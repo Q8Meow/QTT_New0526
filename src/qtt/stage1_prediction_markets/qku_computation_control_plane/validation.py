@@ -1275,6 +1275,68 @@ def _package_ast() -> tuple[tuple[Path, ast.Module], ...]:
     return tuple(trees)
 
 
+def _public_owner_thread_imports_v1(relative: str, tree: ast.Module) -> frozenset[int]:
+    """Admit only the public owner's complete resident-lock/identity pattern."""
+    if relative != "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py":
+        return frozenset()
+    expected_imports = Counter({"": 1, "_public_binding_facts_v1": 1,
+        "_create_synthetic_public_binding_v1": 1, "SourceUseAuthorityV1._issue_public_binding_v1": 1,
+        "SourceUseAuthorityV1._check_public_binding_v1": 1})
+    expected_calls = Counter({("_public_binding_facts_v1", "get_ident"): 1,
+        ("_create_synthetic_public_binding_v1", "get_ident"): 1,
+        ("_create_synthetic_public_binding_v1", "RLock"): 1,
+        ("_check_public_response_fence_v1", "get_ident"): 1,
+        ("SourceUseAuthorityV1._issue_public_binding_v1", "get_ident"): 1,
+        ("SourceUseAuthorityV1._issue_public_binding_v1", "RLock"): 1,
+        ("SourceUseAuthorityV1._check_public_binding_v1", "get_ident"): 1})
+    located, parents, definitions = [], {}, Counter()
+
+    def visit(node, owner=""):
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            owner = ".".join(filter(None, (owner, getattr(node, "name", "<lambda>"))))
+            definitions[owner] += 1
+        located.append((node, owner))
+        for child in ast.iter_child_nodes(node):
+            parents[id(child)] = node
+            visit(child, owner)
+
+    visit(tree)
+    imports, calls, admitted = Counter(), Counter(), set()
+    for node, owner in located:
+        alternate_binding = (
+            isinstance(node, ast.arg) and node.arg == "threading"
+            or isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name == "threading"
+            or isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)) and node.name == "threading"
+            or isinstance(node, ast.MatchMapping) and node.rest == "threading"
+            or isinstance(node, (ast.Global, ast.Nonlocal)) and "threading" in node.names
+            or isinstance(node, (ast.Import, ast.ImportFrom)) and any(
+                (alias.asname or alias.name.split(".", 1)[0]) == "threading"
+                and not (isinstance(node, ast.Import) and alias.name == "threading" and alias.asname is None)
+                for alias in node.names)
+        )
+        if alternate_binding:
+            return frozenset()
+        if isinstance(node, ast.Import) and any(alias.name == "threading" for alias in node.names):
+            parent = parents.get(id(node))
+            if (tuple((alias.name, alias.asname) for alias in node.names) != (("threading", None),)
+                or not isinstance(parent, (ast.Module, ast.FunctionDef)) or node not in parent.body):
+                return frozenset()
+            imports[owner] += 1
+            admitted.add(id(node))
+        if isinstance(node, ast.Name) and node.id == "threading":
+            attribute = parents.get(id(node))
+            call = parents.get(id(attribute))
+            if not (isinstance(node.ctx, ast.Load) and isinstance(attribute, ast.Attribute)
+                and attribute.value is node and isinstance(call, ast.Call) and call.func is attribute
+                and not call.args and not call.keywords):
+                return frozenset()
+            calls[(owner, attribute.attr)] += 1
+    owners = {owner for owner, _ in expected_calls}
+    if imports != expected_imports or calls != expected_calls or any(definitions[owner] != 1 for owner in owners):
+        return frozenset()
+    return frozenset(admitted)
+
+
 def _no_runtime_topology() -> bool:
     from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1, source_use_native_contract_v1
 
@@ -1309,6 +1371,7 @@ def _no_runtime_topology() -> bool:
             return False
         if source_use_native_contract_v1(relative, tree):
             return False
+        public_thread_imports = _public_owner_thread_imports_v1(relative, tree)
         source_use_thread_imports = set()
         if relative == 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py':
             for cls in tree.body:
@@ -1346,7 +1409,7 @@ def _no_runtime_topology() -> bool:
                     type(node).__name__, node.lineno, node.col_offset,
                     node.end_lineno, node.end_col_offset,
                 )
-                if position not in kalshi_admitted:
+                if position not in kalshi_admitted and id(node) not in public_thread_imports:
                     return False
             if (
                 isinstance(node, ast.ImportFrom)

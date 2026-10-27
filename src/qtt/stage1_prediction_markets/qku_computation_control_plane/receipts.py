@@ -15,7 +15,8 @@ from typing import Mapping
 
 from .context import (
     _native_ident, _native_obj, _native_reference_reason, _native_require,
-    _native_utc_receipt_pair, exact_decimal, parse_utc,
+    _native_utc_receipt_pair, _public_counter_v1, _public_nanoseconds_v1,
+    _public_refs_v1, _public_scalar_tree_v1, exact_decimal, parse_utc,
 )
 from .errors import (
     ComputationControlPlaneError, ContractValidationError, PersistenceContractError,
@@ -110,6 +111,9 @@ class EconomicRecordTypeV1(StrEnum):
     PRIVATE_EVIDENCE_WITNESS = "PRIVATE_EVIDENCE_WITNESS"
     SOURCE_USE_CONTROL = "SOURCE_USE_CONTROL"
     SOURCE_USE_ATTRIBUTED_ACTION = "SOURCE_USE_ATTRIBUTED_ACTION"
+    PUBLIC_SOURCE_USE_CONTROL = "PUBLIC_SOURCE_USE_CONTROL"
+    PUBLIC_NATIVE_CAPTURE = "PUBLIC_NATIVE_CAPTURE"
+    PUBLIC_NATIVE_PUBLICATION = "PUBLIC_NATIVE_PUBLICATION"
 
 
 class ModeSnapshotControlClassV1(StrEnum):
@@ -534,6 +538,9 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
         EconomicRecordTypeV1.PRIVATE_EVIDENCE_WITNESS: ("receipts", "PrivateEvidenceWitnessV1"),
         EconomicRecordTypeV1.SOURCE_USE_CONTROL: ("receipts", "SourceUseControlRecordV1"),
         EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION: ("receipts", "SourceUseAttributedActionV1"),
+        EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL: ("receipts", "PublicDataSourceUseActionV1"),
+        EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE: ("receipts", "PublicNativeObservationV1"),
+        EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION: ("receipts", "PublicPublicationRecordV1"),
         EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK: (
             "receipts",
             "PrivateObservationClockReceiptV1",
@@ -588,6 +595,9 @@ class EconomicReceiptEventSpineV1:
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ContractValidationError(ReasonCode.INVALID_CONTRACT, f"{name} must be nonnegative integer")
         expected_module, expected_class = ECONOMIC_RECORD_PAYLOAD_CLASS[self.record_type]
+        if (self.record_type is EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL
+                and type(self.typed_payload) is PublicSourceUseOriginalV1):
+            expected_class = "PublicSourceUseOriginalV1"
         if (
             type(self.typed_payload).__name__ != expected_class
             or type(self.typed_payload).__module__.rsplit(".", 1)[-1] != expected_module
@@ -602,6 +612,249 @@ class EconomicReceiptEventSpineV1:
 
         if self.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK:
             _private_clock_validate_spine_v1(self)
+        if self.record_type in {EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL,
+                                EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE,
+                                EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION}:
+            _public_validate_spine_v1(self)
+
+
+_PUBLIC_OPERATIONS_V1 = MappingProxyType({
+    Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: frozenset({
+        "K_MARKET", "K_EVENT", "K_SERIES", "K_SERIES_FEES", "K_EVENT_FEES",
+        "K_STATUS", "K_HISTORY_CUTOFF", "K_HISTORY_TRADES", "K_WS"}),
+    Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: frozenset({
+        "P_MARKET", "P_BOOK", "P_SETTLEMENT", "P_WS"}),
+    Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: frozenset({"G_EVENT", "G_EVENTS", "G_WS"}),
+})
+_PUBLIC_CONSUMERS_V1 = frozenset(
+    "FormulaExecutionContractV1::MATH-" + number
+    for number in ("01", "03", "04", "05", "06", "07", "36", "39")
+)
+
+
+def _public_profile_v1(profile):
+    _native_require(type(profile) is Stage1VenueProfileIdV1 and profile in _PUBLIC_OPERATIONS_V1,
+                    "public capture profile is outside the selected scope")
+    return profile
+
+
+def _public_identity_v1(kind: str, *parts: str | int) -> str:
+    _native_ident(kind)
+    for part in parts:
+        if type(part) is int:
+            _public_counter_v1(part, allow_zero=True)
+        else:
+            _native_ident(part)
+    return deterministic_json((kind, *parts))
+
+
+def _public_canonical_frame_ref_v1(observation_ref: str) -> str:
+    """A distinct injective tuple, without recursively quoting an entire ID."""
+    _native_ident(observation_ref)
+    parts = _native_strict_json(observation_ref.encode("utf-8"), max_bytes=2048)
+    _native_require(type(parts) is list and len(parts) == 6 and parts[0] == "PUBLIC_NATIVE_CAPTURE_V1"
+                    and type(parts[1]) is str and parts[1] in {profile.value for profile in _PUBLIC_OPERATIONS_V1},
+                    "invalid original observation identity")
+    for value in parts[2:4]:
+        _native_ident(value)
+    _public_counter_v1(parts[4], allow_zero=True)
+    _public_counter_v1(parts[5])
+    _native_require(observation_ref == _public_identity_v1(*parts), "noncanonical original observation identity")
+    return _public_identity_v1("PUBLIC_CANONICAL_FRAME_V1", *parts[1:])
+
+
+def _public_publication_parts_v1(*, profile_id, scope_ref, capture_session_id, partition_key, source_epoch_id, input_version):
+    """Flatten the complete scope/selection tuple without quoting prior IDs."""
+    _public_profile_v1(profile_id)
+    scope = _native_strict_json(scope_ref.encode("utf-8"), max_bytes=2048)
+    selected = _native_strict_json(partition_key.encode("utf-8"), max_bytes=2048)
+    _native_require(type(scope) is list and len(scope) == 3 and scope[0] == "PUBLIC_SCOPE_V1"
+                    and type(selected) is list and len(selected) > 1 and selected[0] == "PUBLIC_SELECTED_COMPONENTS_V1"
+                    and all(type(item) is str for item in selected[1:])
+                    and selected[1:] == sorted(set(selected[1:])), "publication scope/component identity is not canonical")
+    _native_ident(scope[1])
+    _public_counter_v1(scope[2], allow_zero=True)
+    return (profile_id.value, scope[1], scope[2], capture_session_id, source_epoch_id, input_version, *selected[1:])
+
+
+@dataclass(frozen=True, slots=True)
+class PublicCaptureBudgetV1:
+    max_requests: int
+    max_application_messages: int
+    max_application_bytes: int
+    max_message_bytes: int
+    max_selected_instruments: int
+    max_retained_records: int
+    max_retained_bytes: int
+    open_timeout_ns: int
+    receive_timeout_ns: int
+    close_timeout_ns: int
+    duration_ns: int
+    max_recovery_attempts: int
+    queue_high_water: int
+    storage_busy_timeout_ms: int
+    maximum_wall_uncertainty_ns: int
+    deadline_monotonic_ns: int
+
+    def __post_init__(self):
+        for field in dataclass_fields(self):
+            _public_counter_v1(getattr(self, field.name), allow_zero=field.name in {
+                "max_recovery_attempts", "storage_busy_timeout_ms"})
+        _native_require(self.max_message_bytes <= 1048576
+                        and self.max_message_bytes <= self.max_application_bytes
+                        and self.duration_ns <= 900_000_000_000
+                        and self.max_selected_instruments <= 4096
+                        and self.queue_high_water <= self.max_application_messages,
+                        "public capture budget exceeds containment")
+        _public_counter_v1(self.max_message_bytes * self.queue_high_water)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicDataSourceUseScopeV1:
+    schema_version: str
+    profile_id: Stage1VenueProfileIdV1
+    source_contract_version: str
+    source_ids: tuple[str, ...]
+    native_operation_ids: tuple[str, ...]
+    instrument_ids: tuple[str, ...]
+    internal_use_class: str
+    permitted_retention_class: str
+    prohibited_redistribution_class: str
+    account_scope_ref_or_none: str | None
+    credential_alias_ref_or_none: str | None
+    storage_root_ref: str
+    retention_expires_at_ns: int
+    permitted_consumer_ids: tuple[str, ...]
+    budget: PublicCaptureBudgetV1
+    scope_generation: int
+    receive_scope_classes: tuple[str, ...]
+
+    def __post_init__(self):
+        _public_profile_v1(self.profile_id)
+        for name, expected in (
+            ("schema_version", "QTT_PUBLIC_DATA_SOURCE_USE_SCOPE_V1"),
+            ("internal_use_class", "PHASE_A_PUBLIC_DATA_INTERNAL"),
+            ("permitted_retention_class", "BOUNDED_LOCAL_DURABLE"),
+            ("prohibited_redistribution_class", "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING"),
+        ):
+            _native_require(type(getattr(self, name)) is str and getattr(self, name) == expected,
+                            "public scope purpose mismatch")
+        for name in ("source_contract_version", "storage_root_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("account_scope_ref_or_none", "credential_alias_ref_or_none"):
+            if getattr(self, name) is not None:
+                _native_ident(getattr(self, name))
+        for name in ("source_ids", "native_operation_ids", "instrument_ids",
+                     "permitted_consumer_ids", "receive_scope_classes"):
+            _public_refs_v1(getattr(self, name))
+        _native_require(set(self.native_operation_ids) <= _PUBLIC_OPERATIONS_V1[self.profile_id]
+                        and set(self.permitted_consumer_ids) <= _PUBLIC_CONSUMERS_V1
+                        and set(self.receive_scope_classes) <= {
+                            "SELECTED_INSTRUMENTS", "GLOBAL_PUBLIC_LIFECYCLE", "GLOBAL_PUBLIC_DISCOVERY"},
+                        "public scope contains an unsupported operation/consumer/data class")
+        _native_require(type(self.budget) is PublicCaptureBudgetV1, "invalid public capture budget")
+        PublicCaptureBudgetV1(**{f.name: getattr(self.budget, f.name) for f in dataclass_fields(self.budget)})
+        _native_require(len(self.instrument_ids) <= self.budget.max_selected_instruments,
+                        "selected instruments exceed admitted budget")
+        _public_nanoseconds_v1(self.retention_expires_at_ns)
+        _public_counter_v1(self.scope_generation, allow_zero=True)
+        if "G_EVENTS" in self.native_operation_ids:
+            _native_require("GLOBAL_PUBLIC_DISCOVERY" in self.receive_scope_classes,
+                            "global discovery has no explicit receive scope")
+        if "K_WS" in self.native_operation_ids or "P_WS" in self.native_operation_ids:
+            _native_require(self.account_scope_ref_or_none is not None
+                            and self.credential_alias_ref_or_none is not None,
+                            "authenticated public WebSocket requires an admitted alias/account")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicCaptureRequestV1:
+    request_id: str
+    scope: PublicDataSourceUseScopeV1
+    source_binding_refs: tuple[str, ...]
+    account_applicability_ref_or_none: str | None
+    operating_expires_at_ns: int
+    requested_operation_ids: tuple[str, ...]
+    requested_instrument_ids: tuple[str, ...]
+    capture_session_id: str
+    purpose: str
+
+    def __post_init__(self):
+        _native_ident(self.request_id)
+        _native_ident(self.capture_session_id)
+        _native_require(type(self.scope) is PublicDataSourceUseScopeV1, "wrong capture scope type")
+        self.scope.__post_init__()
+        _native_require(type(self.purpose) is str and self.purpose == "PHASE_A_PUBLIC_CAPTURE",
+                        "wrong capture purpose")
+        _public_refs_v1(self.source_binding_refs)
+        _public_refs_v1(self.requested_operation_ids)
+        _public_refs_v1(self.requested_instrument_ids)
+        _native_require(set(self.requested_operation_ids) <= set(self.scope.native_operation_ids)
+                        and set(self.requested_instrument_ids) <= set(self.scope.instrument_ids),
+                        "capture request exceeds reviewed scope")
+        _public_nanoseconds_v1(self.operating_expires_at_ns)
+        _native_require(self.operating_expires_at_ns <= self.scope.retention_expires_at_ns,
+                        "capture expires after retention")
+        if self.account_applicability_ref_or_none is not None:
+            _native_ident(self.account_applicability_ref_or_none)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicNativeObservationV1:
+    observation_id: str
+    request_ref: str
+    profile_id: Stage1VenueProfileIdV1
+    operation_id: str
+    capture_session_id: str
+    connection_epoch: int
+    receive_ordinal: int
+    response_status_or_none: int | None
+    public_header_fields: Mapping[str, str]
+    raw_body_b64: str
+    received_wall_ns: int
+    received_monotonic_ns: int
+    process_epoch_id: str
+    monotonic_clock_id: str
+    clock_quality_ref: str
+    wall_uncertainty_ns: int
+    source_binding_refs: tuple[str, ...]
+    source_use_action_ref: str
+    scope_generation: int
+    native_contract_version: str
+
+    def __post_init__(self):
+        _public_profile_v1(self.profile_id)
+        for name in ("observation_id", "request_ref", "operation_id", "capture_session_id",
+                     "process_epoch_id", "monotonic_clock_id", "clock_quality_ref",
+                     "source_use_action_ref", "native_contract_version"):
+            _native_ident(getattr(self, name))
+        _native_require(self.operation_id in _PUBLIC_OPERATIONS_V1[self.profile_id],
+                        "observation route/profile mismatch")
+        for name in ("received_wall_ns", "received_monotonic_ns", "wall_uncertainty_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        for name in ("connection_epoch", "scope_generation"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _public_counter_v1(self.receive_ordinal)
+        if self.response_status_or_none is not None:
+            _native_require(type(self.response_status_or_none) is int
+                            and 100 <= self.response_status_or_none <= 599,
+                            "invalid observed HTTP status")
+        _public_refs_v1(self.source_binding_refs)
+        _native_require(type(self.public_header_fields) in (dict, MappingProxyType),
+                        "invalid public response headers")
+        headers = dict(self.public_header_fields)
+        _native_require(set(headers) <= {"content-type", "content-length", "date", "retry-after"},
+                        "unselected or private response header")
+        for value in headers.values():
+            _source_use_text_v1(value)
+        object.__setattr__(self, "public_header_fields", MappingProxyType(headers))
+        _source_use_b64_v1(self.raw_body_b64, maximum=1048576, minimum=0)
+        # The receipt is also a persistence entry point. A caller-created data
+        # candidate must pass the same original-body exclusion as the receiver.
+        from ..market_data_ingest.adapter import _public_native_tree_v1
+
+        raw = base64.urlsafe_b64decode(self.raw_body_b64 + "=" * (-len(self.raw_body_b64) % 4))
+        _public_native_tree_v1(raw)
 
 
 def _source_use_require_v1(condition: bool) -> None:
@@ -631,6 +884,9 @@ def _source_use_stream_id_v1(value: object) -> str:
 
 def _source_use_record_ref_v1(value: object) -> str:
     _source_use_require_v1(type(value) is str)
+    if value.startswith('["PUBLIC_SOURCE_ORIGINAL_V1",'):
+        _public_control_ref_v1(value, kind="PUBLIC_SOURCE_ORIGINAL_V1")
+        return value
     match = re.fullmatch(r"SOURCE_USE::([A-Za-z0-9_-]{1,64})::([0-9]{20})", value)
     _source_use_require_v1(match is not None and 1 <= int(match[2]) <= 2**63 - 1)
     return _native_ident(value)
@@ -783,7 +1039,9 @@ def _source_use_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
 
 def _source_use_reconstruct_spine_v1(value: object) -> EconomicReceiptEventSpineV1:
     row = _source_use_fields_v1(value, EconomicReceiptEventSpineV1)
-    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_CONTROL)
+    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_CONTROL
+                           or (row["record_type"] is EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL
+                               and type(row["typed_payload"]) is PublicSourceUseOriginalV1))
     return EconomicReceiptEventSpineV1(**row)
 
 
@@ -846,6 +1104,9 @@ def _source_use_from_storage_v1(
 
 def _source_action_ref_v1(value: object) -> str:
     _source_use_require_v1(type(value) is str)
+    if value.startswith('["PUBLIC_SOURCE_ACTION_V1",'):
+        _public_control_ref_v1(value, kind="PUBLIC_SOURCE_ACTION_V1")
+        return value
     match = re.fullmatch(r"SOURCE_ACTION::([A-Za-z0-9_-]{1,64})::([0-9]{20})", value)
     _source_use_require_v1(match is not None and 1 <= int(match[2]) <= 2**63 - 1)
     return _native_ident(value)
@@ -1034,6 +1295,392 @@ class SourceUseAttributedActionV1:
                                    and (self.declaration_ref is not None if self.action == "WITHDRAW_USE" else self.review_ref is not None))
 
 
+def _public_control_ref_v1(value, *, kind=None):
+    _native_require(type(value) is str and len(value.encode("utf-8")) <= 1024, "invalid public control reference")
+    row = _native_strict_json(value.encode("utf-8"), max_bytes=1024)
+    _native_require(type(row) is list and len(row) == 3 and row[0] in {
+        "PUBLIC_SOURCE_ORIGINAL_V1", "PUBLIC_SOURCE_ACTION_V1"}, "wrong public control identity")
+    _native_require(kind is None or row[0] == kind, "cross-purpose public identity")
+    _source_use_stream_id_v1(row[1])
+    _public_counter_v1(row[2])
+    _native_require(value == _public_identity_v1(*row), "noncanonical public control identity")
+    return tuple(row)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicSourceUseOriginalV1:
+    schema_version: str
+    stream_id: str
+    sequence: int
+    subject_kind: str
+    action: str
+    predecessor_record_ref_or_none: str | None
+    scope: PublicDataSourceUseScopeV1
+    content_or_none: SourceUseOriginalContentV1 | None
+    reason_or_none: str | None
+    input_class: str
+
+    @property
+    def content(self):
+        return self.content_or_none
+
+    @property
+    def predecessor_record_ref(self):
+        return self.predecessor_record_ref_or_none
+
+    @property
+    def reason(self):
+        return self.reason_or_none
+
+    def __post_init__(self):
+        _native_require(type(self.schema_version) is str and self.schema_version == "PUBLIC_SOURCE_ORIGINAL_V1",
+                        "wrong public original schema")
+        _source_use_stream_id_v1(self.stream_id)
+        _public_counter_v1(self.sequence)
+        _native_require(type(self.scope) is PublicDataSourceUseScopeV1, "wrong public original scope")
+        self.scope.__post_init__()
+        for value, allowed in ((self.subject_kind, {"OWNER_DECLARATION", "SOURCE_REVIEW"}),
+                               (self.action, {"RECORD", "SUPERSEDE", "WITHDRAW"}),
+                               (self.input_class, {"SYNTHETIC_TEST", "UNVERIFIED_SUBMISSION"})):
+            _native_require(type(value) is str and value in allowed, "invalid public original discriminator")
+        if self.content_or_none is not None:
+            SourceUseOriginalContentV1(**_source_use_fields_v1(self.content_or_none, SourceUseOriginalContentV1))
+            _native_require(self.subject_kind != "SOURCE_REVIEW"
+                            or self.content_or_none.reviewed_document_ref is not None, "source review has no document")
+        _source_use_text_v1(self.reason_or_none, optional=True)
+        if self.action == "RECORD":
+            _native_require(self.sequence == 1 and self.predecessor_record_ref_or_none is None
+                            and self.content_or_none is not None and self.reason_or_none is None,
+                            "invalid first public original")
+        else:
+            _public_control_ref_v1(self.predecessor_record_ref_or_none, kind="PUBLIC_SOURCE_ORIGINAL_V1")
+            _native_require(self.sequence > 1 and self.predecessor_record_ref_or_none == _public_identity_v1(
+                "PUBLIC_SOURCE_ORIGINAL_V1", self.stream_id, self.sequence - 1)
+                and self.reason_or_none is not None and (self.content_or_none is None) == (self.action == "WITHDRAW"),
+                "invalid public original successor")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicDataSourceUseActionV1:
+    schema_version: str
+    process_ref: str
+    sequence: int
+    predecessor_event_ref: str | None
+    action: str
+    scope: PublicDataSourceUseScopeV1
+    owner_ref: str
+    key_ref: str
+    request_ref: str
+    proof: SourceUseProofV1
+    generation_before: int
+    generation_after: int
+    expected_declaration_ref: str | None
+    expected_review_ref: str | None
+    declaration_ref: str | None
+    review_ref: str | None
+    review_event_ref: str | None
+    use_event_ref: str | None
+    original_event_refs: tuple[str, ...]
+    review_facts: SourceUseReviewFactsV1 | None
+    starts_at_utc: datetime
+    expires_at_utc: datetime
+    capture: PublicCaptureRequestV1 | None
+    reason: str | None
+
+    def __post_init__(self):
+        from .context import _native_utc_nanoseconds
+
+        _native_require(type(self.schema_version) is str and self.schema_version == "PUBLIC_SOURCE_USE_ACTION_V1",
+                        "wrong public action schema")
+        _source_use_stream_id_v1(self.process_ref)
+        _public_counter_v1(self.sequence)
+        predecessor = None if self.sequence == 1 else _public_identity_v1(
+            "PUBLIC_SOURCE_ACTION_V1", self.process_ref, self.sequence - 1)
+        _native_require(self.predecessor_event_ref == predecessor, "wrong public action predecessor")
+        _native_require(type(self.action) is str and self.action in {
+            "REVIEW_ACCEPT", "USE_ADMIT", "OBSERVE_ONCE", "WITHDRAW_USE", "INVALIDATE_REVIEW"}, "invalid public action")
+        _native_require(type(self.scope) is PublicDataSourceUseScopeV1, "wrong public action scope")
+        self.scope.__post_init__()
+        for name in ("owner_ref", "key_ref", "request_ref"):
+            _native_ident(getattr(self, name))
+        SourceUseProofV1(**_source_use_fields_v1(self.proof, SourceUseProofV1))
+        _native_require(self.proof.key_ref == self.key_ref, "proof key mismatch")
+        for value in (self.generation_before, self.generation_after):
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(self.generation_after == self.generation_before + (self.action != "OBSERVE_ONCE"),
+                        "invalid public generation transition")
+        if self.sequence == 1:
+            _native_require(self.generation_before == 0 and self.action == "REVIEW_ACCEPT", "invalid initial public action")
+        for name in ("expected_declaration_ref", "expected_review_ref", "declaration_ref", "review_ref"):
+            if getattr(self, name) is not None:
+                _public_control_ref_v1(getattr(self, name), kind="PUBLIC_SOURCE_ORIGINAL_V1")
+        for name in ("review_event_ref", "use_event_ref"):
+            value = getattr(self, name)
+            if value is not None:
+                _, process, sequence = _public_control_ref_v1(value, kind="PUBLIC_SOURCE_ACTION_V1")
+                _native_require(process == self.process_ref and sequence < self.sequence, "foreign/future public action")
+        _native_require(type(self.original_event_refs) is tuple and len(self.original_event_refs) <= 1,
+                        "invalid original public action vector")
+        for value in self.original_event_refs:
+            _public_control_ref_v1(value, kind="PUBLIC_SOURCE_ORIGINAL_V1")
+            _native_require(value in (self.declaration_ref, self.review_ref), "unbound public original")
+        if self.review_facts is not None:
+            SourceUseReviewFactsV1(**_source_use_fields_v1(self.review_facts, SourceUseReviewFactsV1))
+            _native_require(self.review_facts.factual_checked_at_utc <= self.proof.verified_at_utc,
+                            "review facts postdate authentication")
+        if self.capture is not None:
+            _native_require(type(self.capture) is PublicCaptureRequestV1 and self.capture.scope == self.scope,
+                            "capture scope differs from authenticated action")
+            self.capture.__post_init__()
+        for name in ("starts_at_utc", "expires_at_utc"):
+            _source_use_utc_v1(getattr(self, name))
+        _native_require(self.proof.verified_at_utc <= self.starts_at_utc, "public action predates authentication")
+        negative = self.action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}
+        _native_require(self.starts_at_utc == self.expires_at_utc if negative else self.starts_at_utc < self.expires_at_utc,
+                        "invalid public action lifetime")
+        _source_use_text_v1(self.reason, optional=True)
+        if self.action == "REVIEW_ACCEPT":
+            _native_require(self.review_ref is not None and self.review_facts is not None
+                            and self.review_event_ref is self.use_event_ref is self.capture is self.reason is None
+                            and self.expires_at_utc <= self.review_facts.source_expires_at_utc, "invalid public review acceptance")
+        elif self.action == "USE_ADMIT":
+            _native_require(self.declaration_ref is not None and self.review_ref is not None
+                            and self.review_event_ref is not None
+                            and self.review_facts is self.use_event_ref is self.capture is self.reason is None,
+                            "invalid public use admission")
+        elif self.action == "OBSERVE_ONCE":
+            _native_require(all(v is not None for v in (self.declaration_ref, self.review_ref, self.review_event_ref,
+                                                       self.use_event_ref, self.capture))
+                            and self.review_facts is self.reason is None and not self.original_event_refs,
+                            "invalid public capture action")
+            _native_require(_native_utc_nanoseconds(self.starts_at_utc.isoformat()) < self.capture.operating_expires_at_ns
+                            <= _native_utc_nanoseconds(self.expires_at_utc.isoformat()), "capture lifetime exceeds action")
+        else:
+            _native_require(self.reason is not None and self.review_facts is self.capture is None
+                            and (self.declaration_ref is not None if self.action == "WITHDRAW_USE" else self.review_ref is not None),
+                            "invalid public negative action")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicPublicationRecordV1:
+    schema_version: str
+    publication_id: str
+    profile_id: Stage1VenueProfileIdV1
+    scope_ref: str
+    capture_session_id: str
+    partition_key: str
+    partition_ordinal: int
+    candidate_event_refs: tuple[str, ...]
+    original_observation_refs: tuple[str, ...]
+    metadata_refs: tuple[str, ...]
+    continuity_witness_refs: tuple[str, ...]
+    data_transaction_ref: str
+    commit_evidence: Mapping[str, object]
+    internal_publication_wall_ns: int
+    internal_publication_monotonic_ns: int
+    issuance_observation_or_none: Mapping[str, object] | None
+    source_use_action_ref: str
+    source_use_generation: int
+    source_epoch_id: str
+    input_version: str
+    disposition: str
+    failure_reason_or_none: str | None
+
+    def __post_init__(self):
+        _public_profile_v1(self.profile_id)
+        _native_require(self.schema_version == "PUBLIC_NATIVE_PUBLICATION_V1", "wrong public publication schema")
+        for name in ("publication_id", "scope_ref", "capture_session_id", "partition_key",
+                     "data_transaction_ref", "source_use_action_ref", "source_epoch_id", "input_version"):
+            _native_ident(getattr(self, name))
+        for name in ("candidate_event_refs", "original_observation_refs", "metadata_refs", "continuity_witness_refs"):
+            _public_refs_v1(getattr(self, name), allow_empty=name in {"candidate_event_refs", "continuity_witness_refs"})
+        _public_counter_v1(self.partition_ordinal)
+        _public_counter_v1(self.source_use_generation, allow_zero=True)
+        for name in ("internal_publication_wall_ns", "internal_publication_monotonic_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        _native_require(type(self.disposition) is str and self.disposition in {
+            "STAGED_NOT_AVAILABLE", "OBSERVED_PUBLICATION", "OBSERVED_ISSUANCE", "FAILED_INCOMPLETE"},
+            "invalid publication disposition")
+        _native_require(type(self.commit_evidence) in (dict, MappingProxyType), "invalid commit evidence")
+        object.__setattr__(self, "commit_evidence", _public_scalar_tree_v1(self.commit_evidence))
+        if not self.candidate_event_refs:
+            _native_require(self.commit_evidence.get("reconstructed_state_json") == "{}",
+                            "reference-only publication cannot claim reconstructed economic state")
+        _source_use_text_v1(self.failure_reason_or_none, optional=True)
+        _native_require((self.failure_reason_or_none is not None) == (self.disposition == "FAILED_INCOMPLETE"),
+                        "publication failure reason/disposition mismatch")
+        issuance = self.issuance_observation_or_none
+        _native_require((issuance is not None) == (self.disposition == "OBSERVED_ISSUANCE"),
+                        "issuance must describe an observed issuance")
+        if issuance is not None:
+            _native_require(type(issuance) in (dict, MappingProxyType) and set(issuance) == {
+                "handle_ref", "issued_wall_ns", "issued_monotonic_ns", "process_epoch_id", "monotonic_clock_id",
+                "scope_generation", "observed_by_receipt_ref"}, "invalid issuance observation fields")
+            for name in ("handle_ref", "process_epoch_id", "monotonic_clock_id", "observed_by_receipt_ref"):
+                _native_ident(issuance[name])
+            for name in ("issued_wall_ns", "issued_monotonic_ns"):
+                _public_nanoseconds_v1(issuance[name])
+            _public_counter_v1(issuance["scope_generation"], allow_zero=True)
+            _native_require(issuance["scope_generation"] == self.source_use_generation
+                            and issuance["issued_wall_ns"] >= self.internal_publication_wall_ns
+                            and issuance["issued_monotonic_ns"] >= self.internal_publication_monotonic_ns,
+                            "issuance predates publication or changes generation")
+            object.__setattr__(self, "issuance_observation_or_none", _public_scalar_tree_v1(issuance))
+
+
+def _public_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
+    payload = record.typed_payload
+    types = {
+        EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL: (PublicSourceUseOriginalV1, PublicDataSourceUseActionV1),
+        EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE: (PublicNativeObservationV1,),
+        EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION: (PublicPublicationRecordV1,),
+    }
+    _native_require(type(record.record_type) is EconomicRecordTypeV1
+                    and type(payload) in types[record.record_type], "public spine payload mismatch")
+    payload.__post_init__()
+    _native_require(record.no_effect_flags is NO_EFFECTS_V1, "public spine cannot grant effects")
+    _native_require(record.semantic_owner == record.implementation_owner == "QTT_PUBLIC_DATA_SOURCE_USE",
+                    "wrong public spine owner")
+    if type(payload) is PublicSourceUseOriginalV1:
+        schema = "PUBLIC_SOURCE_ORIGINAL_V1"
+        aggregate = _public_identity_v1(schema, payload.stream_id)
+        identity = _public_identity_v1(schema, payload.stream_id, payload.sequence)
+        sequence = payload.sequence
+    elif type(payload) is PublicDataSourceUseActionV1:
+        schema = "PUBLIC_SOURCE_USE_ACTION_V1"
+        aggregate = _public_identity_v1("PUBLIC_SOURCE_ACTION_V1", payload.process_ref)
+        identity = _public_identity_v1("PUBLIC_SOURCE_ACTION_V1", payload.process_ref, payload.sequence)
+        sequence = payload.sequence
+        _native_require(record.effective_at == record.recorded_at == payload.starts_at_utc,
+                        "public action spine time mismatch")
+    elif type(payload) is PublicNativeObservationV1:
+        schema = "PUBLIC_NATIVE_CAPTURE_V1"
+        parts = (payload.profile_id.value, payload.source_use_action_ref, payload.capture_session_id, payload.connection_epoch)
+        aggregate = _public_identity_v1(schema, *parts)
+        identity = _public_identity_v1(schema, *parts, payload.receive_ordinal)
+        sequence = payload.receive_ordinal
+        _native_require(payload.observation_id == identity, "capture identity differs from original tuple")
+    else:
+        schema = "PUBLIC_NATIVE_PUBLICATION_V1"
+        parts = _public_publication_parts_v1(profile_id=payload.profile_id, scope_ref=payload.scope_ref,
+            capture_session_id=payload.capture_session_id, partition_key=payload.partition_key,
+            source_epoch_id=payload.source_epoch_id, input_version=payload.input_version)
+        aggregate = _public_identity_v1(schema, *parts)
+        identity = _public_identity_v1(schema, *parts, payload.partition_ordinal)
+        sequence = payload.partition_ordinal
+        _native_require(payload.publication_id == identity, "publication identity differs from original tuple")
+    _native_require(record.schema_version == schema and record.aggregate_id == aggregate
+                    and record.record_id == identity and record.sequence == record.aggregate_version == sequence,
+                    "public spine identity/ordinal mismatch")
+    _native_require(record.authority_class == "PUBLIC_DATA_CANDIDATE_NO_OPERATING_AUTHORITY",
+                    "serialized public data cannot grant operating authority")
+    _native_require(len(deterministic_json(record).encode("utf-8")) <= 65536,
+                    "complete encoded public receipt exceeds selected envelope bound")
+
+
+def _public_spine_from_json_v1(text: str) -> EconomicReceiptEventSpineV1:
+    """Closed restoration of data candidates; no process token is deserialized."""
+    def closed(row, cls):
+        _native_require(type(row) is dict and set(row) == {f.name for f in dataclass_fields(cls)},
+                        "stored public record has missing or extra fields")
+        return dict(row)
+
+    def scope(row):
+        value = closed(row, PublicDataSourceUseScopeV1)
+        value["profile_id"] = Stage1VenueProfileIdV1(value["profile_id"])
+        value["budget"] = PublicCaptureBudgetV1(**closed(value["budget"], PublicCaptureBudgetV1))
+        for key in ("source_ids", "native_operation_ids", "instrument_ids", "permitted_consumer_ids", "receive_scope_classes"):
+            _native_require(type(value[key]) is list, "stored public tuple must be an array")
+            value[key] = tuple(value[key])
+        return PublicDataSourceUseScopeV1(**value)
+
+    def dates(row, cls):
+        value = closed(row, cls)
+        for key, item in value.items():
+            if key.endswith("_utc") and item is not None:
+                _native_require(type(item) is str, "stored UTC must be text")
+                value[key] = parse_utc(item, field_name=key)
+            if key in {"recheck_triggers", "reviewed_claims", "limitations"}:
+                _native_require(type(item) is list, "stored review tuple must be an array")
+                value[key] = tuple(item)
+        return cls(**value)
+
+    try:
+        _native_require(type(text) is str, "stored public receipt must be text")
+        value = closed(_native_strict_json(text.encode("utf-8")), EconomicReceiptEventSpineV1)
+        record_type = EconomicRecordTypeV1(value["record_type"])
+        payload = value["typed_payload"]
+        if record_type is EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL:
+            _native_require(type(payload) is dict, "invalid public control storage")
+            cls = PublicSourceUseOriginalV1 if payload.get("schema_version") == "PUBLIC_SOURCE_ORIGINAL_V1" else PublicDataSourceUseActionV1
+            payload = closed(payload, cls)
+            payload["scope"] = scope(payload["scope"])
+            if cls is PublicSourceUseOriginalV1:
+                if payload["content_or_none"] is not None:
+                    payload["content_or_none"] = dates(payload["content_or_none"], SourceUseOriginalContentV1)
+            else:
+                payload["proof"] = dates(payload["proof"], SourceUseProofV1)
+                if payload["review_facts"] is not None:
+                    payload["review_facts"] = dates(payload["review_facts"], SourceUseReviewFactsV1)
+                payload["original_event_refs"] = tuple(payload["original_event_refs"])
+                for key in ("starts_at_utc", "expires_at_utc"):
+                    payload[key] = parse_utc(payload[key], field_name=key)
+                if payload["capture"] is not None:
+                    capture = closed(payload["capture"], PublicCaptureRequestV1)
+                    capture["scope"] = scope(capture["scope"])
+                    for key in ("source_binding_refs", "requested_operation_ids", "requested_instrument_ids"):
+                        _native_require(type(capture[key]) is list, "invalid stored capture tuple")
+                        capture[key] = tuple(capture[key])
+                    payload["capture"] = PublicCaptureRequestV1(**capture)
+        elif record_type in {EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE, EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION}:
+            cls = PublicNativeObservationV1 if record_type is EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE else PublicPublicationRecordV1
+            payload = closed(payload, cls)
+            payload["profile_id"] = Stage1VenueProfileIdV1(payload["profile_id"])
+            for key in ("source_binding_refs",) if cls is PublicNativeObservationV1 else (
+                    "candidate_event_refs", "original_observation_refs", "metadata_refs", "continuity_witness_refs"):
+                _native_require(type(payload[key]) is list, "invalid stored lineage tuple")
+                payload[key] = tuple(payload[key])
+        else:
+            # Reuse the existing closed PIT registry for native state records.
+            # Restoring a record never restores its issuing transaction.
+            value["typed_payload"] = _pit_reconstruct_receipt_payload_v1(record_type, payload)
+        if record_type in {EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL,
+                           EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE, EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION}:
+            value["typed_payload"] = cls(**payload)
+        value["record_type"] = record_type
+        _native_require(value["no_effect_flags"] == json.loads(deterministic_json(NO_EFFECTS_V1)),
+                        "stored public record has effect authority")
+        value["no_effect_flags"] = NO_EFFECTS_V1
+        result = EconomicReceiptEventSpineV1(**value)
+        _native_require(deterministic_json(result) == text, "noncanonical stored public receipt")
+        return result
+    except (ValueError, TypeError, AttributeError, KeyError, UnicodeError) as exc:
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "invalid stored public receipt") from exc
+
+
+def _public_observation_spine_v1(*, observation, scope_ref):
+    """Build the complete bounded envelope of one already received original."""
+    from datetime import timedelta
+
+    _native_require(type(observation) is PublicNativeObservationV1, "untyped original observation")
+    observation.__post_init__()
+    _native_ident(scope_ref)
+    moment = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=observation.received_wall_ns // 1000)
+    parts = (observation.profile_id.value, observation.source_use_action_ref,
+             observation.capture_session_id, observation.connection_epoch)
+    return EconomicReceiptEventSpineV1(
+        record_id=observation.observation_id, record_type=EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE,
+        schema_version="PUBLIC_NATIVE_CAPTURE_V1", semantic_owner="QTT_PUBLIC_DATA_SOURCE_USE",
+        implementation_owner="QTT_PUBLIC_DATA_SOURCE_USE", context_ref=scope_ref,
+        effective_at=moment, recorded_at=moment,
+        causation_id=_public_identity_v1("PUBLIC_RECEIVE_CAUSE_V1", *parts, observation.receive_ordinal),
+        correlation_id=_public_identity_v1("PUBLIC_CAPTURE_CORRELATION_V1", *parts),
+        traceparent="TRACE::PHASE_A_PUBLIC_RECEIVE", tracestate="PUBLIC_DATA_CANDIDATE",
+        sequence=observation.receive_ordinal, aggregate_id=_public_identity_v1("PUBLIC_NATIVE_CAPTURE_V1", *parts),
+        aggregate_version=observation.receive_ordinal, authority_class="PUBLIC_DATA_CANDIDATE_NO_OPERATING_AUTHORITY",
+        typed_payload=observation)
+
+
 def _source_action_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> None:
     row = _source_use_fields_v1(record, EconomicReceiptEventSpineV1)
     _source_use_require_v1(type(record.record_type) is EconomicRecordTypeV1
@@ -1058,7 +1705,9 @@ def _source_action_validate_spine_v1(record: EconomicReceiptEventSpineV1) -> Non
 
 def _source_action_reconstruct_spine_v1(value: object) -> EconomicReceiptEventSpineV1:
     row = _source_use_fields_v1(value, EconomicReceiptEventSpineV1)
-    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION)
+    _source_use_require_v1(row["record_type"] is EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION
+                           or (row["record_type"] is EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL
+                               and type(row["typed_payload"]) is PublicDataSourceUseActionV1))
     return EconomicReceiptEventSpineV1(**row)
 
 
@@ -2468,6 +3117,7 @@ def serialize_st12h_contract_v1(value: object, *, binding_id: str) -> str:
 
 
 class PITCommitEvidenceClassV1(StrEnum):
+    ADAPTER_CONFIRMED_SYNC_UPPER_BOUND = "ADAPTER_CONFIRMED_SYNC_UPPER_BOUND"
     STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE = (
         "STORAGE_ASSIGNED_ATOMIC_COMMIT_EVIDENCE"
     )
@@ -2688,6 +3338,134 @@ class PITCommitIntentV1:
         _pit_receipt_no_effects(self.no_effect_flags)
 
 
+def _public_native_candidate_body_v1(value, *, receipt=None):
+    """Closed data restoration; this check never issues a publication or permit."""
+    from ..market_data_ingest.adapter import (
+        PITCanonicalEventCandidateV2, _pit_payload_types_for_event_kind_v2,
+        _public_translation_from_storage_v1,
+    )
+
+    _native_require(type(value) is dict and set(value) == {"record_type", "candidate", "translation", "transition"}
+                    and value["record_type"] == "PIT_PUBLIC_NATIVE_CANDIDATE_V1", "invalid native candidate record closure")
+    candidate, transition = value["candidate"], value["transition"]
+    _native_require(type(candidate) is dict and set(candidate) == {item.name for item in dataclass_fields(PITCanonicalEventCandidateV2)},
+                    "native candidate fields differ from the existing candidate type")
+    _native_require(type(transition) is dict and set(transition) == {
+        "pre_state_ref_or_none", "post_state_ref", "candidate_ordinal"}, "invalid native candidate transition closure")
+    for name in ("pre_state_ref_or_none", "post_state_ref"):
+        if transition[name] is not None:
+            _pit_receipt_text(transition[name], name)
+    _native_require(transition["post_state_ref"] is not None, "native candidate has no predicted post-state")
+    _pit_receipt_ordinal(transition["candidate_ordinal"], "candidate_ordinal", positive=True)
+    translation = _public_translation_from_storage_v1(value["translation"])
+    frame = translation.normalized_frame
+    _native_require(translation.stream_disposition["kind"] == "MARKET_DATA", "control is not a native state candidate")
+    try:
+        kind, depth = PITEventKindV2(candidate["event_kind"]), PITDepthClassV2(candidate["depth_class"])
+    except (TypeError, ValueError) as exc:
+        raise PITDataContractErrorV1(PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                                     "unknown native candidate kind/depth") from exc
+    payload = candidate["payload"]
+    _native_require(type(payload) is dict and any(set(payload) == {item.name for item in dataclass_fields(cls)}
+                    for cls in _pit_payload_types_for_event_kind_v2(kind)), "native payload has missing or extra typed fields")
+    if "event_kind" in payload:
+        _native_require(payload["event_kind"] == kind.value, "native payload kind differs")
+    expected = dict(profile_id=frame.profile_id.value, raw_frame_ref=frame.frame_id,
+        event_record_id=frame.frame_id+"::CANONICAL-EVENT-V2", capture_session_id=frame.capture_session_id,
+        connection_epoch=frame.connection_epoch, channel=frame.channel, wire_dialect=frame.wire_dialect,
+        process_epoch_id=frame.process_epoch_id, monotonic_clock_id=frame.monotonic_clock_id,
+        wall_clock_source_id=frame.wall_clock_source_id, clock_quality_receipt_ref=frame.clock_quality_receipt_ref,
+        wall_clock_uncertainty_ns=frame.wall_clock_uncertainty_ns,
+        qtt_received_monotonic_ns=frame.qtt_received_monotonic_ns,
+        qtt_received_at_utc=json.loads(deterministic_json(frame.qtt_received_at_utc)),
+        instrument_id=translation.stream_disposition["instrument_id"],
+        event_kind=translation.stream_disposition["event_kind"], schema_version="PIT_CANONICAL_EVENT_V2",
+        provider_publication_time_utc_or_none=None)
+    _native_require(all(candidate[name] == item for name, item in expected.items())
+                    and frame.source_contract_refs == (translation.canonical_contract_ref,) and translation.metadata_refs,
+                    "native candidate/translation identity or receive clocks differ")
+    for name in ("market_id", "instrument_id", "source_currentization_version", "source_receipt_ref", "rights_receipt_ref"):
+        _pit_receipt_text(candidate[name], name)
+    for name in ("provider_trade_id_or_none", "provider_subscription_id_or_none"):
+        if candidate[name] is not None:
+            _pit_receipt_text(candidate[name], name)
+    received = _pit_serialized_utc(candidate["qtt_received_at_utc"], "native received")
+    parsed = _pit_serialized_utc(candidate["qtt_parse_completed_at_utc"], "native parsed")
+    _public_nanoseconds_v1(candidate["qtt_parse_completed_monotonic_ns"])
+    _native_require(parsed >= received and candidate["qtt_parse_completed_monotonic_ns"] >= frame.qtt_received_monotonic_ns,
+                    "native candidate parse clocks precede receipt")
+    event_clock = translation.exact_clock_companion["provider_event_or_none"]
+    _native_require(candidate["provider_event_time_utc_or_none"] == (
+        None if event_clock is None else json.loads(deterministic_json(parse_utc(
+            event_clock["receipt_utc_floor"], field_name="native provider event projection")))),
+        "native candidate provider clock differs from exact companion")
+    sequence = (candidate["provider_sequence_start_or_none"], candidate["provider_sequence_end_or_none"])
+    _native_require((sequence[0] is None) == (sequence[1] is None), "incomplete native provider interval")
+    if sequence[0] is not None:
+        for number in sequence:
+            _public_counter_v1(number, allow_zero=True)
+        _native_require(sequence[0] <= sequence[1], "reversed native provider interval")
+    for name in ("no_private_state_authority", "no_order_authority", "no_profit_claim", "no_qpu_effect", "no_llm_effect"):
+        _native_require(candidate[name] is True, "native candidate cannot carry effect authority")
+    _native_require(candidate["no_effect_flags"] == json.loads(deterministic_json(NO_EFFECTS_V1)),
+                    "native candidate has invalid no-effect flags")
+    if receipt is not None:
+        _native_require(candidate["event_record_id"] == receipt.event_record_id
+                        and candidate["profile_id"] == receipt.profile_id.value
+                        and candidate["capture_session_id"] == receipt.capture_session_id
+                        and candidate["connection_epoch"] == receipt.connection_epoch
+                        and candidate["source_receipt_ref"] == receipt.source_receipt_ref
+                        and candidate["rights_receipt_ref"] == receipt.rights_receipt_ref
+                        and transition["candidate_ordinal"] == receipt.committed_event_ordinal,
+                        "native candidate differs from its outer PIT receipt")
+    return translation
+
+
+def _public_native_candidate_json_v1(*, candidate, translation, contract, metadata,
+        pre_state_ref_or_none, post_state_ref, candidate_ordinal):
+    from ..market_data_ingest.adapter import (
+        PITCanonicalEventCandidateV2, PublicCanonicalTranslationV1, _public_candidate_from_translation_v1,
+    )
+
+    _native_require(type(candidate) is PITCanonicalEventCandidateV2 and type(translation) is PublicCanonicalTranslationV1,
+                    "native receipt construction requires exact candidate/translation")
+    candidate.__post_init__()
+    reconstructed = _public_candidate_from_translation_v1(translation=translation, contract=contract, metadata=metadata,
+        parse_completed_at_utc=candidate.qtt_parse_completed_at_utc,
+        parse_completed_monotonic_ns=candidate.qtt_parse_completed_monotonic_ns)
+    _native_require(deterministic_json(reconstructed) == deterministic_json(candidate),
+                    "native candidate differs from the existing decoder")
+    text = deterministic_json(dict(record_type="PIT_PUBLIC_NATIVE_CANDIDATE_V1", candidate=candidate,
+        translation=translation, transition=dict(pre_state_ref_or_none=pre_state_ref_or_none,
+            post_state_ref=post_state_ref, candidate_ordinal=candidate_ordinal)))
+    _public_native_candidate_load_v1(text)
+    return text
+
+
+def _public_native_candidate_load_v1(text, *, receipt=None):
+    """Bounded closed hydration of the native branch, without generic exemptions."""
+    _native_require(type(text) is str, "native candidate JSON must be exact text")
+    value = _native_strict_json(text.encode("utf-8"))
+    translation = _public_native_candidate_body_v1(value, receipt=receipt)
+    canonical = dict(value, translation=translation)
+    _native_require(deterministic_json(canonical) == text, "noncanonical native candidate JSON")
+    return value, translation
+
+
+def _public_restore_native_candidate_v1(*, receipt, contract, metadata):
+    from ..market_data_ingest.adapter import _public_candidate_from_translation_v1
+
+    _native_require(type(receipt) is PITCanonicalEventReceiptRecordV2, "native restoration requires its exact PIT receipt")
+    receipt.__post_init__()
+    value, translation = _public_native_candidate_load_v1(receipt.canonical_event_json, receipt=receipt)
+    candidate = _public_candidate_from_translation_v1(translation=translation, contract=contract, metadata=metadata,
+        parse_completed_at_utc=_pit_serialized_utc(value["candidate"]["qtt_parse_completed_at_utc"], "stored native parsed"),
+        parse_completed_monotonic_ns=value["candidate"]["qtt_parse_completed_monotonic_ns"])
+    _native_require(deterministic_json(candidate) == deterministic_json(value["candidate"]),
+                    "stored native candidate differs after decoder reconstruction")
+    return candidate, translation
+
+
 @dataclass(frozen=True, slots=True)
 class PITCanonicalEventReceiptRecordV2:
     record_id: str
@@ -2740,6 +3518,11 @@ class PITCanonicalEventReceiptRecordV2:
         try:
             loaded = safe_json_loads(self.canonical_event_json)
         except SerializationSafetyError as exc:
+            native_candidate = _native_strict_json(self.canonical_event_json.encode("utf-8"))
+            if type(native_candidate) is dict and native_candidate.get("record_type") == "PIT_PUBLIC_NATIVE_CANDIDATE_V1":
+                _public_native_candidate_load_v1(self.canonical_event_json, receipt=self)
+                _pit_receipt_no_effects(self.no_effect_flags)
+                return
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
                 "canonical_event_json is not safe canonical JSON",

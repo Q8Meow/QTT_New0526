@@ -3984,8 +3984,1913 @@ PIT_CASES = _build_cases()
 @pytest.mark.parametrize("case", PIT_CASES)
 def test_s1_pit_data_phase_a_contract_matrix(case: PITCase) -> None:
     case.run()
+    if case.name == 'kalshi':
+        _assert_lp02_kalshi_native_translation()
+    if case.name == 'gemini':
+        _assert_lp02_gemini_native_translation()
     if case.name == 'polymarket_retail':
         _assert_f14_independent_native_values()
+        _assert_lp02_retail_native_translation()
+
+
+def _assert_lp02_kalshi_native_translation():
+    """Declared synthetic originals; expected fields and lattice are independent."""
+    import base64
+    from decimal import Inexact, localcontext
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.market_data_ingest.binding import PublicMetadataSnapshotV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PITEventKindV2
+
+    contract = _contract_by_value('KALSHI_US_DCM_DIRECT')
+    wall = _native_utc_nanoseconds((_T0 + timedelta(seconds=1)).isoformat())
+    metadata = PublicMetadataSnapshotV1(metadata_id='SYNTHETIC::METADATA', profile_id=contract.profile_id,
+        market_id='SYNTHETIC::MARKET_ID', instrument_id='SYNTHETIC-TICKER', event_id_or_none='SYNTHETIC-EVENT',
+        series_id_or_none='SYNTHETIC-SERIES', product_class='BINARY', price_orientation='OUTCOME_SIDE',
+        payout_amount_or_none='1', payout_basis_or_none='USD_PER_CONTRACT',
+        price_bands=(('0', '0.5', '0.01'), ('0.5', '1', '0.05')),
+        price_origin_or_none=None, price_increment_or_none=None, quantity_increment_or_none='0.01',
+        quantity_minimum_or_none=None, quantity_origin_or_none=None,
+        lifecycle={'state': 'OPEN'}, resolution={'state': 'UNRESOLVED'},
+        field_lineage=(('SYNTHETIC::METADATA_ORIGINAL', '/market/price_ranges', 'price_bands', 'SOURCE_PRICE_BAND'),),
+        known_at_ns=wall-1_000_000_000, effective_from_ns=0, effective_until_ns_or_none=None,
+        expires_at_ns=wall+60_000_000_000, generation=1, unavailable_fields=('UNAVAILABLE_QUANTITY_ORIGIN',))
+    source_fields = (
+        ('type', 'STRING', '/type', 'EXACT_IDENTITY'),
+        ('instrument', 'STRING', '/msg/market_ticker', 'EXACT_IDENTITY'),
+        ('sid', 'INTEGER', '/sid', 'EXACT_IDENTITY'), ('seq', 'INTEGER', '/seq', 'EXACT_IDENTITY'),
+        ('yes_levels', 'ARRAY', '/msg/yes_dollars_fp', 'EXACT_IDENTITY'),
+        ('no_levels', 'ARRAY', '/msg/no_dollars_fp', 'EXACT_IDENTITY'),
+        ('yes_price', 'DECIMAL_TEXT', '/msg/yes_dollars_fp/0/0', 'EXACT_DECIMAL_TEXT'),
+        ('yes_quantity', 'DECIMAL_TEXT', '/msg/yes_dollars_fp/0/1', 'EXACT_DECIMAL_TEXT'),
+        ('no_price', 'DECIMAL_TEXT', '/msg/no_dollars_fp/0/0', 'EXACT_DECIMAL_TEXT'),
+        ('no_quantity', 'DECIMAL_TEXT', '/msg/no_dollars_fp/0/1', 'EXACT_DECIMAL_TEXT'),
+        ('side', 'STRING', '/msg/side', 'LOWERCASE_OUTCOME_TO_CANONICAL_SIDE'),
+        ('delta_price', 'DECIMAL_TEXT', '/msg/price_dollars', 'EXACT_DECIMAL_TEXT'),
+        ('delta_quantity', 'DECIMAL_TEXT', '/msg/delta_fp', 'EXACT_DECIMAL_TEXT'),
+        ('event_time', 'STRING', '/msg/ts', 'EXACT_RFC3339'),
+    )
+    binding = PublicDataSourceBindingV1(binding_id='SYNTHETIC::BINDING', profile_id=contract.profile_id,
+        legal_product_ref='SYNTHETIC::BINARY', source_ids=('SYNTHETIC::SOURCE',),
+        source_contract_versions=(contract.source_contract_version,),
+        source_receipt_refs=(contract.source_currentization_receipt_ref,), rights_receipt_refs=(contract.rights_receipt_ref,),
+        original_evidence_refs=('SYNTHETIC::DOCUMENT',), review_scope_ref='SYNTHETIC::REVIEW',
+        allowed_operation_ids=('K_WS',), field_bindings=tuple((name, wire, 'DECLARED_NATIVE_UNIT',
+            'SYNTHETIC::DOCUMENT', pointer, transform) for name, wire, pointer, transform in source_fields),
+        known_at_ns=wall-1_000_000_000, effective_from_ns=0, effective_until_ns_or_none=None,
+        expires_at_ns=wall+60_000_000_000, generation=1,
+        permitted_consumer_ids=('FormulaExecutionContractV1::MATH-36',))
+    request = owner.PublicDataReadRequestV1('SYNTHETIC::REQUEST', contract.profile_id, 'K_WS',
+        contract.source_contract_version, ('SYNTHETIC-TICKER',), None, None, binding.binding_id,
+        (metadata.metadata_id,), 'SYNTHETIC::CAPTURE_REQUEST',
+        {'id': 1, 'cmd': 'subscribe', 'params': {'channels': ['orderbook_delta'], 'market_tickers': ['SYNTHETIC-TICKER']}})
+    context = dict(request=request, contract=contract, wall_clock_source_id='SYNTHETIC::CLOCK')
+
+    def translate(payload, *, selected=binding, selected_metadata=metadata, ordinal=1):
+        raw = (' \n' + json.dumps(payload, separators=(', ', ': ')) + '\n').encode()
+        identity = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1', contract.profile_id.value,
+            'SYNTHETIC::ACTION', 'SYNTHETIC::SESSION', 1, ordinal)
+        original = PublicNativeObservationV1(identity, request.request_id, contract.profile_id, 'K_WS',
+            'SYNTHETIC::SESSION', 1, ordinal, None, {}, base64.urlsafe_b64encode(raw).rstrip(b'=').decode(),
+            wall, 100 + ordinal, 'SYNTHETIC::PROCESS', 'SYNTHETIC::MONO', 'SYNTHETIC::QUALITY', 1000,
+            (binding.binding_id,), 'SYNTHETIC::ACTION', 2, contract.source_contract_version)
+        result = owner.translate_public_observation_v1(observation=original, metadata=(selected_metadata,),
+            source_binding=selected, translation_context=context)
+        assert base64.urlsafe_b64decode(original.raw_body_b64 + '=' * (-len(original.raw_body_b64) % 4)) == raw
+        assert result.observation_ref == identity and result.normalized_frame.frame_id != identity
+        return result
+
+    snapshot = {'type': 'orderbook_snapshot', 'sid': 7, 'seq': 1,
+        'msg': {'market_ticker': 'SYNTHETIC-TICKER', 'yes_dollars_fp': [['0.49', '123456.78']],
+                'no_dollars_fp': [['0.49', '2.00']], 'ts': '2026-08-30T12:00:00.000000001Z'},
+        'unbound_additive_public_field': {'display': 'inert'}}
+    for precision in (6, 28, 34):
+        with localcontext() as decimal_context:
+            decimal_context.prec = precision
+            decimal_context.traps[Inexact] = True
+            result = translate(snapshot)
+            tree = result.normalized_frame.parsed_source_scalar_tree_or_none
+            assert tree['msg']['yes_dollars'] == (('0.49', '123456.78'),)
+            assert 'yes_dollars_fp' not in tree['msg'] and 'unbound_additive_public_field' not in tree
+            assert result.exact_clock_companion['provider_event_or_none']['nanosecond_remainder'] == 1
+            event = owner._decode_pit_frame_v2(contract, result.normalized_frame, event_kind=PITEventKindV2.BOOK_SNAPSHOT,
+                parse_completed_at_utc=_T0+timedelta(seconds=2), parse_completed_monotonic_ns=200,
+                price_increment_text='0.01', price_origin_text='0', quantity_increment_text_or_none='0.01',
+                price_bands=metadata.price_bands)
+            assert event.payload.levels[0].quantity == Decimal('123456.78')
+            from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import apply_pit_event_v2
+            from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.integrity import validate_pit_book_integrity_v2
+
+            anchor = apply_pit_event_v2(None, event, candidate_event_ordinal=1).post_state
+            addition = translate({'type': 'orderbook_delta', 'sid': 7, 'seq': 2,
+                'msg': {'market_ticker': 'SYNTHETIC-TICKER', 'side': 'yes',
+                        'price_dollars': '0.49', 'delta_fp': '0.01'}}, ordinal=2)
+            next_event = owner._decode_pit_frame_v2(contract, addition.normalized_frame, event_kind=PITEventKindV2.BOOK_DELTA,
+                parse_completed_at_utc=_T0+timedelta(seconds=2), parse_completed_monotonic_ns=200,
+                price_increment_text='0.01', price_origin_text='0', quantity_increment_text_or_none='0.01',
+                price_bands=metadata.price_bands)
+            changed = apply_pit_event_v2(anchor, next_event, candidate_event_ordinal=2).post_state
+            assert next(level.quantity_text for level in changed.levels if level.canonical_side == 'YES_BID') == '123456.79'
+            validate_pit_book_integrity_v2(changed)
+    _assert_lp02_native_candidate_record(translate(snapshot), contract, metadata)
+    delta = {'type': 'orderbook_delta', 'sid': 7, 'seq': 2,
+        'msg': {'market_ticker': 'SYNTHETIC-TICKER', 'side': 'no', 'price_dollars': '0.50', 'delta_fp': '-0.01'}}
+    result = translate(delta)
+    assert result.normalized_frame.parsed_source_scalar_tree_or_none['msg']['side'] == 'NO'
+    assert result.exact_clock_companion['provider_event_or_none'] is None
+    event = owner._decode_pit_frame_v2(contract, result.normalized_frame, event_kind=PITEventKindV2.BOOK_DELTA,
+        parse_completed_at_utc=_T0+timedelta(seconds=2), parse_completed_monotonic_ns=200,
+        price_increment_text='0.01', price_origin_text='0', quantity_increment_text_or_none='0.01',
+        price_bands=metadata.price_bands)
+    assert event.payload.deltas[0].price_origin == Decimal('0.5')
+    assert event.payload.deltas[0].price_increment == Decimal('0.05')
+    for altered in (
+        {**delta, 'msg': {**delta['msg'], 'price_dollars': '0.51'}},
+        {**delta, 'msg': {**delta['msg'], 'side': 'NO'}},
+        {**delta, 'msg': {**delta['msg'], 'market_ticker': 'OTHER'}},
+        {**delta, 'msg': {**delta['msg'], 'seq': 3}},
+        {**delta, 'msg': {**delta['msg'], 'delta_fp': '-0.00'}},
+        {**delta, 'msg': {**delta['msg'], 'account_balance': '1'}},
+    ):
+        with pytest.raises(ComputationControlPlaneError):
+            translate(altered)
+    with pytest.raises(ComputationControlPlaneError):
+        translate(delta, selected=replace(binding, field_bindings=tuple(row for row in binding.field_bindings if row[0] != 'side')))
+    with pytest.raises(ComputationControlPlaneError):
+        translate(delta, selected_metadata=replace(metadata, expires_at_ns=wall))
+    _assert_lp02_stream_continuity(contract, binding, metadata, request, wall)
+    _assert_lp02_kalshi_trade(contract,binding,metadata,request,wall)
+    from src.qtt.stage1_prediction_markets.selected_venues.market_data import PublicMarketDataSessionV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicCaptureBudgetV1
+
+    # Negative-only object: no issuer table entry, authority, socket or store.
+    denied = object.__new__(PublicMarketDataSessionV1)
+    denied._budget = PublicCaptureBudgetV1(1, 1, 1024, 1024, 1, 2, 4096,
+        1, 1, 1, 1, 0, 1, 0, 1, 1)
+    denied._messages = denied._bytes = 0
+    denied._observations = []
+    with pytest.raises(ComputationControlPlaneError):
+        denied._observe_v1(request, b'{"account_balance":"1"}', 200, {})
+    assert denied._messages == 1 and denied._bytes == 23 and denied._observations == []
+
+    class FailedOwnedClose:
+        count = 0
+
+        def close(self):
+            self.count += 1
+            raise RuntimeError('SYNTHETIC_OWNED_CLOSE_FAILURE')
+
+    socket = FailedOwnedClose()
+    denied._socket, denied._store = socket, None
+    denied._closed, denied._cleanup_error = False, None
+    with pytest.raises(RuntimeError, match='SYNTHETIC_OWNED_CLOSE_FAILURE'):
+        denied.close_v1()
+    assert not denied._closed and denied._socket is socket and denied._cleanup_error
+    class OtherOwnedStore:
+        count = 0
+
+        def close(self):
+            self.count += 1
+
+    store = OtherOwnedStore()
+    denied._store = store
+    with pytest.raises(ComputationControlPlaneError):
+        denied.close_v1()
+    assert socket.count == 1 and store.count == 1 and denied._store is None and not denied._closed
+
+
+def _assert_lp02_kalshi_trade(contract,source,metadata,request,wall):
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+    from src.qtt.stage1_prediction_markets.market_data_ingest.validator import validate_pit_ingest_record_v2
+
+    specifications=(('control_id','INTEGER','/id','EXACT_IDENTITY'),
+        ('control_sid','INTEGER','/msg/sid','EXACT_IDENTITY'),('control_channel','STRING','/msg/channel','EXACT_IDENTITY'),
+        ('trade_id','STRING','/msg/trade_id','EXACT_IDENTITY'),('trade_side','STRING','/msg/taker_side','EXACT_IDENTITY'),
+        ('trade_yes','DECIMAL_TEXT','/msg/yes_price_dollars','EXACT_DECIMAL_TEXT'),
+        ('trade_no','DECIMAL_TEXT','/msg/no_price_dollars','EXACT_DECIMAL_TEXT'),
+        ('trade_count','DECIMAL_TEXT','/msg/count_fp','EXACT_DECIMAL_TEXT'),
+        ('trade_seconds','INTEGER','/msg/ts','DECLARED_SECONDS_TO_NS'),
+        ('trade_milliseconds','INTEGER','/msg/ts_ms','DECLARED_MILLISECONDS_TO_NS'),
+        ('trade_sending','INTEGER','/sending_ts_ms','DECLARED_MILLISECONDS_TO_NS'))
+    source=replace(source,permitted_consumer_ids=('FormulaExecutionContractV1::MATH-01',),
+        field_bindings=(*source.field_bindings,*(
+            (name,wire,'USD_PER_CONTRACT' if name in {'trade_yes','trade_no'} else 'DECLARED_NATIVE_UNIT',
+                source.original_evidence_refs[0],pointer,transform) for name,wire,pointer,transform in specifications)))
+    metadata=replace(metadata,price_orientation='YES',price_bands=(('0','1','0.01'),))
+    request=replace(request,request_options={'id':1,'cmd':'subscribe',
+        'params':{'channels':['trade'],'market_tickers':[metadata.instrument_id]}})
+    seconds=(wall-1_000_000_000)//1_000_000_000
+    body={'type':'trade','sid':7,'seq':1,'sending_ts_ms':seconds*1000+456,'msg':{
+        'market_ticker':metadata.instrument_id,'trade_id':'SYN::K_TRADE',
+        'yes_price_dollars':'0.4900','no_price_dollars':'0.5100','count_fp':'136.00','taker_side':'no',
+        'ts':seconds,'ts_ms':seconds*1000+123}}
+    def translate(value):
+        raw=json.dumps(value,separators=(',',':')).encode()
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,
+            'SYN::K_TRADE_ACTION','SYN::K_TRADE_SESSION',1,1)
+        original=PublicNativeObservationV1(identity,request.request_id,contract.profile_id,'K_WS',
+            'SYN::K_TRADE_SESSION',1,1,None,{},base64.urlsafe_b64encode(raw).rstrip(b'=').decode(),
+            wall,101,'SYN::K_PROCESS','SYN::K_MONO','SYN::K_QUALITY',1000,(source.binding_id,),
+            'SYN::K_TRADE_ACTION',2,contract.source_contract_version)
+        return owner.translate_public_observation_v1(observation=original,metadata=(metadata,),source_binding=source,
+            translation_context=dict(request=request,contract=contract,wall_clock_source_id='SYN::K_WALL'))
+    translated=translate(body)
+    assert int(translated.exact_clock_companion['provider_event_or_none']['utc_ns_text'])==seconds*1_000_000_000+123_000_000
+    assert int(translated.exact_clock_companion['provider_sending_or_none']['utc_ns_text'])==seconds*1_000_000_000+456_000_000
+    candidate=owner._public_candidate_from_translation_v1(translation=translated,contract=contract,metadata=(metadata,),
+        parse_completed_at_utc=_T0+timedelta(seconds=1),parse_completed_monotonic_ns=102)
+    validate_pit_ingest_record_v2(candidate,contract=contract)
+    assert candidate.provider_trade_id_or_none=='SYN::K_TRADE'
+    assert candidate.provider_sequence_start_or_none is candidate.provider_sequence_end_or_none is None
+    for changed in ({'ts_ms':seconds*1000+1000},{'ts':True},{'yes_price_dollars':'0.5000'},
+                    {'yes_price_dollars':0.49},{'count_fp':'1.001'},{'taker_side':'YES'}):
+        with pytest.raises(ComputationControlPlaneError):translate({**body,'msg':{**body['msg'],**changed}})
+    with pytest.raises(ComputationControlPlaneError):
+        translate({**body,'msg':{**body['msg'],'sending_ts_ms':seconds*1000+457}})
+    source,metadata,catalog_requests,catalog_bodies=_assert_lp02_kalshi_metadata(contract,source,metadata,request,wall)
+    _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request),catalog_bodies,
+        (json.dumps({'type':'subscribed','id':1,'msg':{'sid':7,'channel':'trade'}}),json.dumps(body)),expected_price='0.4900')
+    _assert_lp02_kalshi_lifecycle(contract,source,metadata,request,catalog_requests,catalog_bodies,wall)
+    _assert_lp02_public_references(contract,source,metadata,request,catalog_requests,catalog_bodies,wall)
+
+
+def _assert_lp02_public_references(contract,source,metadata,request,catalog_requests,catalog_bodies,wall):
+    """Independent public-reference oracles, including actual file publication."""
+    stamp=_T0.strftime('%Y-%m-%dT%H:%M:%S')+'Z'
+    seconds=(wall-1_000_000_000)//1_000_000_000
+    clock=dict(source_text=stamp,utc_ns_text=str(seconds*1_000_000_000),
+        canonical_utc=stamp[:-1]+'.000000000Z',receipt_utc_floor=stamp[:-1]+'.000000Z',nanosecond_remainder=0)
+    def binding(pointer,wire='STRING',transform='EXACT_IDENTITY'):
+        return pointer,wire,transform
+    cases=[]
+    status=dict(exchange_active=True,trading_active=False,exchange_estimated_resume_time=None,
+        exchange_index_statuses=[dict(exchange_index=2,exchange_active=False,trading_active=False)])
+    cases.append(('K_STATUS',{},None,status,
+        dict(exchange_active=True,trading_active=False,exchange_estimated_resume_time=None,
+             exchange_index_statuses=(dict(exchange_index=2,exchange_active=False,trading_active=False),),top_level_exchange_index=0),
+        [binding('/exchange_active','BOOLEAN'),binding('/trading_active','BOOLEAN'),
+         binding('/exchange_estimated_resume_time','STRING','EXACT_RFC3339'),binding('/exchange_index_statuses','ARRAY'),
+         binding('/exchange_index_statuses/0/exchange_index','INTEGER'),
+         binding('/exchange_index_statuses/0/exchange_active','BOOLEAN'),binding('/exchange_index_statuses/0/trading_active','BOOLEAN')],
+        [{**status,'exchange_active':1},{**status,'exchange_index_statuses':[dict(exchange_index=True,exchange_active=False,trading_active=False)]}]))
+    cutoffs=dict(market_settled_ts=stamp,trades_created_ts=stamp,orders_updated_ts=stamp,market_positions_last_updated_ts=stamp)
+    cases.append(('K_HISTORY_CUTOFF',{},None,cutoffs,cutoffs,
+        [binding('/'+name,'STRING','EXACT_RFC3339') for name in cutoffs],
+        [{**cutoffs,'trades_created_ts':seconds},{**cutoffs,'orders_updated_ts':'unavailable'}]))
+    for operation,key,event in (('K_SERIES_FEES','series_fee_change_arr',False),('K_EVENT_FEES','event_fee_changes',True)):
+        suffix='_override' if event else ''
+        row=dict(id='SYN-FEE-1',series_ticker=metadata.series_id_or_none,scheduled_ts=stamp)
+        row.update({'fee_type'+suffix:'quadratic','fee_multiplier'+suffix:2})
+        options={'event_ticker':metadata.event_id_or_none,'limit':1,'cursor':None} if event else {
+            'series_ticker':metadata.series_id_or_none,'show_historical':True}
+        expected=dict(id='SYN-FEE-1',series_ticker=metadata.series_id_or_none,fee_type='quadratic',fee_multiplier='2',
+            override_cleared=False,scheduled_at=clock)
+        if event:
+            row['event_ticker']=metadata.event_id_or_none
+            expected['event_ticker']=metadata.event_id_or_none
+        body={key:[row]}
+        projection=dict(fee_changes=(expected,))
+        specs=[binding('/'+key,'ARRAY')]+[binding('/'+key+'/0/'+name) for name in ('id','series_ticker','fee_type'+suffix)]
+        specs += [binding('/'+key+'/0/fee_multiplier'+suffix,'DECIMAL_NUMBER','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+            binding('/'+key+'/0/scheduled_ts','STRING','EXACT_RFC3339')]
+        if event:
+            body['cursor']=''
+            projection['cursor']=''
+            specs += [binding('/'+key+'/0/event_ticker'),binding('/cursor')]
+        invalid=[{**body,key:[{**row,'fee_multiplier'+suffix:'2'}]},
+                 {**body,key:[{**row,'series_ticker':'OTHER'}]},
+                 {**body,key:[{**row,'fee_type'+suffix:None}]}]
+        cases.append((operation,options,None,body,projection,specs,invalid))
+        if event:
+            clear={**body,key:[{**row,'fee_type_override':None,'fee_multiplier_override':None}]}
+            cleared={**projection,'fee_changes':({**expected,'fee_type':None,'fee_multiplier':None,'override_cleared':True},)}
+            cases.append((operation,options,None,clear,cleared,specs,[]))
+    trade=dict(ticker=metadata.instrument_id,trade_id='SYN-HISTORY-1',yes_price_dollars='0.4900',
+        no_price_dollars='0.5100',count_fp='136.00',taker_side='no',created_time=stamp)
+    options=dict(ticker=metadata.instrument_id,limit=1,min_ts=seconds-1,max_ts=seconds+1,cursor=None)
+    expected={name:value for name,value in trade.items() if name!='created_time'}
+    expected['provider_event_clock']=clock
+    specs=[binding('/trades','ARRAY'),binding('/cursor')]+[binding('/trades/0/'+name) for name in ('ticker','trade_id','taker_side')]
+    specs += [binding('/trades/0/'+name,'DECIMAL_TEXT','EXACT_DECIMAL_TEXT') for name in ('yes_price_dollars','no_price_dollars','count_fp')]
+    specs += [binding('/trades/0/created_time','STRING','EXACT_RFC3339')]
+    cases.append(('K_HISTORY_TRADES',options,(seconds-1,seconds+1),dict(trades=[trade],cursor='NEXT-PAGE'),
+        dict(trades=(expected,),cursor='NEXT-PAGE'),specs,
+        [dict(trades=[{**trade,'ticker':'OTHER'}],cursor=''),dict(trades=[{**trade,'no_price_dollars':'0.5200'}],cursor=''),
+         dict(trades=[trade],cursor='bad\n'),dict(trades=[{**trade,'count_fp':'0.00'}],cursor='')]))
+    for operation,options,bounds,body,expected,specs,invalid in cases:
+        selected=replace(request,request_id='SYN::REFERENCE_'+operation,operation_id=operation,
+            request_options=options,time_bounds_or_none=bounds)
+        _assert_lp02_reference_case(contract,source,metadata,selected,catalog_requests,catalog_bodies,wall,
+            json.dumps(body).encode(),dict(operation_id=operation,known_at_ns=wall,**expected),specs,
+            tuple(json.dumps(row).encode() for row in invalid))
+    _assert_lp02_published_fees(contract,source,metadata,request,catalog_requests,catalog_bodies,wall)
+
+
+def _assert_lp02_published_fees(contract,source,metadata,request,catalog_requests,catalog_bodies,wall):
+    """Declared synthetic account and fee facts through original capture/storage."""
+    def stamp(offset):return (_T0+timedelta(seconds=1+offset)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    def series(identity,offset,multiplier=1):
+        return dict(id=identity,series_ticker=metadata.series_id_or_none,scheduled_ts=stamp(offset),
+            fee_type='quadratic',fee_multiplier=multiplier)
+    def event(identity,offset,multiplier,kind='quadratic'):
+        return dict(id=identity,series_ticker=metadata.series_id_or_none,event_ticker=metadata.event_id_or_none,
+            scheduled_ts=stamp(offset),fee_type_override=kind,fee_multiplier_override=multiplier)
+    rule=dict(rule_id='SYN::FEE',product_class='BINARY',market_scope=[metadata.instrument_id],
+        account_scope_ref_or_none=None,liquidity_role='TAKER',formula_family='QUADRATIC',
+        coefficients=[['rate','0.07'],['multiplier','1']],rounding_rule='KALSHI_ACCOUNT_GRID',
+        effective_from_ns=0,effective_until_ns_or_none=None,account_applicability_ref_or_none=None,
+        supersedes_rule_ref_or_none=None,generation=1,limitations=['SYNTHETIC_SOURCE_FIXTURE'],native_fee_type_or_none='quadratic')
+    base_series=[series('SYN-S1',-1),series('SYN-S3',5,3)]
+    base_pages=[dict(event_fee_changes=[event('SYN-E2',2,2)],cursor='NEXT'),
+                dict(event_fee_changes=[event('SYN-CLEAR',4,None,None)],cursor='')]
+    zero={**rule,'rule_id':'SYN::ZERO','formula_family':'EXPLICIT_ZERO','coefficients':[],
+        'rounding_rule':'EXACT_ZERO','effective_from_ns':wall+2_000_000_000,
+        'supersedes_rule_ref_or_none':rule['rule_id'],'generation':2,'native_fee_type_or_none':'explicit_zero'}
+    cases=[
+        dict(series=base_series,pages=base_pages,offsets=(0,3,4,6),fee='12.25',rules=[rule],authenticated=True),
+        dict(series=[series('SYN-S1',-1)],pages=[dict(event_fee_changes=[],cursor='')],
+             offsets=(0,),fee='1.75',rules=[rule],account_transition=2),
+        *(dict(series=[series('SYN-S1',-1)],pages=[dict(event_fee_changes=[],cursor='')],
+             offsets=(0,),fee='1.75',rules=[rule],terms_transition=2,authenticated=True,
+             **({'registry_denial':'fee source does not permit'} if blocked else {})) for blocked in (False,True)),
+        *(dict(series=[series('SYN-S1',-1)],pages=[dict(event_fee_changes=[],cursor='')],
+             offsets=(0,),fee='1.75',rules=[rule],settlement_outcome=outcome) for outcome in ('YES','NO')),
+        dict(series=[series('SYN-FUTURE',2)],pages=[dict(event_fee_changes=[],cursor='')],offsets=(3,),fee='1.75',rules=[rule]),
+        dict(series=[series('SYN-S1',-1)],pages=[dict(event_fee_changes=[event('SYN-ZERO',2,0,'explicit_zero')],cursor='')],
+             offsets=(0,3),fee='1.75',rules=[rule,zero]),
+        dict(series=None,pages=base_pages,offsets=(0,),denial='complete Series/Event fee history unavailable',rules=[rule]),
+        dict(series=base_series,pages=base_pages[:1],offsets=(0,),denial='unread page',rules=[rule]),
+        dict(series=base_series,pages=base_pages,offsets=(0,),historical=False,denial='omitted historical changes',rules=[rule]),
+        dict(series=[series('SYN-S1',-1),series('SYN-CONFLICT',-1,2)],pages=base_pages,offsets=(0,),
+             denial='duplicate/conflicting fee history',rules=[rule]),
+        dict(series=[{**series('SYN-UNKNOWN',-1),'fee_type':'unsupported'}],pages=base_pages,offsets=(0,),
+             denial='fee epoch missing or conflicting',rules=[rule]),
+        dict(series=[series('SYN-ZERO-MULTIPLIER',-1,0)],pages=base_pages,offsets=(0,),
+             denial='zero/unknown multiplier',rules=[rule]),
+        dict(series=[series('SYN-FUTURE',2)],pages=base_pages,offsets=(0,),denial='baseline unavailable at the fill',rules=[rule]),
+    ]
+    for case in cases:
+        requests=list(catalog_requests)
+        bodies=list(catalog_bodies)
+        specs=[]
+        if case['series'] is not None:
+            requests.append(replace(request,request_id='SYN::FEE_SERIES',operation_id='K_SERIES_FEES',
+                request_options=dict(series_ticker=metadata.series_id_or_none,show_historical=case.get('historical',True))))
+            bodies.append(json.dumps(dict(series_fee_change_arr=case['series'])).encode())
+        cursor=None
+        for index,page in enumerate(case['pages']):
+            requests.append(replace(request,request_id='SYN::FEE_EVENT::'+str(index),operation_id='K_EVENT_FEES',
+                request_options=dict(event_ticker=metadata.event_id_or_none,limit=1,cursor=cursor),pagination_cursor_or_none=cursor))
+            bodies.append(json.dumps(page).encode())
+            cursor=page['cursor']
+        for key,rows,suffix in (('series_fee_change_arr',case['series'] or [],''),
+            ('event_fee_changes',[row for page in case['pages'] for row in page['event_fee_changes']],'_override')):
+            specs.append(('/'+key,'ARRAY','EXACT_IDENTITY'))
+            # Each retained page has its own row zero. Extra bound pointers are
+            # inert unless that exact row occurs in original provider evidence.
+            for index in range(len(rows)):
+                prefix='/'+key+'/'+str(index)+'/'
+                for name in ('id','series_ticker','fee_type'+suffix):specs.append((prefix+name,'STRING','EXACT_IDENTITY'))
+                if suffix:specs.append((prefix+'event_ticker','STRING','EXACT_IDENTITY'))
+                specs.extend(((prefix+'fee_multiplier'+suffix,'DECIMAL_NUMBER','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+                    (prefix+'scheduled_ts','STRING','EXACT_RFC3339')))
+        specs.append(('/cursor','STRING','EXACT_IDENTITY'))
+        if 'account_transition' in case:
+            requests.append(replace(request,request_id='SYN::ACCOUNT_STATUS',operation_id='K_STATUS',request_options={},
+                source_binding_ref='SYN::FUTURE_ACCOUNT_SOURCE'))
+            bodies.append(b'{"exchange_active":true,"trading_active":true}')
+            specs.extend((('/exchange_active','BOOLEAN','EXACT_IDENTITY'),('/trading_active','BOOLEAN','EXACT_IDENTITY')))
+        ws_bodies=()
+        if case.get('authenticated'):
+            requests.append(request)
+            seconds=(wall-1_000_000_000)//1_000_000_000
+            ws_bodies=(json.dumps({'type':'subscribed','id':1,'msg':{'sid':7,'channel':'trade'}}),
+                json.dumps({'type':'trade','sid':7,'seq':1,'sending_ts_ms':seconds*1000+456,'msg':{
+                    'market_ticker':metadata.instrument_id,'trade_id':'SYN::FEE_OBSERVED_TRADE',
+                    'yes_price_dollars':'0.4900','no_price_dollars':'0.5100','count_fp':'136.00','taker_side':'no',
+                    'ts':seconds,'ts_ms':seconds*1000+123}}))
+        existing={(row[4],row[1],row[5]) for row in source.field_bindings}
+        added=tuple((f'published_fee_{index}',wire,'DECLARED_NATIVE_UNIT',source.original_evidence_refs[0],pointer,transform)
+            for index,(pointer,wire,transform) in enumerate(specs) if (pointer,wire,transform) not in existing)
+        selected=replace(source,allowed_operation_ids=tuple(dict.fromkeys(row.operation_id for row in requests)),
+            field_bindings=source.field_bindings+added,
+            permitted_consumer_ids=tuple(dict.fromkeys((*source.permitted_consumer_ids,
+                'FormulaExecutionContractV1::MATH-06','FormulaExecutionContractV1::MATH-07'))))
+        _assert_lp02_publication_service(contract,selected,metadata,tuple(requests),tuple(bodies),ws_bodies,fee_case=case)
+
+
+def _assert_lp02_published_fee_values(publication,account,case,wall):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.pretrade.pr169_pretrade1_resolvers import PublicConditionalFillV1,compose_public_fee_cashflows_v1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_b.test_service_operations import _assert_lp02_conditional_cash_services
+
+    entry=handoff._require_public_publication_handle_v1(publication=publication)
+    metadata,=entry[4]
+    fills=tuple(PublicConditionalFillV1(Decimal(100),Decimal('.5'),'BUY','TAKER',wall+offset*1_000_000_000)
+        for offset in case['offsets'])
+    kwargs=dict(publication=publication,instrument_id=metadata.instrument_id,known_as_of_ns=wall,applicability=account,fills=fills)
+    if 'denial' in case:
+        with pytest.raises(ComputationControlPlaneError,match=case['denial']):source._resolve_public_publication_fee_epochs_v1(**kwargs)
+        return
+    epochs=source._resolve_public_publication_fee_epochs_v1(**kwargs)
+    assert all(row.known_at_ns>=entry[8] and row.expires_at_ns<=account.effective_until_ns for row in epochs)
+    for epoch in epochs:
+        identity=json.loads(epoch.epoch_id)
+        assert entry[10] in identity and entry[11] in identity and metadata.instrument_id in identity
+        assert set(entry[5][0].original_evidence_refs)<=set(epoch.source_observation_refs)
+    terms=compose_public_fee_cashflows_v1(profile_id=metadata.profile_id,market_scope=(metadata.instrument_id,),
+        epochs=epochs,applicability=account,known_as_of_ns=wall,fills=fills,order_ref='SYN::FRESH_HYPOTHETICAL_ORDER',
+        cap_domain_epoch_refs=tuple(row.epoch_id for row in epochs),prior_unrounded=Decimal(0),prior_collected=Decimal(0),
+        prior_rounding_overpayment=Decimal(0),carry_evidence_refs=(),fresh_hypothetical_order=True,include_deferred_taker_rebate=False)
+    assert terms['platform_fee_total']==Decimal(case['fee'])
+    assert terms['entry_trade_cashflow_total']==-50*len(fills)
+    assert terms['accounting_class']=='CONDITIONAL_CASHFLOW_NOT_AVAILABLE_BALANCE'
+    if 'account_transition' in case:
+        boundary=wall+case['account_transition']*1_000_000_000
+        assert len(epochs)==1 and epochs[0].effective_until_ns_or_none==epochs[0].expires_at_ns==boundary
+        conflict=next(row for row in entry[1]._inputs['source_bindings'] if row.binding_id=='SYN::FUTURE_ACCOUNT_SOURCE')
+        assert set(conflict.original_evidence_refs)<=set(epochs[0].source_observation_refs)
+        with pytest.raises(ComputationControlPlaneError,match='conflicting current accepted account qualification'):
+            source._resolve_public_publication_fee_epochs_v1(**{**kwargs,'fills':(replace(fills[0],fill_at_ns=boundary),)})
+        # A retained pre-transition epoch cannot be reused directly at the
+        # transition, even with the still-unexpired original account object.
+        with pytest.raises(ComputationControlPlaneError,match='fee epoch missing or conflicting'):
+            compose_public_fee_cashflows_v1(profile_id=metadata.profile_id,market_scope=(metadata.instrument_id,),
+                epochs=epochs,applicability=account,known_as_of_ns=wall,fills=(replace(fills[0],fill_at_ns=boundary),),
+                order_ref='SYN::FRESH_HYPOTHETICAL_ORDER',cap_domain_epoch_refs=tuple(row.epoch_id for row in epochs),
+                prior_unrounded=Decimal(0),prior_collected=Decimal(0),prior_rounding_overpayment=Decimal(0),
+                carry_evidence_refs=(),fresh_hypothetical_order=True,include_deferred_taker_rebate=False)
+    # The fee registry derives its own three fields from this publication;
+    # model, terminal-branch and reserve owners remain separate fixtures.
+    _assert_lp02_conditional_cash_services(terms,metadata.profile_id.value,str(100*len(fills)),
+        Decimal(10*len(fills))-Decimal(case['fee']),publication_fee=(publication,account,fills),
+        expected_registry_denial=case.get('registry_denial'),
+        expected_expiry_ns=(wall+case.get('account_transition',case.get('terms_transition'))*1_000_000_000
+            if 'account_transition' in case or 'terms_transition' in case else None),
+        settlement_outcome=case.get('settlement_outcome'))
+    for changed in ({'applicability':replace(account)}, {'known_as_of_ns':wall-1},
+        {'fills':(replace(fills[0],fill_at_ns=wall+45_000_000_000),)},
+        {'instrument_id':'SYN::UNSELECTED'}, {'fills':tuple(reversed(fills))} if len(fills)>1 else {'fills':()}):
+        with pytest.raises(ComputationControlPlaneError):source._resolve_public_publication_fee_epochs_v1(**{**kwargs,**changed})
+
+
+def _assert_lp02_nonkalshi_published_fees(contract,source,metadata,request,body):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    retail=contract.profile_id.value=='POLYMARKET_US_RETAIL_DIRECT'
+    rule=dict(rule_id='SYN::FEE',product_class='BINARY',market_scope=[metadata.instrument_id],
+        account_scope_ref_or_none=None,liquidity_role='TAKER',formula_family='QUADRATIC',
+        coefficients=[['rate','0.0695' if retail else '0.07'],['multiplier','1']],
+        rounding_rule='HALF_EVEN_CENT' if retail else 'CEILING_CENT',effective_from_ns=0,
+        effective_until_ns_or_none=None,account_applicability_ref_or_none=None,supersedes_rule_ref_or_none=None,
+        generation=1,limitations=['SYNTHETIC_SOURCE_FIXTURE'],native_fee_type_or_none=None)
+    source=replace(source,allowed_operation_ids=(request.operation_id,),
+        permitted_consumer_ids=('FormulaExecutionContractV1::MATH-06','FormulaExecutionContractV1::MATH-07'))
+    _assert_lp02_publication_service(contract,source,metadata,(request,),(body,),(),
+        fee_case=dict(rules=[rule],offsets=(0,),fee='1.74' if retail else '1.75'))
+    closed=json.loads(body)
+    if retail:
+        closed['market'].update(active=False,closed=True)
+    else:
+        closed['contracts'][0].update(status='settled',marketState='closed')
+    for outcome in ('YES','NO'):
+        _assert_lp02_publication_service(contract,source,metadata,(request,),(json.dumps(closed).encode(),),(),
+            fee_case=dict(rules=[rule],offsets=(0,),fee='1.74' if retail else '1.75',settlement_outcome=outcome))
+    if retail:
+        successor={**rule,'rule_id':'SYN::LATER_FEE','generation':2,'supersedes_rule_ref_or_none':rule['rule_id'],
+            'effective_from_ns':_native_utc_nanoseconds((_T0+timedelta(seconds=3)).isoformat()),
+            'coefficients':[['rate','0.10'],['multiplier','1']]}
+        _assert_lp02_publication_service(contract,source,metadata,(request,),(body,),(),
+            fee_case=dict(rules=[rule,successor],offsets=(0,3),fee='4.24',
+                registry_denial='Retail cross-regime order cap requires accepted cap-domain evidence'))
+
+
+def _assert_lp02_reference_case(contract,source,metadata,request,catalog_requests,catalog_bodies,wall,raw,expected,specs,invalid):
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+
+    existing={(row[4],row[1],row[5]) for row in source.field_bindings}
+    added=tuple((f'reference_{index}',wire,'DECLARED_NATIVE_UNIT',source.original_evidence_refs[0],pointer,transform)
+        for index,(pointer,wire,transform) in enumerate(specs) if (pointer,wire,transform) not in existing)
+    source=replace(source,allowed_operation_ids=tuple(dict.fromkeys(row.operation_id for row in (*catalog_requests,request))),
+        field_bindings=source.field_bindings+added)
+    def translate(body,selected_source=source):
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::REFERENCE_ACTION','SYN::REFERENCE_SESSION',0,1)
+        original=PublicNativeObservationV1(identity,request.request_id,contract.profile_id,request.operation_id,
+            'SYN::REFERENCE_SESSION',0,1,200,{},base64.urlsafe_b64encode(body).rstrip(b'=').decode(),wall,100,
+            'SYN::REFERENCE_PROCESS','SYN::REFERENCE_MONO','SYN::REFERENCE_QUALITY',1000,(source.binding_id,),
+            'SYN::REFERENCE_ACTION',1,contract.source_contract_version)
+        return owner.translate_public_observation_v1(observation=original,metadata=(metadata,),source_binding=selected_source,
+            translation_context=dict(request=request,contract=contract,wall_clock_source_id='SYN::REFERENCE_WALL'))
+    result=translate(raw)
+    assert result.stream_disposition==dict(kind='PUBLIC_REFERENCE',operation_id=request.operation_id,instrument_ids=request.instrument_ids)
+    assert result.normalized_frame.parsed_source_scalar_tree_or_none==expected
+    assert result.exact_clock_companion['provider_event_or_none'] is None
+    with pytest.raises(ComputationControlPlaneError):
+        owner._public_candidate_from_translation_v1(translation=result,contract=contract,metadata=(metadata,),
+            parse_completed_at_utc=_T0+timedelta(seconds=1),parse_completed_monotonic_ns=101)
+    for body in invalid:
+        with pytest.raises(ComputationControlPlaneError):translate(body)
+    with pytest.raises(ComputationControlPlaneError):
+        translate(raw,replace(source,field_bindings=tuple(row for row in source.field_bindings if row[4]!=specs[0][0])))
+    _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request),(*catalog_bodies,raw),(),
+        expected_reference=(request.operation_id,expected))
+
+
+def _assert_lp02_kalshi_lifecycle(contract,source,metadata,stream_request,catalog_requests,catalog_bodies,wall):
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.market_data_ingest.validator import validate_pit_ingest_record_v2
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+
+    source=replace(source,field_bindings=source.field_bindings+(
+        ('lifecycle_event','STRING','LIFECYCLE',source.original_evidence_refs[0],'/msg/event_type','EXACT_IDENTITY'),
+        ('lifecycle_open','INTEGER','SECONDS',source.original_evidence_refs[0],'/msg/open_ts','DECLARED_SECONDS_TO_NS')))
+    request=replace(stream_request,request_options={'id':1,'cmd':'subscribe','params':{'channels':['market_lifecycle_v2']}})
+    body=dict(type='market_lifecycle_v2',sid=7,seq=1,sending_ts_ms=(wall-1_000_000_000)//1_000_000,
+        msg=dict(market_ticker=metadata.instrument_id,event_type='deactivated',open_ts=(wall-1_000_000_000)//1_000_000_000))
+    def translate(value):
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::K_LIFE_ACTION','SYN::K_LIFE_SESSION',1,1)
+        original=PublicNativeObservationV1(identity,request.request_id,contract.profile_id,'K_WS','SYN::K_LIFE_SESSION',1,1,None,{},
+            base64.urlsafe_b64encode(json.dumps(value).encode()).rstrip(b'=').decode(),wall,101,'SYN::K_PROCESS','SYN::K_MONO',
+            'SYN::K_QUALITY',1000,(source.binding_id,),'SYN::K_LIFE_ACTION',2,contract.source_contract_version)
+        return owner.translate_public_observation_v1(observation=original,metadata=(metadata,),source_binding=source,
+            translation_context=dict(request=request,contract=contract,wall_clock_source_id='SYN::K_WALL'))
+    translated=translate(body)
+    assert translated.stream_disposition['lifecycle_state']=='PAUSED'
+    assert translated.exact_clock_companion['provider_event_or_none'] is None
+    assert translated.exact_clock_companion['provider_sending_or_none']['utc_ns_text']==str(wall-1_000_000_000)
+    candidate=owner._public_candidate_from_translation_v1(translation=translated,contract=contract,metadata=(metadata,),
+        parse_completed_at_utc=_T0+timedelta(seconds=1),parse_completed_monotonic_ns=102)
+    validate_pit_ingest_record_v2(candidate,contract=contract)
+    assert candidate.provider_sequence_start_or_none is candidate.provider_sequence_end_or_none is None
+    for native,expected in (('activated','OPEN'),('determined','RESOLVED'),('settled','SETTLED'),('metadata_updated','UNAVAILABLE'),('unknown','UNAVAILABLE')):
+        assert translate(dict(body,msg=dict(body['msg'],event_type=native))).stream_disposition['lifecycle_state']==expected
+    outside=dict(body,msg=dict(body['msg'],market_ticker='OUTSIDE_SELECTED_SCOPE'))
+    assert translate(outside).stream_disposition['kind']=='UNSELECTED_LIFECYCLE'
+    for changed in (dict(body,seq=True),dict(body,msg=dict(body['msg'],sid=8)),dict(body,msg=dict(body['msg'],open_ts='123'))):
+        with pytest.raises(ComputationControlPlaneError):translate(changed)
+    _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request),catalog_bodies,
+        tuple(json.dumps(row) for row in ({'type':'subscribed','id':1,'msg':{'sid':7,'channel':'market_lifecycle_v2'}},
+            outside,dict(body,seq=2))),expected_price='0.4900',expected_lifecycle_blocked=True)
+    refresh=tuple(replace(row,request_id=row.request_id+'::REOPEN') for row in catalog_requests)
+    refreshed_market=json.loads(catalog_bodies[0])
+    refreshed_market['market']['price_ranges'][0]['step']='0.005'
+    book_source=replace(source,permitted_consumer_ids=tuple('FormulaExecutionContractV1::MATH-'+value for value in ('03','04','05')),
+        field_bindings=tuple((row[0],row[1],'USD_PER_CONTRACT' if row[0] in {'yes_price','no_price'} else row[2],*row[3:])
+            for row in source.field_bindings))
+    reconnect=replace(stream_request,request_id='SYN::K_REOPEN_BOOK',request_options=dict(id=1,cmd='subscribe',
+        params=dict(channels=['orderbook_delta'],market_tickers=[metadata.instrument_id])))
+    anchor=dict(type='orderbook_snapshot',sid=8,seq=1,msg=dict(market_ticker=metadata.instrument_id,
+        yes_dollars_fp=[['0.495','0.1']],no_dollars_fp=[['0.49','0.2']],ts=_T0.isoformat()))
+    book_metadata=replace(metadata,price_orientation='OUTCOME_SIDE')
+    for event_type in ('activated','deactivated','determined','settled','metadata_updated','unknown'):
+        _assert_lp02_publication_service(contract,book_source,book_metadata,(*catalog_requests,request,*refresh,reconnect),
+            (*catalog_bodies,json.dumps(refreshed_market).encode(),*catalog_bodies[1:]),
+            tuple(json.dumps(row) for row in ({'type':'subscribed','id':1,'msg':{'sid':7,'channel':'market_lifecycle_v2'}},
+                dict(body,msg=dict(body['msg'],event_type=event_type)),
+                {'type':'subscribed','id':1,'msg':{'sid':8,'channel':'orderbook_delta'}},anchor)),
+            expected_book=('0.495','0.51','0.5025','0.015',(2,67)),expected_lifecycle_blocked=event_type!='activated')
+    _assert_lp02_kalshi_event_notifications(contract,source,metadata,request,catalog_requests,catalog_bodies,wall)
+
+
+def _assert_lp02_kalshi_event_notifications(contract,source,metadata,request,catalog_requests,catalog_bodies,wall):
+    """One global original, exact child fanout, and budgeted refresh closure."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1,_public_identity_v1
+
+    specs=[('/msg/event_ticker','STRING','EXACT_IDENTITY'),('/msg/series_ticker','STRING','EXACT_IDENTITY'),
+        ('/msg/fee_type_override','STRING','EXACT_IDENTITY'),('/msg/fee_multiplier_override','DECIMAL_NUMBER','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+        ('/series_fee_change_arr','ARRAY','EXACT_IDENTITY'),('/event_fee_changes','ARRAY','EXACT_IDENTITY'),('/cursor','STRING','EXACT_IDENTITY')]
+    for root,suffix in (('/series_fee_change_arr/0/',''),('/event_fee_changes/0/','_override')):
+        specs.extend((root+name,'STRING','EXACT_IDENTITY') for name in ('id','series_ticker','fee_type'+suffix))
+        if suffix:specs.append((root+'event_ticker','STRING','EXACT_IDENTITY'))
+        specs.extend(((root+'fee_multiplier'+suffix,'DECIMAL_NUMBER','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+            (root+'scheduled_ts','STRING','EXACT_RFC3339')))
+    existing={(row[4],row[1],row[5]) for row in source.field_bindings}
+    source=replace(source,allowed_operation_ids=tuple(dict.fromkeys((*source.allowed_operation_ids,'K_SERIES_FEES','K_EVENT_FEES'))),
+        field_bindings=source.field_bindings+tuple(('event_notice_'+str(i),wire,'DECLARED_NATIVE_UNIT',
+            source.original_evidence_refs[0],pointer,transform) for i,(pointer,wire,transform) in enumerate(specs)
+            if (pointer,wire,transform) not in existing))
+    sibling=replace(metadata,metadata_id='SYN::EVENT_SIBLING',market_id='SYN::SIBLING_MARKET',instrument_id='SYN-SIBLING')
+    foreign=replace(sibling,metadata_id='SYN::OTHER_EVENT_METADATA',market_id='SYN::OTHER_MARKET',instrument_id='SYN-OTHER',event_id_or_none='OTHER-EVENT')
+    def translate(value,rows=(metadata,)):
+        selected=replace(request,instrument_ids=tuple(row.instrument_id for row in rows),metadata_refs=tuple(row.metadata_id for row in rows))
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::EVENT_ACTION','SYN::EVENT_SESSION',1,1)
+        original=PublicNativeObservationV1(identity,selected.request_id,contract.profile_id,'K_WS','SYN::EVENT_SESSION',1,1,None,{},
+            base64.urlsafe_b64encode(json.dumps(value).encode()).rstrip(b'=').decode(),wall,101,'SYN::EVENT_PROCESS',
+            'SYN::EVENT_MONO','SYN::EVENT_QUALITY',1000,(source.binding_id,),'SYN::EVENT_ACTION',2,contract.source_contract_version)
+        return owner.translate_public_observation_v1(observation=original,metadata=rows,source_binding=source,
+            translation_context=dict(request=selected,contract=contract,wall_clock_source_id='SYN::EVENT_WALL'))
+    ack=dict(type='subscribed',id=1,msg=dict(sid=7,channel='market_lifecycle_v2'))
+    notice=dict(type='event_lifecycle',sid=7,seq=1,msg=dict(event_ticker=metadata.event_id_or_none,series_ticker=metadata.series_id_or_none))
+    translated=translate(notice,(metadata,sibling,foreign))
+    assert translated.stream_disposition['instrument_ids']==(metadata.instrument_id,sibling.instrument_id)
+    assert translated.stream_disposition['kind']=='PUBLIC_REFERENCE'
+    with pytest.raises(ComputationControlPlaneError):
+        owner._public_candidate_from_translation_v1(translation=translated,metadata=(metadata,sibling,foreign),contract=contract,
+            parse_completed_at_utc=_T0+timedelta(seconds=1),parse_completed_monotonic_ns=102)
+    outside={**notice,'msg':{**notice['msg'],'event_ticker':'OUTSIDE'}}
+    assert translate(outside).stream_disposition['instrument_ids']==()
+    for bad in ({**notice,'seq':True},{**notice,'msg':{**notice['msg'],'series_ticker':'WRONG'}},
+                {**notice,'msg':{**notice['msg'],'sid':8}}):
+        with pytest.raises(ComputationControlPlaneError):translate(bad)
+    refresh=tuple(replace(row,request_id=row.request_id+'::REFRESH') for row in catalog_requests)
+    _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request,*refresh),
+        (*catalog_bodies,*catalog_bodies),tuple(json.dumps(row) for row in (ack,notice)),
+        expected_reference=('K_WS',dict(type='event_lifecycle',sid=7,seq=1,msg=notice['msg'])))
+    _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request),catalog_bodies,
+        tuple(json.dumps(row) for row in (ack,notice)),expected_capture_denial='budgeted exact metadata/fee refresh')
+    for fault,error in (('forged_duplicate','manufactured continuity witness'),
+                        ('missing','one original continuity witness')):
+        _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request,*refresh),
+            (*catalog_bodies,*catalog_bodies),tuple(json.dumps(row) for row in (ack,notice)),
+            expected_capture_denial=error,continuity_failure=fault)
+    series_request=replace(request,request_id='SYN::NOTICE_SERIES',operation_id='K_SERIES_FEES',
+        request_options=dict(series_ticker=metadata.series_id_or_none,show_historical=True))
+    event_request=replace(request,request_id='SYN::NOTICE_EVENT',operation_id='K_EVENT_FEES',
+        request_options=dict(event_ticker=metadata.event_id_or_none,limit=1,cursor=None))
+    other_parent=replace(foreign,series_id_or_none='OTHER-SERIES')
+    for selected_request in (series_request,event_request,catalog_requests[1],catalog_requests[2]):
+        mixed=replace(selected_request,instrument_ids=(metadata.instrument_id,other_parent.instrument_id),
+            metadata_refs=(metadata.metadata_id,other_parent.metadata_id))
+        with pytest.raises(ComputationControlPlaneError):
+            owner.compile_public_read_request_v1(request=mixed,source_binding=source,metadata=(metadata,other_parent))
+    stamp=_T0.strftime('%Y-%m-%dT%H:%M:%SZ')
+    series_body=dict(series_fee_change_arr=[dict(id='SYN::NS',series_ticker=metadata.series_id_or_none,
+        fee_type='quadratic',fee_multiplier=1,scheduled_ts=stamp)])
+    for family,multiplier in (('quadratic',2),(None,None)):
+        message=dict(event_ticker=metadata.event_id_or_none,fee_type_override=family,fee_multiplier_override=multiplier)
+        fee_notice=dict(type='event_fee_update',sid=7,seq=1,msg=message)
+        projected=translate(fee_notice)
+        expected=dict(type='event_fee_update',sid=7,seq=1,msg={**message,'fee_multiplier_override':None if multiplier is None else '2'})
+        assert projected.normalized_frame.parsed_source_scalar_tree_or_none==expected
+        with pytest.raises(ComputationControlPlaneError):
+            translate({**fee_notice,'msg':{**message,'fee_multiplier_override':None if multiplier is not None else 1}})
+        event_body=dict(event_fee_changes=[dict(id='SYN::NE',series_ticker=metadata.series_id_or_none,
+            event_ticker=metadata.event_id_or_none,fee_type_override=family,fee_multiplier_override=multiplier,scheduled_ts=stamp)],cursor='')
+        _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request,series_request,event_request),
+            (*catalog_bodies,json.dumps(series_body).encode(),json.dumps(event_body).encode()),
+            tuple(json.dumps(row) for row in (ack,fee_notice)),expected_reference=('K_WS',expected),separate_refresh_sources=True)
+        rule=dict(rule_id='SYN::NOTICE_FEE',product_class='BINARY',market_scope=[metadata.instrument_id],
+            account_scope_ref_or_none=None,liquidity_role='TAKER',formula_family='QUADRATIC',
+            coefficients=[['rate','0.07'],['multiplier','1']],rounding_rule='KALSHI_ACCOUNT_GRID',
+            effective_from_ns=0,effective_until_ns_or_none=None,account_applicability_ref_or_none=None,
+            supersedes_rule_ref_or_none=None,generation=1,limitations=['SYNTHETIC_SOURCE_FIXTURE'],native_fee_type_or_none='quadratic')
+        fee_source=replace(source,permitted_consumer_ids=(*source.permitted_consumer_ids,
+            'FormulaExecutionContractV1::MATH-06','FormulaExecutionContractV1::MATH-07'))
+        initial=(replace(series_request,request_id='SYN::INITIAL_NOTICE_SERIES'),
+                 replace(event_request,request_id='SYN::INITIAL_NOTICE_EVENT'))
+        _assert_lp02_publication_service(contract,fee_source,metadata,(*catalog_requests,*initial,request,series_request,event_request),
+            (*catalog_bodies,json.dumps(series_body).encode(),b'{"event_fee_changes":[],"cursor":""}',
+                json.dumps(series_body).encode(),json.dumps(event_body).encode()),
+            tuple(json.dumps(row) for row in (ack,fee_notice)),
+            fee_case=dict(rules=[rule],offsets=(0,),fee='3.50' if multiplier is not None else '1.75'))
+        conflict=dict(event_fee_changes=[{**event_body['event_fee_changes'][0],'fee_type_override':'quadratic','fee_multiplier_override':3}],cursor='')
+        _assert_lp02_publication_service(contract,source,metadata,(*catalog_requests,request,series_request,event_request),
+            (*catalog_bodies,json.dumps(series_body).encode(),json.dumps(conflict).encode()),
+            tuple(json.dumps(row) for row in (ack,fee_notice)),expected_capture_denial='conflicts with refreshed current history')
+
+
+def _assert_lp02_kalshi_metadata(contract,source,metadata,stream_request,wall):
+    """Exact Market -> Event -> Series joins; no inferred fee or payout."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+
+    identities=tuple(_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,
+        'SYN::K_CATALOG_ACTION','SYN::K_CATALOG_SESSION',0,index) for index in (1,2,3))
+    specs=[('k_market','OBJECT','/market','EXACT_IDENTITY',0),
+        ('k_ticker','STRING','/market/ticker','EXACT_IDENTITY',0),
+        ('k_event','STRING','/market/event_ticker','EXACT_IDENTITY',0),
+        ('k_bands','ARRAY','/market/price_ranges','SOURCE_PRICE_BAND',0),
+        ('k_event_object','OBJECT','/event','EXACT_IDENTITY',1),
+        ('k_event_ticker','STRING','/event/event_ticker','EXACT_IDENTITY',1),
+        ('k_series_link','STRING','/event/series_ticker','EXACT_IDENTITY',1),
+        ('k_series_object','OBJECT','/series','EXACT_IDENTITY',2),
+        ('k_series_ticker','STRING','/series/ticker','EXACT_IDENTITY',2)]
+    for index in range(len(metadata.price_bands)):
+        specs.extend((f'k_band_{index}_{name}','DECIMAL_TEXT',f'/market/price_ranges/{index}/{name}','EXACT_DECIMAL_TEXT',0)
+            for name in ('start','end','step'))
+    source=replace(source,allowed_operation_ids=('K_MARKET','K_EVENT','K_SERIES','K_WS'),field_bindings=source.field_bindings+tuple(
+        (name,wire,'DECLARED_NATIVE_UNIT',source.original_evidence_refs[0],pointer,transform) for name,wire,pointer,transform,_ in specs))
+    metadata=replace(metadata,field_lineage=tuple((identities[original],pointer,name,transform)
+        for name,wire,pointer,transform,original in specs if wire!='OBJECT'))
+    options=(('K_MARKET',{'ticker':metadata.instrument_id}),('K_EVENT',{'event_ticker':metadata.event_id_or_none}),
+             ('K_SERIES',{'series_ticker':metadata.series_id_or_none}))
+    requests=tuple(replace(stream_request,request_id='SYN::K_CATALOG_'+op,operation_id=op,request_options=opts) for op,opts in options)
+    bodies=(dict(market=dict(ticker=metadata.instrument_id,event_ticker=metadata.event_id_or_none,
+        price_ranges=[dict(start=low,end=high,step=step) for low,high,step in metadata.price_bands])),
+        dict(event=dict(event_ticker=metadata.event_id_or_none,series_ticker=metadata.series_id_or_none)),
+        dict(series=dict(ticker=metadata.series_id_or_none,fee_type='unsupported-waiver',fee_multiplier=0)))
+
+    def translate(index,body,selected=metadata,derive=False):
+        request=requests[index]
+        original=PublicNativeObservationV1(identities[index],request.request_id,contract.profile_id,request.operation_id,
+            'SYN::K_CATALOG_SESSION',0,index+1,200,{},base64.urlsafe_b64encode(json.dumps(body).encode()).rstrip(b'=').decode(),
+            wall,100+index,'SYN::K_PROCESS','SYN::K_MONO','SYN::K_QUALITY',1000,(source.binding_id,),
+            'SYN::K_CATALOG_ACTION',2,contract.source_contract_version)
+        function=owner._compile_public_catalog_metadata_v1 if derive else owner.translate_public_observation_v1
+        return function(observation=original,metadata=(selected,),source_binding=source,
+            translation_context=dict(request=request,contract=contract,wall_clock_source_id='SYN::K_WALL'))
+
+    for index,body in enumerate(bodies):
+        translated=translate(index,body)
+        assert translated.stream_disposition['instrument_generations']==((metadata.instrument_id,metadata.generation),)
+        if index==2:
+            assert dict(translated.normalized_frame.parsed_source_scalar_tree_or_none['series'])=={'ticker':metadata.series_id_or_none}
+        key=('market','event','series')[index]
+        identity_key='event_ticker' if index==1 else 'ticker'
+        with pytest.raises(ComputationControlPlaneError):translate(index,{key:{**body[key],identity_key:'OTHER'}})
+    for change in ({'event_ticker':'OTHER'},{'price_ranges':[]},
+                   {'price_ranges':[{'start':'0','end':'1','step':'0.02'}]},
+                   {'price_ranges':[{'start':'0','end':'1','step':0.01}]}):
+        with pytest.raises(ComputationControlPlaneError):translate(0,{'market':{**bodies[0]['market'],**change}})
+    with pytest.raises(ComputationControlPlaneError):
+        translate(1,{'event':{**bodies[1]['event'],'series_ticker':'OTHER'}})
+    with pytest.raises(ComputationControlPlaneError,match='original'):
+        translate(0,bodies[0],replace(metadata,field_lineage=metadata.field_lineage[1:]))
+    translated,successors,successor_request=translate(0,{'market':{**bodies[0]['market'],
+        'price_ranges':[{'start':'0','end':'1','step':'0.02'}]}},derive=True)
+    assert successors[0].price_bands==(('0','1','0.02'),) and successors[0].generation==metadata.generation+1
+    assert successors[0].metadata_id!=metadata.metadata_id and successors[0].known_at_ns==wall
+    assert successor_request.metadata_refs==(successors[0].metadata_id,)
+    assert metadata.price_bands!=successors[0].price_bands and metadata.generation+1==successors[0].generation
+    return source,metadata,requests,tuple(json.dumps(body).encode() for body in bodies)
+
+
+def _assert_lp02_native_candidate_record(translation, contract, metadata):
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as ingest
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import receipts as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import apply_pit_event_v2
+
+    candidate = ingest._public_candidate_from_translation_v1(translation=translation, contract=contract, metadata=(metadata,),
+        parse_completed_at_utc=_T0+timedelta(seconds=2), parse_completed_monotonic_ns=200)
+    assert candidate.market_id == metadata.market_id and candidate.instrument_id == metadata.instrument_id
+    assert candidate.payload.levels[0].quantity_increment_or_none is None
+    state = apply_pit_event_v2(None, candidate, candidate_event_ordinal=1).post_state
+    text = owner._public_native_candidate_json_v1(candidate=candidate, translation=translation, contract=contract,
+        metadata=(metadata,), pre_state_ref_or_none=None, post_state_ref=state.state_id, candidate_ordinal=1)
+    record = owner.PITCanonicalEventReceiptRecordV2('SYNTHETIC::NATIVE_EVENT_RECEIPT', candidate.event_record_id,
+        'PIT_CANONICAL_EVENT_RECEIPT_RECORD_V2', candidate.profile_id, 'SYNTHETIC::PARTITION', candidate.capture_session_id,
+        candidate.connection_epoch, 1, text, 'SYNTHETIC::VALIDATION', None, None, candidate.source_receipt_ref,
+        candidate.rights_receipt_ref, 'SYNTHETIC::INTENT')
+    reconstructed, restored = owner._public_restore_native_candidate_v1(receipt=record, contract=contract, metadata=(metadata,))
+    assert deterministic_json(reconstructed) == deterministic_json(candidate)
+    assert deterministic_json(restored) == deterministic_json(translation)
+    assert restored.exact_clock_companion['provider_event_or_none']['nanosecond_remainder'] == 1
+    value = json.loads(text)
+    with pytest.raises(ComputationControlPlaneError):
+        deterministic_json(value['translation']['normalized_frame'])
+    for name in ('contains_credential', 'contains_signature', 'contains_authorization_header', 'contains_private_state'):
+        changed = deepcopy(value)
+        changed['translation']['normalized_frame'][name] = True
+        with pytest.raises(ComputationControlPlaneError):
+            replace(record, canonical_event_json=json.dumps(changed, ensure_ascii=False, sort_keys=True, separators=(',', ':')))
+    assert set(value) == {'record_type', 'candidate', 'translation', 'transition'}
+    assert 'durable_commit_completed_at_utc' not in value['candidate']
+    assert 'strategy_available_at_utc' not in value['candidate']
+    for mutation in ('future_clock', 'extra_payload_field', 'clock_companion'):
+        changed = deepcopy(value)
+        if mutation == 'future_clock':
+            changed['candidate']['strategy_available_at_utc'] = (_T0+timedelta(seconds=3)).isoformat()
+        elif mutation == 'extra_payload_field':
+            changed['candidate']['payload']['unexpected'] = True
+        else:
+            changed['translation']['exact_clock_companion']['provider_event_or_none']['nanosecond_remainder'] = 2
+        with pytest.raises(ComputationControlPlaneError):
+            replace(record, canonical_event_json=json.dumps(changed, ensure_ascii=False, sort_keys=True, separators=(',', ':')))
+    for mutation in ('quantity', 'metadata_generation'):
+        changed = deepcopy(value)
+        if mutation == 'quantity':
+            changed['candidate']['payload']['levels'][0]['quantity_text'] = '1.00'
+        else:
+            changed['translation']['stream_disposition']['metadata_generation'] += 1
+        unaccepted = replace(record, canonical_event_json=json.dumps(changed, ensure_ascii=False, sort_keys=True, separators=(',', ':')))
+        with pytest.raises(ComputationControlPlaneError):
+            owner._public_restore_native_candidate_v1(receipt=unaccepted, contract=contract, metadata=(metadata,))
+    with pytest.raises(ComputationControlPlaneError):
+        owner._public_restore_native_candidate_v1(receipt=record, contract=contract,
+            metadata=(replace(metadata, expires_at_ns=metadata.known_at_ns+1),))
+
+
+def _assert_lp02_venue_reality(binding, facts, metadata):
+    """Independent selected-rule oracles; fixture facts grant no native use."""
+    import hashlib
+    from dataclasses import fields
+    from src.qtt.source_evidence.acceptance import validator as accepted
+    from src.qtt.pretrade.pr169_pretrade1_resolvers import resolve_selected_venue_semantics_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from tests.source_evidence._pr123_acceptance_helpers import valid_candidate
+
+    profile = source.Stage1VenueProfileIdV1
+    vectors = (
+        (profile.KALSHI_US_DCM_DIRECT, 'K_MARKET', {
+            'order_semantics.side_orientation':'YES_BOOK_BID_BUYS_YES_ASK_SELLS_YES',
+            'order_semantics.reduce_only':'REDUCE_ONLY_REQUIRES_IOC',
+            'quantity_price_semantics.amend_count':'FILLED_PLUS_DESIRED_REMAINING',
+            'queue_semantics.decrease_or_expiry':'PRESERVES_PRIORITY',
+            'queue_semantics.increase_or_price':'LOSES_PRIORITY',
+            'maintenance_semantics.trading_pause':'NO_CREATE_OR_AMEND_CANCEL_ALLOWED',
+            'maintenance_semantics.exchange_pause':'NO_CREATE_AMEND_OR_CANCEL',
+        }),
+        (profile.POLYMARKET_US_RETAIL_DIRECT, 'P_MARKET', {
+            'order_semantics.intent':'EXACTLY_ONE_INTENT_REPRESENTATION',
+            'quantity_price_semantics.count':'EXACT_JSON_NUMBER_NO_SILENT_SNAPPING',
+            'order_semantics.cancel_response':'ID_OR_EMPTY_CANCEL_RESPONSE_IS_NOT_TERMINAL_PROOF',
+            'queue_semantics.modification':'UNKNOWN_REQUIRES_ACCEPTED_BINDING',
+            'emergency_profile.scope_blast_radius':'ORDER_MARKET_AND_ALL_SCOPES_ARE_DISTINCT',
+        }),
+        (profile.GEMINI_TITAN_DIRECT, 'G_EVENT', {
+            'order_semantics.stop_limit':'FRESH_LAST_TRADE_BUY_LAST_LE_STOP_LE_LIMIT_SELL_LIMIT_LE_STOP_LE_LAST',
+            'order_semantics.terminality':'NEW_MAY_LATER_CANCEL_FILLED_IOC_MAY_END_CANCELED_QUANTITIES_CONTROL_OBLIGATIONS',
+            'quantity_price_semantics.executed':'PER_FILL_EXECUTED_DISTINCT_FROM_TERMINAL_CUMULATIVE_EXECUTED',
+            'emergency_profile.scope_blast_radius':'ORDER_SESSION_AND_ACCOUNT_ALL_SCOPES_ARE_DISTINCT',
+        }),
+    )
+    for selected_profile, operation, expected in vectors:
+        candidate = valid_candidate()
+        target = 'stage1.public_data.selected_venue_semantics'
+        # General evidence scope is still constrained to one exact profile and
+        # legal product by the accepted extraction; it is not a cross-venue grant.
+        candidate.update(venue_id='PREDICTION_MARKETS_GENERAL', platform_scope='PREDICTION_MARKETS_GENERAL',
+            source_target_id=binding.source_ids[0], target_field_path=target, target_field_paths_authorized=[target])
+        candidate['applicability_scope'] = {**candidate['applicability_scope'],
+            'venue_id':'PREDICTION_MARKETS_GENERAL', 'platform_scope':'PREDICTION_MARKETS_GENERAL', 'target_field_paths':[target]}
+        rows = tuple(('venue_semantics.'+name, 'OBJECT', 'EVIDENCE_USE_SEMANTICS', binding.original_evidence_refs[0],
+            '/accepted_semantics/'+name, 'EXACT_IDENTITY') for name in expected)
+        rule_id='SYN::FEE_RULE::'+selected_profile.value
+        rows += (('fee_rules.'+rule_id,'OBJECT','EVIDENCE_USE_FEE_RULE',binding.original_evidence_refs[0],'/fee_rules/0','EXACT_IDENTITY'),)
+        fee_rule=dict(rule_id=rule_id,product_class='BINARY',market_scope=[metadata.instrument_id],
+            account_scope_ref_or_none=None,liquidity_role='TAKER',formula_family='QUADRATIC',
+            coefficients=[['rate','0.0695' if selected_profile is profile.POLYMARKET_US_RETAIL_DIRECT else '0.07'],['multiplier','1']],
+            rounding_rule=('KALSHI_ACCOUNT_GRID' if selected_profile is profile.KALSHI_US_DCM_DIRECT else
+                'HALF_EVEN_CENT' if selected_profile is profile.POLYMARKET_US_RETAIL_DIRECT else 'CEILING_CENT'),
+            effective_from_ns=0,effective_until_ns_or_none=None,account_applicability_ref_or_none=None,
+            supersedes_rule_ref_or_none=None,generation=1,limitations=['SYNTHETIC_SOURCE_FIXTURE'],
+            native_fee_type_or_none='quadratic' if selected_profile is profile.KALSHI_US_DCM_DIRECT else None)
+        current = replace(binding, profile_id=selected_profile, allowed_operation_ids=(operation,), field_bindings=rows,
+            legal_product_ref='SYNTHETIC::'+selected_profile.value, source_contract_versions=('SYNTHETIC::VENUE_SEMANTICS_V1',))
+        candidate['extracted_fact_payload'] = dict(schema_version='PUBLIC_ACCEPTED_FIELD_BINDINGS_V1',
+            profile_id=selected_profile.value, legal_product_ref=current.legal_product_ref,
+            source_contract_version=current.source_contract_versions[0], allowed_operation_ids=[operation],
+            permitted_consumer_ids=list(current.permitted_consumer_ids),
+            field_bindings=[[name,wire,unit,pointer,transform] for name,wire,unit,original,pointer,transform in rows],
+            venue_semantics={name:dict(disposition='SOURCE_BOUND_SUPPORTED',rule_id=rule) for name,rule in expected.items()},
+            fee_rules=[fee_rule])
+        candidate['extracted_fact'] = deepcopy(candidate['extracted_fact_payload'])
+        result = accepted.build_acceptance_artifacts(candidate)
+        assert result.decision_receipt['decision'] == 'ACCEPTED'
+        assert result.accepted_packet['production_external_fact_authority'] is False
+        original_ref = result.accepted_packet['accepted_source_evidence_packet_id']
+        current = replace(current, original_evidence_refs=(original_ref,), review_scope_ref=facts.document_ref,
+            field_bindings=tuple((name,wire,unit,original_ref,pointer,transform) for name,wire,unit,original,pointer,transform in rows))
+        bundle = {item.name:getattr(result,item.name) for item in fields(result)}
+        claim = 'PUBLIC_ACCEPTED_SOURCE_V1::'+original_ref+'::'+hashlib.sha256(accepted.canonical_json_bytes(bundle)).hexdigest()
+        reviewed = replace(facts, reviewed_claims=(*facts.reviewed_claims,claim))
+        selected_metadata = replace(metadata, profile_id=selected_profile)
+        known = max(current.known_at_ns, selected_metadata.known_at_ns, selected_metadata.effective_from_ns, current.effective_from_ns)
+        kwargs = dict(source_binding=current, acceptance_results=(result,),
+            originals=((original_ref,candidate['raw_capture_text'].encode(),candidate['canonical_text'].encode()),),
+            review_facts=reviewed, source_epoch_id='SYNTHETIC::SEMANTIC_SOURCE_EPOCH', metadata=(selected_metadata,),
+            applicability=None, fee_epochs=(), rate_binding=None, known_as_of_ns=known)
+        reality = source.compile_selected_venue_reality_binding_v1(**kwargs)
+        _assert_lp02_accepted_fee_rules(kwargs,fee_rule)
+        assert reality.no_order_authority is True and reality.profile_id is selected_profile
+        assert reality.emergency_profile.disconnect_order_behavior.disposition == 'UNAVAILABLE_MISSING_BINDING'
+        assert set(item.name for item in fields(reality.emergency_profile)) == {
+            'single_cancel','batch_cancel','all_cancel','group_cancel','session_cancel','pause_new_order_behavior',
+            'pause_cancel_behavior','disconnect_order_behavior','terminal_evidence_sources','reduction_mechanism',
+            'scope_blast_radius','unknown_custody_policy','rearm_requirements',
+            'source_refs','native_version','known_at_ns','effective_from_ns','expires_at_ns','generation'}
+        positive = {name:rule for name,rule in expected.items() if rule != 'UNKNOWN_REQUIRES_ACCEPTED_BINDING'}
+        resolve = dict(binding=reality, profile_id=selected_profile, instrument_id=metadata.instrument_id,
+            known_as_of_ns=known, effective_at_ns=known, required_capabilities=tuple(positive))
+        assert dict(resolve_selected_venue_semantics_v1(**resolve)) == positive
+        for changes in ({'required_capabilities':('emergency_profile.disconnect_order_behavior',)},
+            {'required_capabilities':('queue_semantics.native_queue_position',)},
+            {'instrument_id':'UNSELECTED'}, {'known_as_of_ns':reality.expires_at_ns},
+            {'effective_at_ns':reality.expires_at_ns}, {'profile_id':'KALSHI_US_DCM_DIRECT'}):
+            with pytest.raises(ComputationControlPlaneError): resolve_selected_venue_semantics_v1(**{**resolve,**changes})
+        if selected_profile is profile.POLYMARKET_US_RETAIL_DIRECT:
+            with pytest.raises(ComputationControlPlaneError):
+                resolve_selected_venue_semantics_v1(**{**resolve,'required_capabilities':('queue_semantics.modification',)})
+        for changes in ({'no_order_authority':False}, {'unavailable_capabilities':()},
+            {'emergency_profile':replace(reality.emergency_profile,generation=reality.generation+1)}):
+            with pytest.raises(ComputationControlPlaneError): replace(reality,**changes)
+        with pytest.raises(ComputationControlPlaneError):
+            source.compile_selected_venue_reality_binding_v1(**{**kwargs,'review_facts':facts})
+        with pytest.raises(ComputationControlPlaneError):
+            source.compile_selected_venue_reality_binding_v1(**{**kwargs,'originals':((original_ref,b'changed',kwargs['originals'][0][2]),)})
+        bad = deepcopy(result.accepted_packet)
+        bad['extracted_fact_payload']['venue_semantics'][next(iter(expected))]['rule_id']='UNSUPPORTED_GUESSED_RULE'
+        with pytest.raises(ComputationControlPlaneError):
+            source.compile_selected_venue_reality_binding_v1(**{**kwargs,'acceptance_results':(replace(result,accepted_packet=bad),)})
+
+
+def _assert_lp02_accepted_fee_rules(kwargs,expected):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.pretrade.pr169_pretrade1_resolvers import PublicConditionalFillV1,compose_public_fee_cashflows_v1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_b.test_service_operations import _assert_lp02_conditional_cash_services
+
+    proof={key:kwargs[key] for key in ('source_binding','acceptance_results','originals','review_facts')}
+    (native_type,epoch),=source.compile_accepted_public_fee_rules_v1(**proof)
+    assert native_type==expected['native_fee_type_or_none']
+    assert epoch.epoch_id==expected['rule_id'] and epoch.coefficients==tuple(tuple(row) for row in expected['coefficients'])
+    assert epoch.source_observation_refs==proof['source_binding'].original_evidence_refs
+    assert epoch.known_at_ns==proof['source_binding'].known_at_ns and epoch.expires_at_ns==proof['source_binding'].expires_at_ns
+    known=kwargs['known_as_of_ns']
+    account=source.SelectedAccountApplicabilityV1(epoch.profile_id,'SYN::HYPOTHETICAL_ACCOUNT','BINARY',0,epoch.expires_at_ns,
+        known,('SYN::HYPOTHETICAL_ACCOUNT_RECEIPT',),'SYN::HYPOTHETICAL_ACCOUNT_QUALIFICATION',1,
+        'SYN::HYPOTHETICAL_FEE_PROFILE','0.01',None,None,None,('SYNTHETIC_ACCOUNT_NOT_NATIVE_QUALIFIED',))
+    terms=compose_public_fee_cashflows_v1(profile_id=epoch.profile_id,market_scope=epoch.market_scope,
+        epochs=(epoch,),applicability=account,known_as_of_ns=known,
+        fills=(PublicConditionalFillV1(Decimal('100'),Decimal('0.50'),'BUY','TAKER',known),),
+        order_ref='SYN::FRESH_HYPOTHETICAL_ORDER',cap_domain_epoch_refs=(epoch.epoch_id,),
+        prior_unrounded=Decimal(0),prior_collected=Decimal(0),prior_rounding_overpayment=Decimal(0),
+        carry_evidence_refs=(),fresh_hypothetical_order=True,include_deferred_taker_rebate=False)
+    retail=epoch.profile_id is source.Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+    assert terms['platform_fee_total']==Decimal('1.74' if retail else '1.75')
+    _assert_lp02_conditional_cash_services(terms,epoch.profile_id.value,'100',Decimal('8.26' if retail else '8.25'))
+    for changes in ({'originals':((proof['originals'][0][0],b'changed',proof['originals'][0][2]),)},
+            {'source_binding':replace(proof['source_binding'],field_bindings=proof['source_binding'].field_bindings[:-1])}):
+        with pytest.raises(ComputationControlPlaneError):source.compile_accepted_public_fee_rules_v1(**{**proof,**changes})
+    for change in ({'formula_family':'UNSUPPORTED_NATIVE_FAMILY'},{'coefficients':[['rate','0']]},
+                   {'extra':'UNSELECTED'},{'market_scope':[]}):
+        with pytest.raises(ComputationControlPlaneError):
+            source._project_public_fee_rule_facts_v1(source_binding=proof['source_binding'],facts=[{**expected,**change}],
+                field_bindings=proof['source_binding'].field_bindings,original_ref=epoch.source_observation_refs[0])
+
+
+def _assert_lp02_accepted_source_projection(binding,facts,fee_rules=None,account_facts=None,contract_terms=None):
+    """Use the real upstream acceptance validator with declared synthetic facts."""
+    import hashlib
+    from dataclasses import fields
+    from src.qtt.source_evidence.acceptance import validator as accepted
+    from src.qtt.stage1_prediction_markets.market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from tests.source_evidence._pr123_acceptance_helpers import valid_candidate
+
+    candidate=valid_candidate()
+    target='stage1.public_data.field_bindings'
+    candidate.update(venue_id='PREDICTION_MARKETS_GENERAL',platform_scope='PREDICTION_MARKETS_GENERAL',
+        source_target_id=binding.source_ids[0],target_field_path=target,target_field_paths_authorized=[target])
+    candidate['applicability_scope']={**candidate['applicability_scope'],'venue_id':'PREDICTION_MARKETS_GENERAL',
+        'platform_scope':'PREDICTION_MARKETS_GENERAL','target_field_paths':[target]}
+    if fee_rules is not None:
+        binding=replace(binding,field_bindings=binding.field_bindings+tuple(
+            ('fee_rules.'+row['rule_id'],'OBJECT','EVIDENCE_USE_FEE_RULE',binding.original_evidence_refs[0],
+             '/fee_rules/'+str(index),'EXACT_IDENTITY') for index,row in enumerate(fee_rules)))
+    if account_facts is not None:
+        binding=replace(binding,field_bindings=(*binding.field_bindings,('account_applicability','OBJECT',
+            'EVIDENCE_USE_ACCOUNT_APPLICABILITY',binding.original_evidence_refs[0],'/account_applicability','EXACT_IDENTITY')))
+    if contract_terms is not None:
+        binding=replace(binding,field_bindings=(*binding.field_bindings,*(
+            ('contract_terms.'+row['instrument_id'],'OBJECT','EVIDENCE_USE_CONTRACT_TERMS',binding.original_evidence_refs[0],
+             '/contract_terms/'+str(index),'EXACT_IDENTITY') for index,row in enumerate(contract_terms))))
+    candidate['extracted_fact_payload']=dict(schema_version='PUBLIC_ACCEPTED_FIELD_BINDINGS_V1',profile_id=binding.profile_id.value,
+        legal_product_ref=binding.legal_product_ref,source_contract_version=binding.source_contract_versions[0],
+        allowed_operation_ids=list(binding.allowed_operation_ids),permitted_consumer_ids=list(binding.permitted_consumer_ids),
+        field_bindings=[[name,wire,unit,pointer,transform] for name,wire,unit,original,pointer,transform in binding.field_bindings])
+    if fee_rules is not None:candidate['extracted_fact_payload']['fee_rules']=fee_rules
+    if account_facts is not None:candidate['extracted_fact_payload']['account_applicability']=account_facts
+    if contract_terms is not None:candidate['extracted_fact_payload']['contract_terms']=contract_terms
+    candidate['extracted_fact']=deepcopy(candidate['extracted_fact_payload'])
+    result=accepted.build_acceptance_artifacts(candidate)
+    assert result.decision_receipt['decision']=='ACCEPTED' and result.accepted_packet['production_external_fact_authority'] is False
+    packet_id=result.accepted_packet['accepted_source_evidence_packet_id']
+    binding=replace(binding,original_evidence_refs=(packet_id,),review_scope_ref=facts.document_ref,
+        field_bindings=tuple((name,wire,unit,packet_id,pointer,transform) for name,wire,unit,original,pointer,transform in binding.field_bindings))
+    bundle={item.name:getattr(result,item.name) for item in fields(result)}
+    claim='PUBLIC_ACCEPTED_SOURCE_V1::'+packet_id+'::'+hashlib.sha256(accepted.canonical_json_bytes(bundle)).hexdigest()
+    reviewed=replace(facts,reviewed_claims=(*facts.reviewed_claims,claim))
+    originals=((packet_id,candidate['raw_capture_text'].encode(),candidate['canonical_text'].encode()),)
+    kwargs=dict(source_binding=binding,acceptance_results=(result,),originals=originals,review_facts=reviewed)
+    projection=project_accepted_public_field_bindings_v1(**kwargs)
+    assert projection[0] is binding and projection[1]==(claim,) and projection[4] is False
+    assert projection[2][0]['accepted_packet']['extracted_fact_payload']['field_bindings'][0]==tuple(candidate['extracted_fact_payload']['field_bindings'][0])
+    if account_facts is not None:
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+        account=source.compile_accepted_public_account_applicability_v1(**kwargs)
+        assert account.qualification_ref==packet_id and account.available_at_ns==binding.known_at_ns
+        assert account.product_scope_ref==account_facts['product_scope_ref'] and account.profile_id is binding.profile_id
+        assert account.source_receipt_refs==binding.source_receipt_refs
+        retained=dict(source_bindings=(binding,),qualified_source_bindings=(projection,))
+        proof=dict(inputs=retained,applicability=account,native_only=False,
+            known_as_of_ns=max(binding.known_at_ns,account.effective_from_ns))
+        assert source._public_accepted_account_sources_v1(**proof)==(binding,)
+        assert source._public_accepted_account_sources_v1(**{**proof,'native_only':True})==()
+        assert source._public_accepted_account_sources_v1(**{**proof,'known_as_of_ns':account.effective_until_ns})==()
+        with pytest.raises(ComputationControlPlaneError):
+            source._public_accepted_account_sources_v1(**{**proof,'applicability':replace(account,balance_increment_text_or_none='0.1')})
+        future_candidate=deepcopy(candidate)
+        future_facts={**account_facts,'effective_from_ns':proof['known_as_of_ns']+2_000_000_000,
+            'generation':account_facts['generation']+1,'balance_increment_text_or_none':'0.02'}
+        future_candidate['extracted_fact_payload']['account_applicability']=future_facts
+        future_candidate['extracted_fact']=deepcopy(future_candidate['extracted_fact_payload'])
+        future_result=accepted.build_acceptance_artifacts(future_candidate)
+        assert future_result.decision_receipt['decision']=='ACCEPTED'
+        future_id=future_result.accepted_packet['accepted_source_evidence_packet_id']
+        future_binding=replace(binding,binding_id='SYN::FUTURE_ACCOUNT_SOURCE',original_evidence_refs=(future_id,),
+            field_bindings=tuple((name,wire,unit,future_id,pointer,transform)
+                for name,wire,unit,original,pointer,transform in binding.field_bindings))
+        future_bundle={item.name:getattr(future_result,item.name) for item in fields(future_result)}
+        future_claim='PUBLIC_ACCEPTED_SOURCE_V1::'+future_id+'::'+hashlib.sha256(accepted.canonical_json_bytes(future_bundle)).hexdigest()
+        future_proof=project_accepted_public_field_bindings_v1(source_binding=future_binding,acceptance_results=(future_result,),
+            originals=((future_id,future_candidate['raw_capture_text'].encode(),future_candidate['canonical_text'].encode()),),
+            review_facts=replace(reviewed,reviewed_claims=(*reviewed.reviewed_claims,future_claim)))
+        combined=dict(source_bindings=(binding,future_binding),qualified_source_bindings=(projection,future_proof))
+        assert source._public_accepted_account_sources_v1(**{**proof,'inputs':combined})==(binding,)
+        state=source._public_accepted_account_state_v1(**{**proof,'inputs':combined})
+        assert state[1:3]==(account.effective_from_ns,future_facts['effective_from_ns'])
+        assert set(state[3])=={account.qualification_ref,future_id}
+        with pytest.raises(ComputationControlPlaneError,match='conflicting current accepted account qualification'):
+            source._public_accepted_account_sources_v1(**{**proof,'inputs':combined,
+                'effective_at_ns':future_facts['effective_from_ns']})
+        late_binding=replace(future_binding,known_at_ns=future_facts['effective_from_ns']+1)
+        late_combined=dict(source_bindings=(binding,late_binding),
+            qualified_source_bindings=(projection,(late_binding,*future_proof[1:])))
+        assert source._public_accepted_account_sources_v1(**{**proof,'inputs':late_combined,
+            'effective_at_ns':future_facts['effective_from_ns']})==(binding,)
+        assert source._public_accepted_account_state_v1(**{**proof,'inputs':late_combined})[2]==account.effective_until_ns
+        for changed in ({'maker_tier_or_none':True},{'balance_increment_text_or_none':'0'},
+            {'effective_until_ns':account_facts['effective_from_ns']},{'extra':'UNSELECTED'},
+            {'available_at_ns':0},{'qualification_ref':'FORGED'}):
+            with pytest.raises(ComputationControlPlaneError):
+                source._project_public_account_applicability_facts_v1(source_binding=binding,facts={**account_facts,**changed},
+                    field_bindings=binding.field_bindings,original_ref=packet_id)
+    for changes in ({'review_facts':facts},{'originals':((packet_id,b'changed',originals[0][2]),)},
+        {'source_binding':replace(binding,review_scope_ref='OTHER')},
+        {'source_binding':replace(binding,field_bindings=binding.field_bindings[:-1])},
+        {'acceptance_results':(replace(result,accepted_ledger_record={**result.accepted_ledger_record,'source_target_id':'OTHER'}),)},
+        {'acceptance_results':(replace(result,revalidation_status={**result.revalidation_status,'acceptance_blocked_by_staleness':True}),)},
+        {'acceptance_results':(replace(result,accepted_packet={**result.accepted_packet,'production_external_fact_authority':True}),)},
+        {'acceptance_results':(replace(result,conflict_report={}),)}):
+        with pytest.raises(ComputationControlPlaneError):project_accepted_public_field_bindings_v1(**{**kwargs,**changes})
+    # Deeply copied retained facts do not change when caller dictionaries change.
+    result.accepted_packet['accepted_value_label']='MUTATED_CALLER_LABEL'
+    assert projection[2][0]['accepted_packet']['accepted_value_label']!='MUTATED_CALLER_LABEL'
+    with pytest.raises(ComputationControlPlaneError):project_accepted_public_field_bindings_v1(**kwargs)
+    result=accepted.build_acceptance_artifacts(candidate)
+    return binding,reviewed,((binding.binding_id,(result,),originals),)
+
+
+def _assert_lp02_stream_continuity(contract, binding, metadata, request, wall):
+    import time
+    from types import MappingProxyType
+    from src.qtt.service import owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import point_in_time as pit, source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        PublicCaptureBudgetV1, PublicDataSourceUseScopeV1, PublicCaptureRequestV1,
+    )
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as storage
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import apply_pit_event_v2
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _source_use_action_proposals
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    metadata_b = replace(metadata, metadata_id='SYNTHETIC::METADATA_B', market_id='SYNTHETIC::MARKET_B',
+                         instrument_id='SYNTHETIC-TICKER-B')
+    binding = replace(binding, permitted_consumer_ids=(*binding.permitted_consumer_ids,'FormulaExecutionContractV1::MATH-39'),
+        field_bindings=(*(tuple((row[0],row[1],'CONTRACT_COUNT',*row[3:])) if row[0] in {'yes_quantity','delta_quantity'} else row
+                         for row in binding.field_bindings),
+        ('control_id', 'INTEGER', 'REQUEST_ID', 'SYNTHETIC::DOCUMENT', '/id', 'EXACT_IDENTITY'),
+        ('control_sid', 'INTEGER', 'SUBSCRIPTION_ID', 'SYNTHETIC::DOCUMENT', '/msg/sid', 'EXACT_IDENTITY'),
+        ('control_channel', 'STRING', 'CHANNEL', 'SYNTHETIC::DOCUMENT', '/msg/channel', 'EXACT_IDENTITY'),
+        ('market_clock', 'INTEGER', 'MARKET_CHANGE_ORDER', 'SYNTHETIC::DOCUMENT', '/msg/clock', 'EXACT_IDENTITY')))
+    request = replace(request, instrument_ids=(metadata.instrument_id, metadata_b.instrument_id),
+        metadata_refs=(metadata.metadata_id, metadata_b.metadata_id), request_options={'id': 1, 'cmd': 'subscribe',
+            'params': {'channels': ['orderbook_delta'], 'market_tickers': [metadata.instrument_id, metadata_b.instrument_id]}})
+    budget = PublicCaptureBudgetV1(3, 8, 65536, 8192, 2, 64, 262144,
+        1_000_000_000, 1_000_000_000, 1_000_000_000, 30_000_000_000, 0, 4, 60000, 1000, 60_000_000_000)
+    scope = PublicDataSourceUseScopeV1('QTT_PUBLIC_DATA_SOURCE_USE_SCOPE_V1', contract.profile_id,
+        contract.source_contract_version, ('SYNTHETIC::SOURCE',), ('K_WS',), request.instrument_ids,
+        'PHASE_A_PUBLIC_DATA_INTERNAL', 'BOUNDED_LOCAL_DURABLE', 'NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING',
+        'SYNTHETIC::ACCOUNT', 'SYNTHETIC::ALIAS', 'SYNTHETIC::STORAGE', wall+60_000_000_000,
+        binding.permitted_consumer_ids, budget, 2, ('SELECTED_INSTRUMENTS',))
+    capture = PublicCaptureRequestV1(request.capture_request_ref, scope, (binding.binding_id,), 'SYNTHETIC::ACCOUNT_QUALIFICATION',
+        wall+45_000_000_000, ('K_WS',), request.instrument_ids, 'SYNTHETIC::SESSION', 'PHASE_A_PUBLIC_CAPTURE')
+    moment = _T0 + timedelta(seconds=1)
+    _, review, facts, declaration = _source_use_action_proposals(moment)
+    _assert_lp02_venue_reality(binding, facts, metadata)
+    binding,facts,accepted_source_evidence=_assert_lp02_accepted_source_projection(binding,facts)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(time, 'time_ns', lambda: wall)
+        patch.setattr(time, 'monotonic_ns', lambda: 10_000_000_000)
+        with _synthetic_source_use_root() as h, TemporaryDirectory() as directory:
+            path = Path(directory).resolve() / 'synthetic-retained-inputs.db'
+            path.touch()
+            storage_root = storage._create_synthetic_public_storage_root_v1(database_path=path,
+                root_ref=scope.storage_root_ref, expires_at_ns=scope.retention_expires_at_ns)
+            resources = MappingProxyType(dict(configuration=object(), configuration_generation=1,
+                storage_root=storage_root, alias=None, expires_at_ns=wall+90_000_000_000, native_qualified=False))
+            patch.setattr(native, '_public_scope_resources_v1', lambda root, selected: resources)
+            patch.setattr(native, '_public_resources_resident_v1', lambda root, selected, now: None)
+            tag = 'PUBLIC_SOURCE_USE_ACTION_V1'
+            first = h.sign(dict(schema_version=tag, action='REVIEW_ACCEPT', scope=scope, original=review,
+                review_facts=facts, requested_expires_at_utc=moment+timedelta(seconds=60)))
+            second = h.sign(dict(schema_version=tag, action='USE_ADMIT', scope=scope, original=declaration,
+                expected_review_ref=first.review.record_id, requested_expires_at_utc=moment+timedelta(seconds=55)))
+            rate = source.PublicRequestRateBindingV1('SYN::RETAINED_RATE', scope.profile_id,
+                ('K_WS',), 'SYN::RETAINED_COUNTER', binding.original_evidence_refs,
+                0, wall+60_000_000_000, 'SYN::RETAINED_ALLOCATION', 3, 1_000_000_000, 1, None, None, (), 1, ())
+            applicability = source.SelectedAccountApplicabilityV1(scope.profile_id,scope.account_scope_ref_or_none,
+                binding.legal_product_ref,0,wall+60_000_000_000,wall-1,binding.source_receipt_refs,
+                capture.account_applicability_ref_or_none,1,None,None,None,None,None,('SYN::UNAVAILABLE_FEES',))
+            retained = dict(requests=(request,),contracts=(contract,),metadata=(metadata_b,metadata),
+                source_bindings=(binding,),rate_bindings=(rate,),exclusive_allocation_refs=(rate.allocation_ref,),
+                account_applicability_or_none=applicability,wall_clock_source_id='SYN::RETAINED_WALL',
+                clock_quality_ref='SYN::RETAINED_QUALITY',wall_uncertainty_ns=1000,
+                source_epoch_id='SYN::RETAINED_SOURCE_EPOCH',input_version='SYN::RETAINED_VERSION')
+            for changed in ({**retained,'process_epoch_id':'FORGED'},
+                            {**retained,'storage_root':storage_root},
+                            {**retained,'requests':(replace(request,capture_request_ref='FOREIGN'),)},
+                            {**retained,'wall_uncertainty_ns':1001}):
+                with pytest.raises(ComputationControlPlaneError):
+                    h.authority._bind_public_operational_inputs_v1(capture=capture,inputs=changed)
+            # Receipt vectors must match one source/version/right triple, not
+            # independently valid entries from different sources.
+            paired_binding = replace(binding, source_ids=(*binding.source_ids,'SYN::SECOND_SOURCE'),
+                source_contract_versions=(*binding.source_contract_versions,'SYN::SECOND_VERSION'),
+                source_receipt_refs=(*binding.source_receipt_refs,'SYN::SECOND_SOURCE_RECEIPT'),
+                rights_receipt_refs=(*binding.rights_receipt_refs,'SYN::SECOND_RIGHTS_RECEIPT'))
+            paired_scope = replace(scope,source_ids=paired_binding.source_ids)
+            paired_capture = replace(capture,scope=paired_scope)
+            paired_inputs = dict(retained,source_bindings=(paired_binding,),storage_root=storage_root,
+                process_epoch_id=h.authority._process_ref,monotonic_clock_id=h.authority._clock_ref)
+            root_facts = storage._public_root_facts_v1(storage_root)
+            assert source._validate_public_operational_input_view_v1(inputs=paired_inputs,
+                capture=paired_capture,root=root_facts,native_qualified=False,evaluated_at_ns=wall)[0][3] is contract
+            with pytest.raises(ComputationControlPlaneError,match='unique admitted canonical contract'):
+                source._validate_public_operational_input_view_v1(inputs=dict(paired_inputs,
+                    contracts=(replace(contract,rights_receipt_ref='SYN::SECOND_RIGHTS_RECEIPT'),)),
+                    capture=paired_capture,root=root_facts,native_qualified=False,evaluated_at_ns=wall)
+            h.authority._bind_public_operational_inputs_v1(capture=capture,inputs=retained,
+                accepted_source_evidence=accepted_source_evidence)
+            original_view = h.authority._public_input_view
+            assert original_view[5][0][0] is binding and original_view[5][0][4] is False
+            native_candidate_inputs=dict(retained,storage_root=storage_root,process_epoch_id=h.authority._process_ref,
+                monotonic_clock_id=h.authority._clock_ref,source_pairs=h.authority._public_source_pairs_v1(evaluated_at_utc=moment))
+            for qualified,reason in (((),'qualification unavailable'),(original_view[5],'unqualified or synthetic')):
+                with pytest.raises(ComputationControlPlaneError,match=reason):
+                    source._validate_public_operational_input_view_v1(inputs=dict(native_candidate_inputs,qualified_source_bindings=qualified),
+                        capture=capture,root=dict(root_facts,native_qualified=True),native_qualified=True,evaluated_at_ns=wall)
+            # Isolate the quota join with declared test views of source custody;
+            # this does not issue a native source, storage root or permission.
+            source_receipt,rights_receipt=native_candidate_inputs['source_pairs'][0]
+            quota_source=replace(binding,source_ids=(source_receipt.source_id,),
+                source_contract_versions=(source_receipt.source_contract_version,),
+                source_receipt_refs=(source_receipt.receipt_id,),rights_receipt_refs=(rights_receipt.receipt_id,))
+            quota_proof=(quota_source,*original_view[5][0][1:4],True)
+            for maximum,window,spacing,tokens in ((1000000,1,1,False),(120,60000000000,1000000000,False),
+                    (25,1000000000,40000000,False),(3,1000000000,1,True)):
+                caller_rate=replace(rate,allocation_ref='INVENTED::EXCLUSIVE_ALLOCATION',
+                    maximum_requests_per_window=maximum,window_ns=window,minimum_request_interval_ns=spacing,
+                    token_capacity_or_none='10' if tokens else None,token_refill_per_second_or_none='1' if tokens else None,
+                    token_costs=(('K_WS','1'),) if tokens else ())
+                with pytest.raises(ComputationControlPlaneError,match='verified native provider quota') as denied:
+                    source._validate_public_operational_input_view_v1(inputs=dict(native_candidate_inputs,
+                        source_bindings=(quota_source,),qualified_source_bindings=(quota_proof,),
+                        rate_bindings=(caller_rate,),exclusive_allocation_refs=(caller_rate.allocation_ref,)),
+                        capture=capture,root=dict(root_facts,native_qualified=True),native_qualified=True,evaluated_at_ns=wall)
+                assert denied.value.reason_code is source.ReasonCode.OWNER_DATA_MISSING
+                assert h.authority._public_input_view is original_view and h.authority._active_permit is None
+            retained['clock_quality_ref']='MUTATED_CALLER_DICTIONARY'
+            assert original_view[4]['clock_quality_ref']=='SYN::RETAINED_QUALITY'
+            proposal = dict(schema_version=tag, action='OBSERVE_ONCE', scope=scope, capture=capture,
+                expected_declaration_ref=second.declaration.record_id, expected_review_ref=second.review.record_id)
+            def replace_view_after_authentication():
+                h.authority._public_input_view = tuple(list(original_view))
+            with pytest.raises(ComputationControlPlaneError):
+                h.sign(proposal,before_complete=replace_view_after_authentication)
+            assert h.authority._active_permit is None
+            h.authority._public_input_view = original_view
+            valid_retained = dict(original_view[4])
+            for expiring in ('metadata','rate_bindings','account_applicability_or_none'):
+                changed = dict(valid_retained)
+                if expiring == 'metadata':
+                    changed[expiring] = tuple(replace(row,expires_at_ns=wall+1) for row in changed[expiring])
+                elif expiring == 'rate_bindings':
+                    changed[expiring] = (replace(rate,expires_at_ns=wall+1),)
+                else:
+                    changed[expiring] = replace(applicability,effective_until_ns=wall+1)
+                h.authority._bind_public_operational_inputs_v1(capture=capture,inputs=changed)
+                prior_head = h.authority._head
+                def expire_during_authentication():
+                    patch.setattr(time,'time_ns',lambda: wall+1)
+                with pytest.raises(ComputationControlPlaneError):
+                    h.sign(proposal,before_complete=expire_during_authentication)
+                assert h.authority._active_permit is None and h.authority._head is prior_head
+                wall += 1
+                patch.setattr(time,'time_ns',lambda: wall)
+            h.authority._bind_public_operational_inputs_v1(capture=capture,inputs=valid_retained,
+                accepted_source_evidence=accepted_source_evidence)
+            original_view = h.authority._public_input_view
+            h.sign(proposal)
+            issued_inputs=h.authority._active_permit._source_inputs
+            assert issued_inputs['source_bindings'] is original_view[4]['source_bindings']
+            assert issued_inputs['storage_root'] is storage_root
+            assert issued_inputs['process_epoch_id']==h.authority._process_ref
+            assert issued_inputs['monotonic_clock_id']==h.authority._clock_ref
+            assert source._resolve_public_operational_inputs_v1(binding=h.authority._active_permit,evaluated_at_ns=wall)[0][0] is request
+            with pytest.raises(ComputationControlPlaneError):
+                h.authority._bind_public_operational_inputs_v1(capture=capture,inputs=dict(original_view[4]))
+            records = tuple(h.authority._adapter._tables['receipt_records'].values())
+            # Source storage order is independent of the request's exact ref order.
+            inputs = dict(requests=(request,), contracts=(contract,), metadata=(metadata_b, metadata),
+                source_bindings=(binding,), wall_clock_source_id='SYNTHETIC::CLOCK',
+                clock_quality_ref='SYNTHETIC::QUALITY', wall_uncertainty_ns=1000,
+                process_epoch_id='SYNTHETIC::PROCESS', monotonic_clock_id='SYNTHETIC::MONO')
+            _assert_lp02_public_storage(capture, records, inputs, request, wall)
+            synthetic = source._create_synthetic_public_binding_v1(capture=capture, control_records=records, source_inputs=inputs)
+            session = transport._create_public_market_data_session_v1(binding=synthetic)
+
+            def receive(body):
+                return session._observe_v1(request, json.dumps(body).encode(), None, {})
+
+            def book(ticker, sequence, *, clock=10):
+                return {'type': 'orderbook_snapshot', 'sid': 7, 'seq': sequence, 'msg': {
+                    'market_ticker': ticker, 'clock': clock,
+                    'yes_dollars_fp': [['0.49', '123456.78']], 'no_dollars_fp': [['0.49', '2.00']]}}
+
+            def decoded(original, kind):
+                translated = owner.translate_public_observation_v1(observation=original, metadata=(metadata, metadata_b),
+                    source_binding=binding, translation_context=dict(request=request, contract=contract, wall_clock_source_id='SYNTHETIC::CLOCK'))
+                return owner._decode_pit_frame_v2(contract, translated.normalized_frame, event_kind=kind,
+                    parse_completed_at_utc=moment+timedelta(seconds=1), parse_completed_monotonic_ns=10_000_000_001,
+                    price_increment_text='0.01', price_origin_text='0', quantity_increment_text_or_none='0.01',
+                    price_bands=metadata.price_bands)
+
+            try:
+                with pytest.raises(ComputationControlPlaneError):
+                    transport._public_open_https_v1({}, 1, binding=synthetic)
+                with pytest.raises(ComputationControlPlaneError):
+                    transport._public_open_websocket_v1({}, {}, binding=synthetic,
+                        open_timeout=1, close_timeout=1, max_size=1, max_queue=1)
+                receive({'type': 'subscribed', 'id': 1, 'msg': {'sid': 7, 'channel': 'orderbook_delta'}})
+                original_a = receive(book(metadata.instrument_id, 1))
+                witness_a = pit._issue_public_stream_continuity_v1(session=session)
+                event_a = decoded(original_a, pit.PITEventKindV2.BOOK_SNAPSHOT)
+                state_a = apply_pit_event_v2(None, event_a, candidate_event_ordinal=1, continuity_witness=witness_a).post_state
+                receive(book(metadata_b.instrument_id, 2, clock=1))
+                delta = {'type': 'orderbook_delta', 'sid': 7, 'seq': 3, 'msg': {
+                    'market_ticker': metadata.instrument_id, 'side': 'yes', 'price_dollars': '0.49', 'delta_fp': '0.01', 'clock': 10}}
+                original_next = receive(delta)
+                witness = pit._issue_public_stream_continuity_v1(session=session)
+                event = decoded(original_next, pit.PITEventKindV2.BOOK_DELTA)
+                denied = apply_pit_event_v2(state_a, event, candidate_event_ordinal=2)
+                assert denied.failure_reason_or_none is pit.PITReasonCodeV1.PIT_SEQUENCE_GAP
+                changed = apply_pit_event_v2(state_a, event, candidate_event_ordinal=2, continuity_witness=witness)
+                assert changed.event_disposition is pit.PITEventDispositionV1.COMMITTED
+                assert changed.post_state.last_provider_sequence_end_or_none == 3
+                assert witness.covered_from_or_none == 1 and witness.covered_through_or_none == 3
+                assert witness.affected_instrument_ids == request.instrument_ids
+                with pytest.raises(ComputationControlPlaneError):
+                    apply_pit_event_v2(state_a, event, candidate_event_ordinal=2, continuity_witness=replace(witness))
+                receive(delta)
+                assert pit._issue_public_stream_continuity_v1(session=session).disposition == 'DUPLICATE'
+                receive({**delta, 'seq': 4, 'msg': {**delta['msg'], 'clock': 100}})
+                assert pit._issue_public_stream_continuity_v1(session=session).covered_through_or_none == 4
+                receive({**delta, 'seq': 5, 'msg': {**delta['msg'], 'clock': 99}})
+                with pytest.raises(ComputationControlPlaneError):
+                    pit._issue_public_stream_continuity_v1(session=session)
+                with pytest.raises(ComputationControlPlaneError):
+                    apply_pit_event_v2(state_a, event, candidate_event_ordinal=2, continuity_witness=witness)
+            finally:
+                session.close_v1()
+            for failure in ('gap', 'conflict'):
+                synthetic = source._create_synthetic_public_binding_v1(capture=capture, control_records=records, source_inputs=inputs)
+                session = transport._create_public_market_data_session_v1(binding=synthetic)
+                try:
+                    receive({'type': 'subscribed', 'id': 1, 'msg': {'sid': 7, 'channel': 'orderbook_delta'}})
+                    receive(book(metadata.instrument_id, 1))
+                    pit._issue_public_stream_continuity_v1(session=session)
+                    if failure == 'gap':
+                        receive({'type': 'orderbook_delta', 'sid': 7, 'seq': 3, 'msg': {
+                            'market_ticker': metadata.instrument_id, 'side': 'yes', 'price_dollars': '0.49', 'delta_fp': '0.01'}})
+                    else:
+                        receive({**book(metadata.instrument_id, 1), 'msg': {
+                            **book(metadata.instrument_id, 1)['msg'], 'yes_dollars_fp': [['0.49', '1.00']]}})
+                    with pytest.raises(ComputationControlPlaneError):
+                        pit._issue_public_stream_continuity_v1(session=session)
+                    assert synthetic._failed and len(session._observations) == 3
+                finally:
+                    session.close_v1()
+            synthetic = source._create_synthetic_public_binding_v1(capture=capture, control_records=records, source_inputs=inputs)
+            session = transport._create_public_market_data_session_v1(binding=synthetic)
+            try:
+                acknowledgement = {'type': 'subscribed', 'id': 1, 'sid': 7, 'seq': 0,
+                                   'msg': {'sid': 7, 'channel': 'orderbook_delta'}}
+                receive(acknowledgement)
+                first_ack = pit._issue_public_stream_continuity_v1(session=session)
+                receive(acknowledgement)
+                repeated_ack = pit._issue_public_stream_continuity_v1(session=session)
+                assert repeated_ack.disposition == 'DUPLICATE' and repeated_ack.covered_through_or_none == 0
+                assert repeated_ack.generation == first_ack.generation == 1
+                receive(book(metadata.instrument_id, 1))
+                assert pit._issue_public_stream_continuity_v1(session=session).covered_through_or_none == 1
+                assert not synthetic._failed
+            finally:
+                session.close_v1()
+
+
+def _assert_lp02_public_storage(capture, controls, inputs, request, wall):
+    import base64
+    import sqlite3
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as storage
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        PublicCaptureReadRequestV1, PublicPublicationReadRequestV1,
+    )
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        EconomicReceiptEventSpineV1, EconomicRecordTypeV1, PublicNativeObservationV1, _public_identity_v1,
+    )
+
+    with TemporaryDirectory() as directory:
+        path = Path(directory).resolve() / 'synthetic-public.db'
+        path.touch()
+        root = storage._create_synthetic_public_storage_root_v1(database_path=path,
+            root_ref=capture.scope.storage_root_ref, expires_at_ns=wall+60_000_000_000)
+        permission = source._create_synthetic_public_binding_v1(capture=capture, control_records=controls,
+            source_inputs={**inputs, 'storage_root': root})
+        with pytest.raises(ComputationControlPlaneError, match='operational inputs unavailable'):
+            source._resolve_public_operational_inputs_v1(binding=permission, evaluated_at_ns=wall)
+        applicability = source.SelectedAccountApplicabilityV1(capture.scope.profile_id,
+            capture.scope.account_scope_ref_or_none, inputs['source_bindings'][0].legal_product_ref,
+            0, wall+60_000_000_000, wall-1, inputs['source_bindings'][0].source_receipt_refs,
+            capture.account_applicability_ref_or_none, 1, None, None, None, None, None,
+            ('SYNTHETIC::FEE_AND_BALANCE_FACTS_UNAVAILABLE',))
+        rate = source.PublicRequestRateBindingV1('SYNTHETIC::RATE', capture.scope.profile_id,
+            ('K_WS',), 'SYNTHETIC::EXCLUSIVE_COUNTER', inputs['source_bindings'][0].original_evidence_refs,
+            0, wall+60_000_000_000, 'SYNTHETIC::ALLOCATION', 3, 1_000_000_000, 1,
+            None, None, (), 1, ())
+        complete_inputs = {**inputs, 'storage_root': root, 'rate_bindings': (rate,),
+            'exclusive_allocation_refs': (rate.allocation_ref,), 'account_applicability_or_none': applicability}
+        permission = source._create_synthetic_public_binding_v1(capture=capture, control_records=controls,
+            source_inputs=complete_inputs)
+        plan = source._resolve_public_operational_inputs_v1(binding=permission, evaluated_at_ns=wall)
+        assert len(plan) == 1 and plan[0][0] is request and plan[0][4]['host'] == 'api.elections.kalshi.com'
+        selected_metadata=complete_inputs['metadata'][0]
+        sibling=replace(selected_metadata,metadata_id='SYN::FANOUT_METADATA',instrument_id='SYN-FANOUT',market_id='SYN::FANOUT_MARKET')
+        instruments=(selected_metadata.instrument_id,sibling.instrument_id)
+        broad_capture=replace(capture,requested_instrument_ids=instruments,
+            scope=replace(capture.scope,instrument_ids=instruments,
+                receive_scope_classes=('SELECTED_INSTRUMENTS','GLOBAL_PUBLIC_LIFECYCLE')))
+        global_request=replace(request,instrument_ids=instruments,metadata_refs=(selected_metadata.metadata_id,sibling.metadata_id),
+            request_options=dict(id=1,cmd='subscribe',params=dict(channels=['market_lifecycle_v2'])))
+        global_inputs={**complete_inputs,'metadata':(selected_metadata,sibling),'requests':(global_request,)}
+        assert source._validate_public_operational_input_view_v1(inputs=global_inputs,capture=broad_capture,
+            root=storage._public_root_facts_v1(root),native_qualified=False,evaluated_at_ns=wall)[0][0] is global_request
+        incomplete=replace(global_request,instrument_ids=(selected_metadata.instrument_id,),metadata_refs=(selected_metadata.metadata_id,))
+        with pytest.raises(ComputationControlPlaneError,match='every capture-selected instrument'):
+            source._validate_public_operational_input_view_v1(inputs={**global_inputs,'requests':(incomplete,)},
+                capture=broad_capture,root=storage._public_root_facts_v1(root),native_qualified=False,evaluated_at_ns=wall)
+        _assert_lp02_public_credentials(permission, plan[0][4], wall)
+        _assert_lp02_bounded_websocket(permission, plan[0][4])
+        for bad in (
+            {'rate_bindings': (replace(rate, expires_at_ns=wall),)},
+            {'rate_bindings': (rate, replace(rate, binding_id='SYNTHETIC::CONFLICTING_RATE'))},
+            {'exclusive_allocation_refs': ('SYNTHETIC::DIFFERENT_ALLOCATION',)},
+            {'account_applicability_or_none': None},
+            {'requests': (replace(request, capture_request_ref='SYNTHETIC::DIFFERENT_CAPTURE'),)},
+        ):
+            denied = source._create_synthetic_public_binding_v1(capture=capture, control_records=controls,
+                source_inputs={**complete_inputs, **bad})
+            with pytest.raises(ComputationControlPlaneError):
+                source._resolve_public_operational_inputs_v1(binding=denied, evaluated_at_ns=wall)
+        facts = source._public_binding_facts_v1(permission)
+        raw = b' { "type": "subscribed", "id": 1, "msg": { "sid": 7, "channel": "orderbook_delta" } } '
+        parts = (request.profile_id.value, facts['action_ref'], capture.capture_session_id, 0)
+        identity = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1', *parts, 1)
+        original = PublicNativeObservationV1(identity, request.request_id, request.profile_id, request.operation_id,
+            capture.capture_session_id, 0, 1, None, {}, base64.urlsafe_b64encode(raw).rstrip(b'=').decode(),
+            wall, 10_000_000_000, inputs['process_epoch_id'], inputs['monotonic_clock_id'],
+            inputs['clock_quality_ref'], inputs['wall_uncertainty_ns'], (request.source_binding_ref,),
+            facts['action_ref'], facts['scope_generation'], request.native_contract_version)
+        moment = _T0 + timedelta(seconds=1)
+        record = EconomicReceiptEventSpineV1(identity, EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE,
+            'PUBLIC_NATIVE_CAPTURE_V1', 'QTT_PUBLIC_DATA_SOURCE_USE', 'QTT_PUBLIC_DATA_SOURCE_USE', facts['scope_ref'],
+            moment, moment, 'SYNTHETIC::CAUSE', 'SYNTHETIC::CORRELATION', 'SYNTHETIC::TRACE', 'SYNTHETIC::TRACE_STATE',
+            1, _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1', *parts), 1,
+            'PUBLIC_DATA_CANDIDATE_NO_OPERATING_AUTHORITY', original)
+        read = PublicCaptureReadRequestV1(request.profile_id, facts['scope_ref'], capture.capture_session_id,
+            (identity,), 'RESTORE_FOR_CURRENT_SESSION', wall, wall, facts['scope_generation'], 1, 65536,
+            capture.scope.storage_root_ref)
+        _assert_lp02_public_storage_deadline(root,permission,record,path)
+        adapter = storage.SQLitePhaseAAdapterV1(root_capability=root, source_use_binding=permission,
+                                               busy_timeout_ms=capture.scope.budget.storage_busy_timeout_ms)
+        try:
+            transaction = adapter.begin_transaction()
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.insert_receipt_record(transaction, replace(record, context_ref='SYNTHETIC::OTHER_SCOPE'))
+            adapter.insert_receipt_record(transaction, record)
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.load_committed_public_capture_v1(read, root_capability=root)
+            transaction.rollback()
+            assert transaction.completion_witness is None
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.load_committed_public_capture_v1(read, root_capability=root)
+            transaction = adapter.begin_transaction()
+            adapter.insert_receipt_record(transaction, record)
+            transaction.commit()
+            witness = transaction.completion_witness
+            evidence = adapter._require_public_commit_witness_v1(witness)
+            assert evidence['evidence_class'] == 'ADAPTER_CONFIRMED_SYNC_UPPER_BOUND'
+            assert evidence['backend_assigned_commit_ns'] is None and evidence['native_qualified'] is False
+            assert evidence['original_record_refs'] == (identity,)
+            restored, = adapter.load_committed_public_capture_v1(read, root_capability=root)
+            assert deterministic_json(restored) == deterministic_json(record)
+            assert base64.urlsafe_b64decode(restored.typed_payload.raw_body_b64+'='*(-len(original.raw_body_b64)%4)) == raw
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.get_record(identity)
+            with pytest.raises(ComputationControlPlaneError):
+                adapter._require_public_commit_witness_v1(object())
+            wrong_kind = PublicPublicationReadRequestV1(request.profile_id, facts['scope_ref'], capture.capture_session_id,
+                (identity,), 'RESTORE_FOR_CURRENT_SESSION', wall, wall, facts['scope_generation'], 1, 65536,
+                capture.scope.storage_root_ref)
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.load_committed_public_publication_v1(wrong_kind, root_capability=root)
+            with pytest.raises(ComputationControlPlaneError):
+                replace(original, raw_body_b64=base64.urlsafe_b64encode(b'{"private_key":"excluded"}').rstrip(b'=').decode())
+            identity_next = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1', *parts, 2)
+            next_original = replace(original, observation_id=identity_next, receive_ordinal=2,
+                received_wall_ns=wall+1, received_monotonic_ns=10_000_000_001)
+            next_record = replace(record, record_id=identity_next, sequence=2, aggregate_version=2, typed_payload=next_original)
+            transaction = adapter.begin_transaction()
+            adapter.insert_receipt_record(transaction, next_record)
+            transaction.commit()
+            exact_cutoff = replace(read, observation_refs=(identity_next,))
+            with pytest.raises(ComputationControlPlaneError):
+                adapter.load_committed_public_capture_v1(exact_cutoff, root_capability=root)
+            restored_next, = adapter.load_committed_public_capture_v1(
+                replace(exact_cutoff, effective_cutoff_ns=wall+1, recorded_cutoff_ns=wall+1), root_capability=root)
+            assert restored_next.typed_payload.received_wall_ns == wall+1
+        finally:
+            adapter.close()
+        # Reopening verifies exact existing schema, without recreating absent guards.
+        adapter = storage.SQLitePhaseAAdapterV1(root_capability=root, source_use_binding=permission,
+                                               busy_timeout_ms=capture.scope.budget.storage_busy_timeout_ms)
+        adapter.close()
+        connection = sqlite3.connect(path)
+        connection.execute('DROP TRIGGER receipt_records_reject_update')
+        connection.close()
+        with pytest.raises(ComputationControlPlaneError):
+            storage.SQLitePhaseAAdapterV1(root_capability=root, source_use_binding=permission,
+                                         busy_timeout_ms=capture.scope.budget.storage_busy_timeout_ms)
+        connection = sqlite3.connect(path)
+        assert connection.execute("SELECT 1 FROM sqlite_master WHERE name='receipt_records_reject_update'").fetchone() is None
+        assert connection.execute('SELECT COUNT(*) FROM receipt_records').fetchone() == (2,)
+        connection.close()
+
+
+def _assert_lp02_public_storage_deadline(root,permission,record,path):
+    """Real SQLite locks cannot consume a stale owner busy-wait allowance."""
+    import sqlite3
+    import time
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as storage
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    assert permission._capture.scope.budget.storage_busy_timeout_ms==60000
+    clock=[10_000_000_000]
+    def open_store():
+        return storage.SQLitePhaseAAdapterV1(root_capability=root,source_use_binding=permission,busy_timeout_ms=60000)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(time,'monotonic_ns',lambda:clock[0])
+        adapter=open_store()
+        rival=sqlite3.connect(path,isolation_level=None,timeout=0)
+        try:
+            assert adapter._connection.execute('PRAGMA busy_timeout').fetchone()==(0,)
+            rival.execute('BEGIN EXCLUSIVE')
+            clock[0]=permission._deadline-1_500_000
+            with pytest.raises(ComputationControlPlaneError):adapter.begin_transaction()
+            assert adapter._connection.execute('PRAGMA busy_timeout').fetchone()==(1,)
+            assert adapter._active_transaction is None
+            # Initialization also cannot wait for the caller's 60-second limit.
+            with pytest.raises(ComputationControlPlaneError):open_store()
+            rival.execute('ROLLBACK')
+            assert rival.execute('SELECT COUNT(*) FROM receipt_records').fetchone()==(0,)
+        finally:
+            rival.close();adapter.close()
+        clock[0]=10_000_000_000
+        adapter=open_store()
+        rival=sqlite3.connect(path,isolation_level=None,timeout=0)
+        try:
+            transaction=adapter.begin_transaction()
+            adapter.insert_receipt_record(transaction,record)
+            rival.execute('BEGIN')
+            assert rival.execute('SELECT COUNT(*) FROM receipt_records').fetchone()==(0,)
+            clock[0]=permission._deadline-500_000
+            with pytest.raises(sqlite3.OperationalError):transaction.commit()
+            assert adapter._connection.execute('PRAGMA busy_timeout').fetchone()==(0,)
+            assert not transaction.is_active and transaction.completion_witness is None
+            assert adapter._active_transaction is None
+            rival.execute('ROLLBACK')
+            assert rival.execute('SELECT COUNT(*) FROM receipt_records').fetchone()==(0,)
+        finally:
+            rival.close();adapter.close()
+        clock[0]=10_000_000_000
+        adapter=open_store()
+        try:
+            transaction=adapter.begin_transaction()
+            adapter.insert_receipt_record(transaction,record)
+            clock[0]=permission._deadline
+            transaction.rollback()
+            assert not transaction.is_active and transaction.completion_witness is None
+            assert adapter._connection.execute('PRAGMA busy_timeout').fetchone()==(0,)
+            assert adapter._connection.execute('SELECT COUNT(*) FROM receipt_records').fetchone()==(0,)
+        finally:
+            adapter.close()
+
+
+def _assert_lp02_public_credentials(permission, descriptor, wall):
+    import base64
+    import copy
+    import pickle
+    from types import MappingProxyType
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from src.qtt.service import owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+
+    key = Ed25519PrivateKey.from_private_bytes(bytes([19])*32)
+    scope = permission._capture.scope
+    row = MappingProxyType(dict(alias_ref=scope.credential_alias_ref_or_none, profile_id=scope.profile_id.value,
+        account_scope_ref=scope.account_scope_ref_or_none, product_scope_ref='SYNTHETIC::BINARY',
+        key_identifier='SYNTHETIC::KEY_IDENTIFIER', algorithm='KALSHI_ED25519', relative_key_file='synthetic.pem',
+        valid_from_ns=0, expires_at_ns=wall+60_000_000_000, generation=1,
+        allowed_handshake_paths=('/trade-api/ws/v2',)))
+    with pytest.raises(ComputationControlPlaneError):
+        native._read_public_credential_key_v1(binding=permission)
+    loads = []
+    with pytest.MonkeyPatch.context() as patch:
+        # Named key effect is substituted before synthetic session construction.
+        # Its declared origin still cannot satisfy the native effect predicate.
+        def fixture_key(*, binding):
+            assert binding is permission
+            loads.append(binding)
+            return row, key
+
+        patch.setattr(native, '_read_public_credential_key_v1', fixture_key)
+        session = transport._create_public_market_data_session_v1(binding=permission)
+        try:
+            with pytest.raises(TypeError):
+                source.PublicCredentialBindingV1()
+            credential = source._load_public_credential_v1(binding=permission, descriptor=descriptor)
+            headers = source._public_handshake_headers_v1(binding=permission, descriptor=descriptor)
+            assert len(loads) == 1 and credential._native_qualified is False
+            assert set(headers) == {'KALSHI-ACCESS-KEY', 'KALSHI-ACCESS-TIMESTAMP', 'KALSHI-ACCESS-SIGNATURE'}
+            assert headers['KALSHI-ACCESS-TIMESTAMP'] == str(wall//1_000_000)
+            key.public_key().verify(base64.b64decode(headers['KALSHI-ACCESS-SIGNATURE']),
+                (str(wall//1_000_000)+'GET/trade-api/ws/v2').encode('ascii'))
+            for duplicate in (copy.copy, copy.deepcopy, pickle.dumps):
+                with pytest.raises(TypeError):
+                    duplicate(credential)
+            assert repr(credential) == '<PublicCredentialBindingV1 opaque>'
+            with pytest.raises(ComputationControlPlaneError):
+                source._public_handshake_headers_v1(binding=permission,
+                    descriptor=MappingProxyType({**descriptor, 'path': '/trade-api/v2/portfolio/orders'}))
+            with pytest.raises(ComputationControlPlaneError):
+                transport._public_open_websocket_v1(descriptor, None, binding=permission,
+                    open_timeout=1, close_timeout=1, max_size=1024, max_queue=1)
+            headers.clear()
+        finally:
+            session.close_v1()
+        assert credential._key is None and id(permission) not in source._PUBLIC_CREDENTIALS_V1
+        with pytest.raises(ComputationControlPlaneError):
+            source._require_public_credential_v1(credential=credential, descriptor=descriptor)
+    for changed in (
+        {'algorithm': 'KALSHI_RSA_PSS'},
+        {'account_scope_ref': 'SYNTHETIC::OTHER_ACCOUNT'},
+        {'allowed_handshake_paths': ('/trade-api/ws/v2', '/trade-api/v2/portfolio/orders')},
+        {'expires_at_ns': wall},
+    ):
+        denied = source._create_synthetic_public_binding_v1(capture=permission._capture,
+            control_records=permission._control_records, source_inputs=permission._source_inputs)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(native, '_read_public_credential_key_v1',
+                lambda *, binding: (MappingProxyType({**row, **changed}), key))
+            session = transport._create_public_market_data_session_v1(binding=denied)
+            try:
+                with pytest.raises(ComputationControlPlaneError):
+                    source._load_public_credential_v1(binding=denied, descriptor=descriptor)
+            finally:
+                session.close_v1()
+    from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.exceptions import InvalidSignature
+
+    rsa_key = generate_private_key(public_exponent=65537, key_size=2048)
+    denied = source._create_synthetic_public_binding_v1(capture=permission._capture,
+        control_records=permission._control_records, source_inputs=permission._source_inputs)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(native, '_read_public_credential_key_v1',
+            lambda *, binding: (MappingProxyType({**row, 'algorithm': 'KALSHI_RSA_PSS'}), rsa_key))
+        session = transport._create_public_market_data_session_v1(binding=denied)
+        try:
+            rsa_headers = source._public_handshake_headers_v1(binding=denied, descriptor=descriptor)
+            signature = base64.b64decode(rsa_headers['KALSHI-ACCESS-SIGNATURE'], validate=True)
+            message = (rsa_headers['KALSHI-ACCESS-TIMESTAMP']+'GET/trade-api/ws/v2').encode('utf-8')
+            assert rsa_headers['KALSHI-ACCESS-TIMESTAMP'] == str(wall//1_000_000)
+            exact_padding = padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32)
+            rsa_key.public_key().verify(signature, message, exact_padding, hashes.SHA256())
+            for wrong in (message+b'\n', message+b'?query=excluded', b'host'+message,
+                          message.replace(b'GET', b'POST'), b'wrong-timestampGET/trade-api/ws/v2'):
+                with pytest.raises(InvalidSignature):
+                    rsa_key.public_key().verify(signature, wrong, exact_padding, hashes.SHA256())
+            other_key = generate_private_key(public_exponent=65537, key_size=2048)
+            with pytest.raises(InvalidSignature):
+                other_key.public_key().verify(signature, message, exact_padding, hashes.SHA256())
+            for wrong_padding, wrong_hash in (
+                (padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=0), hashes.SHA256()),
+                (padding.PSS(mgf=padding.MGF1(hashes.SHA512()), salt_length=32), hashes.SHA256()),
+                (padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32), hashes.SHA512()),
+                (padding.PKCS1v15(), hashes.SHA256()),
+            ):
+                with pytest.raises(InvalidSignature):
+                    rsa_key.public_key().verify(signature, message, wrong_padding, wrong_hash)
+            # Some library versions accept a variable salt when MAX_LENGTH is
+            # used for verification. Generate the incompatible outbound form,
+            # then verify against the independent exact 32-byte requirement.
+            for incompatible_salt in (0, padding.PSS.MAX_LENGTH):
+                incompatible = rsa_key.sign(message,
+                    padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=incompatible_salt), hashes.SHA256())
+                with pytest.raises(InvalidSignature):
+                    rsa_key.public_key().verify(incompatible, message, exact_padding, hashes.SHA256())
+            rsa_headers.clear()
+        finally:
+            session.close_v1()
+
+
+def _assert_lp02_bounded_websocket(original_permission, descriptor):
+    from types import SimpleNamespace
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+
+    request = original_permission._source_inputs['requests'][0]
+    ticker = request.instrument_ids[0]
+    frames = [dict(type='subscribed', id=1, msg=dict(sid=7, channel='orderbook_delta')),
+        dict(type='orderbook_snapshot', sid=7, seq=1, msg=dict(market_ticker=ticker,
+            yes_dollars_fp=[['0.49', '123456.78']], no_dollars_fp=[['0.49', '2.00']],ts=_T0.isoformat()))]
+    frames.extend(dict(type='orderbook_delta', sid=7, seq=sequence, msg=dict(market_ticker=ticker,
+        side='yes', price_dollars='0.49', delta_fp='0.01',ts=_T0.isoformat())) for sequence in range(2, 8))
+    text = [' \n'+json.dumps(frame)+'\n' for frame in frames]
+
+    class FixtureSocket:
+        def __init__(self, packets, live_after_close):
+            self.packets, self.live_after_close = list(packets), live_after_close
+            self.sent, self.waits, self.close_count = [], [], 0
+            self.socket = self
+            self.recv_events_thread = SimpleNamespace(is_alive=lambda: self.live_after_close)
+
+        def settimeout(self, timeout):
+            assert 0 < timeout <= 1
+            self.waits.append(timeout)
+
+        def send(self, command):
+            self.sent.append(command)
+
+        def recv(self, *, timeout, decode):
+            assert 0 < timeout <= 1 and decode is None
+            return self.packets.pop(0)
+
+        def close(self):
+            self.close_count += 1
+
+    for failure in (None, 'binary', 'worker', 'record_limit', 'byte_limit'):
+        permission = source._create_synthetic_public_binding_v1(capture=original_permission._capture,
+            control_records=original_permission._control_records, source_inputs=original_permission._source_inputs)
+        socket = FixtureSocket((b'binary',) if failure == 'binary' else text, failure == 'worker')
+        with pytest.MonkeyPatch.context() as patch:
+            def open_fixture(selected, headers, *, binding, **bounds):
+                assert selected == descriptor and headers is None and binding is permission
+                assert bounds['max_size'] == permission._capture.scope.budget.max_message_bytes
+                return socket
+
+            patch.setattr(transport, '_public_open_websocket_v1', open_fixture)
+            session = transport._create_public_market_data_session_v1(binding=permission)
+            if failure in {'record_limit', 'byte_limit'}:
+                if failure == 'record_limit':
+                    session._retained_records = permission._capture.scope.budget.max_retained_records-1
+                else:
+                    session._bytes = permission._capture.scope.budget.max_application_bytes-len(text[0].encode())
+                bounded = session._websocket_v1(request, descriptor)
+                assert len(bounded) == 1 and len(socket.packets) == 7 and socket.close_count == 1
+                session.close_v1()
+            elif failure is None:
+                originals = session._websocket_v1(request, descriptor)
+                assert len(originals) == len(text) == session._messages == 8
+                assert session._bytes == sum(len(packet.encode()) for packet in text)
+                assert len(session._translations) == len(session._continuity_witnesses) == 8
+                assert session._continuity_witnesses[0].disposition == 'CONTROL'
+                assert session._continuity_witnesses[0].sequence_start_or_none is None
+                assert session._continuity_witnesses[0].covered_through_or_none is None
+                assert session._continuity_witnesses[-1].covered_through_or_none == 7
+                assert len(socket.sent) == 1 and json.loads(socket.sent[0]) == json.loads(json.dumps(dict(
+                    id=1, cmd='subscribe', params=dict(channels=['orderbook_delta'], market_tickers=list(request.instrument_ids)))))
+                assert socket.close_count == 1 and session._socket is None
+                session.close_v1()
+            else:
+                with pytest.raises(ComputationControlPlaneError):
+                    session._websocket_v1(request, descriptor)
+                assert permission._failed and socket.close_count == 1
+                if failure == 'binary':
+                    assert session._messages == 1 and session._bytes == len(b'binary') and not session._observations
+                    session.close_v1()
+                else:
+                    assert session._socket is socket and session._cleanup_error and not session._closed
+                    with pytest.raises(ComputationControlPlaneError):
+                        session.close_v1()
+                    assert socket.close_count == 1 and not session._closed
+    _assert_lp02_atomic_public_batch(original_permission, descriptor, text, FixtureSocket)
+    unsubscribe = replace(request, request_options={'id': 2, 'cmd': 'unsubscribe', 'params': {'sids': [7]}})
+    permission = source._create_synthetic_public_binding_v1(capture=original_permission._capture,
+        control_records=original_permission._control_records,
+        source_inputs={**original_permission._source_inputs, 'requests': (unsubscribe,)})
+    source_binding = permission._source_inputs['source_bindings'][0]
+    metadata_by_ref = {item.metadata_id: item for item in permission._source_inputs['metadata']}
+    descriptor = transport.compile_public_read_request_v1(request=unsubscribe, source_binding=source_binding,
+        metadata=tuple(metadata_by_ref[ref] for ref in unsubscribe.metadata_refs))
+    with pytest.MonkeyPatch.context() as patch:
+        def forbidden_open(*args, **kwargs):
+            raise AssertionError('unowned unsubscribe reached a connection effect')
+
+        patch.setattr(transport, '_public_open_websocket_v1', forbidden_open)
+        session = transport._create_public_market_data_session_v1(binding=permission)
+        try:
+            with pytest.raises(ComputationControlPlaneError, match='unowned subscription'):
+                session._websocket_v1(unsubscribe, descriptor)
+            assert session._requests == 0
+        finally:
+            session.close_v1()
+
+
+def _assert_lp02_atomic_public_batch(original_permission, descriptor, frames, fixture_socket):
+    import copy
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as storage
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import EconomicRecordTypeV1
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+
+    for failure in (None, 'insert', 'readback', 'finite', 'off_grid', 'expiry', 'regression', 'owner_inputs'):
+        with TemporaryDirectory() as directory, pytest.MonkeyPatch.context() as patch:
+            path = Path(directory).resolve() / 'synthetic-atomic-public.db'
+            path.touch()
+            root = storage._create_synthetic_public_storage_root_v1(database_path=path,
+                root_ref=original_permission._capture.scope.storage_root_ref,
+                expires_at_ns=original_permission._capture.scope.retention_expires_at_ns)
+            selected_inputs = dict(original_permission._source_inputs)
+            if failure in (None, 'expiry', 'regression', 'owner_inputs'):
+                # Separate declared service fixture: both admitted bids and their
+                # payout complements belong to this exact one-cent grid.
+                selected_metadata = tuple(replace(item, metadata_id=item.metadata_id+'::SERVICE',
+                    price_bands=(('0', '1', '0.01'),), field_lineage=(
+                        ('SYNTHETIC::SERVICE_METADATA_ORIGINAL', '/market/price_ranges', 'price_bands', 'SOURCE_PRICE_BAND'),
+                    )) for item in selected_inputs['metadata'])
+                selected_inputs['metadata'] = selected_metadata
+                selected_inputs['requests'] = tuple(replace(item,
+                    metadata_refs=tuple(row.metadata_id for row in selected_metadata)) for item in selected_inputs['requests'])
+            permission = source._create_synthetic_public_binding_v1(capture=original_permission._capture,
+                control_records=original_permission._control_records,
+                source_inputs={**selected_inputs, 'storage_root': root,
+                    'source_epoch_id': 'SYNTHETIC::SOURCE_EPOCH', 'input_version': 'SYNTHETIC::INPUT_VERSION'})
+            socket = fixture_socket(frames, False)
+            patch.setattr(transport, '_public_open_websocket_v1', lambda *args, **kwargs: socket)
+            session = transport._create_public_market_data_session_v1(binding=permission)
+            try:
+                if failure == 'finite':
+                    disposition, handles = session.run_bounded_v1()
+                    assert disposition.value == 'COMMITTED' and len(handles) == 1
+                    assert session._started and session._closed and session._store is session._socket is None
+                    assert handoff._require_public_publication_handle_v1(publication=handles[0])[12] is False
+                    with pytest.raises(ComputationControlPlaneError, match='only once'):
+                        session.run_bounded_v1()
+                    continue
+                selected_plan = source._resolve_public_operational_inputs_v1(binding=permission, evaluated_at_ns=session._guard_v1()[1])
+                session._websocket_v1(permission._source_inputs['requests'][0], selected_plan[0][4])
+                adapter = storage.SQLitePhaseAAdapterV1(root_capability=root, source_use_binding=permission,
+                    busy_timeout_ms=permission._capture.scope.budget.storage_busy_timeout_ms)
+                session._store = adapter
+                batch = handoff._prepare_public_pit_batch_v1(session=session, adapter=adapter)
+                issued = handoff._require_public_pit_batch_v1(batch=batch, adapter=adapter)
+                assert len(issued[6]) == 7 and len(issued[7]) == 8
+                with pytest.raises(TypeError):
+                    copy.copy(batch)
+                with pytest.raises(ComputationControlPlaneError):
+                    handoff._require_public_pit_batch_v1(batch=object(), adapter=adapter)
+                event = next(row for row in issued[3] if row.record_type is EconomicRecordTypeV1.PIT_CANONICAL_EVENT)
+                transaction = adapter.begin_transaction()
+                with pytest.raises(ComputationControlPlaneError, match='complete prepared batch'):
+                    adapter.insert_receipt_record(transaction, event)
+                transaction.rollback()
+                assert adapter._connection.execute('SELECT COUNT(*) FROM receipt_records').fetchone() == (0,)
+                transaction = adapter.begin_transaction()
+                transaction.public_batch = batch
+                adapter.insert_receipt_record(transaction, issued[3][0])
+                with pytest.raises(ComputationControlPlaneError, match='missing an exact prepared batch member'):
+                    transaction.commit()
+                assert transaction.completion_witness is None
+                transaction.rollback()
+                assert adapter._connection.execute('SELECT COUNT(*) FROM receipt_records').fetchone() == (0,)
+                if failure == 'insert':
+                    insert = adapter._insert
+                    count = 0
+
+                    def failed_insert(*args, **kwargs):
+                        nonlocal count
+                        count += 1
+                        if count == 3:
+                            raise RuntimeError('SYNTHETIC_PRECOMMIT_FAILURE')
+                        return insert(*args, **kwargs)
+
+                    patch.setattr(adapter, '_insert', failed_insert)
+                elif failure == 'readback':
+                    connection = adapter._connection
+
+                    class ReadbackFault:
+                        committed = False
+
+                        def execute(self, statement, *args):
+                            if self.committed and statement == 'SELECT payload_json FROM receipt_records WHERE record_id=?':
+                                raise RuntimeError('SYNTHETIC_POSTCOMMIT_READBACK_FAILURE')
+                            result = connection.execute(statement, *args)
+                            if statement == 'COMMIT':
+                                self.committed = True
+                            return result
+
+                        def close(self):
+                            return connection.close()
+
+                    patch.setattr(adapter, '_connection', ReadbackFault())
+                if failure in ('insert', 'readback'):
+                    with pytest.raises(RuntimeError, match='SYNTHETIC_'):
+                        adapter._commit_public_pit_batch_v1(batch=batch)
+                    assert permission._failed and adapter._active_transaction is None
+                    retained = adapter._connection.execute('SELECT COUNT(*) FROM receipt_records').fetchone()[0]
+                    assert retained == (0 if failure == 'insert' else len(issued[3]))
+                    if failure == 'readback':
+                        assert adapter.availability.value == 'INTEGRITY_FAILURE'
+                else:
+                    witness = adapter._commit_public_pit_batch_v1(batch=batch)
+                    states, evidence = handoff._reconstruct_public_pit_batch_v1(batch=batch, adapter=adapter, witness=witness)
+                    state, = states.values()
+                    assert state.last_completed_event_ordinal == 7
+                    assert any(level.quantity_text == '123456.84' for level in state.levels)
+                    assert evidence['native_qualified'] is False
+                    assert evidence['backend_assigned_commit_ns'] is None
+                    assert len(witness.records) == len(issued[3])
+                    assert all(row.typed_payload.commit_completion_ref_or_none is None for row in issued[3]
+                        if row.record_type is EconomicRecordTypeV1.PIT_CAPTURE_AND_GAP)
+                    handle = handoff._publish_public_pit_batch_v1(batch=batch, adapter=adapter, witness=witness,
+                        source_epoch_id='SYNTHETIC::SOURCE_EPOCH', input_version='SYNTHETIC::INPUT_VERSION')
+                    published = handoff._require_public_publication_handle_v1(publication=handle)
+                    assert published[12] is False and published[8] >= evidence['completed_wall_ns']
+                    assert published[6].typed_payload.disposition == 'OBSERVED_PUBLICATION'
+                    assert published[7].typed_payload.disposition == 'OBSERVED_ISSUANCE'
+                    assert published[7].typed_payload.issuance_observation_or_none['issued_wall_ns'] == published[8]
+                    with pytest.raises(ComputationControlPlaneError):
+                        handoff._require_public_publication_handle_v1(publication=handle, native_only=True)
+                    with pytest.raises(ComputationControlPlaneError):
+                        handoff._require_public_publication_handle_v1(publication=object())
+                    with pytest.raises(TypeError):
+                        copy.copy(handle)
+                    session.close_v1()
+                    assert handoff._require_public_publication_handle_v1(publication=handle) is published
+                    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_b.test_service_operations import (
+                        _assert_lp02_issued_public_service,
+                    )
+                    _assert_lp02_issued_public_service(handle, off_grid=failure == 'off_grid',
+                        failure_mode=failure or 'withdraw')
+                    permission._failed = True
+                    with pytest.raises(ComputationControlPlaneError):
+                        handoff._require_public_publication_handle_v1(publication=handle)
+            finally:
+                session.close_v1()
 
 
 
@@ -19248,3 +21153,914 @@ def _assert_f14_independent_native_values():
         with pytest.raises(ComputationControlPlaneError) as caught:
             r._native_retail_private_evidence_join_v1(*args[:3], **args[3])
         assert str(caught.value).endswith(': ' + token)
+
+
+def _assert_lp02_gemini_native_translation():
+    """Declared wire originals, exact clocks, reconnect anchors and range reuse."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.market_data_ingest.binding import PublicMetadataSnapshotV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PITEventDispositionV1, PITEventKindV2
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import apply_pit_event_v2
+
+    contract = _contract_by_value('GEMINI_TITAN_DIRECT')
+    wall = _native_utc_nanoseconds((_T0+timedelta(seconds=1)).isoformat())
+    metadata = PublicMetadataSnapshotV1('SYN::G_META', contract.profile_id, 'SYN-G-MARKET', 'SYN-G-SYMBOL',
+        'SYN-G-EVENT', None, 'BINARY', 'YES', '1', 'USD_PER_CONTRACT', (), '0.01', '0.02', '0.1', '1', None,
+        {'state':'OPEN'}, {'state':'UNRESOLVED'},
+        (('SYN::G_META_ORIGINAL','/contracts/0/instrumentSymbol','symbol','METADATA_IDENTITY_JOIN'),),
+        wall-1_000_000_000, 0, None, wall+60_000_000_000, 1, ('UNAVAILABLE_QUANTITY_ORIGIN',))
+    specs = [('id','STRING','/id','EXACT_IDENTITY'),('status','INTEGER','/status','EXACT_IDENTITY'),
+             ('symbol','STRING','/s','EXACT_IDENTITY'),('event_time','INTEGER','/E','DECLARED_NANOSECONDS'),
+             ('first','INTEGER','/U','EXACT_IDENTITY'),('last','INTEGER','/u','EXACT_IDENTITY'),
+             ('bids','ARRAY','/b','EXACT_IDENTITY'),('asks','ARRAY','/a','EXACT_IDENTITY'),
+             ('trade','INTEGER','/t','EXACT_IDENTITY'),('maker','BOOLEAN','/m','EXACT_IDENTITY')]
+    for name, pointer in (('bp','/b/0/0'),('bq','/b/0/1'),('ap','/a/0/0'),('aq','/a/0/1'),
+                          ('best_bid','/b'),('bid_size','/B'),('best_ask','/a'),('ask_size','/A'),
+                          ('trade_price','/p'),('trade_quantity','/q')):
+        specs.append((name,'DECIMAL_TEXT',pointer,'EXACT_DECIMAL_TEXT'))
+    source = PublicDataSourceBindingV1('SYN::G_SOURCE',contract.profile_id,'SYN::G_PRODUCT',('SYN::G_DOC',),
+        (contract.source_contract_version,), (contract.source_currentization_receipt_ref,), (contract.rights_receipt_ref,),
+        ('SYN::G_DOC_ORIGINAL',),'SYN::G_REVIEW',('G_WS',),
+        tuple((name,wire,'DECLARED_NATIVE_UNIT','SYN::G_DOC_ORIGINAL',pointer,transform) for name,wire,pointer,transform in specs),
+        wall-1_000_000_000,0,None,wall+60_000_000_000,1,('FormulaExecutionContractV1::MATH-03',))
+    request = owner.PublicDataReadRequestV1('SYN::G_REQUEST',contract.profile_id,'G_WS',contract.source_contract_version,
+        ('SYN-G-SYMBOL',),None,None,source.binding_id,(metadata.metadata_id,),'SYN::G_CAPTURE',
+        {'id':'SYN-G-CONTROL','method':'SUBSCRIBE','params':['SYN-G-SYMBOL@depth','SYN-G-SYMBOL@trade','SYN-G-SYMBOL@bookTicker']})
+    prefix = []
+
+    def translate(body, *, epoch=1, retained=True, selected=source, complete=True):
+        ordinal = 1+sum(row.connection_epoch==epoch for row in prefix)
+        raw = json.dumps(body,separators=(',',':')).encode()
+        identity = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::G_ACTION','SYN::G_SESSION',epoch,ordinal)
+        original = PublicNativeObservationV1(identity,request.request_id,contract.profile_id,'G_WS','SYN::G_SESSION',epoch,ordinal,
+            None,{},base64.urlsafe_b64encode(raw).rstrip(b'=').decode(),wall,100+len(prefix),'SYN::G_PROCESS','SYN::G_MONO',
+            'SYN::G_CLOCK_QUALITY',1000,(source.binding_id,),'SYN::G_ACTION',1,contract.source_contract_version)
+        context = dict(request=request,contract=contract,wall_clock_source_id='SYN::G_WALL')
+        if complete:
+            context['original_prefix']=tuple(prefix)
+        result = owner.translate_public_observation_v1(observation=original,metadata=(metadata,),source_binding=selected,
+            translation_context=context)
+        if retained:
+            prefix.append(original)
+        return result
+
+    def candidate(translated):
+        return owner._public_candidate_from_translation_v1(translation=translated,contract=contract,metadata=(metadata,),
+            parse_completed_at_utc=_T0+timedelta(seconds=2),parse_completed_monotonic_ns=200)
+
+    control = translate({'id':'SYN-G-CONTROL','status':200,'result':None})
+    assert control.stream_disposition['kind']=='CONTROL'
+    event_ns = wall-1_000_000_000+1
+    trade = candidate(translate({'s':'SYN-G-SYMBOL','E':event_ns,'t':1234567890123456789,'p':'0.49','q':'0.1','m':True}))
+    assert trade.event_kind is PITEventKindV2.TRADE and trade.provider_trade_id_or_none=='1234567890123456789'
+    assert trade.provider_sequence_start_or_none is trade.provider_sequence_end_or_none is None
+    bbo = candidate(translate({'s':'SYN-G-SYMBOL','E':event_ns,'u':99,'b':'0.49','B':'0.1','a':'0.51','A':'0.2'}))
+    assert bbo.event_kind is PITEventKindV2.BBO
+    assert bbo.provider_sequence_start_or_none is bbo.provider_sequence_end_or_none is None
+    snapshot = {'s':'SYN-G-SYMBOL','E':event_ns,'U':100,'u':110,'b':[['0.49','0.1']],'a':[['0.51','0.2']]}
+    translated = translate(snapshot)
+    assert translated.stream_disposition['event_kind']=='BOOK_SNAPSHOT'
+    assert translated.exact_clock_companion['provider_event_or_none']['nanosecond_remainder']==1
+    first = candidate(translated)
+    assert first.provider_sequence_start_or_none==100 and first.provider_sequence_end_or_none==110
+    state = apply_pit_event_v2(None,first,candidate_event_ordinal=1).post_state
+    duplicate = candidate(translate(snapshot))
+    repeated = apply_pit_event_v2(state,duplicate,candidate_event_ordinal=2)
+    assert repeated.event_disposition is PITEventDispositionV1.DUPLICATE_IGNORED and repeated.post_state is state
+    conflicting = candidate(translate({**snapshot,'b':[['0.49','0.2']]},retained=False))
+    assert apply_pit_event_v2(state,conflicting,candidate_event_ordinal=2).event_disposition is PITEventDispositionV1.QUARANTINED
+    changed = candidate(translate({**snapshot,'U':109,'u':112,'b':[['0.49','0']],'a':[['0.53','0.3']]}))
+    assert changed.event_kind is PITEventKindV2.BOOK_DELTA
+    updated = apply_pit_event_v2(state,changed,candidate_event_ordinal=2)
+    assert updated.event_disposition is PITEventDispositionV1.COMMITTED
+    assert updated.post_state.last_provider_sequence_end_or_none==112
+    assert all(row.canonical_side!='BID' for row in updated.post_state.levels)
+    assert any(row.price_text=='0.53' and row.quantity_text=='0.3' for row in updated.post_state.levels)
+    reconnect = candidate(translate(snapshot,epoch=2))
+    assert reconnect.event_kind is PITEventKindV2.BOOK_SNAPSHOT
+    for body in ({**snapshot,'U':True}, {**snapshot,'b':[['0.50','0.1']]},
+                 {**snapshot,'s':'other'}, {**snapshot,'E':str(event_ns)},
+                 {'s':'SYN-G-SYMBOL','E':event_ns,'t':True,'p':'0.49','q':'0.1','m':True}):
+        with pytest.raises(ComputationControlPlaneError):
+            translate(body,retained=False)
+    with pytest.raises(ComputationControlPlaneError,match='complete original connection prefix'):
+        translate(snapshot,complete=False,retained=False)
+    with pytest.raises(ComputationControlPlaneError,match='unique compatible source binding'):
+        translate(snapshot,epoch=2,retained=False,selected=replace(source,field_bindings=tuple(row for row in source.field_bindings if row[0]!='bp')))
+    _assert_lp02_native_candidate_record(translated,contract,metadata)
+    source, metadata, catalog_request, catalog_body = _assert_lp02_gemini_metadata(contract,source,metadata,request,wall)
+    _assert_lp02_nonkalshi_published_fees(contract,source,metadata,catalog_request,catalog_body)
+    _assert_lp02_gemini_lifecycle(contract,source,metadata,request,catalog_request,catalog_body,wall)
+    scalar_source=replace(source,permitted_consumer_ids=('FormulaExecutionContractV1::MATH-01',),
+        field_bindings=tuple((row[0],row[1],'USD_PER_CONTRACT' if row[0]=='trade_price' else row[2],*row[3:])
+                            for row in source.field_bindings))
+    scalar_request=replace(request,request_options={'id':'SYN-G-CONTROL','method':'SUBSCRIBE','params':['SYN-G-SYMBOL@trade']})
+    _assert_lp02_publication_service(contract,scalar_source,metadata,(catalog_request,scalar_request),(catalog_body,),
+        (json.dumps({'id':'SYN-G-CONTROL','status':200,'result':None}),
+         json.dumps({'s':'SYN-G-SYMBOL','E':event_ns,'t':1234567890123456789,'p':'0.49','q':'0.1','m':True})),
+        expected_price='0.49',exercise_https_deadline=True)
+    book_source=replace(source,permitted_consumer_ids=tuple('FormulaExecutionContractV1::'+name
+        for name in ('MATH-03','MATH-04','MATH-05')),
+        field_bindings=tuple((row[0],row[1],'USD_PER_CONTRACT' if row[0] in {'bp','ap'} else row[2],*row[3:])
+                            for row in source.field_bindings))
+    book_request=replace(request,request_options={'id':'SYN-G-CONTROL','method':'SUBSCRIBE','params':['SYN-G-SYMBOL@depth']})
+    for ask,expected in (('0.51',('0.49','0.51','0.50','0.02',(1,25))),
+                         ('0.53',('0.49','0.53','0.51','0.04',(4,51)))):
+        anchor={'s':'SYN-G-SYMBOL','E':event_ns,'U':100,'u':110,'b':[['0.49','0.1']],'a':[[ask,'0.2']]}
+        _assert_lp02_publication_service(contract,book_source,metadata,(catalog_request,book_request),(catalog_body,),
+            (json.dumps({'id':'SYN-G-CONTROL','status':200,'result':None}),json.dumps(anchor)),expected_book=expected)
+
+
+def _assert_lp02_gemini_metadata(contract,source,metadata,stream_request,wall):
+    """Independent native catalog values and exact per-contract lineage."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+
+    original_id = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::CATALOG_ACTION','SYN::CATALOG_SESSION',0,1)
+    specs=[('event_ticker','STRING','/ticker','EXACT_IDENTITY'),('contracts','ARRAY','/contracts','EXACT_IDENTITY')]
+    for name in ('id','ticker','instrumentSymbol','status','marketState'):
+        specs.append(('catalog_'+name,'STRING','/contracts/0/'+name,'EXACT_IDENTITY'))
+    for name in ('quantityIncrement','quantityMinimum','priceIncrement','priceMinimum'):
+        specs.append(('catalog_'+name,'DECIMAL_TEXT','/contracts/0/'+name,'EXACT_DECIMAL_TEXT'))
+    specs.append(('catalog_effectiveDate','STRING','/contracts/0/effectiveDate','EXACT_RFC3339'))
+    added=tuple((name,wire,'DECLARED_NATIVE_UNIT','SYN::G_DOC_ORIGINAL',pointer,transform) for name,wire,pointer,transform in specs)
+    source=replace(source,allowed_operation_ids=('G_EVENT','G_WS'),field_bindings=source.field_bindings+added)
+    metadata=replace(metadata,field_lineage=tuple((original_id,pointer,name,transform)
+        for name,wire,pointer,transform in specs if name!='contracts'))
+    request=replace(stream_request,request_id='SYN::G_CATALOG_REQUEST',operation_id='G_EVENT',
+        request_options={'eventTicker':metadata.event_id_or_none})
+    native=dict(id='SYN-G-MARKET',ticker='SYN-CONTRACT',instrumentSymbol='SYN-G-SYMBOL',status='active',marketState='open',
+        quantityIncrement='0.1',quantityMinimum='1',priceIncrement='0.02',priceMinimum='0.01',
+        effectiveDate='1970-01-01T00:00:00.000000000Z',settlementValue='87654.32')
+    body=dict(ticker='SYN-G-EVENT',contracts=[native],events=[dict(ticker='OTHER',contracts=[dict(instrumentSymbol='OTHER')])])
+
+    def translate(value, selected=metadata, selected_source=source, selected_request=request, derive=False):
+        original=PublicNativeObservationV1(original_id,selected_request.request_id,contract.profile_id,selected_request.operation_id,
+            'SYN::CATALOG_SESSION',0,1,200,{},base64.urlsafe_b64encode(json.dumps(value).encode()).rstrip(b'=').decode(),
+            wall,100,'SYN::G_PROCESS','SYN::G_MONO','SYN::G_CLOCK_QUALITY',1000,(selected_source.binding_id,),
+            'SYN::CATALOG_ACTION',1,contract.source_contract_version)
+        function=owner._compile_public_catalog_metadata_v1 if derive else owner.translate_public_observation_v1
+        return function(observation=original,metadata=(selected,),source_binding=selected_source,
+            translation_context=dict(request=selected_request,contract=contract,wall_clock_source_id='SYN::G_WALL'))
+
+    translated=translate(body)
+    assert translated.stream_disposition['instrument_generations']==(('SYN-G-SYMBOL',1),)
+    from types import SimpleNamespace
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.handoff import _public_lifecycle_state_v1
+    catalog_proof,open_metadata,_=translate(body,derive=True)
+    current,=open_metadata
+    book_view=SimpleNamespace(stream_disposition={'instrument_id':metadata.instrument_id,'event_kind':'BOOK_SNAPSHOT'})
+    assert _public_lifecycle_state_v1(translation=book_view,metadata=(metadata,),prior_state=None)=='ADMISSIBLE'
+    assert _public_lifecycle_state_v1(translation=book_view,metadata=(metadata,),prior_state=None,
+        native_only=True,lifecycle_catalog=())=='LIFECYCLE_BLOCKED'
+    assert _public_lifecycle_state_v1(translation=book_view,metadata=(current,),prior_state=None,
+        native_only=True,lifecycle_catalog=(catalog_proof,))=='ADMISSIBLE'
+    for changed in (replace(current,lifecycle={'state':'OPEN'}),
+            replace(current,lifecycle={**current.lifecycle,'observation_ref':'UNRECONSTRUCTED'}),
+            replace(current,field_lineage=tuple(row for row in current.field_lineage if not row[1].endswith('/marketState'))),
+            *(replace(current,profile_id=type(contract.profile_id)(profile)) for profile in
+                ('KALSHI_US_DCM_DIRECT','POLYMARKET_US_RETAIL_DIRECT'))):
+        assert _public_lifecycle_state_v1(translation=book_view,metadata=(changed,),prior_state=None,
+            native_only=True,lifecycle_catalog=(catalog_proof,))=='LIFECYCLE_BLOCKED'
+    # A later catalog is absent from the reconstruction prefix at this event.
+    assert _public_lifecycle_state_v1(translation=book_view,metadata=(current,),prior_state=None,
+        native_only=True,lifecycle_catalog=())=='LIFECYCLE_BLOCKED'
+    closed_proof,closed_metadata,_=translate(dict(body,contracts=[dict(native,status='closed',marketState='closed')]),derive=True)
+    forged_open=replace(closed_metadata[0],lifecycle={**closed_metadata[0].lifecycle,'state':'OPEN','native_state':'active/open'})
+    assert _public_lifecycle_state_v1(translation=book_view,metadata=(forged_open,),prior_state=None,
+        native_only=True,lifecycle_catalog=(closed_proof,))=='LIFECYCLE_BLOCKED'
+    projected=translated.normalized_frame.parsed_source_scalar_tree_or_none['contracts']
+    assert len(projected)==1 and projected[0]['priceMinimum']=='0.01' and projected[0]['quantityMinimum']=='1'
+    assert 'settlementValue' not in projected[0] and metadata.payout_amount_or_none=='1'
+    assert metadata.quantity_origin_or_none is None and 'UNAVAILABLE_QUANTITY_ORIGIN' in metadata.unavailable_fields
+    for changed in (dict(body,ticker='OTHER'),dict(body,contracts=[]),dict(body,contracts=[native,native]),
+                    dict(body,contracts=[dict(native,id='OTHER')]),dict(body,contracts=[dict(native,instrumentSymbol='syn-g-symbol')]),
+                    dict(body,contracts=[dict(native,priceIncrement='0.01')]),dict(body,contracts=[dict(native,priceMinimum=0.01)]),
+                    dict(body,contracts=[dict(native,quantityMinimum='2')]),dict(body,contracts=[dict(native,status='under_review')]),
+                    dict(body,contracts=[dict(native,effectiveDate='1970-01-01T00:00:01Z')])):
+        with pytest.raises(ComputationControlPlaneError): translate(changed)
+    with pytest.raises(ComputationControlPlaneError,match='exact original field lineage'):
+        translate(body,replace(metadata,field_lineage=metadata.field_lineage[:-1]))
+    _projected,successors,_request=translate(dict(body,contracts=[dict(native,priceIncrement='0.01',
+        quantityMinimum='2',status='under_review')]),derive=True)
+    successor,=successors
+    assert successor.price_increment_or_none=='0.01' and successor.quantity_minimum_or_none=='2'
+    assert successor.lifecycle['state']=='UNAVAILABLE' and successor.known_at_ns==wall
+    assert successor.generation==metadata.generation+1 and successor.quantity_origin_or_none is None
+    assert metadata.price_increment_or_none=='0.02' and metadata.quantity_minimum_or_none=='1'
+    with pytest.raises(ComputationControlPlaneError,match='reopening'):
+        translate(body,replace(metadata,resolution={'state':'RESOLVED','final':True},
+            lifecycle={'state':'RESOLVED'}),derive=True)
+    discovery_source=replace(source,allowed_operation_ids=('G_EVENTS',),field_bindings=(
+        ('discovery','ARRAY','DECLARED_NATIVE_UNIT','SYN::G_DOC_ORIGINAL','/data','EXACT_IDENTITY'),)+tuple(
+        ('discovery_'+name,wire,unit,original,'/data/0'+pointer,transform) for name,wire,unit,original,pointer,transform in added))
+    discovery_metadata=replace(metadata,field_lineage=tuple((original,'/data/0'+pointer,'discovery_'+name,transform)
+        for original,pointer,name,transform in metadata.field_lineage))
+    discovery_request=replace(request,operation_id='G_EVENTS',request_options={'limit':10,'offset':0})
+    discovered=translate(dict(data=[body,dict(ticker='OTHER',contracts=[])]),discovery_metadata,discovery_source,discovery_request)
+    assert discovered.stream_disposition['instrument_generations']==(('SYN-G-SYMBOL',1),)
+    assert len(discovered.normalized_frame.parsed_source_scalar_tree_or_none['contracts'])==1
+    with pytest.raises(ComputationControlPlaneError):
+        translate(dict(events=[body]),discovery_metadata,discovery_source,discovery_request)
+    return source,metadata,request,json.dumps(body).encode()
+
+
+def _assert_lp02_gemini_lifecycle(contract,source,metadata,stream_request,catalog_request,catalog_body,wall):
+    """Status milliseconds, exact catalog joins and persistent lifecycle denial."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    specs=(('lifecycle_type','STRING','/e','EXACT_IDENTITY'),('lifecycle_event','STRING','/k','EXACT_IDENTITY'),
+           ('lifecycle_contract','STRING','/c','EXACT_IDENTITY'),('lifecycle_id','INTEGER','/i','METADATA_IDENTITY_JOIN'),
+           ('old_status','STRING','/o','EXACT_IDENTITY'),('new_status','STRING','/n','EXACT_IDENTITY'),
+           ('lifecycle_time','INTEGER','/E','DECLARED_MILLISECONDS_TO_NS'))
+    source=replace(source,permitted_consumer_ids=tuple('FormulaExecutionContractV1::'+name for name in ('MATH-03','MATH-04','MATH-05')),
+        field_bindings=tuple((row[0],row[1],'USD_PER_CONTRACT' if row[0] in {'bp','ap'} else row[2],*row[3:]) for row in source.field_bindings)
+        +tuple((name,wire,'DECLARED_NATIVE_UNIT','SYN::G_DOC_ORIGINAL',pointer,transform) for name,wire,pointer,transform in specs))
+    metadata=replace(metadata,market_id='134794')
+    catalog=json.loads(catalog_body);catalog['contracts'][0]['id']='134794'
+    request=replace(stream_request,request_options={'id':'SYN-G-CONTROL','method':'SUBSCRIBE',
+        'params':['SYN-G-SYMBOL@depth','contractStatus']})
+    original_id=metadata.field_lineage[0][0]
+    catalog_original=PublicNativeObservationV1(original_id,catalog_request.request_id,contract.profile_id,'G_EVENT',
+        'SYN::CATALOG_SESSION',0,1,200,{},base64.urlsafe_b64encode(json.dumps(catalog).encode()).rstrip(b'=').decode(),
+        wall,100,'SYN::G_PROCESS','SYN::G_MONO','SYN::G_CLOCK_QUALITY',1000,(source.binding_id,),
+        'SYN::CATALOG_ACTION',1,contract.source_contract_version)
+    body=dict(e='contractStatus',E=(wall-1_000_000_000)//1_000_000,s=metadata.instrument_id,
+        k=metadata.event_id_or_none,c='SYN-CONTRACT',i=134794,o='Active',n='Closed')
+    def translate(value,selected_source=source,originals=(catalog_original,)):
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::CATALOG_ACTION','SYN::CATALOG_SESSION',1,1)
+        original=replace(catalog_original,observation_id=identity,request_ref=request.request_id,operation_id='G_WS',
+            connection_epoch=1,response_status_or_none=None,received_monotonic_ns=101,
+            raw_body_b64=base64.urlsafe_b64encode(json.dumps(value).encode()).rstrip(b'=').decode())
+        return owner.translate_public_observation_v1(observation=original,metadata=(metadata,),source_binding=selected_source,
+            translation_context=dict(request=request,contract=contract,wall_clock_source_id='SYN::G_WALL',
+                original_prefix=originals,source_bindings=(selected_source,)))
+    translated=translate(body)
+    assert translated.stream_disposition['event_kind']=='LIFECYCLE' and translated.stream_disposition['lifecycle_state']=='CLOSED'
+    assert translated.exact_clock_companion['provider_event_or_none']['utc_ns_text']==str(wall-1_000_000_000)
+    assert translated.normalized_frame.parsed_source_scalar_tree_or_none['marketId']=='134794'
+    assert translate(dict(body,n='unrecognized')).stream_disposition['lifecycle_state']=='UNAVAILABLE'
+    assert translate(dict(body,s='UNSELECTED',i=987)).stream_disposition['kind']=='UNSELECTED_LIFECYCLE'
+    for changed in (dict(body,s='syn-g-symbol'),dict(body,k='OTHER'),dict(body,c='OTHER'),
+                    dict(body,i='134794'),dict(body,i=True),dict(body,E=str(body['E']))):
+        with pytest.raises(ComputationControlPlaneError):translate(changed)
+    with pytest.raises(ComputationControlPlaneError,match='retained catalog original'):translate(body,originals=())
+    with pytest.raises(ComputationControlPlaneError,match='unique compatible source binding'):
+        translate(body,selected_source=replace(source,field_bindings=tuple(row for row in source.field_bindings if row[0]!='lifecycle_time')))
+    # An active transition also requires refreshed metadata; a following depth
+    # update cannot clear the lifecycle block within this immutable generation.
+    anchor=dict(s='SYN-G-SYMBOL',E=wall-1_000_000_000,U=100,u=100,b=[['0.49','0.1']],a=[['0.51','0.2']])
+    later=dict(anchor,U=101,u=101,b=[['0.49','0.2']])
+    for status in ('Closed','Active','unrecognized'):
+        _assert_lp02_publication_service(contract,source,metadata,(catalog_request,request),(json.dumps(catalog).encode(),),
+            tuple(json.dumps(row) for row in ({'id':'SYN-G-CONTROL','status':200,'result':None},anchor,dict(body,n=status),later)),
+            expected_book=('0.49','0.51','0.50','0.02',(1,25)),expected_lifecycle_blocked=True)
+    refresh=replace(catalog_request,request_id='SYN::G_REFRESH')
+    reconnect=replace(request,request_id='SYN::G_NEW_ANCHOR')
+    _assert_lp02_publication_service(contract,source,metadata,(catalog_request,request,refresh,reconnect),
+        (json.dumps(catalog).encode(),json.dumps(catalog).encode()),
+        tuple(json.dumps(row) for row in ({'id':'SYN-G-CONTROL','status':200,'result':None},anchor,
+            dict(body,n='Active'),{'id':'SYN-G-CONTROL','status':200,'result':None},dict(anchor,U=200,u=200))),
+        expected_book=('0.49','0.51','0.50','0.02',(1,25)))
+
+
+def _assert_lp02_retail_native_translation():
+    """Synthetic native bytes; separate REST/WS field types and metadata custody."""
+    import base64
+    from src.qtt.stage1_prediction_markets.market_data_ingest import adapter as owner
+    from src.qtt.stage1_prediction_markets.market_data_ingest.binding import PublicMetadataSnapshotV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import PublicNativeObservationV1, _public_identity_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import PITDepthClassV2
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot.builder import apply_pit_event_v2
+
+    contract = _contract_by_value('POLYMARKET_US_RETAIL_DIRECT')
+    wall = _native_utc_nanoseconds((_T0+timedelta(seconds=1)).isoformat())
+    meta_ref = _public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::P_ACTION','SYN::P_SESSION',0,1)
+    meta_specs = [('market_id','STRING','/market/id','EXACT_IDENTITY'),
+                  ('slug','STRING','/market/slug','EXACT_IDENTITY'),
+                  ('sides','ARRAY','/market/marketSides','EXACT_IDENTITY'),
+                  ('tick','DECIMAL_NUMBER','/market/orderPriceMinTickSize','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+                  ('minimum','DECIMAL_NUMBER','/market/minimumTradeQty','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+                  ('active','BOOLEAN','/market/active','EXACT_IDENTITY'),
+                  ('closed','BOOLEAN','/market/closed','EXACT_IDENTITY')]
+    metadata = PublicMetadataSnapshotV1('SYN::P_META',contract.profile_id,'SYN-P-ID','syn-p-slug',None,None,
+        'BINARY','YES','1','USD_PER_CONTRACT',(),'0','0.01',None,'1',None,
+        {'state':'OPEN'},{'state':'UNRESOLVED'},
+        tuple((meta_ref,pointer,name,transform) for name,wire,pointer,transform in meta_specs),
+        wall-1_000_000_000,0,None,wall+60_000_000_000,1,('UNAVAILABLE_QUANTITY_ORIGIN',))
+    specs = meta_specs + [('book_slug','STRING','/marketData/marketSlug','EXACT_IDENTITY'),
+        ('settlement_preliminary','BOOLEAN','/marketData/stats/settlementPreliminaryFlag','EXACT_IDENTITY'),
+        ('state','STRING','/marketData/state','EXACT_IDENTITY'),
+        ('time','STRING','/marketData/transactTime','EXACT_RFC3339'),
+        ('request','STRING','/requestId','EXACT_IDENTITY'),
+        ('subscription','STRING','/subscriptionType','EXACT_IDENTITY'),
+        ('trade_slug','STRING','/trade/marketSlug','EXACT_IDENTITY'),
+        ('trade_currency','STRING','/trade/price/currency','EXACT_IDENTITY'),
+        ('trade_price','DECIMAL_TEXT','/trade/price/value','EXACT_DECIMAL_TEXT'),
+        ('trade_time','STRING','/trade/tradeTime','EXACT_RFC3339')]
+    for side in ('bids','offers'):
+        specs.append((side,'ARRAY','/marketData/'+side,'EXACT_IDENTITY'))
+        for index in range(2):
+            root='/marketData/'+side+'/'+str(index)
+            specs.extend([(side+str(index)+'_currency','STRING',root+'/px/currency','EXACT_IDENTITY'),
+                (side+str(index)+'_qty','DECIMAL_TEXT',root+'/qty','EXACT_DECIMAL_TEXT'),
+                (side+str(index)+'_px_rest','DECIMAL_NUMBER',root+'/px/value','EXACT_DECIMAL_NUMBER_TO_TEXT'),
+                (side+str(index)+'_px_ws','DECIMAL_TEXT',root+'/px/value','EXACT_DECIMAL_TEXT')])
+    source = PublicDataSourceBindingV1('SYN::P_SOURCE',contract.profile_id,'SYN::P_PRODUCT',('SYN::P_DOC',),
+        (contract.source_contract_version,),(contract.source_currentization_receipt_ref,),(contract.rights_receipt_ref,),
+        ('SYN::P_DOC_ORIGINAL',),'SYN::P_REVIEW',('P_MARKET','P_BOOK','P_WS'),
+        tuple((name,wire,'USD_PER_CONTRACT' if name=='trade_price' else 'DECLARED_NATIVE_UNIT','SYN::P_DOC_ORIGINAL',pointer,transform) for name,wire,pointer,transform in specs),
+        wall-1_000_000_000,0,None,wall+60_000_000_000,1,('FormulaExecutionContractV1::MATH-01','FormulaExecutionContractV1::MATH-03',))
+    requests = {op:owner.PublicDataReadRequestV1('SYN::'+op,contract.profile_id,op,contract.source_contract_version,
+        (metadata.instrument_id,),None,None,source.binding_id,(metadata.metadata_id,),'SYN::P_CAPTURE',
+        {'subscribe':{'requestId':'SYN-P-CONTROL','subscriptionType':'SUBSCRIPTION_TYPE_MARKET_DATA','marketSlugs':[metadata.instrument_id]}}
+        if op=='P_WS' else {'slug':metadata.instrument_id}) for op in ('P_MARKET','P_BOOK','P_WS')}
+    requests['P_TRADE']=replace(requests['P_WS'],request_id='SYN::P_TRADE',request_options={
+        'subscribe':{'requestId':'SYN-P-TRADE','subscriptionType':'SUBSCRIPTION_TYPE_TRADE','marketSlugs':[metadata.instrument_id]}})
+    prefix=[]
+
+    def translate(raw,op,*,retained=True,selected=metadata,originals=None):
+        if type(raw) is not bytes:
+            raw=json.dumps(raw,separators=(',',':')).encode()
+        native_op=requests[op].operation_id
+        epoch=2 if op=='P_TRADE' else 1 if native_op=='P_WS' else 0
+        ordinal=1+sum(row.connection_epoch==epoch for row in prefix)
+        identity=_public_identity_v1('PUBLIC_NATIVE_CAPTURE_V1',contract.profile_id.value,'SYN::P_ACTION','SYN::P_SESSION',epoch,ordinal)
+        original=PublicNativeObservationV1(identity,requests[op].request_id,contract.profile_id,native_op,'SYN::P_SESSION',epoch,ordinal,
+            None if native_op=='P_WS' else 200,{},base64.urlsafe_b64encode(raw).rstrip(b'=').decode(),wall,100+len(prefix),
+            'SYN::P_PROCESS','SYN::P_MONO','SYN::P_QUALITY',1000,(source.binding_id,),'SYN::P_ACTION',1,contract.source_contract_version)
+        result=owner.translate_public_observation_v1(observation=original,metadata=(selected,),source_binding=source,
+            translation_context=dict(request=requests[op],contract=contract,wall_clock_source_id='SYN::P_WALL',
+                original_prefix=tuple(prefix) if originals is None else originals,source_bindings=(source,)))
+        if retained:
+            prefix.append(original)
+        return result
+
+    raw_metadata=b'{"market":{"id":"SYN-P-ID","slug":"syn-p-slug","marketSides":[{"sideId":"SIDE-A","label":"ALPHA"},{"sideId":"SIDE-B","label":"BETA"}],"orderPriceMinTickSize":0.01,"minimumTradeQty":1,"active":true,"closed":false,"outcomes":["inert"],"feeCoefficient":999}}'
+    meta=translate(raw_metadata,'P_MARKET')
+    assert meta.stream_disposition['kind']=='METADATA'
+    assert 'outcomes' not in meta.normalized_frame.parsed_source_scalar_tree_or_none
+    raw_book=b'{"marketData":{"marketSlug":"syn-p-slug","state":"MARKET_STATE_OPEN","transactTime":"'+_T0.strftime('%Y-%m-%dT%H:%M:%S').encode()+b'.000000001Z","bids":[{"px":{"value":0.49,"currency":"USD"},"qty":"0.2"},{"px":{"value":0.48,"currency":"USD"},"qty":"0.1"}],"offers":[{"px":{"value":0.51,"currency":"USD"},"qty":"0.3"}]}}'
+    rest=translate(raw_book,'P_BOOK')
+    def candidate(value):
+        return owner._public_candidate_from_translation_v1(translation=value,contract=contract,metadata=(metadata,),
+            parse_completed_at_utc=_T0+timedelta(seconds=2),parse_completed_monotonic_ns=200)
+    first=candidate(rest)
+    assert first.depth_class is PITDepthClassV2.COMPLETE_PROVIDER_SNAPSHOT
+    state=apply_pit_event_v2(None,first,candidate_event_ordinal=1).post_state
+    body=json.loads(raw_book,parse_float=Decimal)
+    for side in ('bids','offers'):
+        for row in body['marketData'][side]:
+            row['px']['value']=str(row['px']['value'])
+    body['requestId']='SYN-P-CONTROL'
+    body['subscriptionType']='SUBSCRIPTION_TYPE_MARKET_DATA'
+    body['marketData']['bids']=body['marketData']['bids'][:1]
+    body['marketData']['offers'][0]['px']['value']='0.53'
+    ws=translate(body,'P_WS')
+    second=candidate(ws)
+    assert second.depth_class is PITDepthClassV2.PROVIDER_PUBLISHED_TOP_LEVELS_CURRENT_STATE_FRAME
+    assert second.provider_sequence_start_or_none is second.provider_sequence_end_or_none is None
+    current=apply_pit_event_v2(state,second,candidate_event_ordinal=2).post_state
+    assert len(current.levels)==2 and all(row.price_text!='0.48' for row in current.levels)
+    assert any(row.price_text=='0.53' for row in current.levels)
+    _assert_lp02_contractual_settlement(metadata, ws, wall)
+    for flag in (True,False):
+        flagged=deepcopy(body)
+        flagged['marketData']['stats']={'settlementPreliminaryFlag':flag}
+        projected=translate(flagged,'P_WS',retained=False)
+        assert projected.normalized_frame.parsed_source_scalar_tree_or_none['settlement_preliminary_or_none'] is flag
+        assert any(row[1]=='/marketData/stats/settlementPreliminaryFlag' for row in projected.field_lineage)
+        same_book=apply_pit_event_v2(state,candidate(projected),candidate_event_ordinal=2).post_state
+        assert same_book.levels==current.levels
+        _assert_lp02_contractual_settlement(metadata,projected,wall)
+        book_source=replace(source,permitted_consumer_ids=tuple('FormulaExecutionContractV1::MATH-'+value for value in ('03','04','05')))
+        _assert_lp02_publication_service(contract,book_source,metadata,(requests['P_MARKET'],requests['P_WS']),
+            (raw_metadata,),(json.dumps(flagged,separators=(',',':')),),expected_book=('0.49','0.53','0.51','0.04',(4,51)),
+            expected_preliminary=flag,expected_sequence_unavailable=True)
+    invalid_flag=deepcopy(flagged)
+    invalid_flag['marketData']['stats']['settlementPreliminaryFlag']='false'
+    with pytest.raises(ComputationControlPlaneError):translate(invalid_flag,'P_WS',retained=False)
+    bound_source=source
+    source=replace(source,field_bindings=tuple(row for row in source.field_bindings if row[0]!='settlement_preliminary'))
+    unbound=translate(flagged,'P_WS',retained=False)
+    assert unbound.normalized_frame.parsed_source_scalar_tree_or_none['settlement_preliminary_or_none'] is None
+    _assert_lp02_contractual_settlement(metadata,unbound,wall)
+    source=bound_source
+    for mutation in ('request','subscription','currency','wire_price','wire_qty','slug','off_grid'):
+        changed=deepcopy(body)
+        if mutation=='request':changed['requestId']='FOREIGN'
+        elif mutation=='subscription':changed['subscriptionType']='SUBSCRIPTION_TYPE_TRADE'
+        elif mutation=='currency':changed['marketData']['bids'][0]['px']['currency']='EUR'
+        elif mutation=='wire_price':changed['marketData']['bids'][0]['px']['value']=0.49
+        elif mutation=='wire_qty':changed['marketData']['bids'][0]['qty']=1
+        elif mutation=='slug':changed['marketData']['marketSlug']='foreign'
+        else:changed['marketData']['bids'][0]['px']['value']='0.495'
+        with pytest.raises(ComputationControlPlaneError):translate(changed,'P_WS',retained=False)
+    with pytest.raises(ComputationControlPlaneError):translate(raw_book.replace(b'0.49',b'"0.49"'),'P_BOOK',retained=False,originals=(prefix[0],))
+    with pytest.raises(ComputationControlPlaneError):translate(body,'P_WS',retained=False,originals=())
+    with pytest.raises(ComputationControlPlaneError):translate(body,'P_WS',retained=False,selected=replace(metadata,price_increment_or_none='0.02'))
+    with pytest.raises(ComputationControlPlaneError):translate(body,'P_WS',retained=False,selected=replace(metadata,field_lineage=metadata.field_lineage[1:]))
+    _assert_lp02_native_candidate_record(rest,contract,metadata)
+    trade_body={'requestId':'SYN-P-TRADE','subscriptionType':'SUBSCRIPTION_TYPE_TRADE',
+        'trade':{'marketSlug':'syn-p-slug','price':{'value':'0.49','currency':'USD'},
+                 'quantity':{'value':'0.50','currency':'USD'},
+                 'tradeTime':_T0.strftime('%Y-%m-%dT%H:%M:%S')+'.000000001Z'}}
+    traded=translate(trade_body,'P_TRADE')
+    trade_candidate=candidate(traded)
+    assert trade_candidate.provider_trade_id_or_none is None
+    assert trade_candidate.provider_sequence_start_or_none is trade_candidate.provider_sequence_end_or_none is None
+    scalar=dict(trade_candidate.payload.fields)
+    assert scalar['price']=='0.49' and 'quantity' not in scalar
+    assert scalar['quantityUnavailableReason']=='PIT_NATIVE_QUANTITY_BASIS_UNAVAILABLE'
+    _assert_lp02_publication_service(contract,source,metadata,(requests['P_MARKET'],requests['P_TRADE']),
+        (raw_metadata,), (json.dumps(trade_body,separators=(',',':')),), expected_price='0.49')
+    _assert_lp02_nonkalshi_published_fees(contract,source,metadata,requests['P_MARKET'],raw_metadata)
+    settlement=replace(requests['P_MARKET'],request_id='SYN::P_SETTLEMENT',operation_id='P_SETTLEMENT')
+    _assert_lp02_reference_case(contract,source,metadata,settlement,(requests['P_MARKET'],),(raw_metadata,),wall,
+        b'{"slug":"syn-p-slug","settlement":-123.456789012345678901}',
+        dict(operation_id='P_SETTLEMENT',known_at_ns=wall,instrument_id='syn-p-slug',market_id='SYN-P-ID',
+            observed_settlement='-123.456789012345678901',finality='UNAVAILABLE_SEPARATE_ACCEPTED_RESOLUTION_REQUIRED',
+            accounting_class='PUBLIC_OBSERVATION_NOT_ACCOUNT_CASH'),
+        [('/slug','STRING','EXACT_IDENTITY'),('/settlement','DECIMAL_NUMBER','EXACT_DECIMAL_NUMBER_TO_TEXT')],
+        (b'{"slug":"other","settlement":1}',b'{"slug":"syn-p-slug","settlement":"1"}',
+         b'{"slug":"syn-p-slug","settlement":true}',b'{"slug":"syn-p-slug","settlement":-0.0}'))
+
+
+def _assert_lp02_contractual_settlement(metadata,translation,wall):
+    """Independent binary finality vectors; these candidates confer no custody."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import resolve_public_contractual_settlement_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+
+    ref='SYN::ACCEPTED_BINARY_RESOLUTION'
+    resolution=dict(state='RESOLVED',outcome='YES',final=True,revision='SYN::REVISION_1',
+        effective_at_ns=wall-1,known_at_ns=wall-1,observation_ref=ref,value='1')
+    names=('product_class','payout_amount','payout_basis',*('resolution.'+key for key in resolution))
+    lineage=tuple((ref,'/'+name.replace('.','/'),name,'EXACT_IDENTITY') for name in names)
+    final=replace(metadata,known_at_ns=wall-1,lifecycle={'state':'RESOLVED'},resolution=resolution,field_lineage=lineage)
+    def resolve(row=final,observations=(),**changes):
+        return resolve_public_contractual_settlement_v1(metadata=row,translations=observations,
+            known_as_of_ns=changes.get('known',wall),effective_at_ns=changes.get('effective',wall),
+            position_outcome=changes.get('outcome','YES'))
+    for profile in (Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+                    Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT):
+        row=replace(final,profile_id=profile)
+        assert resolve(row)['value_per_contract']=='1' and resolve(row,outcome='NO')['value_per_contract']=='0'
+        negative=replace(row,resolution={**resolution,'outcome':'NO','value':'0'})
+        assert resolve(negative)['value_per_contract']=='0' and resolve(negative,outcome='NO')['value_per_contract']=='1'
+        assert resolve(row)['accounting_class']=='PUBLIC_CONTRACTUAL_SETTLEMENT_NOT_ACCOUNT_CASH'
+    flag=translation.normalized_frame.parsed_source_scalar_tree_or_none['settlement_preliminary_or_none']
+    if flag is False:
+        assert resolve(observations=(translation,))['value_per_contract']=='1'
+    else:
+        with pytest.raises(ComputationControlPlaneError,match='preliminary'):resolve(observations=(translation,))
+    def observation(identity,preliminary,offset):
+        frame=translation.normalized_frame
+        return replace(translation,observation_ref=identity,
+            field_lineage=tuple((identity,*row[1:]) for row in translation.field_lineage),
+            normalized_frame=replace(frame,frame_id=identity+'::FRAME',
+                qtt_received_monotonic_ns=frame.qtt_received_monotonic_ns+offset,
+                parsed_source_scalar_tree_or_none={**frame.parsed_source_scalar_tree_or_none,
+                    'settlement_preliminary_or_none':preliminary}))
+    earlier=observation('SYN::EARLIER_FALSE',False,0)
+    later=observation('SYN::LATER_PRELIMINARY',True,1)
+    with pytest.raises(ComputationControlPlaneError,match='preliminary'):resolve(observations=(earlier,later))
+    with pytest.raises(ComputationControlPlaneError,match='reordered'):resolve(observations=(later,earlier))
+    with pytest.raises(ComputationControlPlaneError,match='ambiguous'):resolve(observations=(earlier,observation('SYN::TIED',True,0)))
+    with pytest.raises(ComputationControlPlaneError,match='duplicated'):resolve(observations=(earlier,earlier))
+    final_false=observation('SYN::LATER_FALSE',False,2)
+    with pytest.raises(ComputationControlPlaneError,match='preliminary'):resolve(observations=(later,final_false))
+    successor=replace(final,known_at_ns=wall+1,resolution={**resolution,'known_at_ns':wall+1,'revision':'SYN::REVISION_2'})
+    assert resolve(successor,observations=(earlier,later),known=wall+2)['value_per_contract']=='1'
+    assert resolve(successor,observations=(later,final_false),known=wall+2)['value_per_contract']=='1'
+    for changed in (replace(final,product_class='SCALAR'),replace(final,payout_amount_or_none=None,payout_basis_or_none=None),
+            replace(final,lifecycle={'state':'UNDER_REVIEW'}),replace(final,field_lineage=lineage[1:]),
+            replace(final,resolution={**resolution,'final':False}),replace(final,resolution={**resolution,'state':'VOID'}),
+            replace(final,resolution={**resolution,'value':'0.5'}),
+            replace(final,resolution={**resolution,'known_at_ns':wall+1}),
+            replace(final,resolution={**resolution,'effective_at_ns':wall+1})):
+        with pytest.raises(ComputationControlPlaneError):resolve(changed)
+    with pytest.raises(ComputationControlPlaneError):resolve(known=wall-2)
+    with pytest.raises(ComputationControlPlaneError):resolve(known=final.expires_at_ns)
+    with pytest.raises(ComputationControlPlaneError):resolve(observations=(translation,),known=wall-1)
+
+
+def _assert_lp02_https_deadline(permission,request):
+    """Setup latency cannot leave an earlier connect/send timeout in force."""
+    import time
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    class StopAfterSend(Exception):pass
+    for existing_socket,remaining in ((False,200_000_000),(True,200_000_000),(False,0)):
+        clock=[10_000_000_000]
+        sent=[];timeouts=[];closed=[]
+        class Socket:
+            def settimeout(self,value):timeouts.append(value)
+        class HTTP:
+            def __init__(self,timeout):
+                self.timeout=timeout
+                self.sock=Socket() if existing_socket else None
+            def request(self,method,path,headers):
+                assert self.timeout==0.2
+                assert timeouts==([0.2] if existing_socket else [])
+                sent.append((method,path))
+                self.sock=Socket()
+            def getresponse(self):raise StopAfterSend()
+            def close(self):closed.append(True)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(time,'monotonic_ns',lambda:clock[0])
+            binding=source._create_synthetic_public_binding_v1(capture=permission._capture,
+                control_records=permission._control_records,source_inputs=permission._source_inputs)
+            session=transport._create_public_market_data_session_v1(binding=binding)
+            plan=source._resolve_public_operational_inputs_v1(binding=binding,evaluated_at_ns=time.time_ns())
+            descriptor=next(row[4] for row in plan if row[0] is request)
+            assert descriptor['method']=='GET'
+            def delayed_open(descriptor,timeout,*,binding):
+                assert timeout==1
+                clock[0]=binding._deadline-remaining
+                return HTTP(timeout)
+            patch.setattr(transport,'_public_open_https_v1',delayed_open)
+            try:
+                with pytest.raises(StopAfterSend if remaining else ComputationControlPlaneError):
+                    session._https_v1(request,descriptor)
+                assert len(sent)==(1 if remaining else 0) and closed==[True]
+                assert session._requests==1 and session._observations==[] and session._socket is None
+                assert binding._failed
+            finally:
+                session.close_v1()
+
+
+def _assert_lp02_publication_service(contract,source_binding,metadata,requests,http_bodies,ws_bodies,*,expected_price=None,expected_book=None,expected_lifecycle_blocked=False,expected_reference=None,expected_preliminary='UNSELECTED',expected_sequence_unavailable=False,fee_case=None,expected_capture_denial=None,separate_refresh_sources=False,continuity_failure=None,exercise_https_deadline=False):
+    """Original synthetic transport through real file commits, issuance and service."""
+    import time
+    from types import MappingProxyType, SimpleNamespace
+    from src.qtt.service import owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import sqlite_reference as storage
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        PublicCaptureBudgetV1,PublicDataSourceUseScopeV1,PublicCaptureRequestV1,_public_identity_v1)
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as transport
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+    from tests.stage1_prediction_markets.qku_computation_control_plane.accounting.test_contract_matrix import _source_use_action_proposals
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_b.test_service_operations import (
+        _assert_lp02_scalar_service, _assert_lp02_book_services)
+
+    wall=_native_utc_nanoseconds((_T0+timedelta(seconds=1)).isoformat())
+    moment=_T0+timedelta(seconds=1)
+    operations=tuple(dict.fromkeys(row.operation_id for row in requests))
+    authenticated=any(op in {'K_WS','P_WS'} for op in operations)
+    account_required=authenticated or fee_case is not None
+    budget=PublicCaptureBudgetV1(len(requests),len(http_bodies)+len(ws_bodies),65536,8192,1,64,262144,
+        1_000_000_000,1_000_000_000,1_000_000_000,30_000_000_000,0,min(4,len(http_bodies)+len(ws_bodies)),0,1000,60_000_000_000)
+    lifecycle=any(row.operation_id=='G_WS' and 'contractStatus' in row.request_options['params'] or
+        row.operation_id=='K_WS' and 'market_lifecycle_v2' in row.request_options['params']['channels'] for row in requests)
+    receive_scopes=('SELECTED_INSTRUMENTS','GLOBAL_PUBLIC_LIFECYCLE') if lifecycle else ('SELECTED_INSTRUMENTS',)
+    scope=PublicDataSourceUseScopeV1('QTT_PUBLIC_DATA_SOURCE_USE_SCOPE_V1',contract.profile_id,
+        contract.source_contract_version,source_binding.source_ids,source_binding.allowed_operation_ids,(metadata.instrument_id,),
+        'PHASE_A_PUBLIC_DATA_INTERNAL','BOUNDED_LOCAL_DURABLE','NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING',
+        'SYN::SCALAR_ACCOUNT' if account_required else None,'SYN::SCALAR_ALIAS' if authenticated else None,
+        'SYN::SCALAR_ROOT',wall+60_000_000_000,source_binding.permitted_consumer_ids,budget,2,receive_scopes)
+    capture=PublicCaptureRequestV1(requests[0].capture_request_ref,scope,(source_binding.binding_id,),
+        'SYN::SCALAR_ACCOUNT_QUALIFICATION' if account_required else None,wall+45_000_000_000,operations,
+        (metadata.instrument_id,),'SYN::SCALAR_SESSION','PHASE_A_PUBLIC_CAPTURE')
+    _,review,review_facts,declaration=_source_use_action_proposals(moment)
+    qualified=()
+    additional_sources=()
+    if fee_case is not None:
+        from src.qtt.stage1_prediction_markets.market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+        # Documentary and catalog proofs may legitimately share canonical names.
+        source_binding=replace(source_binding,field_bindings=tuple(
+            ('quantity_increment_or_none',*row[1:]) if row[4].endswith('/quantityIncrement') else row
+            for row in source_binding.field_bindings))
+        metadata=replace(metadata,field_lineage=tuple(
+            (row[0],row[1],'quantity_increment_or_none',row[3]) if row[1].endswith('/quantityIncrement') else row
+            for row in metadata.field_lineage))
+        account_facts=dict(account_scope_ref=scope.account_scope_ref_or_none,product_scope_ref='BINARY',
+            effective_from_ns=0,effective_until_ns=wall+60_000_000_000,generation=1,
+            fee_profile_id_or_none='SYN::HYPOTHETICAL_FEE_PROFILE',balance_increment_text_or_none='0.01',
+            maker_tier_or_none=None,taker_tier_or_none=None,promotion_eligibility_or_none=None,
+            limitations=['SYNTHETIC_ACCOUNT_NOT_NATIVE_QUALIFIED'])
+        contract_terms=[dict(instrument_id=metadata.instrument_id,market_id=metadata.market_id,
+            event_id_or_none=metadata.event_id_or_none,series_id_or_none=metadata.series_id_or_none,
+            product_class=metadata.product_class,price_orientation=metadata.price_orientation,
+            payout_amount_or_none=metadata.payout_amount_or_none,payout_basis_or_none=metadata.payout_basis_or_none,
+            effective_from_ns=0,effective_until_ns=wall+60_000_000_000,generation=1,
+            grid_rules_or_none=dict(price_origin_or_none=metadata.price_origin_or_none,
+                quantity_origin_or_none=metadata.quantity_origin_or_none,
+                quantity_increment_or_none=metadata.quantity_increment_or_none),
+            resolution_or_none=(dict(state='RESOLVED',outcome=fee_case['settlement_outcome'],final=True,
+                revision='SYN::RESOLUTION_1',effective_at_ns=source_binding.known_at_ns)
+                if 'settlement_outcome' in fee_case else None))]
+        source_binding,review_facts,evidence=_assert_lp02_accepted_source_projection(source_binding,review_facts,
+            fee_case['rules'],account_facts,contract_terms)
+        qualified=(project_accepted_public_field_bindings_v1(source_binding=source_binding,
+            acceptance_results=evidence[0][1],originals=evidence[0][2],review_facts=review_facts),)
+        accepted_account=source.compile_accepted_public_account_applicability_v1(source_binding=source_binding,
+            acceptance_results=evidence[0][1],originals=evidence[0][2],review_facts=review_facts)
+        from src.qtt.stage1_prediction_markets.market_data_ingest.binding import (
+            compile_accepted_public_contract_terms_v1,_public_metadata_lineage_sources_v1)
+        metadata=compile_accepted_public_contract_terms_v1(metadata=metadata,source_binding=source_binding,
+            acceptance_results=evidence[0][1],originals=evidence[0][2],review_facts=review_facts)
+        requests=tuple(replace(row,metadata_refs=(metadata.metadata_id,)) for row in requests)
+        assert metadata.payout_amount_or_none==contract_terms[0]['payout_amount_or_none']
+        assert (metadata.resolution['state']=='RESOLVED' if 'settlement_outcome' in fee_case
+            else metadata.resolution['state'] in {'UNRESOLVED','UNAVAILABLE'})
+        assert _public_metadata_lineage_sources_v1(metadata=(metadata,),
+            inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=qualified),originals=(),
+            native_only=False,known_as_of_ns=wall)==(source_binding,)
+        with pytest.raises(ComputationControlPlaneError,match='custody'):
+            _public_metadata_lineage_sources_v1(metadata=(metadata,),
+                inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=qualified),originals=(),
+                native_only=True,known_as_of_ns=wall)
+        with pytest.raises(ComputationControlPlaneError,match='original field'):
+            _public_metadata_lineage_sources_v1(metadata=(replace(metadata,payout_amount_or_none='2'),),
+                inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=qualified),originals=(),
+                native_only=False,known_as_of_ns=wall)
+        for changed in (replace(metadata,expires_at_ns=metadata.expires_at_ns+1),
+                replace(metadata,effective_until_ns_or_none=metadata.effective_until_ns_or_none+1),
+                replace(metadata,known_at_ns=source_binding.known_at_ns-1),
+                replace(metadata,field_lineage=tuple(row for row in metadata.field_lineage if row[2]!='payout_amount')),
+                replace(metadata,field_lineage=tuple(('SYN::UNRELATED_CAPTURE',*row[1:])
+                    if row[2]=='product_class' else row for row in metadata.field_lineage))):
+            with pytest.raises(ComputationControlPlaneError):
+                _public_metadata_lineage_sources_v1(metadata=(changed,),
+                    inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=qualified),
+                    originals=(SimpleNamespace(observation_id='SYN::UNRELATED_CAPTURE'),),native_only=False,known_as_of_ns=wall)
+        for proofs in ((),(*qualified,*qualified)):
+            with pytest.raises(ComputationControlPlaneError,match='custody'):
+                _public_metadata_lineage_sources_v1(metadata=(metadata,),
+                    inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=proofs),originals=(),
+                    native_only=False,known_as_of_ns=wall)
+        if 'settlement_outcome' in fee_case:
+            for changed in (replace(metadata,resolution={**metadata.resolution,'known_at_ns':source_binding.known_at_ns-1}),
+                    replace(metadata,resolution={**metadata.resolution,'observation_ref':'SYN::UNRELATED'}),
+                    replace(metadata,lifecycle={'state':'OPEN'})):
+                with pytest.raises(ComputationControlPlaneError):
+                    _public_metadata_lineage_sources_v1(metadata=(changed,),
+                        inputs=dict(source_bindings=(source_binding,),qualified_source_bindings=qualified),originals=(),
+                        native_only=False,known_as_of_ns=wall)
+        capture=replace(capture,account_applicability_ref_or_none=accepted_account.qualification_ref)
+        if 'account_transition' in fee_case:
+            future_source=replace(source_binding,binding_id='SYN::FUTURE_ACCOUNT_SOURCE',
+                field_bindings=tuple(row for row in source_binding.field_bindings if row[0]!='account_applicability'))
+            future_source,review_facts,future_evidence=_assert_lp02_accepted_source_projection(future_source,review_facts,
+                account_facts={**account_facts,'effective_from_ns':wall+fee_case['account_transition']*1_000_000_000,
+                    'generation':2,'balance_increment_text_or_none':'0.02'})
+            additional_sources=(future_source,)
+            qualified=(*qualified,project_accepted_public_field_bindings_v1(source_binding=future_source,
+                acceptance_results=future_evidence[0][1],originals=future_evidence[0][2],review_facts=review_facts))
+            capture=replace(capture,source_binding_refs=(*capture.source_binding_refs,future_source.binding_id))
+        if 'terms_transition' in fee_case:
+            boundary=wall+fee_case['terms_transition']*1_000_000_000
+            future_source=replace(source_binding,binding_id='SYN::FUTURE_TERMS_SOURCE',expires_at_ns=wall+30_000_000_000,
+                field_bindings=tuple(row for row in source_binding.field_bindings if not row[0].startswith('contract_terms.')),
+                permitted_consumer_ids=tuple(row for row in source_binding.permitted_consumer_ids
+                    if 'registry_denial' not in fee_case or row not in {'FormulaExecutionContractV1::MATH-06','FormulaExecutionContractV1::MATH-07'}))
+            future_source,review_facts,future_evidence=_assert_lp02_accepted_source_projection(future_source,review_facts,
+                contract_terms=[{**contract_terms[0],'effective_from_ns':boundary,'generation':2,'payout_amount_or_none':'2'}])
+            future_proof=project_accepted_public_field_bindings_v1(source_binding=future_source,
+                acceptance_results=future_evidence[0][1],originals=future_evidence[0][2],review_facts=review_facts)
+            qualified=(*qualified,future_proof)
+            additional_sources=(future_source,)
+            with pytest.raises(ComputationControlPlaneError,match='interval'):
+                _public_metadata_lineage_sources_v1(metadata=(metadata,),originals=(),native_only=False,known_as_of_ns=wall,
+                    inputs=dict(source_bindings=(source_binding,future_source),qualified_source_bindings=qualified))
+            metadata=replace(metadata,metadata_id=_public_identity_v1('SYN::BOUNDED_TERMS',metadata.instrument_id,boundary),
+                effective_until_ns_or_none=boundary,expires_at_ns=boundary)
+            assert _public_metadata_lineage_sources_v1(metadata=(metadata,),originals=(),native_only=False,known_as_of_ns=wall,
+                inputs=dict(source_bindings=(source_binding,future_source),qualified_source_bindings=qualified))==(source_binding,future_source)
+            # An unknown future fact cannot impose a retrospective boundary.
+            late=replace(future_source,known_at_ns=wall+1)
+            assert _public_metadata_lineage_sources_v1(metadata=(metadata,),originals=(),native_only=False,known_as_of_ns=wall,
+                inputs=dict(source_bindings=(source_binding,late),qualified_source_bindings=(qualified[0],(late,*future_proof[1:]))))==(source_binding,)
+            capture=replace(capture,source_binding_refs=(*capture.source_binding_refs,future_source.binding_id))
+            requests=tuple(replace(row,metadata_refs=(metadata.metadata_id,)) for row in requests)
+    if separate_refresh_sources:
+        assert fee_case is None and not additional_sources
+        refresh_sources={row.request_id:replace(source_binding,binding_id='SYN::REFRESH_SOURCE::'+row.operation_id)
+            for row in requests if row.operation_id in {'K_SERIES_FEES','K_EVENT_FEES'}}
+        additional_sources=tuple(refresh_sources.values())
+        capture=replace(capture,source_binding_refs=(*capture.source_binding_refs,*(row.binding_id for row in additional_sources)))
+        requests=tuple(replace(row,source_binding_ref=refresh_sources[row.request_id].binding_id)
+            if row.request_id in refresh_sources else row for row in requests)
+    mono=[10_000_000_000]
+    def sample_mono():
+        mono[0]+=1000
+        return mono[0]
+    with pytest.MonkeyPatch.context() as patch, TemporaryDirectory() as directory:
+        patch.setattr(time,'time_ns',lambda:wall)
+        patch.setattr(time,'monotonic_ns',sample_mono)
+        with _synthetic_source_use_root() as h:
+            resources=MappingProxyType(dict(configuration=object(),configuration_generation=1,storage_root=object(),
+                alias=None,expires_at_ns=wall+90_000_000_000,native_qualified=False))
+            patch.setattr(native,'_public_scope_resources_v1',lambda root,selected:resources)
+            patch.setattr(native,'_public_resources_resident_v1',lambda root,selected,now:None)
+            tag='PUBLIC_SOURCE_USE_ACTION_V1'
+            first=h.sign(dict(schema_version=tag,action='REVIEW_ACCEPT',scope=scope,original=review,
+                review_facts=review_facts,requested_expires_at_utc=moment+timedelta(seconds=60)))
+            second=h.sign(dict(schema_version=tag,action='USE_ADMIT',scope=scope,original=declaration,
+                expected_review_ref=first.review.record_id,requested_expires_at_utc=moment+timedelta(seconds=55)))
+            third=h.sign(dict(schema_version=tag,action='OBSERVE_ONCE',scope=scope,capture=capture,
+                expected_declaration_ref=second.declaration.record_id,expected_review_ref=second.review.record_id))
+            controls=tuple(h.authority._adapter._tables['receipt_records'].values())
+            catalog_indices=tuple(index for index,row in enumerate(requests) if row.operation_id in {'K_MARKET','K_EVENT','K_SERIES','P_MARKET','G_EVENT','G_EVENTS'})
+            # Catalog versions must be compiled from captured bytes; seed
+            # metadata never forecasts an original ID from this new session.
+            path=Path(directory).resolve()/'synthetic-scalar.db'
+            path.touch()
+            root=storage._create_synthetic_public_storage_root_v1(database_path=path,root_ref=scope.storage_root_ref,
+                expires_at_ns=scope.retention_expires_at_ns)
+            rate=source.PublicRequestRateBindingV1('SYN::SCALAR_RATE',scope.profile_id,operations,'SYN::SCALAR_COUNTER',
+                source_binding.source_ids if additional_sources else source_binding.original_evidence_refs,
+                0,wall+60_000_000_000,'SYN::SCALAR_ALLOCATION',len(requests),
+                1_000_000_000,1,None,None,(),1,())
+            applicability=(source.SelectedAccountApplicabilityV1(scope.profile_id,scope.account_scope_ref_or_none,
+                'BINARY' if fee_case is not None else source_binding.legal_product_ref,0,wall+60_000_000_000,wall-1,source_binding.source_receipt_refs,
+                capture.account_applicability_ref_or_none,1,None,None,None,None,None,('SYN::MISSING_ACCOUNT_FEES',))
+                if account_required else None)
+            if fee_case is not None:
+                applicability=accepted_account
+            permission=source._create_synthetic_public_binding_v1(capture=capture,control_records=controls,
+                source_inputs=dict(requests=requests,contracts=(contract,),metadata=(metadata,),source_bindings=(source_binding,*additional_sources),
+                    storage_root=root,rate_bindings=(rate,),exclusive_allocation_refs=(rate.allocation_ref,),
+                    account_applicability_or_none=applicability,qualified_source_bindings=qualified,
+                    wall_clock_source_id='SYN::SCALAR_WALL',clock_quality_ref='SYN::SCALAR_QUALITY',
+                    wall_uncertainty_ns=1000,process_epoch_id='SYN::SCALAR_PROCESS',monotonic_clock_id='SYN::SCALAR_MONO',
+                    source_epoch_id='SYN::SCALAR_SOURCE_EPOCH',input_version='SYN::SCALAR_VERSION'))
+            if fee_case is not None and authenticated:
+                assert applicability.product_scope_ref=='BINARY' and source_binding.legal_product_ref!='BINARY'
+                with pytest.raises(ComputationControlPlaneError,match='authenticated public stream account/product'):
+                    source._validate_public_operational_input_view_v1(inputs={**permission._source_inputs,'qualified_source_bindings':()},
+                        capture=capture,root=storage._public_root_facts_v1(root),native_qualified=False,evaluated_at_ns=wall)
+                with pytest.raises(ComputationControlPlaneError,match='authenticated public stream account/product'):
+                    source._validate_public_operational_input_view_v1(inputs={**permission._source_inputs,
+                        'qualified_source_bindings':((replace(source_binding,binding_id='UNRETAINED'),*qualified[0][1:]),)},
+                        capture=capture,root=storage._public_root_facts_v1(root),native_qualified=False,evaluated_at_ns=wall)
+            if exercise_https_deadline:
+                _assert_lp02_https_deadline(permission,requests[0])
+            queued_http=iter(http_bodies)
+            class Response:
+                status=200
+                def __init__(self,raw):self.raw=raw
+                def getheaders(self):return [('Content-Type','application/json'),('Content-Length',str(len(self.raw)))]
+                def read(self,maximum):
+                    assert maximum==len(self.raw)+1
+                    return self.raw
+            class HTTP:
+                def __init__(self):self.sock=SimpleNamespace(settimeout=lambda timeout:None)
+                def request(self,method,path,headers):assert method=='GET'
+                def getresponse(self):return Response(next(queued_http))
+                def close(self):pass
+            queued_ws=iter(ws_bodies)
+            class WS:
+                def __init__(self):
+                    self.socket=SimpleNamespace(settimeout=lambda timeout:None)
+                    self.messages=queued_ws
+                    self.closed=False
+                def send(self,message):assert type(json.loads(message)) is dict
+                def recv(self,*,timeout,decode):
+                    assert timeout>0 and decode is None
+                    return next(self.messages)
+                def close(self):self.closed=True
+            opened_ws=[]
+            def open_ws(*args,**kwargs):
+                ws=WS();opened_ws.append(ws);return ws
+            patch.setattr(transport,'_public_open_https_v1',lambda *args,**kwargs:HTTP())
+            patch.setattr(transport,'_public_open_websocket_v1',open_ws)
+            if continuity_failure is not None:
+                prepare=handoff._prepare_public_pit_batch_v1
+                def corrupt_continuity(*,session,adapter):
+                    if continuity_failure=='missing':
+                        session._continuity_witnesses.pop()
+                    else:
+                        session._continuity_witnesses[-1]=replace(session._continuity_witnesses[-1],disposition='DUPLICATE')
+                    return prepare(session=session,adapter=adapter)
+                patch.setattr(handoff,'_prepare_public_pit_batch_v1',corrupt_continuity)
+            session=transport._create_public_market_data_session_v1(binding=permission)
+            try:
+                if expected_capture_denial is not None:
+                    with pytest.raises(ComputationControlPlaneError,match=expected_capture_denial):session.run_bounded_v1()
+                    assert not session._publications and permission._failed and all(ws.closed for ws in opened_ws)
+                    assert len(session._observations)==len(http_bodies)+len(ws_bodies)
+                    return
+                disposition,handles=session.run_bounded_v1()
+                assert disposition.value=='COMMITTED' and len(handles)==1
+                assert (len(opened_ws)==sum(row.operation_id in {'K_WS','P_WS','G_WS'} for row in requests)
+                    and all(ws.closed for ws in opened_ws))
+                entry=handoff._require_public_publication_handle_v1(publication=handles[0])
+                assert entry[12] is False and entry[7].typed_payload.disposition=='OBSERVED_ISSUANCE'
+                assert len(session._observations)==len(http_bodies)+len(ws_bodies)
+                if fee_case is not None:
+                    from src.qtt.stage1_prediction_markets.market_data_ingest.binding import (
+                        _validate_public_metadata_grid_lineage_v1,_public_contract_terms_values_v1)
+                    selected_metadata,=entry[4]
+                    terms_original=qualified[0][2][0]['accepted_packet']['accepted_source_evidence_packet_id']
+                    documentary=_public_contract_terms_values_v1(terms=contract_terms[0],source_binding=source_binding,
+                        original_ref=terms_original)
+                    documentary_lineage=tuple(row for row in selected_metadata.field_lineage if row[0]==terms_original)
+                    def check_grid(row=selected_metadata,observations=None,translations=None):
+                        return _validate_public_metadata_grid_lineage_v1(metadata=row,
+                            originals=tuple(session._observations) if observations is None else observations,
+                            translations=tuple(session._translations) if translations is None else translations,
+                            documentary_values=documentary,documentary_lineage=documentary_lineage)
+                    assert check_grid() is None
+                    for changed in (replace(selected_metadata,quantity_origin_or_none='1',unavailable_fields=()),
+                            replace(selected_metadata,quantity_increment_or_none='0.003'),
+                            replace(selected_metadata,quantity_minimum_or_none='123'),
+                            replace(selected_metadata,field_lineage=tuple(row for row in selected_metadata.field_lineage
+                                if row[0]==terms_original)),
+                            replace(selected_metadata,quantity_origin_or_none='1',unavailable_fields=(),
+                                field_lineage=(*selected_metadata.field_lineage,(session._observations[-1].observation_id,
+                                    '/quantityMinimum','quantity_origin_or_none','EXACT_DECIMAL_TEXT')))):
+                        with pytest.raises(ComputationControlPlaneError,match='grid'):
+                            check_grid(changed)
+                    with pytest.raises(ComputationControlPlaneError,match='grid'):
+                        check_grid(translations=())
+                    assert handoff._public_selected_metadata_sources_v1(publication=handles[0],
+                        metadata=entry[4],known_as_of_ns=wall)==((source_binding,*additional_sources)
+                            if 'terms_transition' in fee_case else (source_binding,))
+                    _assert_lp02_published_fee_values(handles[0],applicability,fee_case,wall)
+                    if 'terms_transition' in fee_case:
+                        _assert_lp02_scalar_service(handles[0],expected_price='0.4900')
+                    return
+                if expected_preliminary != 'UNSELECTED':
+                    retained=handoff._public_committed_translations_v1(publication=handles[0])
+                    book,=tuple(row for row in retained if row.stream_disposition.get('event_kind')=='BOOK_REPLACEMENT')
+                    assert book.normalized_frame.parsed_source_scalar_tree_or_none['settlement_preliminary_or_none'] is expected_preliminary
+                    _assert_lp02_contractual_settlement(entry[4][0],book,wall)
+                if catalog_indices:
+                    selected_metadata,=entry[4]
+                    assert selected_metadata.generation==metadata.generation+len(catalog_indices)
+                    assert selected_metadata.metadata_id!=metadata.metadata_id and metadata not in session._active_metadata
+                    catalog_originals={session._observations[index].observation_id for index in range(len(session._observations))
+                        if session._observations[index].operation_id in {'K_MARKET','K_EVENT','K_SERIES','P_MARKET','G_EVENT','G_EVENTS'}}
+                    assert {row[0] for row in selected_metadata.field_lineage} <= catalog_originals
+                if expected_reference is not None:
+                    assert not entry[3] and not entry[7].typed_payload.candidate_event_refs
+                    assert entry[7].typed_payload.commit_evidence['reconstructed_state_json']=='{}'
+                    refs=tuple(row for row in handoff._public_reference_translations_v1(publication=handles[0])
+                        if row.stream_disposition['kind']=='PUBLIC_REFERENCE')
+                    refs=tuple(row for row in refs if row.stream_disposition['operation_id']==expected_reference[0])
+                    assert len(refs)==1
+                    assert refs[0].normalized_frame.parsed_source_scalar_tree_or_none==expected_reference[1]
+                    if separate_refresh_sources:
+                        refresh_originals={row.observation_id for row in session._observations
+                            if row.operation_id in {'K_SERIES_FEES','K_EVENT_FEES'}}
+                        assert entry[15][metadata.instrument_id]==frozenset((*refresh_originals,refs[0].observation_ref))
+                        assert handoff._public_selected_metadata_sources_v1(publication=handles[0],metadata=entry[4],
+                            known_as_of_ns=wall)==(source_binding,*additional_sources)
+                        sealed=handoff._public_committed_observation_plans_v1(publication=handles[0])
+                        saved=dict(session._observation_plans)
+                        try:
+                            session._observation_plans.clear()
+                            assert set(sealed)=={row.observation_id for row in session._observations}
+                            assert handoff._public_selected_metadata_sources_v1(publication=handles[0],metadata=entry[4],
+                                known_as_of_ns=wall)==(source_binding,*additional_sources)
+                        finally:
+                            session._observation_plans.update(saved)
+                    return
+                assert (expected_price is None) != (expected_book is None)
+                if expected_sequence_unavailable:
+                    state,=entry[3].values()
+                    assert state.state_vector.availability_state.value=='AVAILABLE_CURRENT_STATE'
+                    assert state.state_vector.continuity_state.value=='SEQUENCE_UNAVAILABLE'
+                    assert state.last_provider_sequence_end_or_none is None
+                    # Frozen consumers require a contiguous book. Current-state
+                    # Retail observations cannot acquire that label via finality.
+                    with pytest.raises(ComputationControlPlaneError,match='public contiguous top-of-book capability is unavailable'):
+                        _assert_lp02_book_services(handles[0],expected_book=expected_book)
+                    return
+                if expected_lifecycle_blocked:
+                    state,=entry[3].values()
+                    assert state.state_vector.lifecycle_state=='METADATA_REFRESH_REQUIRED'
+                    assert state.state_vector.availability_state.value=='LIFECYCLE_BLOCKED'
+                    with pytest.raises(ComputationControlPlaneError,match='selected public lifecycle'):
+                        if expected_book is not None:
+                            _assert_lp02_book_services(handles[0],expected_book=expected_book)
+                        else:
+                            _assert_lp02_scalar_service(handles[0],expected_price=expected_price)
+                    return
+                if expected_book is not None:
+                    _assert_lp02_book_services(handles[0],expected_book=expected_book)
+                else:
+                    _assert_lp02_scalar_service(handles[0],expected_price=expected_price)
+            finally:
+                session.close_v1()

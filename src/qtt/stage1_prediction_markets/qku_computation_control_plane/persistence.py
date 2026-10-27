@@ -10,7 +10,10 @@ from _thread import RLock
 from typing import Mapping
 
 from .accounting import JournalPostingV1, JournalTransactionV1, ReconciliationBreakReceiptV1
-from .context import _native_ident, parse_utc, _f14_freeze_v1, _f14_plain_v1
+from .context import (
+    _native_ident, _native_require, _public_counter_v1, _public_nanoseconds_v1, _public_refs_v1,
+    parse_utc, _f14_freeze_v1, _f14_plain_v1,
+)
 from .errors import ContractValidationError, PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import (
     IdempotencyClaimReceiptV1,
@@ -33,6 +36,7 @@ from .receipts import (
     _source_use_reconstruct_spine_v1, _source_use_from_storage_v1, _source_use_append_disposition_v1,
     SourceUseAttributedActionV1, _source_action_ref_v1, _source_action_from_storage_v1,
     _source_action_reconstruct_spine_v1, _source_use_require_v1,
+    PublicDataSourceUseActionV1, PublicSourceUseOriginalV1, _public_identity_v1, _public_validate_spine_v1,
 )
 from .rollback import (
     JournalReversalBundleV1,
@@ -47,6 +51,7 @@ from .serialization import (deterministic_json, _f14_require_v1,
 
 class PersistenceAvailabilityV1(StrEnum):
     AVAILABLE_REFERENCE = "AVAILABLE_REFERENCE"
+    AVAILABLE_PHASE_A_LOCAL_DURABLE = "AVAILABLE_PHASE_A_LOCAL_DURABLE"
     AVAILABLE_OWNER_CONTROL_EPHEMERAL = "AVAILABLE_OWNER_CONTROL_EPHEMERAL"
     UNAVAILABLE = "UNAVAILABLE"
     SCHEMA_MISMATCH = "SCHEMA_MISMATCH"
@@ -83,11 +88,70 @@ class PersistenceTransactionV1(ABC):
     def rollback(self) -> None: ...
 
 
+def _public_read_request_v1(request, references):
+    from .receipts import _public_profile_v1
+
+    _public_profile_v1(request.profile_id)
+    for name in ("scope_ref", "capture_session_id", "root_ref"):
+        _native_ident(getattr(request, name))
+    _public_refs_v1(references)
+    for name in ("effective_cutoff_ns", "recorded_cutoff_ns"):
+        _public_nanoseconds_v1(getattr(request, name))
+    _public_counter_v1(request.source_use_generation, allow_zero=True)
+    _public_counter_v1(request.maximum_rows)
+    _public_counter_v1(request.maximum_bytes)
+    _native_require(len(references) <= request.maximum_rows <= 4096, "public read row bound exceeded")
+    _native_require(type(request.read_purpose) is str and request.read_purpose in {
+        "RESTORE_FOR_CURRENT_SESSION", "AUTHORIZED_HISTORICAL_RECONSTRUCTION"}, "unsupported public read purpose")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicCaptureReadRequestV1:
+    profile_id: object
+    scope_ref: str
+    capture_session_id: str
+    observation_refs: tuple[str, ...]
+    read_purpose: str
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+    source_use_generation: int
+    maximum_rows: int
+    maximum_bytes: int
+    root_ref: str
+
+    def __post_init__(self):
+        _public_read_request_v1(self, self.observation_refs)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicPublicationReadRequestV1:
+    profile_id: object
+    scope_ref: str
+    capture_session_id: str
+    publication_refs: tuple[str, ...]
+    read_purpose: str
+    effective_cutoff_ns: int
+    recorded_cutoff_ns: int
+    source_use_generation: int
+    maximum_rows: int
+    maximum_bytes: int
+    root_ref: str
+
+    def __post_init__(self):
+        _public_read_request_v1(self, self.publication_refs)
+
+
 class PersistenceAdapterV1(ABC):
     """Typed append-only storage boundary; production technology remains unselected."""
 
     production_selection_state = PRODUCTION_PERSISTENCE_SELECTION_STATE_V1
     _source_use_integrity_failed_v1 = False
+
+    def load_committed_public_capture_v1(self, request: PublicCaptureReadRequestV1, *, root_capability=None):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "public capture read custody unavailable")
+
+    def load_committed_public_publication_v1(self, request: PublicPublicationReadRequestV1, *, root_capability=None):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "public publication read custody unavailable")
 
     @property
     @abstractmethod
@@ -300,7 +364,7 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         return any(record_ref in rows for table, rows in tables.items() if table != "idempotency_claims")
 
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
-        if _source_action_reserved_v1(record):
+        if _source_action_reserved_v1(record) or _public_record_reserved_v1(record):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions require original owner composition")
         tx = self._transaction(transaction)
         payload = record.typed_payload
@@ -607,12 +671,12 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
             )
         if record_ref.startswith("SOURCE_USE::"):
             return self.load_committed_source_use_record_v1(record_ref)
-        if record_ref.startswith("SOURCE_ACTION::"):
+        if record_ref.startswith(("SOURCE_ACTION::", '["PUBLIC_')):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions require specialized reads")
         with self._lock:
             for rows in self._tables.values():
                 if record_ref in rows:
-                    if _source_action_reserved_v1(rows[record_ref]):
+                    if _source_action_reserved_v1(rows[record_ref]) or _public_record_reserved_v1(rows[record_ref]):
                         raise PersistenceContractError(ReasonCode.PERSISTENCE_CONFLICT, "unexpected attributed action in reference storage")
                     return rows[record_ref]
         return None
@@ -634,6 +698,9 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
                 if table == "idempotency_claims":
                     continue
                 for record in rows.values():
+                    if _public_record_reserved_v1(record):
+                        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                            "public records require their purpose-specific owner")
                     effective = getattr(record, "effective_at", None)
                     recorded = getattr(record, "recorded_at", getattr(record, "created_at", None))
                     aggregate = getattr(record, "aggregate_id", None)
@@ -645,9 +712,22 @@ class InMemoryPersistenceAdapterV1(PersistenceAdapterV1):
         return tuple(sorted(records, key=lambda row: (getattr(row, "aggregate_id", ""), getattr(row, "sequence", getattr(row, "event_sequence", 0)), getattr(row, "recorded_at", getattr(row, "created_at", minimum)), getattr(row, "record_id", getattr(row, "economic_event_id", getattr(row, "journal_transaction_id", getattr(row, "transition_id", "")))))))
 
 
+def _public_record_reserved_v1(record: object) -> bool:
+    from .receipts import PublicNativeObservationV1, PublicPublicationRecordV1
+
+    return (getattr(record, "record_type", None) in {
+                EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL, EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE,
+                EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION}
+            or type(getattr(record, "typed_payload", None)) in {
+                PublicSourceUseOriginalV1, PublicDataSourceUseActionV1, PublicNativeObservationV1, PublicPublicationRecordV1}
+            or any(type(value) is str and value.startswith('["PUBLIC_')
+                   for value in (getattr(record, "record_id", None), getattr(record, "aggregate_id", None))))
+
+
 def _source_action_reserved_v1(record: object) -> bool:
     return (getattr(record, "record_type", None) == EconomicRecordTypeV1.SOURCE_USE_ATTRIBUTED_ACTION
             or isinstance(getattr(record, "typed_payload", None), SourceUseAttributedActionV1)
+            or type(getattr(record, "typed_payload", None)) is PublicDataSourceUseActionV1
             or any(type(value) is str and value.startswith("SOURCE_ACTION::")
                    for value in (getattr(record, "record_id", None), getattr(record, "aggregate_id", None))))
 
@@ -717,6 +797,22 @@ class OwnerControlMemoryAdapterV1(InMemoryPersistenceAdapterV1):
 
     def _action_read_v1(self, tables, *, event_ref=None, process_ref=None):
         _source_use_require_v1(self._scope_valid_v1())
+        if getattr(self, "_public_control_mode", False):
+            if process_ref is not None:
+                _source_use_require_v1(process_ref == self._control_scope[2])
+                aggregate = _public_identity_v1("PUBLIC_SOURCE_ACTION_V1", process_ref)
+                matches = [row for row in tables["receipt_records"].values() if row.aggregate_id == aggregate]
+                if not matches:
+                    return None
+                for row in matches:
+                    _source_action_reconstruct_spine_v1(row)
+                event_ref = max(matches, key=lambda row: row.sequence).record_id
+            from .receipts import _public_control_ref_v1
+
+            identity = _public_control_ref_v1(event_ref, kind="PUBLIC_SOURCE_ACTION_V1")
+            _source_use_require_v1(identity[1] == self._control_scope[2])
+            value = tables["receipt_records"].get(event_ref)
+            return None if value is None else _source_action_from_storage_v1(value, record_id=event_ref)
         try:
             if process_ref is not None:
                 _source_use_require_v1(process_ref == self._control_scope[2])
@@ -775,6 +871,25 @@ class OwnerControlMemoryAdapterV1(InMemoryPersistenceAdapterV1):
             existing = self.load_source_use_record_for_update_v1(tx, record.record_id)
             _source_use_append_disposition_v1(record, head, existing)
         self._insert(tx, "receipt_records", record.record_id, record)
+
+    def _source_use_read_v1(self, tables, *, record_ref=None, stream_id=None):
+        if not getattr(self, "_public_control_mode", False):
+            return super()._source_use_read_v1(tables, record_ref=record_ref, stream_id=stream_id)
+        _source_use_require_v1(self._scope_valid_v1())
+        if stream_id is not None:
+            _source_use_stream_id_v1(stream_id)
+            aggregate = _public_identity_v1("PUBLIC_SOURCE_ORIGINAL_V1", stream_id)
+            matches = [row for row in tables["receipt_records"].values() if row.aggregate_id == aggregate]
+            if not matches:
+                return None
+            for row in matches:
+                _source_use_reconstruct_spine_v1(row)
+            record_ref = max(matches, key=lambda row: row.sequence).record_id
+        from .receipts import _public_control_ref_v1
+
+        _public_control_ref_v1(record_ref, kind="PUBLIC_SOURCE_ORIGINAL_V1")
+        value = tables["receipt_records"].get(record_ref)
+        return None if value is None else _source_use_from_storage_v1(value, record_id=record_ref)
 
     def _validate_action_batch_v1(self, transaction, *, complete):
         tx = self._transaction(transaction)

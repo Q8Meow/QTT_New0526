@@ -723,15 +723,75 @@ def test_exact_orthogonal_registry_and_transition_matrix() -> None:
     )
     assert len(role_path_refs) == 68
     assert len({path_ref.path for path_ref in role_path_refs}) == 34
+    # Frozen role-reference identities, with only LP02's ROLE-02/04 market-data
+    # path transition. A present implementation does not discharge role holds.
+    prefix = "src/qtt/stage1_prediction_markets/"
+    qcp = prefix + "qku_computation_control_plane/"
+    market_data = prefix + "selected_venues/market_data.py"
+    paths_by_role = (
+        ("stage1_launch_graph.py", "identity_adapter.py", "specification.py"),
+        ("input_resolver.py", "point_in_time.py", market_data),
+        ("source_policy.py", "source_rights.py", "freshness.py", "point_in_time.py"),
+        (market_data,),
+        ("implementation_registry.py", "economic_math.py"),
+        ("implementation_registry.py", "economic_math.py"),
+        ("evidence.py", "model_risk.py"),
+        ("evidence.py", "model_risk.py"),
+        ("bindings.py", "economic_math.py", prefix+"selected_venues/profiles.py"),
+        ("economic_math.py", "implementation_registry.py"),
+        ("economic_math.py", "evidence.py"),
+        ("economic_math.py", "implementation_registry.py"),
+        ("economic_math.py", "evidence.py"),
+        ("latency_policy.py", "economic_math.py"),
+        ("economic_math.py", "accounting.py"),
+        ("evidence.py", "model_risk.py", "implementation_registry.py"),
+        ("accounting.py", "transaction.py", "persistence.py", prefix+"selected_venues/private_state.py",
+            prefix+"selected_venues/reconciliation.py"),
+        ("authority.py", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("economic_math.py", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("implementation_registry.py", "economic_math.py", "quantum_adapter.py", "quantum_benchmark.py"),
+        ("lifecycle.py", prefix+"selected_venues/execution_policy.py"),
+        ("lifecycle.py", prefix+"selected_venues/execution_policy.py", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("economic_math.py", "evidence.py", "accounting.py"),
+        ("mode_snapshot_policy.py", "authority.py"),
+        (prefix+"selected_venues/execution_router.py",),
+        ("dependency_graph.py", "fallback.py"),
+        ("quantum_adapter.py", "quantum_benchmark.py", "plugin_adapter.py"),
+        ("agent_policy.py", "llm_gateway.py"),
+    )
+    future_pairs = {
+        ("ROLE-09", prefix+"selected_venues/profiles.py"),
+        ("ROLE-17", prefix+"selected_venues/private_state.py"),
+        ("ROLE-17", prefix+"selected_venues/reconciliation.py"),
+        ("ROLE-18", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("ROLE-19", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("ROLE-21", prefix+"selected_venues/execution_policy.py"),
+        ("ROLE-22", prefix+"selected_venues/execution_policy.py"),
+        ("ROLE-22", prefix+"capital_risk/stage1_risk_policy.py"),
+        ("ROLE-25", prefix+"selected_venues/execution_router.py"),
+    }
+    expected_refs = tuple((f"ROLE-{index:02}", path if path.startswith(prefix) else qcp+path)
+        for index, paths in enumerate(paths_by_role, 1) for path in paths)
+    assert tuple((role.role_id, ref.path) for role in graph.roles for ref in role.path_refs) == expected_refs
+    for role in graph.roles:
+        for ref in role.path_refs:
+            future = (role.role_id, ref.path) in future_pairs
+            assert ref.disposition.value == ("FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED" if future else "EXISTING_CANONICAL_OWNER")
+            assert ref.semantic_owner == role.semantic_owner
+    assert {(role.role_id, ref.path) for role in graph.roles for ref in role.path_refs if ref.path == market_data} == {
+        ("ROLE-02", market_data), ("ROLE-04", market_data)}
+    for role_id, failure in (("ROLE-02", "UNAVAILABLE"), ("ROLE-04", "NO_TRADE")):
+        assert role_by_id[role_id].disposition.value == "TRUE_MISSING_DEPENDENCY"
+        assert role_by_id[role_id].default_failure_route.value == failure
     assert sum(
         path_ref.disposition.value == "EXISTING_CANONICAL_OWNER"
         for path_ref in role_path_refs
-    ) == 57
+    ) == 59
     assert sum(
         path_ref.disposition.value
         == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
         for path_ref in role_path_refs
-    ) == 11
+    ) == 9
     assert graph.future_sole_write_role_id == "ROLE-25"
     assert tuple(
         role.role_id

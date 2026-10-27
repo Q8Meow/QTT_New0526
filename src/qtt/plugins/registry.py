@@ -484,6 +484,23 @@ def _validate_launch_projection(
     derived_edges: list[tuple[str, str]] = []
     role_paths: list[str] = []
     path_dispositions: Counter[str] = Counter()
+    owner_path_refs: list[tuple[str, str, str]] = []
+    owner_prefix = "src/qtt/stage1_prediction_markets/"
+    public_market_data = owner_prefix + "selected_venues/market_data.py"
+    implemented_public_refs = frozenset({("ROLE-02", public_market_data), ("ROLE-04", public_market_data)})
+    # The original eleven future references admit exactly these two LP02
+    # transitions. Counts alone must not credit another role or owner path.
+    baseline_future_refs = implemented_public_refs | frozenset({
+        ("ROLE-09", owner_prefix + "selected_venues/profiles.py"),
+        ("ROLE-17", owner_prefix + "selected_venues/private_state.py"),
+        ("ROLE-17", owner_prefix + "selected_venues/reconciliation.py"),
+        ("ROLE-18", owner_prefix + "capital_risk/stage1_risk_policy.py"),
+        ("ROLE-19", owner_prefix + "capital_risk/stage1_risk_policy.py"),
+        ("ROLE-21", owner_prefix + "selected_venues/execution_policy.py"),
+        ("ROLE-22", owner_prefix + "selected_venues/execution_policy.py"),
+        ("ROLE-22", owner_prefix + "capital_risk/stage1_risk_policy.py"),
+        ("ROLE-25", owner_prefix + "selected_venues/execution_router.py"),
+    })
     dispositions: list[str] = []
     for expected_role_id, raw_role in zip(
         expected_role_ids,
@@ -559,12 +576,25 @@ def _validate_launch_projection(
             per_role_paths.append((path, path_disposition))
             role_paths.append(path)
             path_dispositions[path_disposition] += 1
+            owner_path_refs.append((role_id, path, path_disposition))
         if len(per_role_paths) != len(set(per_role_paths)):
             _raise(
                 PluginPackageReasonCodeV1.IDENTITY_INVALID,
                 "role owner-path rows must be duplicate-free",
             )
         roles.append(role)
+
+    if (
+        {(role, path) for role, path, state in owner_path_refs
+         if state == "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"}
+        != baseline_future_refs - implemented_public_refs
+        or {(role, path, state) for role, path, state in owner_path_refs if path == public_market_data}
+        != {(role, path, "EXISTING_CANONICAL_OWNER") for role, path in implemented_public_refs}
+    ):
+        _raise(
+            PluginPackageReasonCodeV1.ADMISSION_INVALID,
+            "LP02 exact role/owner-path disposition transitions differ",
+        )
 
     role_id_set = set(expected_role_ids)
     if any(
@@ -588,8 +618,8 @@ def _validate_launch_projection(
         or path_dispositions
         != Counter(
             {
-                "EXISTING_CANONICAL_OWNER": 57,
-                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+                "EXISTING_CANONICAL_OWNER": 57 + len(implemented_public_refs),
+                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": len(baseline_future_refs - implemented_public_refs),
             }
         )
         or len(set(role_paths)) != 34

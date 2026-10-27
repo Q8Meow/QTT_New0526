@@ -9,7 +9,8 @@ from fractions import Fraction
 import json
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Iterable, Mapping
 
 from ..stage1_prediction_markets.qku_computation_control_plane.economic_math import (
     KalshiFeeRoundingInputV1,
@@ -46,6 +47,196 @@ if TYPE_CHECKING:
 
 GENERATED_PREFIX = Path("docs/master_plan/generated/pr169_pretrade1")
 REGISTRY_REF = "docs/master_plan/generated/pr169_pretrade1/pretrade_decision_registry.jsonl"
+
+
+def resolve_selected_venue_semantics_v1(*, binding, profile_id, instrument_id: str,
+                                      known_as_of_ns: int, effective_at_ns: int,
+                                      required_capabilities: tuple[str, ...]) -> Mapping[str, str]:
+    """Resolve submit-disabled semantic rules for a conditional PRETRADE use.
+
+    The returned values are source semantics, never a native execution grant.
+    A missing capability blocks only the requesting conditional calculation.
+    """
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import (
+        _native_require, _public_refs_v1, _public_nanoseconds_v1,
+    )
+    from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import SelectedVenueRealityBindingV1
+
+    _native_require(type(binding) is SelectedVenueRealityBindingV1, "exact venue reality binding required")
+    binding.__post_init__()
+    _native_ident(instrument_id)
+    _public_refs_v1(required_capabilities)
+    _public_nanoseconds_v1(known_as_of_ns)
+    _public_nanoseconds_v1(effective_at_ns)
+    _native_require(binding.profile_id is profile_id and instrument_id in binding.instrument_scope
+        and binding.known_at_ns <= known_as_of_ns < binding.expires_at_ns
+        and binding.effective_from_ns <= effective_at_ns < binding.expires_at_ns,
+        "venue semantics scope/knowledge/effective interval mismatch")
+    resolved = {}
+    for capability in required_capabilities:
+        section, separator, name = capability.partition(".")
+        _native_require(separator and section in {"order_semantics", "quantity_price_semantics", "queue_semantics",
+            "maintenance_semantics", "settlement_semantics", "emergency_profile"}, "unselected semantic capability")
+        values = getattr(binding, section)
+        fact = getattr(values, name, None) if section == "emergency_profile" else dict(values.fields).get(name)
+        if (fact is None or capability in binding.unavailable_capabilities
+                or fact.disposition != "SOURCE_BOUND_SUPPORTED"):
+            raise ContractValidationError(ReasonCode.OWNER_DATA_MISSING, "venue capability unavailable: " + capability)
+        resolved[capability] = fact.rule_id_or_none
+    return MappingProxyType(resolved)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicConditionalFillV1:
+    """A proposed YES-oriented fill, without order or execution authority."""
+
+    contracts: Decimal
+    price: Decimal
+    side: str
+    liquidity_role: str
+    fill_at_ns: int
+
+    def __post_init__(self):
+        from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_require, _public_nanoseconds_v1
+
+        quantity = _kalshi_bounded_fraction(self.contracts, "contracts", nonnegative=True)
+        price = _kalshi_bounded_fraction(self.price, "price", nonnegative=True)
+        _native_require(quantity > 0 and price <= 1, "conditional fill quantity/price domain")
+        _native_require(type(self.side) is str and self.side in {"BUY", "SELL"}
+                        and type(self.liquidity_role) is str and self.liquidity_role in {"MAKER", "TAKER"},
+                        "conditional fill side/role unavailable")
+        _public_nanoseconds_v1(self.fill_at_ns)
+
+
+def compose_public_fee_cashflows_v1(*, profile_id, market_scope: tuple[str, ...],
+                                  epochs, applicability, known_as_of_ns: int,
+                                  fills: tuple[PublicConditionalFillV1, ...],
+                                  order_ref: str, cap_domain_epoch_refs: tuple[str, ...],
+                                  prior_unrounded: Decimal, prior_collected: Decimal,
+                                  prior_rounding_overpayment: Decimal,
+                                  carry_evidence_refs: tuple[str, ...],
+                                  fresh_hypothetical_order: bool,
+                                  include_deferred_taker_rebate: bool) -> Mapping[str, object]:
+    """Compose one conditional order through existing scalar and cash owners.
+
+    These are evidence-use values. The public packet factory separately proves
+    original source/account/carry custody before any native consumer admission.
+    """
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import (
+        _native_require, _native_retail_finite_decimal_text_v1, _public_refs_v1, _public_nanoseconds_v1,
+    )
+    from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import resolve_public_fee_epoch_v1
+    from ..stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+    from ..stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+        _public_unrounded_fee_v1, public_fee_amount_v1, public_deferred_taker_rebate_v1,
+    )
+
+    _native_ident(order_ref)
+    _public_refs_v1(market_scope)
+    _public_refs_v1(cap_domain_epoch_refs)
+    _public_refs_v1(carry_evidence_refs, allow_empty=True)
+    _public_nanoseconds_v1(known_as_of_ns)
+    _native_require(type(fresh_hypothetical_order) is bool and type(include_deferred_taker_rebate) is bool
+        and type(fills) is tuple and 1 <= len(fills) <= 4096, "conditional order inputs invalid")
+    raw = _kalshi_bounded_fraction(prior_unrounded, "prior_unrounded", nonnegative=True)
+    collected = _kalshi_bounded_fraction(prior_collected, "prior_collected", nonnegative=True)
+    carry = _kalshi_bounded_fraction(prior_rounding_overpayment, "prior_rounding_overpayment", nonnegative=True, microdollars=True)
+    if fresh_hypothetical_order:
+        _native_require(raw == collected == carry == 0 and not carry_evidence_refs,
+                        "fresh hypothetical order cannot discard or relabel prior carry")
+    else:
+        _native_require(bool(carry_evidence_refs), "existing order requires full prior carry evidence")
+    selected, last = [], known_as_of_ns
+    for fill in fills:
+        _native_require(type(fill) is PublicConditionalFillV1, "exact conditional fill required")
+        fill.__post_init__()
+        _native_require(fill.fill_at_ns >= last, "conditional fills must be ordered and not precede the as-of")
+        last = fill.fill_at_ns
+        epoch = resolve_public_fee_epoch_v1(epochs=epochs, profile_id=profile_id, market_scope=market_scope,
+            applicability=applicability, known_as_of_ns=known_as_of_ns, effective_at_ns=fill.fill_at_ns,
+            liquidity_role=fill.liquidity_role)
+        _native_require(epoch.epoch_id in cap_domain_epoch_refs, "fee regime is outside the accepted order/cap domain")
+        selected.append(epoch)
+    _native_require(set(cap_domain_epoch_refs) <= {epoch.epoch_id for epoch in epochs}, "unknown order/cap epoch")
+    principal = sum((Fraction(fill.contracts)*Fraction(fill.price)*(1 if fill.side == "SELL" else -1) for fill in fills), Fraction(0))
+    render = _native_retail_finite_decimal_text_v1
+    amount = lambda value: Decimal(render(value))
+    charges = credits = deferred = Fraction(0)
+    if profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+        _native_require(applicability.fee_profile_id_or_none is not None
+            and applicability.balance_increment_text_or_none is not None,
+            "KAL-045 account fee classification/balance grid unavailable")
+        _native_require(raw == collected == 0 and not include_deferred_taker_rebate,
+                        "Kalshi does not use Retail fee-cap or weekly-rebate semantics")
+        compiled = []
+        for fill, epoch in zip(fills, selected, strict=True):
+            _native_require(epoch.formula_family == "EXPLICIT_ZERO" or (
+                epoch.formula_family == "QUADRATIC" and epoch.rounding_rule == "KALSHI_ACCOUNT_GRID"
+                and Fraction(dict(epoch.coefficients)["rate"]) == Fraction("0.07" if fill.liquidity_role == "TAKER" else "0.0175")),
+                "unsupported Kalshi fee family/role")
+            compiled.append(KalshiFeeRoundingInputV1(
+                revenue=_kalshi_decimal6(Fraction(fill.contracts)*Fraction(fill.price)*(1 if fill.side == "SELL" else -1), "revenue"),
+                model_fee=amount(_public_unrounded_fee_v1(epoch=epoch, contracts=fill.contracts, price=fill.price))))
+        terms = compose_kalshi_conditional_cashflows_v1(profile_id=profile_id.value, currency="USD", fills=tuple(compiled),
+            balance_increment=Decimal(applicability.balance_increment_text_or_none), prior_rounding_overpayment=prior_rounding_overpayment)
+        charges, credits, carry = Fraction(terms.platform_fee_total), Fraction(terms.expected_rebate_total), Fraction(terms.rounding_overpayment_after)
+    else:
+        _native_require(carry == 0, "non-Kalshi fee rule cannot consume Kalshi cash-grid carry")
+        retail = profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+        _native_require(retail or profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT, "unselected fee profile")
+        _native_require(retail or raw == collected == 0, "Gemini has no Retail cap carry")
+        if include_deferred_taker_rebate:
+            _native_require(retail and applicability.taker_tier_or_none is not None,
+                            "independent taker rebate qualification unavailable")
+        for fill, epoch in zip(fills, selected, strict=True):
+            use_cap = retail and fill.liquidity_role == "TAKER"
+            result = public_fee_amount_v1(epoch=epoch, contracts=fill.contracts, price=fill.price,
+                prior_unrounded=amount(raw) if use_cap else Decimal(0),
+                prior_collected=amount(collected) if use_cap else Decimal(0))
+            fee = Fraction(result["charged"])
+            charges += max(fee, Fraction(0))
+            credits += max(-fee, Fraction(0))
+            if use_cap:
+                raw, collected = Fraction(result["cumulative_unrounded"]), Fraction(result["cumulative_collected"])
+                if include_deferred_taker_rebate:
+                    deferred += Fraction(public_deferred_taker_rebate_v1(qualifying_collected_fee=amount(fee),
+                        proven_tier=applicability.taker_tier_or_none)["amount"])
+    return MappingProxyType(dict(entry_trade_cashflow_total=amount(principal), platform_fee_total=amount(charges),
+        expected_rebate_total=amount(credits+deferred), rounding_overpayment_after=amount(carry),
+        immediate_rebate_total=amount(credits), contingent_deferred_rebate_total=amount(deferred),
+        cumulative_unrounded=amount(raw), cumulative_collected=amount(collected),
+        selected_epoch_refs=tuple(epoch.epoch_id for epoch in selected), order_ref=order_ref,
+        cap_domain_epoch_refs=cap_domain_epoch_refs, carry_evidence_refs=carry_evidence_refs,
+        accounting_class="CONDITIONAL_CASHFLOW_NOT_AVAILABLE_BALANCE", no_order_authority=True))
+
+
+def compose_public_contractual_settlement_cashflow_v1(*, metadata, translations, known_as_of_ns, fills):
+    """Resolve one observed binary branch for proposed YES-position changes.
+
+    The other terminal branches, outcome probabilities and private cash posting
+    retain their own owners. A resolved branch does not create those inputs.
+    """
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import resolve_public_contractual_settlement_v1
+
+    _native_require(type(fills) is tuple and 0 < len(fills) <= 4096, "conditional settlement fills unavailable")
+    quantity, previous = Fraction(0), known_as_of_ns
+    for fill in fills:
+        _native_require(type(fill) is PublicConditionalFillV1, "conditional settlement requires exact proposed fills")
+        fill.__post_init__()
+        _native_require(fill.fill_at_ns >= previous, "conditional settlement fills precede the decision or are reordered")
+        previous = fill.fill_at_ns
+        quantity += Fraction(fill.contracts) * (1 if fill.side == "BUY" else -1)
+    value = resolve_public_contractual_settlement_v1(metadata=metadata,translations=translations,
+        known_as_of_ns=known_as_of_ns,effective_at_ns=known_as_of_ns,position_outcome="YES")
+    field = "win_terminal_cashflow_total" if value["resolved_outcome"] == "YES" else "lose_terminal_cashflow_total"
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_retail_finite_decimal_text_v1
+
+    return MappingProxyType(dict(field_name=field,
+        value=Decimal(_native_retail_finite_decimal_text_v1(quantity*Fraction(value["value_per_contract"]))),
+        source_observation_refs=tuple(dict.fromkeys((value["resolution_ref"],*value["original_observation_refs"]))),
+        resolution_revision=value["resolution_revision"],accounting_class="CONDITIONAL_CONTRACTUAL_VALUE_NOT_ACCOUNT_CASH",
+        no_order_authority=True))
 
 
 @dataclass(frozen=True, slots=True)

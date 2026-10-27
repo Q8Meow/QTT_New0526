@@ -514,6 +514,9 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
 
     assert_selected_branch(branch, adversarial_branches)
     if branch == context.S1_KALSHI_SCENARIO_BOOTSTRAP_BRANCH:
+        lp02 = "s1-lp02-selected-data-integration"
+        assert context.S1_LP02_SELECTED_DATA_INTEGRATION_BRANCH == lp02
+        assert_selected_branch(lp02, (lp02.upper(), lp02[:-1], lp02+"-copy", lp02+"/", "prefix-"+lp02))
         scheduled = "s1-kalshi-scheduled-fee-scenario"
         assert context.S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH == scheduled
         assert_selected_branch(scheduled, (

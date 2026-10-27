@@ -970,6 +970,92 @@ def kalshi_fee_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[froz
     return (frozenset(admitted), ())
 
 
+_PUBLIC_DATA_NATIVE_OWNER = "src/qtt/stage1_prediction_markets/selected_venues/market_data.py"
+_PUBLIC_DATA_NATIVE_TEMPLATE = '''
+def _public_tls_context_v1():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    _native_require(context.check_hostname and context.verify_mode == ssl.CERT_REQUIRED,
+                    "public transport requires verified TLS")
+    return context
+
+def _public_admit_effect_v1(*, binding, descriptor, method):
+    facts = _public_binding_facts_v1(binding)
+    session = binding._owner
+    _native_require(facts["native_qualified"] is True and type(session) is PublicMarketDataSessionV1
+                    and _PUBLIC_SESSIONS_V1.get(id(session)) is session,
+                    "synthetic or unowned permission cannot open a native public transport")
+    _, wall, _ = session._guard_v1()
+    plan = _resolve_public_operational_inputs_v1(binding=binding, evaluated_at_ns=wall)
+    matches = [row for row in plan if row[4] == descriptor and row[4]["method"] == method]
+    _native_require(len(matches) == 1, "native effect descriptor differs from the admitted fixed request")
+    return matches[0]
+
+def _public_open_https_v1(descriptor, timeout, *, binding):
+    _public_admit_effect_v1(binding=binding, descriptor=descriptor, method="GET")
+    _native_require(type(timeout) in (int, float) and 0 < timeout < float("inf"), "invalid finite HTTPS timeout")
+    timeout = min(timeout, binding._owner._timeout_v1(binding._capture.scope.budget.open_timeout_ns))
+    import http.client
+    return http.client.HTTPSConnection(descriptor["host"], port=443, timeout=timeout,
+                                       context=_public_tls_context_v1())
+
+def _public_open_websocket_v1(descriptor, headers, *, binding, open_timeout, close_timeout, max_size, max_queue):
+    _public_admit_effect_v1(binding=binding, descriptor=descriptor, method="WEBSOCKET")
+    _native_require(headers is None, "caller-selected public handshake headers are forbidden")
+    budget = binding._capture.scope.budget
+    _native_require(type(max_size) is int and 0 < max_size <= budget.max_message_bytes
+                    and type(max_queue) is int and 0 < max_queue <= budget.queue_high_water,
+                    "WebSocket buffering exceeds the admitted finite budget")
+    for timeout in (open_timeout, close_timeout):
+        _native_require(type(timeout) in (int, float) and 0 < timeout < float("inf"), "invalid finite WebSocket timeout")
+    open_timeout = min(open_timeout, binding._owner._timeout_v1(budget.open_timeout_ns))
+    close_timeout = min(close_timeout, budget.close_timeout_ns / 1_000_000_000)
+    import logging
+    import websockets
+    from websockets.sync.client import connect
+    from ..qku_computation_control_plane.source_policy import _public_handshake_headers_v1
+    _native_require(websockets.__version__ == "17.0.1", "unqualified public WebSocket runtime")
+    uri = "wss://" + descriptor["host"] + descriptor["path"]
+    if descriptor["query"]:
+        uri += "?" + descriptor["query"]
+    logger = logging.Logger("QTT_PUBLIC_CAPTURE")
+    logger.disabled, logger.propagate = True, False
+    ephemeral = _public_handshake_headers_v1(binding=binding, descriptor=descriptor)
+    try:
+        tls = _public_tls_context_v1()
+        _public_admit_effect_v1(binding=binding, descriptor=descriptor, method="WEBSOCKET")
+        effective_open_timeout = min(open_timeout, binding._owner._timeout_v1(budget.open_timeout_ns))
+        return connect(uri, ssl=tls, additional_headers=ephemeral, proxy=None,
+                       compression=None, ping_interval=None, open_timeout=effective_open_timeout,
+                       close_timeout=close_timeout, max_size=max_size, max_queue=max_queue, logger=logger)
+    finally:
+        ephemeral.clear()
+'''
+
+
+def public_data_native_admission_v1(relpath: str, tree: ast.Module) -> tuple[frozenset[tuple], tuple[str, ...]]:
+    """Admit five transport nodes only when all four effect boundaries match."""
+    if relpath != _PUBLIC_DATA_NATIVE_OWNER:
+        return frozenset(), ()
+    admitted, failures = set(), []
+    for expected in ast.parse(_PUBLIC_DATA_NATIVE_TEMPLATE).body:
+        found = [node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                 and node.name == expected.name]
+        if (len(found) != 1 or found[0] not in tree.body
+                or ast.dump(found[0], include_attributes=False) != ast.dump(expected, include_attributes=False)):
+            failures.append("PUBLIC_DATA_NATIVE_FUNCTION_TEMPLATE:" + expected.name)
+            continue
+        for node in ast.walk(found[0]):
+            selected = isinstance(node, (ast.Import, ast.ImportFrom)) and any(
+                name == "http.client" or name == "websockets" or name.startswith("websockets.")
+                for name in _imported_module_names(node))
+            if isinstance(node, ast.Call):
+                selected = ast.unparse(node.func) in {"http.client.HTTPSConnection", "connect"}
+            if selected:
+                admitted.add((type(node).__name__, node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
+    return (frozenset(), tuple(failures)) if failures else (frozenset(admitted), ())
+
+
 # Reviewed, literal native entry/function boundaries. These are narrow AST
 # templates and call sites, never a module-wide permission for native effects.
 _SOURCE_USE_NATIVE_PATH = "src/qtt/service/owner_source_use_windows.py"
@@ -979,7 +1065,7 @@ _SOURCE_USE_NATIVE_TEMPLATES = {
     "_known_folders_v1": "def _known_folders_v1(api):\n    from uuid import UUID\n    paths = []\n    for fixed in ('905e63b6-c1bf-494e-b29c-65b732d3d21a', '62ab5d82-fdc1-4dc3-a9dd-070d1d495d97'):\n        guid = (ctypes.c_ubyte * 16).from_buffer_copy(UUID(fixed).bytes_le)\n        pointer = ctypes.c_void_p()\n        _require(api.shell.SHGetKnownFolderPath(ctypes.byref(guid), 0, None, ctypes.byref(pointer)) == 0 and pointer.value)\n        try:\n            value = _native_utf16_v1(pointer.value, 32768)[0]\n        finally:\n            api.ole.CoTaskMemFree(pointer)\n        _require(len(value) >= 3 and value[1:3] == ':\\\\' and value[0].isascii() and value[0].isalpha() and (not value.startswith('\\\\')) and (':' not in value[2:]))\n        volume = value[:3]\n        filesystem = ctypes.create_unicode_buffer(32)\n        _require(api.kernel.GetDriveTypeW(volume) == 3 and api.kernel.GetVolumeInformationW(volume, None, 0, None, None, None, filesystem, len(filesystem)) and (filesystem.value == 'NTFS'))\n        paths.append(Path(value))\n    return tuple(paths)",
     "_open_control_object_v1": "def _open_control_object_v1(api, path, directory, sid, retained):\n    text = str(path)\n    _require(path.is_absolute() and len(text) < 32760 and (':' not in text[2:]) and (not text.startswith('\\\\')))\n    handle = api.kernel.CreateFileW(text, 131072 | 128 | 1, 1, None, 3, 2097152 | (33554432 if directory else 0), None)\n    _require(handle not in (None, ctypes.c_void_p(-1).value))\n    retained.append(handle)\n    state = _object_state_v1(api, handle, path, directory)\n    _check_acl_v1(_observe_acl_v1(api, handle), sid, directory)\n    _require(_object_state_v1(api, handle, path, directory) == state)\n    return (handle, state)",
     "_check_interpreter_v1": "def _check_interpreter_v1(installation):\n    runtime = installation / 'runtime'\n    expected = (runtime / 'python314.zip', runtime, installation / 'app', installation / 'deps')\n    _require(sys.version_info[:3] == (3, 14, 6) and sys.platform == 'win32' and (os.name == 'nt') and (ctypes.sizeof(ctypes.c_void_p) == 8) and (getattr(sys.implementation, '_multiarch', None) == 'win-amd64') and all((getattr(sys.flags, name) == 1 for name in ('isolated', 'no_site', 'ignore_environment', 'safe_path', 'dont_write_bytecode'))) and (sys.prefix == sys.base_prefix) and (sys.exec_prefix == sys.base_exec_prefix) and (os.path.normcase(sys.executable) == os.path.normcase(str(runtime / 'pythonw.exe'))) and (tuple((os.path.normcase(str(Path(value))) for value in sys.path)) == tuple((os.path.normcase(str(value)) for value in expected))) and (os.path.normcase(os.getcwd()) == os.path.normcase(str(runtime))) and (not {'site', 'sitecustomize', 'usercustomize'}.intersection(sys.modules)) and (len(sys.argv) == 1) and (os.path.normcase(sys.argv[0]) == os.path.normcase(str(installation / 'app' / 'qtt' / 'service' / 'owner_source_use_windows.py'))) and (os.path.normcase(__file__) == os.path.normcase(sys.argv[0])))",
-    "_bootstrap_owner_source_use_v1": "def _bootstrap_owner_source_use_v1():\n    api = _native_system_v1()\n    retained = []\n    try:\n        sid = _check_principal_v1(_observe_principal_v1(api))\n        program_files, program_data = _known_folders_v1(api)\n        installation = program_files / 'QTT' / 'OwnerControl'\n        _check_interpreter_v1(installation)\n        for anchor in (program_files, program_data):\n            _open_control_object_v1(api, anchor / 'QTT', True, sid, retained)\n            _open_control_object_v1(api, anchor / 'QTT' / 'OwnerControl', True, sid, retained)\n        opened = {}\n        seen_ids = set()\n        stack = [installation]\n        while stack:\n            directory = stack.pop()\n            with os.scandir(directory) as entries:\n                for entry in entries:\n                    _require(len(opened) < 65536 and entry.name not in {'.', '..'} and (':' not in entry.name))\n                    path = directory / entry.name\n                    is_directory = entry.is_dir(follow_symlinks=False)\n                    handle, state = _open_control_object_v1(api, path, is_directory, sid, retained)\n                    _require(state[:2] not in seen_ids)\n                    seen_ids.add(state[:2])\n                    opened[os.path.normcase(str(path))] = (handle, state)\n                    if is_directory:\n                        stack.append(path)\n        for relative, directory in (('runtime', True), ('app', True), ('deps', True), ('runtime/pythonw.exe', False), ('runtime/python314.zip', False), ('runtime/python314._pth', False), ('app/qtt/service/owner_source_use_windows.py', False)):\n            required = opened.get(os.path.normcase(str(installation / relative)))\n            _require(required is not None and required[1][5] is directory)\n        pth = installation / 'runtime' / 'python314._pth'\n        handle, state = opened[os.path.normcase(str(pth))]\n        pth_raw = _read_control_bytes_v1(api, handle, state[3], 256)\n        _require(pth_raw in (b'python314.zip\\n.\\n../app\\n../deps\\n', b'python314.zip\\r\\n.\\r\\n../app\\r\\n../deps\\r\\n') and _object_state_v1(api, handle, pth, False) == state)\n        config = program_data / 'QTT' / 'OwnerControl' / 'enrollment.json'\n        handle, state = _open_control_object_v1(api, config, False, sid, retained)\n        raw = _read_control_bytes_v1(api, handle, state[3], 65536)\n        _require(_object_state_v1(api, handle, config, False) == state)\n        _bind_native_module_identity_v1()\n        from .owner_source_use import _read_public_enrollment_v1\n        enrollment = _read_public_enrollment_v1(raw)\n        _require(enrollment.approval_sid == sid and enrollment.root_state != 'DISABLED')\n        root = object.__new__(_SourceUseNativeRootV1)\n        root.api, root.handles, root.enrollment, root.sid = (api, retained, enrollment, sid)\n        root.closed, root.operation = (False, None)\n        from threading import RLock\n        root.operation_lock = RLock()\n        root.window = None\n        root.completion_worker = None\n        root.completed = {}\n        _ROOTS[id(root)] = root\n        return root\n    except BaseException:\n        for handle in reversed(retained):\n            api.kernel.CloseHandle(handle)\n        raise",
+    "_bootstrap_owner_source_use_v1": "def _bootstrap_owner_source_use_v1():\n    api = _native_system_v1()\n    retained = []\n    try:\n        sid = _check_principal_v1(_observe_principal_v1(api))\n        program_files, program_data = _known_folders_v1(api)\n        installation = program_files / 'QTT' / 'OwnerControl'\n        _check_interpreter_v1(installation)\n        for anchor in (program_files, program_data):\n            _open_control_object_v1(api, anchor / 'QTT', True, sid, retained)\n            _open_control_object_v1(api, anchor / 'QTT' / 'OwnerControl', True, sid, retained)\n        opened = {}\n        seen_ids = set()\n        stack = [installation]\n        while stack:\n            directory = stack.pop()\n            with os.scandir(directory) as entries:\n                for entry in entries:\n                    _require(len(opened) < 65536 and entry.name not in {'.', '..'} and (':' not in entry.name))\n                    path = directory / entry.name\n                    is_directory = entry.is_dir(follow_symlinks=False)\n                    handle, state = _open_control_object_v1(api, path, is_directory, sid, retained)\n                    _require(state[:2] not in seen_ids)\n                    seen_ids.add(state[:2])\n                    opened[os.path.normcase(str(path))] = (handle, state)\n                    if is_directory:\n                        stack.append(path)\n        for relative, directory in (('runtime', True), ('app', True), ('deps', True), ('runtime/pythonw.exe', False), ('runtime/python314.zip', False), ('runtime/python314._pth', False), ('app/qtt/service/owner_source_use_windows.py', False)):\n            required = opened.get(os.path.normcase(str(installation / relative)))\n            _require(required is not None and required[1][5] is directory)\n        pth = installation / 'runtime' / 'python314._pth'\n        handle, state = opened[os.path.normcase(str(pth))]\n        pth_raw = _read_control_bytes_v1(api, handle, state[3], 256)\n        _require(pth_raw in (b'python314.zip\\n.\\n../app\\n../deps\\n', b'python314.zip\\r\\n.\\r\\n../app\\r\\n../deps\\r\\n') and _object_state_v1(api, handle, pth, False) == state)\n        config = program_data / 'QTT' / 'OwnerControl' / 'enrollment.json'\n        handle, state = _open_control_object_v1(api, config, False, sid, retained)\n        raw = _read_control_bytes_v1(api, handle, state[3], 65536)\n        _require(_object_state_v1(api, handle, config, False) == state)\n        _bind_native_module_identity_v1()\n        from .owner_source_use import _read_public_enrollment_v1\n        enrollment = _read_public_enrollment_v1(raw)\n        _require(enrollment.approval_sid == sid and enrollment.root_state != 'DISABLED')\n        root = object.__new__(_SourceUseNativeRootV1)\n        root.api, root.handles, root.enrollment, root.sid = (api, retained, enrollment, sid)\n        root.closed, root.operation = (False, None)\n        root.control_path = program_data / 'QTT' / 'OwnerControl'\n        root.public_configuration = None\n        root.public_storage_handles = []\n        from threading import RLock\n        root.operation_lock = RLock()\n        root.window = None\n        root.completion_worker = None\n        root.completed = {}\n        _ROOTS[id(root)] = root\n        return root\n    except BaseException:\n        for handle in reversed(retained):\n            api.kernel.CloseHandle(handle)\n        raise",
     "_webauthn_table_v1": "def _webauthn_table_v1(root):\n    _require_native_root_v1(root)\n    w = ctypes.WinDLL('webauthn.dll', use_last_error=True, winmode=2048)\n    w.WebAuthNGetApiVersionNumber.argtypes, w.WebAuthNGetApiVersionNumber.restype = ([], ctypes.c_uint32)\n    version = w.WebAuthNGetApiVersionNumber()\n    _require(type(version) is int and 1 <= version <= 9)\n    from fido2.client import win_api\n    _require(win_api.WEBAUTHN_API_VERSION == version)\n    _check_output_layouts_v1(win_api)\n    h, p, hr = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int32)\n    w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable.argtypes = [ctypes.POINTER(ctypes.c_int32)]\n    w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable.restype = hr\n    w.WebAuthNGetCancellationId.argtypes, w.WebAuthNGetCancellationId.restype = ([ctypes.POINTER(win_api.GUID)], hr)\n    w.WebAuthNCancelCurrentOperation.argtypes, w.WebAuthNCancelCurrentOperation.restype = ([ctypes.POINTER(win_api.GUID)], hr)\n    w.WebAuthNAuthenticatorMakeCredential.argtypes = [h, ctypes.POINTER(win_api.WebAuthNRpEntityInformation), ctypes.POINTER(win_api.WebAuthNUserEntityInformation), ctypes.POINTER(win_api.WebAuthNCoseCredentialParameters), ctypes.POINTER(win_api.WebAuthNClientData), ctypes.POINTER(win_api.WebAuthNMakeCredentialOptions), ctypes.POINTER(p)]\n    w.WebAuthNAuthenticatorMakeCredential.restype = hr\n    w.WebAuthNAuthenticatorGetAssertion.argtypes = [h, ctypes.c_wchar_p, ctypes.POINTER(win_api.WebAuthNClientData), ctypes.POINTER(win_api.WebAuthNGetAssertionOptions), ctypes.POINTER(p)]\n    w.WebAuthNAuthenticatorGetAssertion.restype = hr\n    w.WebAuthNFreeCredentialAttestation.argtypes, w.WebAuthNFreeCredentialAttestation.restype = ([p], None)\n    w.WebAuthNFreeAssertion.argtypes, w.WebAuthNFreeAssertion.restype = ([p], None)\n    available = ctypes.c_int32()\n    _require(w.WebAuthNIsUserVerifyingPlatformAuthenticatorAvailable(ctypes.byref(available)) == 0 and available.value == 1)\n    return (w, win_api)",
     "_acquire_native_response_v1": "def _acquire_native_response_v1(root, operation):\n    import time\n    from .owner_source_use import _source_use_b64_v1\n    _require_native_root_v1(root)\n    window = _check_owned_window_v1(root)\n    before = _check_principal_v1(_observe_principal_v1(root.api))\n    _require(before == root.sid)\n    library, table = (operation.library, operation.table)\n    authentication = operation.authentication\n    remaining_ms = (operation.deadline - time.monotonic_ns()) // 1000000\n    _require(1 <= remaining_ms <= 120000)\n    client = library.WebAuthNClientData(authentication.client_data)\n    pointer = ctypes.c_void_p()\n    operation.keepalive = [window, operation.guid, client]\n    try:\n        if authentication.operation == 'GET':\n            options = library.WebAuthNGetAssertionOptions(timeout=remaining_ms, attachment=library.WebAuthNAuthenticatorAttachment.PLATFORM, uv_requirement=library.WebAuthNUserVerificationRequirement.REQUIRED, credentials=[{'id': _source_use_b64_v1(authentication.enrollment.key_id_b64, maximum=1024), 'type': 'public-key', 'transport': 'INTERNAL'}], cancellationId=operation.guid, extensions=[], flags=0, cred_large_blob_operation=library.WebAuthNLargeBlobOperation.NONE)\n            operation.keepalive.append(options)\n            result = table.WebAuthNAuthenticatorGetAssertion(window.hwnd, 'localhost', ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))\n        else:\n            options = library.WebAuthNMakeCredentialOptions(timeout=remaining_ms, require_resident_key=False, prefer_resident_key=False, attachment=library.WebAuthNAuthenticatorAttachment.PLATFORM, uv_requirement=library.WebAuthNUserVerificationRequirement.REQUIRED, attestation_convoyence=library.WebAuthNAttestationConveyancePreference.NONE, credentials=[], cancellationId=operation.guid, extensions=[], enterprise_attestation=library.WebAuthNEnterpriseAttestation.NONE, large_blob_support=library.WebAuthNLargeBlobSupport.NONE, enable_prf=False)\n            rp = library.WebAuthNRpEntityInformation({'id': 'localhost', 'name': 'QTT Owner Source Use'})\n            user = library.WebAuthNUserEntityInformation({'id': _source_use_b64_v1(authentication.enrollment.user_handle_b64, minimum=32, maximum=32), 'name': authentication.enrollment.owner_ref, 'displayName': authentication.enrollment.owner_ref})\n            algorithms = library.WebAuthNCoseCredentialParameters([{'type': 'public-key', 'alg': -7}])\n            operation.keepalive.extend((options, rp, user, algorithms))\n            result = table.WebAuthNAuthenticatorMakeCredential(window.hwnd, ctypes.byref(rp), ctypes.byref(user), ctypes.byref(algorithms), ctypes.byref(client), ctypes.byref(options), ctypes.byref(pointer))\n        _require(result == 0 and pointer.value)\n        after = _check_principal_v1(_observe_principal_v1(root.api))\n        _require(after == before == root.sid)\n        raw = _copy_native_response_v1(pointer.value, authentication.operation, authentication.client_data)\n        return (raw, before, after)\n    finally:\n        if pointer.value:\n            if authentication.operation == 'GET':\n                table.WebAuthNFreeAssertion(pointer)\n            else:\n                table.WebAuthNFreeCredentialAttestation(pointer)",
     "_user_table_v1": "def _user_table_v1():\n    user = ctypes.WinDLL('user32.dll', use_last_error=True, winmode=2048)\n    h, p, b, d, word = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int32, ctypes.c_uint32, ctypes.c_size_t)\n    result = ctypes.c_ssize_t\n    user.IsWindow.argtypes, user.IsWindow.restype = ([h], b)\n    user.GetWindowThreadProcessId.argtypes, user.GetWindowThreadProcessId.restype = ([h, ctypes.POINTER(d)], d)\n    user.RegisterClassExW.argtypes, user.RegisterClassExW.restype = ([p], ctypes.c_uint16)\n    user.UnregisterClassW.argtypes, user.UnregisterClassW.restype = ([ctypes.c_wchar_p, h], b)\n    user.CreateWindowExW.argtypes = [d, ctypes.c_wchar_p, ctypes.c_wchar_p, d, b, b, b, b, h, h, h, p]\n    user.CreateWindowExW.restype = h\n    user.DefWindowProcW.argtypes, user.DefWindowProcW.restype = ([h, d, word, result], result)\n    user.DestroyWindow.argtypes, user.DestroyWindow.restype = ([h], b)\n    user.ShowWindow.argtypes, user.ShowWindow.restype = ([h, b], b)\n    user.UpdateWindow.argtypes, user.UpdateWindow.restype = ([h], b)\n    user.GetMessageW.argtypes, user.GetMessageW.restype = ([p, h, d, d], b)\n    user.TranslateMessage.argtypes, user.TranslateMessage.restype = ([p], b)\n    user.DispatchMessageW.argtypes, user.DispatchMessageW.restype = ([p], result)\n    user.PostQuitMessage.argtypes, user.PostQuitMessage.restype = ([b], None)\n    user.SetWindowTextW.argtypes, user.SetWindowTextW.restype = ([h, ctypes.c_wchar_p], b)\n    user.GetWindowTextLengthW.argtypes, user.GetWindowTextLengthW.restype = ([h], b)\n    user.GetWindowTextW.argtypes, user.GetWindowTextW.restype = ([h, ctypes.c_wchar_p, b], b)\n    user.EnableWindow.argtypes, user.EnableWindow.restype = ([h, b], b)\n    user.SendMessageW.argtypes, user.SendMessageW.restype = ([h, d, word, result], result)\n    user.SetTimer.argtypes, user.SetTimer.restype = ([h, word, d, p], word)\n    user.KillTimer.argtypes, user.KillTimer.restype = ([h, word], b)\n    user.MessageBoxW.argtypes, user.MessageBoxW.restype = ([h, ctypes.c_wchar_p, ctypes.c_wchar_p, d], b)\n    user.SetWindowLongPtrW.argtypes, user.SetWindowLongPtrW.restype = ([h, b, result], result)\n    user.CallWindowProcW.argtypes, user.CallWindowProcW.restype = ([p, h, d, word, result], result)\n    return user",
@@ -1015,6 +1101,8 @@ _SOURCE_USE_NATIVE_CALLS = (
     ("_open_control_object_v1", "api.kernel.CreateFileW(text, 131072 | 128 | 1, 1, None, 3, 2097152 | (33554432 if directory else 0), None)"),
     ("_read_control_bytes_v1", "api.kernel.ReadFile(handle, buffer, size + 1, ctypes.byref(count), None)"),
     ("_bootstrap_owner_source_use_v1", "api.kernel.CloseHandle(handle)"),
+    ("_open_public_data_object_v1", "api.kernel.CreateFileW(str(path), 131072 | 128, 3, None, 3, 2097152 | (33554432 if directory else 0), None)"),
+    ("_read_public_credential_key_v1", "root.api.kernel.CloseHandle(owned)"),
     ("_close_native_root_v1", "root.api.kernel.CloseHandle(handle)"),
     ("_check_owned_window_v1", "window.user.IsWindow(window.hwnd)"),
     ("_check_owned_window_v1", "window.user.GetWindowThreadProcessId(window.hwnd, ctypes.byref(process))"),
@@ -1097,12 +1185,29 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
         "_user_table_v1": {(True, "_run_local_window_v1")},
         "_acquire_native_response_v1": {(True, "_start_native_operation_v1.worker")},
     }
+    public_callers = {
+        "_public_open_https_v1": {(_PUBLIC_DATA_NATIVE_OWNER, "PublicMarketDataSessionV1._https_v1")},
+        "_public_open_websocket_v1": {(_PUBLIC_DATA_NATIVE_OWNER, "PublicMarketDataSessionV1._websocket_v1")},
+        "_public_tls_context_v1": {(_PUBLIC_DATA_NATIVE_OWNER, name) for name in
+                                   ("_public_open_https_v1", "_public_open_websocket_v1")},
+        "_public_admit_effect_v1": {(_PUBLIC_DATA_NATIVE_OWNER, name) for name in
+                                    ("_public_open_https_v1", "_public_open_websocket_v1")},
+        "_open_public_data_object_v1": {(_SOURCE_USE_NATIVE_PATH, "_load_public_capture_configuration_v1")},
+        "_load_public_capture_configuration_v1": {(_SOURCE_USE_NATIVE_PATH, "_public_scope_resources_v1")},
+        "_read_public_credential_key_v1": {(_KALSHI_FEE_NATIVE_OWNER, "_load_public_credential_v1")},
+        "_check_public_credential_file_v1": {
+            (_KALSHI_FEE_NATIVE_OWNER, "_require_public_credential_v1"),
+            (_SOURCE_USE_NATIVE_PATH, "_read_public_credential_key_v1"),
+        },
+        "_public_scope_resources_v1": {(_KALSHI_FEE_NATIVE_OWNER, "SourceUseAuthorityV1." + name)
+                                        for name in ("prepare_action_v1", "_commit_verified_action_v1", "_bind_public_operational_inputs_v1")},
+    }
     loader_count = 0
     entry_calls = []
     for node, owner in located:
         if relpath.startswith("src/"):
             protected_callable = (node.id if isinstance(node, ast.Name) else node.attr if isinstance(node, ast.Attribute) else None)
-            if protected_callable in {*helper_callers, "run_owner_source_use_local_v1", "_start_native_operation_v1"}:
+            if protected_callable in {*helper_callers, *public_callers, "run_owner_source_use_local_v1", "_start_native_operation_v1"}:
                 parent = parents.get(id(node))
                 if not (isinstance(parent, ast.Call) and parent.func is node):
                     failures.append("SOURCE_USE_NATIVE_CALLABLE_REFERENCE:" + protected_callable)
@@ -1118,6 +1223,10 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
                 if not (isinstance(parent, ast.Call) and parent.func is node):
                     failures.append("SOURCE_USE_NATIVE_LOADER_INDIRECTION")
         if isinstance(node, (ast.Import, ast.ImportFrom)):
+            if relpath.startswith("src/") and isinstance(node, ast.ImportFrom) and any(
+                alias.name in public_callers and alias.asname is not None for alias in node.names
+            ):
+                failures.append("PUBLIC_DATA_NATIVE_HELPER_ALIAS")
             if relpath.startswith("src/") and isinstance(node, ast.ImportFrom) and node.module == "ctypes" and any(
                     alias.name in {"WinDLL", "CDLL", "OleDLL", "PyDLL", "windll", "cdll"} for alias in node.names):
                 failures.append("SOURCE_USE_NATIVE_LOADER_ALIAS")
@@ -1157,6 +1266,8 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
             leaf = name.rsplit(".", 1)[-1]
             if leaf in helper_callers and (native, owner) not in helper_callers[leaf]:
                 failures.append("SOURCE_USE_NATIVE_CALLER:" + leaf)
+            if leaf in public_callers and (relpath, owner) not in public_callers[leaf]:
+                failures.append("PUBLIC_DATA_NATIVE_CALLER:" + leaf)
             if leaf == "_start_native_operation_v1" and not (controller and owner in {
                     "OwnerSourceUseControllerV1._confirm_prepared_v1",
                     "OwnerSourceUseControllerV1._begin_enrollment_v1",
@@ -1192,8 +1303,9 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
 
     admitted, admission_failures = f14_native_admission_v1(path.as_posix(), tree)
     kalshi_admitted, kalshi_failures = kalshi_fee_native_admission_v1(path.as_posix(), tree)
-    admitted = admitted | kalshi_admitted
-    admission_failures = admission_failures + kalshi_failures
+    public_admitted, public_failures = public_data_native_admission_v1(path.as_posix(), tree)
+    admitted = admitted | kalshi_admitted | public_admitted
+    admission_failures = admission_failures + kalshi_failures + public_failures
     admission_failures += source_use_native_contract_v1(path.as_posix(), tree)
     found_by_flag = {flag: set[str]() for flag in enabled_flags}
     source_retrieval_imports = {

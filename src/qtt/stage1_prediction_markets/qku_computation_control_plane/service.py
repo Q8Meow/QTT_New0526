@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, is_dataclass, replace
+from functools import wraps
 from types import MappingProxyType
 from typing import Mapping
 
@@ -65,7 +66,10 @@ from .input_resolver import (
     CanonicalOwnerPacketRegistryV1,
     CurrentModeSnapshotInputResolverV1,
     FormulaInputResolverV1,
+    _PUBLIC_RESPONSE_DEPENDENCIES_V1,
+    _admit_public_packet_custody_v1,
 )
+from .source_policy import _public_response_fence_v1
 from .models import (
     BuildEvidenceBundleRequestV1,
     BuildEvidenceBundleResponseV1,
@@ -139,6 +143,97 @@ from .stack_resolver import (
     ApplicableStackResolverV1,
     REGISTERED_FORMULA_STACKS,
 )
+
+
+_PUBLIC_RESULT_DEPENDENCIES_V1: dict[str, dict[object, tuple]] = {}
+
+
+def _public_receipt_references_v1(value):
+    """Inspect bounded typed results before acquiring a publication fence."""
+    refs = set()
+    pending = [value]
+    visited = 0
+    while pending:
+        item = pending.pop()
+        visited += 1
+        if visited > 4096:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "public result projection exceeds its bound")
+        if is_dataclass(item) and not isinstance(item, type):
+            for field in fields(item):
+                child = getattr(item, field.name)
+                if "receipt" in field.name and (field.name.endswith("_id") or "ref" in field.name):
+                    if type(child) is str:
+                        refs.add(child)
+                    elif type(child) is tuple:
+                        refs.update(ref for ref in child if type(ref) is str)
+                if is_dataclass(child) or type(child) is tuple:
+                    pending.append(child)
+        elif type(item) is tuple:
+            pending.extend(child for child in item if is_dataclass(child) or type(child) is tuple)
+    return tuple(sorted(refs))
+
+
+def _release_public_response_v1(response, entries, receipt_keys, index=0):
+    # Only resident immutable entries and the completed response enter here.
+    # No result construction, imports, callbacks, lookup I/O or serialization.
+    if index == len(entries):
+        for key, dependencies in receipt_keys:
+            context, ref = key
+            _PUBLIC_RESULT_DEPENDENCIES_V1.setdefault(ref, {})[context] = dependencies
+        return response
+    with _public_response_fence_v1(entries[index][1]):
+        return _release_public_response_v1(response, entries, receipt_keys, index+1)
+
+
+def _finalize_public_response_v1(*, response, dependencies, context):
+    from ..orderbook_event_state_snapshot.handoff import _require_public_publication_custody_v1
+
+    refs = _public_receipt_references_v1(response) if dependencies else ()
+    for ref in refs:
+        for entry, fence in _PUBLIC_RESULT_DEPENDENCIES_V1.get(ref, {}).get(context, ()):
+            dependencies[(id(entry[0]), id(fence))] = (entry, fence)
+    entries = tuple(dependencies[key] for key in sorted(dependencies))
+    receipt_keys = tuple(((context, ref), entries) for ref in refs)
+    for entry, _fence in entries:
+        if _require_public_publication_custody_v1(publication=entry[0]) is not entry:
+            raise InputAuthorityError(ReasonCode.INPUT_PACKET_MISMATCH, "public result publication changed")
+    return _release_public_response_v1(response, entries, receipt_keys)
+
+
+def _finalize_public_operation_v1(operation):
+    """Preserve each operation's one admission and its original result type."""
+    @wraps(operation)
+    def guarded(self, request):
+        dependencies = {}
+        token = _PUBLIC_RESPONSE_DEPENDENCIES_V1.set(dependencies)
+        try:
+            response = operation(self, request)
+            context = getattr(request, "context", None)
+            # Receipt-only operations retain prior public dependency custody.
+            for ref in _public_receipt_references_v1(request):
+                contexts = _PUBLIC_RESULT_DEPENDENCIES_V1.get(ref)
+                if contexts is not None and context not in contexts:
+                    raise InputAuthorityError(ReasonCode.INPUT_SCOPE_MISMATCH,
+                                              "public result receipt belongs to another execution context")
+                for entry, fence in (() if contexts is None else contexts[context]):
+                    dependencies[(id(entry[0]), id(fence))] = (entry, fence)
+            # Plan/eligibility projections may select inputs without extracting
+            # numbers. Guard only the bindings of those selected components.
+            if type(context) is ComputationExecutionContextV1:
+                selected = getattr(request, "component_ids", ()) or getattr(request, "required_launch_roles", ())
+                component = getattr(request, "component_id", None)
+                if component is not None:
+                    selected = (*selected, component)
+                for packet in self.owner_registry.packets:
+                    if (packet.scope == context.scope and packet.context_id == context.context_id
+                            and packet.clocks.as_of_time == context.as_of
+                            and any(binding.startswith("FIVAB::"+component_id+"::")
+                                    for binding in packet.authorized_binding_ids for component_id in selected)):
+                        _admit_public_packet_custody_v1(registry=self.owner_registry, packet=packet, context=context)
+            return _finalize_public_response_v1(response=response, dependencies=dependencies, context=context)
+        finally:
+            _PUBLIC_RESPONSE_DEPENDENCIES_V1.reset(token)
+    return guarded
 
 
 def _assertions(record: TypedValueRecordV1) -> Mapping[str, object]:
@@ -1086,6 +1181,7 @@ class QKUComputationControlPlaneV1:
             identity_resolution=result,
         )
 
+    @_finalize_public_operation_v1
     def resolve_contextual_computability(
         self, request: ResolveContextualComputabilityRequestV1
     ) -> ResolveContextualComputabilityResponseV1:
@@ -1152,6 +1248,7 @@ class QKUComputationControlPlaneV1:
             computability=snapshot.resolution,
         )
 
+    @_finalize_public_operation_v1
     def resolve_applicable_stack(
         self, request: ResolveApplicableStackRequestV1
     ) -> ResolveApplicableStackResponseV1:
@@ -1208,6 +1305,7 @@ class QKUComputationControlPlaneV1:
             stack_resolution=result,
         )
 
+    @_finalize_public_operation_v1
     def resolve_required_inputs(
         self, request: ResolveRequiredInputsRequestV1
     ) -> ResolveRequiredInputsResponseV1:
@@ -1272,6 +1370,7 @@ class QKUComputationControlPlaneV1:
             input_resolution=result,
         )
 
+    @_finalize_public_operation_v1
     def compute_component(
         self, request: ComputeComponentRequestV1
     ) -> ComputeComponentResponseV1:
@@ -1336,6 +1435,7 @@ class QKUComputationControlPlaneV1:
             component_result=result,
         )
 
+    @_finalize_public_operation_v1
     def compute_stack(
         self, request: ComputeStackRequestV1
     ) -> ComputeStackResponseV1:
@@ -1415,6 +1515,7 @@ class QKUComputationControlPlaneV1:
             stack_result=result,
         )
 
+    @_finalize_public_operation_v1
     def compare_with_no_trade(
         self, request: CompareWithNoTradeRequestV1
     ) -> CompareWithNoTradeResponseV1:
@@ -1436,6 +1537,7 @@ class QKUComputationControlPlaneV1:
             comparison=result,
         )
 
+    @_finalize_public_operation_v1
     def evaluate_trade_plan(
         self, request: EvaluateTradePlanRequestV1
     ) -> EvaluateTradePlanResponseV1:
@@ -1458,12 +1560,14 @@ class QKUComputationControlPlaneV1:
             evaluation=result,
         )
 
+    @_finalize_public_operation_v1
     def get_snapshot_view(
         self, request: GetSnapshotViewRequestV1
     ) -> GetSnapshotViewResponseV1:
         _admit_agent_request(self, request)
         try:
             packet = self.owner_registry.packet_by_id(request.snapshot_id)
+            _admit_public_packet_custody_v1(registry=self.owner_registry, packet=packet, context=request.context)
         except InputAuthorityError as exc:
             disposition = PublicFallbackBoundaryV1.translate(exc)
             result = SnapshotViewV1(
@@ -1499,6 +1603,7 @@ class QKUComputationControlPlaneV1:
             snapshot_view=result,
         )
 
+    @_finalize_public_operation_v1
     def explain_resolution(
         self, request: ExplainResolutionRequestV1
     ) -> ExplainResolutionResponseV1:
@@ -1516,6 +1621,7 @@ class QKUComputationControlPlaneV1:
             explanation=result,
         )
 
+    @_finalize_public_operation_v1
     def submit_candidate_proposal(
         self, request: SubmitCandidateProposalRequestV1
     ) -> SubmitCandidateProposalResponseV1:
@@ -1544,6 +1650,7 @@ class QKUComputationControlPlaneV1:
             proposal=result,
         )
 
+    @_finalize_public_operation_v1
     def request_materialization_work_order(
         self, request: RequestMaterializationWorkOrderRequestV1
     ) -> RequestMaterializationWorkOrderResponseV1:
@@ -1562,6 +1669,7 @@ class QKUComputationControlPlaneV1:
             work_order=result,
         )
 
+    @_finalize_public_operation_v1
     def compile_replay_paper_cohort(
         self, request: CompileReplayPaperCohortRequestV1
     ) -> CompileReplayPaperCohortResponseV1:
@@ -1595,6 +1703,7 @@ class QKUComputationControlPlaneV1:
             cohort_compilation=result,
         )
 
+    @_finalize_public_operation_v1
     def register_replay_paper_result(
         self, request: RegisterReplayPaperResultRequestV1
     ) -> RegisterReplayPaperResultResponseV1:
@@ -1625,6 +1734,7 @@ class QKUComputationControlPlaneV1:
             registration=result,
         )
 
+    @_finalize_public_operation_v1
     def build_evidence_bundle(
         self, request: BuildEvidenceBundleRequestV1
     ) -> BuildEvidenceBundleResponseV1:

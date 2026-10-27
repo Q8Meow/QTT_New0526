@@ -1,15 +1,27 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+import base64
+import json
+from dataclasses import dataclass, fields as dataclass_fields
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
+from fractions import Fraction
 from types import MappingProxyType
 from typing import Mapping
+from urllib.parse import quote, urlencode
 
 from src.qtt.stage1_prediction_markets.market_data_ingest import policy
 from src.qtt.stage1_prediction_markets.market_data_ingest.binding import (
     SelectedPITPublicDataContractV2,
+    PublicMetadataSnapshotV1,
+)
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import (
+    _native_ident, _native_require, _public_counter_v1, _public_refs_v1, _public_scalar_tree_v1,
+    _public_exact_clock_v1, _public_on_price_grid_v1,
+    _native_utc_receipt_pair,
+    _native_utc_nanoseconds,
+    _native_retail_finite_decimal_text_v1,
 )
 from src.qtt.stage1_prediction_markets.market_data_ingest.source_dependency import (
     PIT_SOURCE_DEPENDENCIES_V2,
@@ -34,10 +46,199 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     deterministic_json,
     safe_json_loads,
+    _native_strict_json, _check_key,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import (
     Stage1VenueProfileIdV1,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class PublicDataReadRequestV1:
+    request_id: str
+    profile_id: Stage1VenueProfileIdV1
+    operation_id: str
+    native_contract_version: str
+    instrument_ids: tuple[str, ...]
+    pagination_cursor_or_none: str | None
+    time_bounds_or_none: tuple[int, int] | None
+    source_binding_ref: str
+    metadata_refs: tuple[str, ...]
+    capture_request_ref: str
+    request_options: Mapping[str, object]
+
+    def __post_init__(self):
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+            _PUBLIC_OPERATIONS_V1, _public_profile_v1,
+        )
+
+        _public_profile_v1(self.profile_id)
+        for name in ("request_id", "operation_id", "native_contract_version", "source_binding_ref", "capture_request_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(self.operation_id in _PUBLIC_OPERATIONS_V1[self.profile_id], "unsupported public operation")
+        _public_refs_v1(self.instrument_ids)
+        _public_refs_v1(self.metadata_refs, allow_empty=True)
+        if self.pagination_cursor_or_none is not None:
+            _native_ident(self.pagination_cursor_or_none)
+        if self.time_bounds_or_none is not None:
+            _native_require(type(self.time_bounds_or_none) is tuple and len(self.time_bounds_or_none) == 2,
+                            "invalid request time interval")
+            for value in self.time_bounds_or_none:
+                _public_counter_v1(value, allow_zero=True)
+            _native_require(self.time_bounds_or_none[0] <= self.time_bounds_or_none[1], "reversed request interval")
+        _native_require(type(self.request_options) in (dict, MappingProxyType), "invalid request options")
+        object.__setattr__(self, "request_options", _public_scalar_tree_v1(self.request_options))
+
+
+def _public_native_path_id_v1(value):
+    _native_ident(value)
+    _native_require(not any(c in value for c in "/\\?#%:") and value not in {".", ".."},
+                    "unsafe native path identity")
+    return quote(value, safe="")
+
+
+def compile_public_read_request_v1(*, request: PublicDataReadRequestV1,
+                                   source_binding, metadata: tuple[PublicMetadataSnapshotV1, ...]):
+    """Compile a closed, data-only descriptor. This function grants no effect."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+
+    _native_require(type(request) is PublicDataReadRequestV1 and type(source_binding) is PublicDataSourceBindingV1,
+                    "public compiler requires exact input types")
+    request.__post_init__()
+    source_binding.__post_init__()
+    _native_require(request.profile_id is source_binding.profile_id
+                    and request.source_binding_ref == source_binding.binding_id
+                    and request.operation_id in source_binding.allowed_operation_ids
+                    and request.native_contract_version in source_binding.source_contract_versions,
+                    "public request does not bind accepted source contract")
+    _native_require(type(metadata) is tuple and len(metadata) <= 4096, "invalid metadata selection")
+    for row in metadata:
+        _native_require(type(row) is PublicMetadataSnapshotV1 and row.profile_id is request.profile_id,
+                        "cross-profile metadata selection")
+        row.__post_init__()
+    _native_require(tuple(row.metadata_id for row in metadata) == request.metadata_refs,
+                    "request metadata references differ from selected immutable inputs")
+    op, options = request.operation_id, request.request_options
+    host = {
+        Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: "api.elections.kalshi.com",
+        Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: "gateway.polymarket.us",
+        Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: "api.gemini.com",
+    }[request.profile_id]
+    routes = {
+        "K_MARKET": ("ticker", "/trade-api/v2/markets/"),
+        "K_EVENT": ("event_ticker", "/trade-api/v2/events/"),
+        "K_SERIES": ("series_ticker", "/trade-api/v2/series/"),
+        "P_MARKET": ("slug", "/v1/market/slug/"),
+        "P_BOOK": ("slug", "/v1/markets/"),
+        "P_SETTLEMENT": ("slug", "/v1/markets/"),
+        "G_EVENT": ("eventTicker", "/v1/prediction-markets/events/"),
+    }
+    query, command, receive_scope = [], None, "SELECTED_INSTRUMENTS"
+    if op in routes:
+        name, prefix = routes[op]
+        _native_require(set(options) == {name}, "unexpected single-resource request option")
+        native_id = options[name]
+        allowed = set(request.instrument_ids)
+        if op in {"K_EVENT", "G_EVENT"}:
+            allowed = {row.event_id_or_none for row in metadata}
+        elif op == "K_SERIES":
+            allowed = {row.series_id_or_none for row in metadata}
+        _native_require(allowed == {native_id}, "native path identity is outside selected metadata/instruments")
+        path = prefix + _public_native_path_id_v1(native_id)
+        if op in {"P_BOOK", "P_SETTLEMENT"}:
+            path += "/book" if op == "P_BOOK" else "/settlement"
+    elif op == "K_SERIES_FEES":
+        _native_require(set(options) == {"series_ticker", "show_historical"}
+                        and type(options["show_historical"]) is bool, "invalid Series fee request")
+        _native_require({row.series_id_or_none for row in metadata} == {options["series_ticker"]}, "unbound Series")
+        _public_native_path_id_v1(options["series_ticker"])
+        path = "/trade-api/v2/series/fee_changes"
+        query = [("series_ticker", options["series_ticker"]),
+                 ("show_historical", "true" if options["show_historical"] else "false")]
+    elif op in {"K_EVENT_FEES", "K_HISTORY_TRADES"}:
+        required = {"event_ticker", "limit", "cursor"} if op == "K_EVENT_FEES" else {
+            "ticker", "limit", "min_ts", "max_ts", "cursor"}
+        _native_require(set(options) == required and type(options["limit"]) is int
+                        and 1 <= options["limit"] <= 1000, "invalid bounded paginated request")
+        name = "event_ticker" if op == "K_EVENT_FEES" else "ticker"
+        allowed = {row.event_id_or_none for row in metadata} if op == "K_EVENT_FEES" else set(request.instrument_ids)
+        _native_require(allowed == {options[name]}, "paginated request identity outside scope")
+        _public_native_path_id_v1(options[name])
+        _native_require(options["cursor"] == request.pagination_cursor_or_none, "cursor does not bind descriptor")
+        path = "/trade-api/v2/events/fee_changes" if op == "K_EVENT_FEES" else "/trade-api/v2/historical/trades"
+        query = [(name, options[name]), ("limit", options["limit"])]
+        if op == "K_HISTORY_TRADES":
+            _native_require(request.time_bounds_or_none is not None
+                            and (options["min_ts"], options["max_ts"]) == request.time_bounds_or_none,
+                            "historical window does not bind descriptor")
+            for key in ("min_ts", "max_ts"):
+                _public_counter_v1(options[key], allow_zero=True)
+                query.append((key, options[key]))
+        if options["cursor"] is not None:
+            query.append(("cursor", options["cursor"]))
+    elif op in {"K_STATUS", "K_HISTORY_CUTOFF"}:
+        _native_require(not options, "status/cutoff accepts no options")
+        path = "/trade-api/v2/exchange/status" if op == "K_STATUS" else "/trade-api/v2/historical/cutoff"
+    elif op == "G_EVENTS":
+        _native_require(set(options) == {"limit", "offset"} and type(options["limit"]) is int
+                        and 1 <= options["limit"] <= 500, "invalid global discovery request")
+        _public_counter_v1(options["offset"], allow_zero=True)
+        path, query, receive_scope = "/v1/prediction-markets/events", list(options.items()), "GLOBAL_PUBLIC_DISCOVERY"
+    elif op == "K_WS":
+        _native_require(set(options) == {"id", "cmd", "params"}, "invalid Kalshi control fields")
+        _public_counter_v1(options["id"])
+        params = options["params"]
+        _native_require(type(params) is MappingProxyType, "invalid Kalshi control params")
+        if options["cmd"] == "subscribe":
+            channels = params.get("channels")
+            _native_require(type(channels) is tuple and len(channels) == 1
+                            and channels[0] in {"orderbook_delta", "trade", "market_lifecycle_v2"},
+                            "unselected Kalshi channel")
+            if channels[0] == "market_lifecycle_v2":
+                _native_require(set(params) == {"channels"}, "global lifecycle does not support ticker filtering")
+                receive_scope = "GLOBAL_PUBLIC_LIFECYCLE"
+            else:
+                _native_require(set(params) == {"channels", "market_tickers"}, "invalid selected subscription")
+                _public_refs_v1(params["market_tickers"])
+                _native_require(set(params["market_tickers"]) <= set(request.instrument_ids), "unselected ticker")
+        else:
+            _native_require(options["cmd"] == "unsubscribe" and set(params) == {"sids"}
+                            and type(params["sids"]) is tuple and len(params["sids"]) == 1,
+                            "unselected Kalshi command")
+            _public_counter_v1(params["sids"][0])
+        path, command = "/trade-api/ws/v2", options
+    elif op == "P_WS":
+        _native_require(set(options) == {"subscribe"} and type(options["subscribe"]) is MappingProxyType,
+                        "invalid Retail subscription envelope")
+        sub = options["subscribe"]
+        _native_require(set(sub) == {"requestId", "subscriptionType", "marketSlugs"}, "invalid Retail subscription fields")
+        _native_ident(sub["requestId"])
+        _public_refs_v1(sub["marketSlugs"])
+        _native_require(sub["subscriptionType"] in {"SUBSCRIPTION_TYPE_MARKET_DATA", "SUBSCRIPTION_TYPE_TRADE"}
+                        and len(sub["marketSlugs"]) <= 100
+                        and set(sub["marketSlugs"]) <= set(request.instrument_ids), "unselected Retail subscription")
+        host, path, command = "api.polymarket.us", "/v1/ws/markets", options
+    elif op == "G_WS":
+        _native_require(set(options) == {"id", "method", "params"}
+                        and options["method"] in {"SUBSCRIBE", "UNSUBSCRIBE"}, "unselected Gemini command")
+        _native_ident(options["id"])
+        _public_refs_v1(options["params"])
+        allowed = {instrument + "@" + channel for instrument in request.instrument_ids
+                   for channel in ("depth", "bookTicker", "trade")}
+        allowed.add("contractStatus")
+        _native_require(set(options["params"]) <= allowed, "unselected Gemini stream")
+        if "contractStatus" in options["params"]:
+            receive_scope = "GLOBAL_PUBLIC_LIFECYCLE"
+        host, path, query, command = "ws.gemini.com", "/", [("snapshot", "-1")], options
+    else:
+        _native_require(False, "unselected public operation")
+    if op not in {"K_EVENT_FEES", "K_HISTORY_TRADES"}:
+        _native_require(request.pagination_cursor_or_none is None, "unused cursor")
+    if op != "K_HISTORY_TRADES":
+        _native_require(request.time_bounds_or_none is None, "unused time bounds")
+    return _public_scalar_tree_v1(dict(request_ref=request.request_id, host=host, port=443,
+        method="GET" if command is None else "WEBSOCKET", path=path,
+        query=urlencode(query), command=command, receive_scope_class=receive_scope))
 
 
 def _scope_refs_for_adapter() -> tuple[policy.ScopeRef, ...]:
@@ -683,7 +884,7 @@ class _PITBookLevelV2:
                 PITReasonCodeV1.PIT_TICK_GRID_INVALID,
                 "price increment/origin must be finite exact Decimal values",
             )
-        if (price - self.price_origin) % self.price_increment != 0:
+        if ((Fraction(price) - Fraction(self.price_origin)) / Fraction(self.price_increment)).denominator != 1:
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_TICK_GRID_INVALID,
                 "book level price is off its exact origin/increment grid",
@@ -693,7 +894,7 @@ class _PITBookLevelV2:
                 type(self.quantity_increment_or_none) is not Decimal
                 or not self.quantity_increment_or_none.is_finite()
                 or self.quantity_increment_or_none <= 0
-                or quantity % self.quantity_increment_or_none != 0
+                or (Fraction(quantity) / Fraction(self.quantity_increment_or_none)).denominator != 1
             ):
                 raise PITDataContractErrorV1(
                     PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
@@ -772,7 +973,7 @@ class _PITDeltaLevelV2:
             or self.price_increment <= 0
             or type(self.price_origin) is not Decimal
             or not self.price_origin.is_finite()
-            or (price - self.price_origin) % self.price_increment != 0
+            or ((Fraction(price) - Fraction(self.price_origin)) / Fraction(self.price_increment)).denominator != 1
         ):
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_DECIMAL_OR_SCALE_INVALID,
@@ -792,7 +993,7 @@ class _PITDeltaLevelV2:
             type(self.quantity_increment_or_none) is not Decimal
             or not self.quantity_increment_or_none.is_finite()
             or self.quantity_increment_or_none <= 0
-            or quantity_delta % self.quantity_increment_or_none != 0
+            or (Fraction(quantity_delta) / Fraction(self.quantity_increment_or_none)).denominator != 1
         ):
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
@@ -1134,23 +1335,28 @@ _PIT_TYPED_PAYLOAD_TYPE_BY_EVENT_KIND_V2 = MappingProxyType(
 )
 
 
+def _pit_payload_types_for_event_kind_v2(event_kind: PITEventKindV2) -> tuple[type, ...]:
+    if event_kind is PITEventKindV2.BOOK_SNAPSHOT:
+        return (_PITBookSnapshotPayloadV2,)
+    if event_kind is PITEventKindV2.BOOK_DELTA:
+        return (
+            _PITBookAbsoluteUpdatePayloadV2,
+            _PITBookDeltaPayloadV2,
+        )
+    if event_kind is PITEventKindV2.BOOK_REPLACEMENT:
+        return (_PITBookReplacementPayloadV2,)
+    expected_type = _PIT_TYPED_PAYLOAD_TYPE_BY_EVENT_KIND_V2.get(event_kind)
+    return () if expected_type is None else (expected_type,)
+
+
 def _pit_payload_matches_event_kind(
     payload: object,
     event_kind: PITEventKindV2,
 ) -> bool:
-    if event_kind is PITEventKindV2.BOOK_SNAPSHOT:
-        return type(payload) is _PITBookSnapshotPayloadV2
-    if event_kind is PITEventKindV2.BOOK_DELTA:
-        return type(payload) in {
-            _PITBookAbsoluteUpdatePayloadV2,
-            _PITBookDeltaPayloadV2,
-        }
-    if event_kind is PITEventKindV2.BOOK_REPLACEMENT:
-        return type(payload) is _PITBookReplacementPayloadV2
-    expected_type = _PIT_TYPED_PAYLOAD_TYPE_BY_EVENT_KIND_V2.get(event_kind)
+    if event_kind in {PITEventKindV2.BOOK_SNAPSHOT, PITEventKindV2.BOOK_DELTA, PITEventKindV2.BOOK_REPLACEMENT}:
+        return type(payload) in _pit_payload_types_for_event_kind_v2(event_kind)
     return (
-        expected_type is not None
-        and type(payload) is expected_type
+        type(payload) in _pit_payload_types_for_event_kind_v2(event_kind)
         and payload.event_kind is event_kind
     )
 
@@ -1678,6 +1884,7 @@ def _pit_level_from_source(
     price_increment: Decimal,
     price_origin: Decimal,
     quantity_increment_or_none: Decimal | None,
+    price_bands: tuple = (),
 ) -> _PITBookLevelV2:
     if type(item) is tuple and len(item) == 2:
         price_value, quantity_value = item
@@ -1694,6 +1901,9 @@ def _pit_level_from_source(
             "book level must be exact pair or admitted object",
         )
     price_text, price, price_scale = _pit_decimal_text(price_value, "level price")
+    if price_bands:
+        origin, increment = _public_on_price_grid_v1(price_text, bands=price_bands, origin=None, increment=None)
+        price_origin, price_increment = Decimal(origin), Decimal(increment)
     quantity_text, quantity, quantity_scale = _pit_decimal_text(
         quantity_value, "level quantity"
     )
@@ -1840,6 +2050,7 @@ def _decode_gemini_titan_frame_v2(
     price_increment: Decimal,
     price_origin: Decimal,
     quantity_increment_or_none: Decimal | None,
+    price_bands: tuple = (),
 ) -> PITCanonicalEventCandidateV2:
     tree = _pit_frame_tree(frame)
     symbol = _pit_tree_value(
@@ -1955,6 +2166,7 @@ def _decode_polymarket_us_retail_frame_v2(
     price_increment: Decimal,
     price_origin: Decimal,
     quantity_increment_or_none: Decimal | None,
+    price_bands: tuple = (),
 ) -> PITCanonicalEventCandidateV2:
     if frame.wire_dialect not in {
         "POLYMARKET_RETAIL_CAMEL_STRING_V1",
@@ -2115,6 +2327,7 @@ def _pit_kalshi_snapshot_levels(
     price_increment: Decimal,
     price_origin: Decimal,
     quantity_increment_or_none: Decimal | None,
+    price_bands: tuple = (),
 ) -> tuple[_PITBookLevelV2, ...]:
     result: list[_PITBookLevelV2] = []
     for field_names, source_side, canonical_side in (
@@ -2142,6 +2355,7 @@ def _pit_kalshi_snapshot_levels(
                     price_increment=price_increment,
                     price_origin=price_origin,
                     quantity_increment_or_none=quantity_increment_or_none,
+                    price_bands=price_bands,
                 )
             )
     return tuple(result)
@@ -2157,6 +2371,7 @@ def _decode_kalshi_us_dcm_frame_v2(
     price_increment: Decimal,
     price_origin: Decimal,
     quantity_increment_or_none: Decimal | None,
+    price_bands: tuple = (),
 ) -> PITCanonicalEventCandidateV2:
     tree = _pit_frame_tree(frame)
     if event_kind in {PITEventKindV2.BOOK_SNAPSHOT, PITEventKindV2.BOOK_DELTA}:
@@ -2240,6 +2455,7 @@ def _decode_kalshi_us_dcm_frame_v2(
                 price_increment=price_increment,
                 price_origin=price_origin,
                 quantity_increment_or_none=quantity_increment_or_none,
+                price_bands=price_bands,
             ),
             provider_sequence=sequence,
             provider_subscription_id_or_none=sid,
@@ -2262,6 +2478,9 @@ def _decode_kalshi_us_dcm_frame_v2(
         delta_text, delta, delta_scale = _pit_decimal_text(
             delta_value, "Kalshi quantity delta"
         )
+        if price_bands:
+            origin, increment = _public_on_price_grid_v1(price_text, bands=price_bands, origin=None, increment=None)
+            price_origin, price_increment = Decimal(origin), Decimal(increment)
         payload = _PITBookDeltaPayloadV2(
             deltas=(
                 _PITDeltaLevelV2(
@@ -2295,11 +2514,12 @@ def _decode_kalshi_us_dcm_frame_v2(
         _pit_tree_value(message, "created_time", required=False),
         "Kalshi provider event time",
     )
+    joined_market_id = _pit_tree_value(message, "market_id", required=False)
     return _pit_candidate(
         contract=contract,
         frame=frame,
         event_kind=event_kind,
-        market_id=ticker,
+        market_id=ticker if joined_market_id is None else _pit_adapter_text(joined_market_id, "joined Kalshi market identity"),
         instrument_id=ticker,
         payload=payload,
         depth_class=depth_class,
@@ -2332,6 +2552,7 @@ def _decode_pit_frame_v2(
     price_increment_text: str,
     price_origin_text: str,
     quantity_increment_text_or_none: str | None,
+    price_bands: tuple = (),
 ) -> PITCanonicalEventCandidateV2:
     if type(contract) is not SelectedPITPublicDataContractV2 or type(
         frame
@@ -2387,6 +2608,8 @@ def _decode_pit_frame_v2(
                 "quantity increment must be positive",
             )
     decoder = _PIT_PRIVATE_DECODER_BY_PROFILE_V2.get(frame.profile_id)
+    _native_require(not price_bands or frame.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT,
+                    "band-grid decoder selected for another profile")
     if decoder is None:
         raise PITDataContractErrorV1(
             PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
@@ -2401,4 +2624,1104 @@ def _decode_pit_frame_v2(
         price_increment=price_increment,
         price_origin=price_origin,
         quantity_increment_or_none=quantity_increment,
+        price_bands=price_bands,
     )
+
+
+def _public_native_tree_v1(raw: bytes, *, maximum_bytes: int = 65536) -> dict:
+    """Bounded original-body admission, shared by capture and translation.
+
+    Inspect additive fields too: projecting a private field out later cannot
+    make retaining its original bytes lawful. Decimal values stay native here.
+    """
+    tree = _native_strict_json(raw, max_bytes=maximum_bytes)
+    _native_require(type(tree) is dict, "public native body must be an object")
+
+    def inspect(value):
+        if type(value) is dict:
+            for key, item in value.items():
+                _check_key(key)
+                if _pit_source_field_class(key) in policy.PIT_PRIVATE_FIELD_DENYLIST_V1:
+                    raise PITDataContractErrorV1(PITReasonCodeV1.PIT_PRIVATE_FIELD_CLASS_REJECTED,
+                                                 "private field in original public body")
+                inspect(item)
+        elif type(value) is list:
+            for item in value:
+                inspect(item)
+
+    inspect(tree)
+    return tree
+
+
+@dataclass(frozen=True, slots=True)
+class PublicCanonicalTranslationV1:
+    observation_ref: str
+    normalized_frame: PITRawFrameV1
+    exact_clock_companion: Mapping[str, object]
+    canonical_contract_ref: str
+    metadata_refs: tuple[str, ...]
+    stream_disposition: Mapping[str, object]
+    field_lineage: tuple[tuple[str, str, str, str], ...]
+
+    def __post_init__(self):
+        from .binding import _public_field_lineage_v1
+
+        _native_ident(self.observation_ref)
+        _native_ident(self.canonical_contract_ref)
+        _native_require(type(self.normalized_frame) is PITRawFrameV1
+                        and self.normalized_frame.frame_id != self.observation_ref
+                        and self.normalized_frame.raw_utf8_text_or_none is None,
+                        "translation must identify a distinct internal frame")
+        self.normalized_frame.__post_init__()
+        _public_refs_v1(self.metadata_refs, allow_empty=True)
+        _public_field_lineage_v1(self.field_lineage)
+        for name in ("exact_clock_companion", "stream_disposition"):
+            value = getattr(self, name)
+            _native_require(type(value) in (dict, MappingProxyType), "invalid translation companion")
+            object.__setattr__(self, name, _public_scalar_tree_v1(value))
+        clocks = self.exact_clock_companion
+        _native_require(set(clocks) == {"received", "provider_event_or_none", "provider_sending_or_none"}
+                        and clocks["received"] is not None, "invalid exact clock companion fields")
+        for pair in clocks.values():
+            if pair is not None:
+                _native_require(type(pair) is MappingProxyType and "source_text" in pair
+                                and dict(pair) == _native_utc_receipt_pair(pair["source_text"]),
+                                "exact clock companion differs from its source time")
+        _native_require(self.normalized_frame.qtt_received_at_utc == _pit_provider_time(
+            clocks["received"]["receipt_utc_floor"], "received projection"), "received clock projection differs")
+        disposition = self.stream_disposition
+        _native_require(disposition.get("kind") in {"CONTROL", "METADATA", "MARKET_DATA", "UNSELECTED_LIFECYCLE", "PUBLIC_REFERENCE"}, "unknown translation disposition")
+        if disposition["kind"] == "CONTROL":
+            _native_require({"kind", "message_type", "request_id"} <= set(disposition)
+                <= {"kind", "message_type", "request_id", "sid", "seq", "channel", "code", "message"}
+                and disposition["message_type"] in {"subscribed", "ok", "unsubscribed", "error"},
+                "invalid control disposition")
+            if self.normalized_frame.profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
+                _native_ident(disposition["request_id"])
+            else:
+                _public_counter_v1(disposition["request_id"])
+            for name in ("sid", "seq", "code"):
+                if name in disposition:
+                    _public_counter_v1(disposition[name], allow_zero=name != "sid")
+            if disposition["message_type"] == "subscribed":
+                _native_require({"sid", "channel"} <= set(disposition), "incomplete subscription disposition")
+        elif disposition["kind"] == "PUBLIC_REFERENCE":
+            if disposition.get("operation_id") == "K_WS":
+                _native_require(set(disposition) == {"kind","operation_id","instrument_ids","notification_type","event_id"}
+                    and disposition["notification_type"] in {"event_lifecycle","event_fee_update"},
+                    "invalid global Event notification disposition")
+                _native_ident(disposition["event_id"])
+                _public_refs_v1(disposition["instrument_ids"],allow_empty=True)
+            else:
+                _native_require(set(disposition) == {"kind", "operation_id", "instrument_ids"}
+                    and disposition["operation_id"] in {"K_STATUS", "K_HISTORY_CUTOFF", "K_SERIES_FEES", "K_EVENT_FEES",
+                                                        "K_HISTORY_TRADES", "P_SETTLEMENT"}, "invalid public reference disposition")
+                _public_refs_v1(disposition["instrument_ids"])
+        elif disposition["kind"] == "UNSELECTED_LIFECYCLE":
+            _native_require(set(disposition) == {"kind", "instrument_id"}, "invalid unselected lifecycle disposition")
+            _native_ident(disposition["instrument_id"])
+        elif disposition["kind"] == "METADATA":
+            if "instrument_generations" in disposition:
+                _native_require(set(disposition) == {"kind", "instrument_generations"},
+                                "invalid metadata selection disposition")
+                rows = disposition["instrument_generations"]
+                _native_require(type(rows) is tuple and 0 < len(rows) <= 4096
+                                and all(type(row) is tuple and len(row) == 2 for row in rows)
+                                and len({row[0] for row in rows}) == len(rows),
+                                "metadata selection must name each instrument exactly once")
+                for instrument, generation in rows:
+                    _native_ident(instrument)
+                    _public_counter_v1(generation, allow_zero=True)
+            else:
+                _native_require(set(disposition) == {"kind", "instrument_id", "metadata_generation"},
+                                "invalid metadata disposition")
+                _native_ident(disposition["instrument_id"])
+                _public_counter_v1(disposition["metadata_generation"], allow_zero=True)
+        else:
+            _native_require({"kind", "event_kind", "instrument_id", "metadata_generation"} <= set(disposition)
+                            <= {"kind", "event_kind", "instrument_id", "metadata_generation", "market_clock", "lifecycle_state"}
+                            and disposition["event_kind"] in {"BOOK_SNAPSHOT", "BOOK_DELTA", "BOOK_REPLACEMENT",
+                                                              "BBO", "TRADE", "LIFECYCLE"},
+                            "invalid market-data disposition")
+            _native_ident(disposition["instrument_id"])
+            _public_counter_v1(disposition["metadata_generation"], allow_zero=True)
+            if "market_clock" in disposition:
+                _public_counter_v1(disposition["market_clock"], allow_zero=True)
+            if disposition["event_kind"] == "LIFECYCLE":
+                _native_require(disposition.get("lifecycle_state") in {
+                    "OPEN", "PAUSED", "CLOSED", "UNDER_REVIEW", "RESOLVED", "SETTLED", "VOID", "UNAVAILABLE"},
+                    "lifecycle event requires a closed canonical disposition")
+            else:
+                _native_require("lifecycle_state" not in disposition, "non-lifecycle event cannot change lifecycle")
+
+
+def _public_translation_from_storage_v1(value) -> PublicCanonicalTranslationV1:
+    """Restore an unaccepted translation candidate, never receiving custody."""
+    _native_require(type(value) is dict and set(value) == {field.name for field in dataclass_fields(PublicCanonicalTranslationV1)},
+                    "stored translation has missing or extra fields")
+    row = dict(value)
+    frame = row["normalized_frame"]
+    _native_require(type(frame) is dict and set(frame) == {field.name for field in dataclass_fields(PITRawFrameV1)},
+                    "stored normalized frame has missing or extra fields")
+    frame = dict(frame)
+    try:
+        frame["profile_id"] = Stage1VenueProfileIdV1(frame["profile_id"])
+    except (TypeError, ValueError) as exc:
+        raise PITDataContractErrorV1(PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED, "unknown stored translation profile") from exc
+    frame["qtt_received_at_utc"] = _pit_provider_time(frame["qtt_received_at_utc"], "stored received projection")
+    _native_require(type(frame["source_contract_refs"]) is list, "stored frame references must be an array")
+    frame["source_contract_refs"] = tuple(frame["source_contract_refs"])
+    row["normalized_frame"] = PITRawFrameV1(**frame)
+    _native_require(type(row["metadata_refs"]) is list and type(row["field_lineage"]) is list
+                    and all(type(item) is list for item in row["field_lineage"]), "invalid stored translation lineage")
+    row["metadata_refs"] = tuple(row["metadata_refs"])
+    row["field_lineage"] = tuple(tuple(item) for item in row["field_lineage"])
+    restored = PublicCanonicalTranslationV1(**row)
+    # Only the exact validated frame type may serialize its false safety
+    # declarations. Untyped mappings keep the ordinary secret-key rejection.
+    _native_require(deterministic_json(restored) == json.dumps(value, ensure_ascii=False, allow_nan=False,
+                    separators=(",", ":"), sort_keys=True), "stored translation differs after closed restoration")
+    return restored
+
+
+def _public_candidate_from_translation_v1(*, translation: PublicCanonicalTranslationV1,
+        contract: SelectedPITPublicDataContractV2, metadata: tuple[PublicMetadataSnapshotV1, ...],
+        parse_completed_at_utc: datetime, parse_completed_monotonic_ns: int) -> PITCanonicalEventCandidateV2:
+    """The existing decoder remains the only native candidate payload decoder."""
+    _native_require(type(translation) is PublicCanonicalTranslationV1
+                    and type(contract) is SelectedPITPublicDataContractV2 and type(metadata) is tuple
+                    and all(type(item) is PublicMetadataSnapshotV1 for item in metadata),
+                    "native candidate requires exact translation/contract/metadata")
+    translation.__post_init__()
+    contract.__post_init__()
+    _native_require(translation.canonical_contract_ref == contract.contract_id
+                    and translation.metadata_refs == tuple(item.metadata_id for item in metadata)
+                    and translation.stream_disposition["kind"] == "MARKET_DATA", "native candidate association differs")
+    selected = [item for item in metadata if type(item) is PublicMetadataSnapshotV1
+                and item.instrument_id == translation.stream_disposition["instrument_id"]]
+    _native_require(len(selected) == 1, "native candidate metadata is missing or ambiguous")
+    selected = selected[0]
+    selected.__post_init__()
+    parse_completed_at_utc = _pit_adapter_utc(parse_completed_at_utc, "native parse completed")
+    parsed_ns = _native_utc_nanoseconds(parse_completed_at_utc.isoformat())
+    _native_require(selected.profile_id is contract.profile_id
+                    and selected.generation == translation.stream_disposition["metadata_generation"]
+                    and selected.known_at_ns <= parsed_ns < selected.expires_at_ns
+                    and selected.effective_from_ns <= parsed_ns
+                    and (selected.effective_until_ns_or_none is None or parsed_ns < selected.effective_until_ns_or_none),
+                    "native candidate metadata generation changed")
+    if selected.price_bands:
+        origin, _, increment = selected.price_bands[0]
+    else:
+        origin, increment = selected.price_origin_or_none, selected.price_increment_or_none
+    # An absent quantity origin is not an inferred zero lattice. Retain its
+    # explicit metadata limitation; observed sizes aren't new-order minimums.
+    quantity_increment = (selected.quantity_increment_or_none if selected.quantity_origin_or_none is not None
+                          and Fraction(Decimal(selected.quantity_origin_or_none)) == 0 else None)
+    candidate = _decode_pit_frame_v2(contract, translation.normalized_frame,
+        event_kind=PITEventKindV2(translation.stream_disposition["event_kind"]),
+        parse_completed_at_utc=parse_completed_at_utc, parse_completed_monotonic_ns=parse_completed_monotonic_ns,
+        price_increment_text=increment, price_origin_text=origin,
+        quantity_increment_text_or_none=quantity_increment, price_bands=selected.price_bands)
+    _native_require(candidate.instrument_id == selected.instrument_id and candidate.market_id == selected.market_id,
+                    "decoded native candidate market/instrument differs")
+    return candidate
+
+
+def _compile_public_catalog_metadata_v1(*, observation, metadata, source_binding, translation_context):
+    """Derive append-only catalog candidates, then verify the exact translation.
+
+    Identity and documentary payoff/origin rules still come from the selected
+    upstream inputs. Observable grids and catalog state come from these bytes.
+    Only the receiving/publication owner can attach native custody afterwards.
+    """
+    from dataclasses import replace
+    from ..qku_computation_control_plane.receipts import _public_identity_v1
+    from ..qku_computation_control_plane.serialization import _native_strict_json
+
+    observed = _translate_public_observation_v1(observation=observation, metadata=metadata,
+        source_binding=source_binding, translation_context=translation_context, project_catalog=True)
+    request = translation_context["request"]
+    payload = observed.normalized_frame.parsed_source_scalar_tree_or_none
+    originals = tuple(row for row in observed.field_lineage if row[0] == observation.observation_id)
+    _native_require(originals, "catalog metadata has no original material fields")
+    successors = []
+    for prior in metadata:
+        if prior.instrument_id not in request.instrument_ids:
+            successors.append(prior)
+            continue
+        changes = {}
+        material = originals
+        if request.operation_id == "K_MARKET":
+            changes.update(price_bands=tuple((row["start"],row["end"],row["step"])
+                for row in payload["market"]["price_ranges"]), price_origin_or_none=None, price_increment_or_none=None)
+        elif request.operation_id == "P_MARKET":
+            changes.update(price_increment_or_none=payload["orderPriceMinTickSize"],
+                           quantity_minimum_or_none=payload["minimumTradeQty"])
+            if prior.resolution.get("final") is True:
+                _native_require(payload["closed"] or not payload["active"],
+                                "catalog reopening conflicts with accepted final resolution")
+            elif payload["closed"] or not payload["active"]:
+                changes["lifecycle"] = dict(state="CLOSED" if payload["closed"] else "UNAVAILABLE",
+                    native_state="closed" if payload["closed"] else "inactive", observation_ref=observation.observation_id,
+                    effective_at_ns=observation.received_wall_ns)
+        elif request.operation_id in {"G_EVENT", "G_EVENTS"}:
+            rows = tuple(row for row in payload["contracts"] if row["instrumentSymbol"] == prior.instrument_id)
+            _native_require(len(rows) == 1, "catalog successor has no unique selected contract")
+            row = rows[0]
+            # Distinguish each contract's source array index; another contract's
+            # grid fields cannot become this instrument's material lineage.
+            raw = _public_native_tree_v1(base64.urlsafe_b64decode(observation.raw_body_b64
+                + "="*(-len(observation.raw_body_b64)%4)), maximum_bytes=1048576)
+            prefixes = []
+            events = [("",raw)] if request.operation_id == "G_EVENT" else [(f"/data/{i}",event) for i,event in enumerate(raw["data"])]
+            for base,event in events:
+                if event.get("ticker") == prior.event_id_or_none:
+                    prefixes.extend(base+f"/contracts/{i}/" for i,item in enumerate(event["contracts"])
+                        if item.get("instrumentSymbol") == prior.instrument_id)
+            _native_require(len(prefixes) == 1, "catalog successor contract pointer is ambiguous")
+            material = tuple(item for item in originals if item[1].startswith(prefixes[0])
+                or item[1] == prefixes[0].split("/contracts/",1)[0]+"/ticker")
+            state = ("OPEN" if row["status"] == "active" and row["marketState"] == "open" else
+                "SETTLED" if row["status"] == "settled" and row["marketState"] == "closed" else
+                "CLOSED" if row["status"] == "closed" and row["marketState"] == "closed" else "UNAVAILABLE")
+            _native_require(not (state == "OPEN" and prior.resolution.get("final") is True),
+                            "catalog reopening conflicts with accepted final resolution")
+            effective = int(_public_exact_clock_v1(row["effectiveDate"],unit="RFC3339")["utc_ns_text"])
+            changes.update(price_bands=(), price_origin_or_none=row["priceMinimum"], price_increment_or_none=row["priceIncrement"],
+                quantity_increment_or_none=row["quantityIncrement"], quantity_minimum_or_none=row["quantityMinimum"],
+                effective_from_ns=effective, lifecycle=dict(state=state,native_state=row["status"]+"/"+row["marketState"],
+                    observation_ref=observation.observation_id,effective_at_ns=effective))
+        replaced_fields = {item[2] for item in material} | set(changes)
+        lineage = tuple(item for item in prior.field_lineage if item[2] not in replaced_fields
+            or item[1].startswith("/contract_terms/") and item[2] in {
+                "price_origin_or_none", "quantity_origin_or_none", "quantity_increment_or_none"}) + material
+        known = max(prior.known_at_ns, observation.received_wall_ns)
+        origin_parts = _native_strict_json(observation.observation_id.encode("utf-8"), max_bytes=2048)
+        successor = replace(prior, metadata_id=_public_identity_v1("PUBLIC_CATALOG_METADATA_V1",
+            *origin_parts[1:], prior.instrument_id, prior.generation+1),
+            field_lineage=lineage, known_at_ns=known, generation=prior.generation+1, **changes)
+        successors.append(successor)
+    successors = tuple(successors)
+    projected_request = replace(request, metadata_refs=tuple(row.metadata_id for row in successors))
+    projected_context = dict(translation_context, request=projected_request)
+    verified = translate_public_observation_v1(observation=observation, metadata=successors,
+        source_binding=source_binding, translation_context=projected_context)
+    return verified, successors, projected_request
+
+
+def translate_public_observation_v1(*, observation, metadata: tuple[PublicMetadataSnapshotV1, ...],
+                                    source_binding, translation_context: Mapping[str, object]) -> PublicCanonicalTranslationV1:
+    return _translate_public_observation_v1(observation=observation, metadata=metadata,
+        source_binding=source_binding, translation_context=translation_context, project_catalog=False)
+
+
+def _translate_public_observation_v1(*, observation, metadata, source_binding, translation_context, project_catalog):
+    """Translate original native fields once, under their accepted field bindings.
+
+    The context supplies existing request/contract/clock identities, never an
+    event-kind, normalized payload, provider timestamp or success flag.
+    """
+    from ..qku_computation_control_plane.receipts import (
+        PublicNativeObservationV1, _public_identity_v1, _public_canonical_frame_ref_v1,
+    )
+    from ..qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+
+    _native_require(type(observation) is PublicNativeObservationV1
+                    and type(source_binding) is PublicDataSourceBindingV1,
+                    "translation requires exact original and source binding")
+    observation.__post_init__()
+    _native_require(observation.observation_id == _public_identity_v1("PUBLIC_NATIVE_CAPTURE_V1",
+        observation.profile_id.value, observation.source_use_action_ref, observation.capture_session_id,
+        observation.connection_epoch, observation.receive_ordinal), "original observation identity differs from capture tuple")
+    source_binding.__post_init__()
+    _native_require(type(translation_context) in (dict, MappingProxyType)
+                    and {"request", "contract", "wall_clock_source_id"} <= set(translation_context)
+                    <= {"request", "contract", "wall_clock_source_id", "original_prefix", "source_bindings"},
+                    "translation context has missing or extra inputs")
+    request, contract = translation_context["request"], translation_context["contract"]
+    _native_require(type(contract) is SelectedPITPublicDataContractV2, "missing selected canonical contract")
+    contract.__post_init__()
+    _native_ident(translation_context["wall_clock_source_id"])
+    compile_public_read_request_v1(request=request, source_binding=source_binding, metadata=metadata)
+    _native_require(observation.profile_id is request.profile_id is contract.profile_id is source_binding.profile_id
+                    and observation.request_ref == request.request_id
+                    and observation.operation_id == request.operation_id
+                    and observation.native_contract_version == request.native_contract_version
+                    and observation.source_binding_refs == (source_binding.binding_id,)
+                    and (contract.source_contract_version, contract.source_currentization_receipt_ref,
+                         contract.rights_receipt_ref) in tuple(zip(source_binding.source_contract_versions,
+                             source_binding.source_receipt_refs, source_binding.rights_receipt_refs)),
+                    "original/request/source/contract association differs")
+    now = observation.received_wall_ns
+    _native_require(source_binding.known_at_ns <= now < source_binding.expires_at_ns
+                    and source_binding.effective_from_ns <= now
+                    and (source_binding.effective_until_ns_or_none is None
+                         or now < source_binding.effective_until_ns_or_none), "source binding unavailable at capture")
+    _native_require(observation.response_status_or_none in (None, 200), "non-success body is not market data")
+    raw = base64.urlsafe_b64decode(observation.raw_body_b64 + "=" * (-len(observation.raw_body_b64) % 4))
+    tree = _public_native_tree_v1(raw, maximum_bytes=1048576)
+    prefix = translation_context.get("original_prefix", ())
+    _native_require(type(prefix) is tuple and len(prefix) <= 4096
+                    and all(type(row) is PublicNativeObservationV1 for row in prefix)
+                    and len({row.observation_id for row in prefix}) == len(prefix),
+                    "invalid bounded original observation prefix")
+    for row in prefix:
+        row.__post_init__()
+        _native_require(row.capture_session_id == observation.capture_session_id
+                        and row.profile_id is observation.profile_id and row.scope_generation == observation.scope_generation
+                        and row.source_use_action_ref == observation.source_use_action_ref
+                        and row.connection_epoch <= observation.connection_epoch
+                        and row.received_wall_ns <= observation.received_wall_ns
+                        and row.received_monotonic_ns <= observation.received_monotonic_ns,
+                        "original prefix is outside the current receiving custody")
+    source_bindings = translation_context.get("source_bindings", (source_binding,))
+    _native_require(type(source_bindings) is tuple and 0 < len(source_bindings) <= 4096
+                    and all(type(row) is PublicDataSourceBindingV1 for row in source_bindings)
+                    and len({row.binding_id for row in source_bindings}) == len(source_bindings),
+                    "invalid original metadata source selection")
+    for row in source_bindings:
+        row.__post_init__()
+        _native_require(row.profile_id is observation.profile_id, "cross-profile metadata source")
+    lineage = []
+
+    def field(pointer, wire, transform="EXACT_IDENTITY", *, original=observation, native_tree=tree, native_source=source_binding, nullable=False):
+        value = native_tree
+        for segment in pointer[1:].split("/"):
+            segment = segment.replace("~1", "/").replace("~0", "~")
+            if type(value) is dict:
+                _native_require(segment in value, "required native field absent: " + pointer)
+                value = value[segment]
+            else:
+                _native_require(type(value) is list and segment.isascii() and segment.isdigit()
+                                and str(int(segment)) == segment and int(segment) < len(value),
+                                "invalid native array pointer: " + pointer)
+                value = value[int(segment)]
+        matches = [row for row in native_source.field_bindings
+                   if row[1] == wire and row[4] == pointer and row[5] == transform]
+        _native_require(len(matches) == 1, "native field has no unique compatible source binding: " + pointer)
+        expected = {"STRING": str, "INTEGER": int, "DECIMAL_TEXT": str,
+                    "BOOLEAN": bool, "OBJECT": dict, "ARRAY": list}
+        if value is None and nullable:
+            pass
+        elif wire == "DECIMAL_NUMBER":
+            _native_require(type(value) in (int, Decimal), "native decimal number required")
+        else:
+            _native_require(type(value) is expected[wire], "native field type differs: " + pointer)
+        name = matches[0][0]
+        row = (original.observation_id, pointer, name, transform)
+        if row not in lineage:
+            lineage.append(row)
+        return value
+
+    def decimal_number(pointer, *, signed=False, **origin):
+        from ..qku_computation_control_plane.context import _finite_decimal_text_v1
+
+        value = field(pointer, "DECIMAL_NUMBER", "EXACT_DECIMAL_NUMBER_TO_TEXT", **origin)
+        _native_require((signed or value >= 0) and not (type(value) is Decimal and value.is_zero() and value.is_signed()),
+                        "invalid native nonnegative decimal number")
+        return _finite_decimal_text_v1(Fraction(value))
+
+    def decimal(pointer, *, maximum_scale=None, signed=False):
+        text = field(pointer, "DECIMAL_TEXT", "EXACT_DECIMAL_TEXT")
+        _, value, scale = _pit_decimal_text(text, pointer)
+        _native_require(not (value.is_zero() and value.is_signed())
+                        and (signed or value >= 0)
+                        and (maximum_scale is None or scale <= maximum_scale), "invalid native decimal domain")
+        return text
+
+    def accepted_metadata(instrument):
+        matches = [row for row in metadata if row.instrument_id == instrument]
+        _native_require(instrument in request.instrument_ids and len(matches) == 1, "native instrument/metadata mismatch")
+        result = matches[0]
+        _native_require(result.known_at_ns <= now < result.expires_at_ns
+                        and result.effective_from_ns <= now
+                        and (result.effective_until_ns_or_none is None or now < result.effective_until_ns_or_none),
+                        "metadata unavailable at original capture")
+        for row in result.field_lineage:
+            if row not in lineage:
+                lineage.append(row)
+        return result
+
+    received = _public_exact_clock_v1(now, unit="NANOSECONDS")
+    provider = sending = None
+    disposition = {"kind": "MARKET_DATA"}
+    normalized = {}
+    op = request.operation_id
+    _native_require(type(project_catalog) is bool and (not project_catalog or op in {
+        "K_MARKET", "K_EVENT", "K_SERIES", "P_MARKET", "G_EVENT", "G_EVENTS"}),
+        "metadata projection is restricted to the selected catalog operations")
+    wire_dialect = contract.wire_dialect_policy
+    if op in {"K_STATUS", "K_HISTORY_CUTOFF", "K_SERIES_FEES", "K_EVENT_FEES", "K_HISTORY_TRADES", "P_SETTLEMENT"}:
+        # These are retained observations with their own known-at axis. They
+        # never stand in for a current book, private fill, account quota or cash.
+        disposition = dict(kind="PUBLIC_REFERENCE", operation_id=op, instrument_ids=request.instrument_ids)
+        channel = "PUBLIC_REFERENCE"
+        normalized = dict(operation_id=op, known_at_ns=now)
+        if op == "K_STATUS":
+            normalized.update(exchange_active=field("/exchange_active", "BOOLEAN"),
+                              trading_active=field("/trading_active", "BOOLEAN"))
+            if "exchange_estimated_resume_time" in tree:
+                value = field("/exchange_estimated_resume_time", "STRING", "EXACT_RFC3339", nullable=True)
+                normalized["exchange_estimated_resume_time"] = (None if value is None
+                    else _public_exact_clock_v1(value, unit="RFC3339")["source_text"])
+            if "exchange_index_statuses" in tree:
+                indices, seen = [], set()
+                for index, row in enumerate(field("/exchange_index_statuses", "ARRAY")):
+                    _native_require(type(row) is dict and index < 4096, "invalid exchange status row")
+                    base = f"/exchange_index_statuses/{index}"
+                    shard = field(base+"/exchange_index", "INTEGER")
+                    _public_counter_v1(shard, allow_zero=True)
+                    _native_require(shard not in seen, "duplicate exchange status index")
+                    seen.add(shard)
+                    indices.append(dict(exchange_index=shard, exchange_active=field(base+"/exchange_active", "BOOLEAN"),
+                                        trading_active=field(base+"/trading_active", "BOOLEAN")))
+                normalized["exchange_index_statuses"] = tuple(indices)
+            # Top-level status is only index zero. No account or selected-market
+            # shard is inferred from its mere presence.
+            normalized["top_level_exchange_index"] = 0
+        elif op == "K_HISTORY_CUTOFF":
+            for name in ("market_settled_ts", "trades_created_ts", "orders_updated_ts"):
+                value = field("/"+name, "STRING", "EXACT_RFC3339")
+                normalized[name] = _public_exact_clock_v1(value, unit="RFC3339")["source_text"]
+            if "market_positions_last_updated_ts" in tree:
+                value = field("/market_positions_last_updated_ts", "STRING", "EXACT_RFC3339")
+                normalized["market_positions_last_updated_ts"] = _public_exact_clock_v1(value, unit="RFC3339")["source_text"]
+        elif op in {"K_SERIES_FEES", "K_EVENT_FEES"}:
+            event_override = op == "K_EVENT_FEES"
+            key = "event_fee_changes" if event_override else "series_fee_change_arr"
+            projected, seen = [], set()
+            native_rows = field("/"+key, "ARRAY")
+            _native_require(len(native_rows) <= (request.request_options["limit"] if event_override else 4096),
+                            "fee history exceeds its bounded requested response")
+            for index, row in enumerate(native_rows):
+                _native_require(type(row) is dict, "fee change must be an object")
+                base = f"/{key}/{index}"
+                identity, series = field(base+"/id", "STRING"), field(base+"/series_ticker", "STRING")
+                _native_ident(identity)
+                _native_require(identity not in seen and series in {row.series_id_or_none for row in metadata},
+                                "duplicate or unselected Series fee history")
+                seen.add(identity)
+                result = dict(id=identity, series_ticker=series)
+                if event_override:
+                    event = field(base+"/event_ticker", "STRING")
+                    _native_require(event == request.request_options["event_ticker"] and any(
+                        row.event_id_or_none == event and row.series_id_or_none == series for row in metadata),
+                        "Event fee history parent identity differs")
+                    result["event_ticker"] = event
+                else:
+                    _native_require(series == request.request_options["series_ticker"], "Series fee history request identity differs")
+                suffix = "_override" if event_override else ""
+                family = field(base+"/fee_type"+suffix, "STRING", nullable=event_override)
+                multiplier = field(base+"/fee_multiplier"+suffix, "DECIMAL_NUMBER", "EXACT_DECIMAL_NUMBER_TO_TEXT", nullable=event_override)
+                _native_require((family is None) == (multiplier is None), "Event fee clear requires an exact null/null pair")
+                if family is not None:
+                    _native_ident(family)
+                    _native_require(multiplier >= 0 and not (type(multiplier) is Decimal and multiplier.is_zero() and multiplier.is_signed()),
+                                    "invalid native fee multiplier")
+                    multiplier = _native_retail_finite_decimal_text_v1(Fraction(multiplier))
+                result.update(fee_type=family, fee_multiplier=multiplier,
+                    override_cleared=event_override and family is None,
+                    scheduled_at=_public_exact_clock_v1(field(base+"/scheduled_ts", "STRING", "EXACT_RFC3339"), unit="RFC3339"))
+                projected.append(result)
+            normalized["fee_changes"] = tuple(projected)
+            if event_override:
+                normalized["cursor"] = field("/cursor", "STRING")
+        elif op == "K_HISTORY_TRADES":
+            rows = field("/trades", "ARRAY")
+            _native_require(len(rows) <= request.request_options["limit"], "historical response exceeds selected page size")
+            projected, seen = [], set()
+            for index, row in enumerate(rows):
+                _native_require(type(row) is dict, "historical trade must be an object")
+                base = f"/trades/{index}"
+                ticker, identity = field(base+"/ticker", "STRING"), field(base+"/trade_id", "STRING")
+                _native_ident(identity)
+                _native_require(ticker == request.request_options["ticker"] and identity not in seen,
+                                "historical trade identity differs or is duplicated")
+                seen.add(identity)
+                selected = accepted_metadata(ticker)
+                yes, no = decimal(base+"/yes_price_dollars", maximum_scale=4), decimal(base+"/no_price_dollars", maximum_scale=4)
+                _native_require(selected.payout_basis_or_none == "USD_PER_CONTRACT" and selected.payout_amount_or_none is not None
+                    and Fraction(yes)+Fraction(no) == Fraction(selected.payout_amount_or_none), "historical trade payout basis differs")
+                for price in (yes,no):
+                    _public_on_price_grid_v1(price, bands=selected.price_bands,
+                        origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                count = decimal(base+"/count_fp", maximum_scale=2)
+                side = field(base+"/taker_side", "STRING")
+                _native_require(Fraction(count) > 0 and side in {"yes", "no"}, "invalid historical trade quantity/side")
+                clock = _public_exact_clock_v1(field(base+"/created_time", "STRING", "EXACT_RFC3339"), unit="RFC3339")
+                _native_require(request.time_bounds_or_none[0]*1_000_000_000 <= int(clock["utc_ns_text"])
+                    <= request.time_bounds_or_none[1]*1_000_000_000, "historical trade lies outside requested time bounds")
+                projected.append(dict(ticker=ticker, trade_id=identity, yes_price_dollars=yes, no_price_dollars=no,
+                    count_fp=count, taker_side=side, provider_event_clock=clock))
+            normalized.update(trades=tuple(projected), cursor=field("/cursor", "STRING"))
+        else:
+            instrument = field("/slug", "STRING")
+            _native_require(instrument == request.request_options["slug"], "settlement slug differs from requested market")
+            selected = accepted_metadata(instrument)
+            normalized.update(instrument_id=instrument, market_id=selected.market_id,
+                observed_settlement=decimal_number("/settlement", signed=True), finality="UNAVAILABLE_SEPARATE_ACCEPTED_RESOLUTION_REQUIRED",
+                accounting_class="PUBLIC_OBSERVATION_NOT_ACCOUNT_CASH")
+        if "cursor" in normalized:
+            cursor = normalized["cursor"]
+            _native_require(len(cursor) <= 1024 and all(ord(char) >= 32 and ord(char) != 127 for char in cursor),
+                            "invalid bounded response cursor")
+    elif op in {"P_MARKET", "P_BOOK", "P_WS"}:
+        wire_dialect = "POLYMARKET_RETAIL_CAMEL_STRING_V1"
+        retail_trade = op == "P_WS" and request.request_options["subscribe"]["subscriptionType"] == "SUBSCRIPTION_TYPE_TRADE"
+        if op == "P_MARKET":
+            instrument = field("/market/slug", "STRING")
+        else:
+            instrument = field("/trade/marketSlug" if retail_trade else "/marketData/marketSlug", "STRING")
+        selected = accepted_metadata(instrument)
+        if op in {"P_MARKET", "P_BOOK"}:
+            _native_require(request.request_options["slug"] == instrument, "Retail returned slug differs from request")
+        else:
+            sub = request.request_options["subscribe"]
+            _native_require(field("/requestId", "STRING") == sub["requestId"]
+                            and field("/subscriptionType", "STRING") == sub["subscriptionType"]
+                            and instrument in sub["marketSlugs"], "Retail book is outside the selected subscription")
+        if op == "P_MARKET":
+            metadata_original, metadata_tree, metadata_source = observation, tree, source_binding
+        else:
+            original_refs = {row[0] for row in selected.field_lineage if row[1] == "/market/marketSides"}
+            originals = [row for row in prefix if row.observation_id in original_refs and row.operation_id == "P_MARKET"]
+            _native_require(len(originals) == 1, "Retail book requires its retained exact market metadata original")
+            metadata_original = originals[0]
+            metadata_tree = _public_native_tree_v1(base64.urlsafe_b64decode(metadata_original.raw_body_b64
+                + "=" * (-len(metadata_original.raw_body_b64) % 4)), maximum_bytes=1048576)
+            sources = [row for row in source_bindings if metadata_original.source_binding_refs == (row.binding_id,)]
+            _native_require(len(sources) == 1, "Retail metadata original has no unique admitted source")
+            metadata_source = sources[0]
+        _native_require("P_MARKET" in metadata_source.allowed_operation_ids
+                        and metadata_original.response_status_or_none == 200
+                        and metadata_original.native_contract_version in metadata_source.source_contract_versions
+                        and metadata_source.known_at_ns <= now < metadata_source.expires_at_ns
+                        and metadata_source.effective_from_ns <= now
+                        and (metadata_source.effective_until_ns_or_none is None or now < metadata_source.effective_until_ns_or_none),
+                        "Retail metadata original source unavailable")
+        origin = dict(original=metadata_original, native_tree=metadata_tree, native_source=metadata_source)
+        market = field("/market/id", "STRING", **origin)
+        slug = field("/market/slug", "STRING", **origin)
+        sides = field("/market/marketSides", "ARRAY", **origin)
+        tick = decimal_number("/market/orderPriceMinTickSize", **origin)
+        minimum = decimal_number("/market/minimumTradeQty", **origin)
+        # The Boolean flags are retained facts, not a replacement for the
+        # separately source-bound complete lifecycle/finality policy.
+        active = field("/market/active", "BOOLEAN", **origin)
+        closed = field("/market/closed", "BOOLEAN", **origin)
+        required_pointers = {"/market/id", "/market/slug", "/market/marketSides",
+                             "/market/orderPriceMinTickSize", "/market/minimumTradeQty"}
+        required_lineage = [row for row in lineage if row[0] == metadata_original.observation_id and row[1] in required_pointers]
+        _native_require(len(required_lineage) == len(required_pointers)
+                        and (project_catalog or all(row in selected.field_lineage for row in required_lineage))
+                        and market == selected.market_id and slug == selected.instrument_id
+                        and (project_catalog or tick == selected.price_increment_or_none and minimum == selected.quantity_minimum_or_none)
+                        and len(sides) >= 2 and all(type(side) is dict and side for side in sides),
+                        "Retail metadata fields differ from their exact accepted identity/grid/side lineage")
+        normalized = dict(marketId=market, marketSlug=slug, marketSides=sides, orderPriceMinTickSize=tick)
+        if op == "P_MARKET":
+            normalized.update(minimumTradeQty=minimum, active=active, closed=closed)
+            disposition = dict(kind="METADATA", instrument_id=instrument, metadata_generation=selected.generation)
+            channel = "PUBLIC_METADATA"
+        elif retail_trade:
+            _native_require("marketData" not in tree and "marketDataLite" not in tree,
+                            "ambiguous Retail trade/book envelope")
+            _native_require(field("/trade/price/currency", "STRING") == "USD", "Retail trade currency is not USD")
+            price = decimal("/trade/price/value")
+            _public_on_price_grid_v1(price, bands=selected.price_bands,
+                origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+            provider = _public_exact_clock_v1(field("/trade/tradeTime", "STRING", "EXACT_RFC3339"), unit="RFC3339")
+            normalized.update(price=price, transactTime=provider["receipt_utc_floor"],
+                quantityUnavailableReason="PIT_NATIVE_QUANTITY_BASIS_UNAVAILABLE")
+            quantity_bindings = [row for row in source_binding.field_bindings
+                if row[4] == "/trade/quantity/value" and row[1] == "DECIMAL_TEXT"
+                and row[2] == "CONTRACT_COUNT" and row[5] == "EXACT_DECIMAL_TEXT"]
+            if quantity_bindings:
+                _native_require(len(quantity_bindings) == 1, "ambiguous Retail trade quantity basis")
+                normalized["quantity"] = decimal("/trade/quantity/value")
+                del normalized["quantityUnavailableReason"]
+            channel = "markets"
+            disposition.update(event_kind="TRADE", instrument_id=instrument, metadata_generation=selected.generation)
+        else:
+            _native_require("trade" not in tree and "marketDataLite" not in tree, "ambiguous Retail book envelope")
+            normalized["state"] = field("/marketData/state", "STRING")
+            # This optional field limits settlement finality, never book access.
+            # An absent/unbound field stays unknown; false is not finality proof.
+            preliminary_pointer = "/marketData/stats/settlementPreliminaryFlag"
+            stats = tree["marketData"].get("stats")
+            preliminary = None
+            if type(stats) is dict and "settlementPreliminaryFlag" in stats:
+                matching = tuple(row for row in source_binding.field_bindings
+                    if row[1] == "BOOLEAN" and row[4] == preliminary_pointer and row[5] == "EXACT_IDENTITY")
+                if len(matching) == 1:
+                    preliminary = field(preliminary_pointer, "BOOLEAN")
+            normalized["settlement_preliminary_or_none"] = preliminary
+            provider = _public_exact_clock_v1(field("/marketData/transactTime", "STRING", "EXACT_RFC3339"), unit="RFC3339")
+            normalized["transactTime"] = provider["receipt_utc_floor"]
+            for side in ("bids", "offers"):
+                pointer = "/marketData/"+side
+                levels = field(pointer, "ARRAY")
+                converted = []
+                for index, _level in enumerate(levels):
+                    base = pointer+"/"+str(index)
+                    _native_require(field(base+"/px/currency", "STRING") == "USD", "Retail native book currency is not USD")
+                    price = decimal_number(base+"/px/value") if op == "P_BOOK" else decimal(base+"/px/value")
+                    quantity = decimal(base+"/qty")
+                    _public_on_price_grid_v1(price, bands=selected.price_bands,
+                        origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                    converted.append((price, quantity))
+                normalized[side] = tuple(converted)
+            channel = "REST_BOOK" if op == "P_BOOK" else "markets"
+            disposition.update(event_kind="BOOK_REPLACEMENT", instrument_id=instrument, metadata_generation=selected.generation)
+    elif op in {"K_MARKET", "K_EVENT", "K_SERIES"}:
+        base = {"K_MARKET": "/market", "K_EVENT": "/event", "K_SERIES": "/series"}[op]
+        envelope = field(base, "OBJECT")
+        identity_name = "event_ticker" if op == "K_EVENT" else "ticker"
+        identity = field(base + "/" + identity_name, "STRING")
+        expected = request.request_options[{"K_MARKET": "ticker", "K_EVENT": "event_ticker",
+                                            "K_SERIES": "series_ticker"}[op]]
+        _native_require(identity == expected, "Kalshi metadata identity differs from the request")
+        rows = tuple(accepted_metadata(instrument) for instrument in request.instrument_ids)
+        if op == "K_MARKET":
+            _native_require(len(rows) == 1 and rows[0].instrument_id == identity,
+                            "Kalshi market response has an ambiguous selected instrument")
+            selected = rows[0]
+            event = field(base + "/event_ticker", "STRING")
+            _native_require(event == selected.event_id_or_none, "Kalshi market/event metadata join differs")
+            if "market_id" in envelope:
+                _native_require(field(base + "/market_id", "STRING") == selected.market_id,
+                                "Kalshi metadata market id differs")
+            ranges = field(base + "/price_ranges", "ARRAY", "SOURCE_PRICE_BAND")
+            _native_require(0 < len(ranges) <= 256, "Kalshi market price bands unavailable")
+            bands = tuple(tuple(decimal(base + f"/price_ranges/{index}/" + key, maximum_scale=4)
+                                for key in ("start", "end", "step")) for index, row in enumerate(ranges))
+            from ..qku_computation_control_plane.context import _public_price_bands_v1
+            _public_price_bands_v1(bands)
+            _native_require(project_catalog or bands == selected.price_bands, "Kalshi metadata bands changed; refresh required")
+            required = {base + "/ticker", base + "/event_ticker", base + "/price_ranges",
+                        *(base + f"/price_ranges/{index}/" + key for index in range(len(bands))
+                          for key in ("start", "end", "step"))}
+            material = tuple(row for row in lineage if row[0] == observation.observation_id and row[1] in required)
+            _native_require(len(material) == len(required) and (project_catalog or all(row in selected.field_lineage for row in material)),
+                            "Kalshi metadata lacks exact original band/identity lineage")
+            normalized = {"market": dict(ticker=identity, event_ticker=event,
+                price_ranges=tuple(dict(start=low, end=high, step=step) for low, high, step in bands))}
+        elif op == "K_EVENT":
+            series = field(base + "/series_ticker", "STRING")
+            _native_require(all(row.event_id_or_none == identity and row.series_id_or_none == series for row in rows),
+                            "Kalshi event/Series metadata join differs")
+            normalized = {"event": dict(event_ticker=identity, series_ticker=series)}
+            required = {base + "/event_ticker", base + "/series_ticker"}
+        else:
+            _native_require(all(row.series_id_or_none == identity for row in rows), "Kalshi Series metadata join differs")
+            normalized = {"series": dict(ticker=identity)}
+            required = {base + "/ticker"}
+        material = tuple(row for row in lineage if row[0] == observation.observation_id and row[1] in required)
+        _native_require(len(material) == len(required) and (project_catalog or all(
+            all(fact in row.field_lineage for fact in material) for row in rows)),
+            "Kalshi metadata lacks exact original identity lineage")
+        # Fee fields remain fee-selector inputs. A catalog does not supply an
+        # account schedule, a default multiplier or a cashflow on its own.
+        channel = "PUBLIC_METADATA"
+        disposition = dict(kind="METADATA", instrument_generations=tuple((row.instrument_id,row.generation) for row in rows))
+    elif op in {"G_EVENT", "G_EVENTS"}:
+        # One catalog response can cover several selected contracts. Keep their
+        # distinct generations; a first-row projection cannot stand for them all.
+        events = [("", tree)] if op == "G_EVENT" else [
+            (f"/data/{index}", row) for index, row in enumerate(field("/data", "ARRAY"))]
+        selected_events = {row.event_id_or_none for row in metadata if row.instrument_id in request.instrument_ids}
+        _native_require(None not in selected_events, "Gemini event identity is unavailable")
+        projected, seen = [], set()
+        for base, event in events:
+            _native_require(type(event) is dict, "Gemini event must be an object")
+            # Unselected discovery rows and nested sibling events remain inert.
+            if op == "G_EVENTS" and event.get("ticker") not in selected_events:
+                continue
+            ticker = field(base + "/ticker", "STRING")
+            _native_require(ticker in selected_events and (op != "G_EVENT"
+                            or ticker == request.request_options["eventTicker"]),
+                            "Gemini root event identity differs from the request")
+            contracts = field(base + "/contracts", "ARRAY")
+            for index, native in enumerate(contracts):
+                _native_require(type(native) is dict, "Gemini contract must be an object")
+                if native.get("instrumentSymbol") not in request.instrument_ids:
+                    continue
+                pointer = base + f"/contracts/{index}"
+                instrument = field(pointer + "/instrumentSymbol", "STRING")
+                selected = accepted_metadata(instrument)
+                _native_require(instrument not in seen and selected.event_id_or_none == ticker,
+                                "duplicate or cross-event Gemini contract")
+                seen.add(instrument)
+                identity = field(pointer + "/id", "STRING")
+                contract_ticker = field(pointer + "/ticker", "STRING")
+                facts = {key: decimal(pointer + "/" + key) for key in (
+                    "quantityIncrement", "quantityMinimum", "priceIncrement", "priceMinimum")}
+                _native_require(identity == selected.market_id and (project_catalog or not selected.price_bands
+                    and facts["priceMinimum"] == selected.price_origin_or_none
+                    and facts["priceIncrement"] == selected.price_increment_or_none
+                    and facts["quantityIncrement"] == selected.quantity_increment_or_none
+                    and facts["quantityMinimum"] == selected.quantity_minimum_or_none),
+                    "Gemini metadata identity/grid differs from its accepted version")
+                status = field(pointer + "/status", "STRING")
+                market_state = field(pointer + "/marketState", "STRING")
+                state = ("OPEN" if status == "active" and market_state == "open" else
+                         "SETTLED" if status == "settled" and market_state == "closed" else
+                         "CLOSED" if status == "closed" and market_state == "closed" else
+                         "UNAVAILABLE")
+                _native_require(project_catalog or selected.lifecycle["state"] == state,
+                                "Gemini lifecycle changed; accepted metadata refresh required")
+                effective = _public_exact_clock_v1(field(pointer + "/effectiveDate", "STRING", "EXACT_RFC3339"),
+                                                  unit="RFC3339")
+                _native_require(project_catalog or int(effective["utc_ns_text"]) == selected.effective_from_ns,
+                                "Gemini metadata effective time differs")
+                result = dict(instrumentSymbol=instrument, marketId=identity, ticker=contract_ticker,
+                    eventTicker=ticker, status=status, marketState=market_state,
+                    effectiveDate=effective["source_text"], **facts)
+                for key in ("resolutionSide", "resolvedAt"):
+                    if native.get(key) is not None:
+                        value = field(pointer + "/" + key, "STRING",
+                                      "EXACT_RFC3339" if key == "resolvedAt" else "EXACT_IDENTITY")
+                        if key == "resolvedAt":
+                            value = _public_exact_clock_v1(value, unit="RFC3339")["source_text"]
+                        else:
+                            _native_require(value in {"yes", "no"}, "Gemini resolution outcome unavailable")
+                        result[key] = value
+                # SettlementValue is the underlying observation, never payout.
+                required = {base + "/ticker", *(pointer + "/" + key for key in (
+                    "instrumentSymbol", "id", "ticker", "quantityIncrement", "quantityMinimum",
+                    "priceIncrement", "priceMinimum", "status", "marketState", "effectiveDate"))}
+                material = tuple(row for row in lineage if row[0] == observation.observation_id and row[1] in required)
+                _native_require(len(material) == len(required) and (project_catalog or all(row in selected.field_lineage for row in material)),
+                                "Gemini metadata lacks exact original field lineage")
+                projected.append(result)
+        _native_require(seen == set(request.instrument_ids), "Gemini selected contract is absent from the root catalog")
+        normalized, channel = {"contracts": tuple(projected)}, "PUBLIC_METADATA"
+        disposition = dict(kind="METADATA", instrument_generations=tuple(
+            (row.instrument_id, row.generation) for row in metadata if row.instrument_id in seen))
+    elif op == "G_WS" and tree.get("e") == "contractStatus":
+        options = request.request_options
+        _native_require(options["method"] == "SUBSCRIBE" and "contractStatus" in options["params"],
+                        "Gemini lifecycle message is outside the global subscription")
+        _native_require(field("/e", "STRING") == "contractStatus", "invalid Gemini lifecycle discriminator")
+        instrument = field("/s", "STRING")
+        event_ticker, contract_ticker = field("/k", "STRING"), field("/c", "STRING")
+        identity = field("/i", "INTEGER", "METADATA_IDENTITY_JOIN")
+        _public_counter_v1(identity, allow_zero=True)
+        previous_status, native_status = field("/o", "STRING"), field("/n", "STRING")
+        provider = _public_exact_clock_v1(field("/E", "INTEGER", "DECLARED_MILLISECONDS_TO_NS"), unit="MILLISECONDS")
+        normalized = dict(instrumentSymbol=instrument, marketId=str(identity), eventTicker=event_ticker,
+            contractTicker=contract_ticker, previousStatus=previous_status, status=native_status,
+            E=provider["receipt_utc_floor"])
+        if "p" in tree:
+            normalized["underlyingStrike"] = decimal("/p")
+        channel = "prediction_markets.contractStatus"
+        if instrument not in request.instrument_ids:
+            _native_require(all(row.market_id != str(identity) for row in metadata),
+                            "Gemini lifecycle symbol differs for a selected contract identity")
+            disposition = dict(kind="UNSELECTED_LIFECYCLE", instrument_id=instrument)
+        else:
+            selected = accepted_metadata(instrument)
+            _native_require(str(identity) == selected.market_id and event_ticker == selected.event_id_or_none,
+                            "Gemini lifecycle event/contract identity differs from accepted metadata")
+            ticker_lineage = tuple(row for row in selected.field_lineage
+                                  if "/contracts/" in row[1] and row[1].endswith("/ticker"))
+            _native_require(len(ticker_lineage) == 1, "Gemini lifecycle contract ticker binding unavailable")
+            original_id, pointer, _name, transform = ticker_lineage[0]
+            originals = tuple(row for row in prefix if row.observation_id == original_id and row.operation_id in {"G_EVENT", "G_EVENTS"})
+            _native_require(len(originals) == 1, "Gemini lifecycle lacks its retained catalog original")
+            original = originals[0]
+            matching_sources = tuple(row for row in source_bindings if row.binding_id in original.source_binding_refs)
+            _native_require(len(matching_sources) == 1, "Gemini catalog source association unavailable")
+            catalog = _public_native_tree_v1(base64.urlsafe_b64decode(original.raw_body_b64+"="*(-len(original.raw_body_b64)%4)),
+                                            maximum_bytes=1048576)
+            bound_ticker = field(pointer, "STRING", transform, original=original, native_tree=catalog,
+                                 native_source=matching_sources[0])
+            _native_require(bound_ticker == contract_ticker, "Gemini lifecycle contract ticker differs")
+            state = {"Active": "OPEN", "Closed": "CLOSED", "Under Review": "UNDER_REVIEW",
+                     "Settled": "SETTLED", "Invalid": "VOID"}.get(native_status, "UNAVAILABLE")
+            disposition.update(event_kind="LIFECYCLE", instrument_id=instrument,
+                               metadata_generation=selected.generation, lifecycle_state=state)
+    elif op == "G_WS":
+        options = request.request_options
+        if "id" in tree or "status" in tree or "result" in tree or "error" in tree:
+            identifier = field("/id", "STRING")
+            status = field("/status", "INTEGER")
+            _native_require(identifier == options["id"] and status == 200 and "result" in tree
+                            and "error" not in tree, "unmatched or failed Gemini control response")
+            # The documented result is retained inert in the original, never an
+            # economic value or proof that a full book has already arrived.
+            disposition = {"kind": "CONTROL", "message_type": "ok", "request_id": identifier}
+            normalized, channel = dict(disposition), "PUBLIC_CONTROL"
+        else:
+            _native_require(options["method"] == "SUBSCRIBE", "Gemini data does not belong to a subscription")
+            instrument = field("/s", "STRING")
+            selected = accepted_metadata(instrument)
+            normalized = {"instrumentSymbol": instrument, "marketId": selected.market_id}
+            variants = []
+            if {"U", "u", "b", "a"} <= tree.keys() and type(tree["b"]) is list and type(tree["a"]) is list:
+                variants.append("depth")
+            if {"u", "b", "B", "a", "A"} <= tree.keys() and type(tree["b"]) is str and type(tree["a"]) is str:
+                variants.append("bookTicker")
+            if {"t", "p", "q", "m"} <= tree.keys():
+                variants.append("trade")
+            _native_require(len(variants) == 1, "Gemini public message has no unique admitted field shape")
+            variant = variants[0]
+            _native_require(instrument+"@"+variant in options["params"], "Gemini message is outside the selected channel")
+            provider = _public_exact_clock_v1(field("/E", "INTEGER", "DECLARED_NANOSECONDS"), unit="NANOSECONDS")
+            normalized["E"] = provider["receipt_utc_floor"]
+            if variant == "depth":
+                epoch_prefix = tuple(row for row in prefix if row.connection_epoch == observation.connection_epoch)
+                _native_require("original_prefix" in translation_context
+                                and tuple(row.receive_ordinal for row in epoch_prefix) == tuple(range(1, observation.receive_ordinal))
+                                and all(row.request_ref == request.request_id for row in epoch_prefix),
+                                "Gemini anchor requires the complete original connection prefix")
+                anchor_range = None
+                for row in epoch_prefix:
+                    prior = _public_native_tree_v1(base64.urlsafe_b64decode(row.raw_body_b64+"="*(-len(row.raw_body_b64)%4)),
+                                                  maximum_bytes=1048576)
+                    if prior.get("s") == instrument and {"U", "u", "b", "a"} <= prior.keys():
+                        _native_require(type(prior["b"]) is list and type(prior["a"]) is list,
+                                        "ambiguous Gemini prefix depth shape")
+                        if anchor_range is None:
+                            anchor_range = (prior["U"], prior["u"])
+                for name in ("U", "u"):
+                    normalized[name] = field("/"+name, "INTEGER")
+                    _public_counter_v1(normalized[name], allow_zero=True)
+                _native_require(normalized["U"] <= normalized["u"], "Gemini depth range is inverted")
+                for native_side in ("b", "a"):
+                    levels = field("/"+native_side, "ARRAY")
+                    _native_require(all(type(level) is list and len(level) == 2 for level in levels),
+                                    "Gemini depth requires exact price/quantity pairs")
+                    normalized[native_side] = tuple((decimal(f"/{native_side}/{index}/0"),
+                                                     decimal(f"/{native_side}/{index}/1"))
+                        for index, _level in enumerate(levels))
+                    for price, _quantity in normalized[native_side]:
+                        _public_on_price_grid_v1(price, bands=selected.price_bands,
+                            origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                # Repeated or conflicting reuse of the first range retains the
+                # original snapshot payload kind for the reducer's comparison.
+                event_kind = ("BOOK_SNAPSHOT" if anchor_range is None
+                    or anchor_range == (normalized["U"], normalized["u"]) else "BOOK_DELTA")
+            elif variant == "bookTicker":
+                normalized.update(u=field("/u", "INTEGER"), best_bid=decimal("/b"),
+                    bid_quantity=decimal("/B"), best_ask=decimal("/a"), ask_quantity=decimal("/A"))
+                _public_counter_v1(normalized["u"], allow_zero=True)
+                _native_require(Fraction(normalized["best_bid"]) <= Fraction(normalized["best_ask"]), "crossed Gemini BBO")
+                for name in ("best_bid", "best_ask"):
+                    _public_on_price_grid_v1(normalized[name], bands=selected.price_bands,
+                        origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                event_kind = "BBO"
+            else:
+                identifier = field("/t", "INTEGER")
+                _public_counter_v1(identifier, allow_zero=True)
+                normalized.update(tradeId=str(identifier), price=decimal("/p"), quantity=decimal("/q"),
+                                  buyer_is_maker=field("/m", "BOOLEAN"))
+                _public_on_price_grid_v1(normalized["price"], bands=selected.price_bands,
+                    origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                event_kind = "TRADE"
+            # The internal frame uses the established canonical surface; the
+            # exact native subscription remains in the retained request/original.
+            channel = {"depth": "prediction_markets.depth", "bookTicker": "prediction_markets.bookTicker",
+                       "trade": "prediction_markets.trades"}[variant]
+            disposition.update(event_kind=event_kind, instrument_id=instrument, metadata_generation=selected.generation)
+    elif op == "K_WS" and tree.get("type") in {"event_lifecycle","event_fee_update"}:
+        _native_require(request.request_options["cmd"] == "subscribe"
+            and "market_lifecycle_v2" in request.request_options["params"]["channels"],
+            "Kalshi Event notification is outside the global subscription")
+        kind = field("/type","STRING")
+        event = field("/msg/event_ticker","STRING")
+        _native_ident(event)
+        selected = tuple(accepted_metadata(instrument) for instrument in request.instrument_ids
+            if any(row.instrument_id == instrument and row.event_id_or_none == event for row in metadata))
+        message = dict(event_ticker=event)
+        if kind == "event_lifecycle":
+            series = field("/msg/series_ticker","STRING")
+            _native_ident(series)
+            _native_require(all(row.series_id_or_none == series for row in selected),
+                            "Event lifecycle Series parent differs from selected metadata")
+            message["series_ticker"] = series
+        else:
+            family = field("/msg/fee_type_override","STRING",nullable=True)
+            multiplier = field("/msg/fee_multiplier_override","DECIMAL_NUMBER","EXACT_DECIMAL_NUMBER_TO_TEXT",nullable=True)
+            _native_require((family is None) == (multiplier is None), "Event fee notification clear requires null/null")
+            if family is not None:
+                _native_ident(family)
+                _native_require(multiplier >= 0 and not (type(multiplier) is Decimal and multiplier.is_zero() and multiplier.is_signed()),
+                                "invalid Event fee notification multiplier")
+                multiplier = _native_retail_finite_decimal_text_v1(Fraction(multiplier))
+            message.update(fee_type_override=family,fee_multiplier_override=multiplier)
+        normalized = dict(type=kind,msg=message)
+        for name in ("sid","seq"):
+            normalized[name] = field("/"+name,"INTEGER")
+            _public_counter_v1(normalized[name],allow_zero=name == "seq")
+            _native_require(name not in tree["msg"] or type(tree["msg"][name]) is int and tree["msg"][name] == normalized[name],
+                            "conflicting root/nested Event notification sequence")
+        if "sending_ts_ms" in tree:
+            sending = _public_exact_clock_v1(field("/sending_ts_ms","INTEGER","DECLARED_MILLISECONDS_TO_NS"),unit="MILLISECONDS")
+        channel = "market_lifecycle_v2"
+        disposition = dict(kind="PUBLIC_REFERENCE",operation_id="K_WS",notification_type=kind,event_id=event,
+            instrument_ids=tuple(row.instrument_id for row in selected))
+    elif op == "K_WS" and tree.get("type") == "market_lifecycle_v2":
+        _native_require(request.request_options["cmd"] == "subscribe"
+                        and "market_lifecycle_v2" in request.request_options["params"]["channels"],
+                        "Kalshi lifecycle message is outside the global subscription")
+        _native_require(field("/type", "STRING") == "market_lifecycle_v2", "invalid Kalshi lifecycle discriminator")
+        instrument, event_type = field("/msg/market_ticker", "STRING"), field("/msg/event_type", "STRING")
+        message = tree["msg"]
+        normalized_message = dict(market_ticker=instrument, event_type=event_type)
+        normalized = dict(type="market_lifecycle_v2", msg=normalized_message)
+        for name in ("sid", "seq"):
+            normalized[name] = field("/"+name, "INTEGER")
+            _public_counter_v1(normalized[name], allow_zero=name == "seq")
+            _native_require(name not in message or type(message[name]) is int and message[name] == normalized[name],
+                            "conflicting root/nested lifecycle sequence alias")
+        if "sending_ts_ms" in tree:
+            sending = _public_exact_clock_v1(field("/sending_ts_ms", "INTEGER", "DECLARED_MILLISECONDS_TO_NS"), unit="MILLISECONDS")
+        for name in ("open_ts", "close_ts", "determination_ts", "settlement_ts"):
+            if name in message:
+                value = field("/msg/"+name, "INTEGER", "DECLARED_SECONDS_TO_NS")
+                normalized_message[name] = _public_exact_clock_v1(value, unit="SECONDS")["source_text"]
+        channel = "market_lifecycle_v2"
+        if instrument not in request.instrument_ids:
+            disposition = dict(kind="UNSELECTED_LIFECYCLE", instrument_id=instrument)
+        else:
+            selected = accepted_metadata(instrument)
+            normalized_message["market_id"] = selected.market_id
+            if "market_id" in message:
+                _native_require(field("/msg/market_id", "STRING") == selected.market_id, "native lifecycle market id differs")
+            if "market_ticker" in tree:
+                _native_require(field("/market_ticker", "STRING") == instrument, "native lifecycle root identity differs")
+            state = {"activated": "OPEN", "deactivated": "PAUSED", "determined": "RESOLVED",
+                     "settled": "SETTLED"}.get(event_type, "UNAVAILABLE")
+            disposition.update(event_kind="LIFECYCLE", instrument_id=instrument,
+                               metadata_generation=selected.generation, lifecycle_state=state)
+    elif op == "K_WS":
+        message_type = field("/type", "STRING")
+        _native_require(type(tree.get("msg")) is dict, "Kalshi native msg object required")
+        message = tree["msg"]
+        for alias in ("sid", "seq"):
+            if alias in tree and alias in message:
+                _native_require(type(tree[alias]) is type(message[alias]) and tree[alias] == message[alias],
+                                "conflicting root/nested native alias")
+        if message_type in {"subscribed", "ok", "unsubscribed", "error"}:
+            identifier = field("/id", "INTEGER")
+            _native_require(identifier == request.request_options["id"], "unmatched Kalshi control id")
+            _native_require((message_type != "subscribed" or request.request_options["cmd"] == "subscribe")
+                            and (message_type != "unsubscribed" or request.request_options["cmd"] == "unsubscribe"),
+                            "control acknowledgement does not match the pending command")
+            disposition = {"kind": "CONTROL", "message_type": message_type, "request_id": identifier}
+            for key in ("sid", "seq"):
+                pointer = "/" + key if key in tree else "/msg/" + key
+                if key in tree or key in message:
+                    disposition[key] = field(pointer, "INTEGER")
+            if message_type == "subscribed":
+                channel = field("/msg/channel", "STRING")
+                _native_require(channel in request.request_options["params"].get("channels", ()), "control channel mismatch")
+                _native_require("sid" in disposition, "subscription acknowledgement has no sid")
+                disposition["channel"] = channel
+            if message_type == "error":
+                disposition["code"] = field("/msg/code", "INTEGER")
+                disposition["message"] = field("/msg/msg", "STRING")
+            normalized, channel = dict(disposition), "PUBLIC_CONTROL"
+        else:
+            _native_require(message_type in {"orderbook_snapshot", "orderbook_delta", "trade", "market_lifecycle_v2"},
+                            "unknown Kalshi application message")
+            instrument = field("/msg/market_ticker", "STRING")
+            selected = accepted_metadata(instrument)
+            if "market_ticker" in tree:
+                _native_require(field("/market_ticker", "STRING") == instrument, "root/nested market identity mismatch")
+            if "market_id" in message:
+                _native_require(field("/msg/market_id", "STRING") == selected.market_id, "native market id mismatch")
+            normalized_message = {"market_ticker": instrument, "market_id": selected.market_id}
+            normalized = {"type": message_type, "msg": normalized_message}
+            native_channel = "orderbook_delta" if message_type.startswith("orderbook_") else message_type
+            _native_require(request.request_options["cmd"] == "subscribe"
+                            and native_channel in request.request_options["params"]["channels"],
+                            "Kalshi data is outside the acknowledged operation/channel")
+            channel = "/historical/trades" if message_type == "trade" else native_channel
+            for key in ("sid", "seq"):
+                if key in tree:
+                    normalized[key] = field("/" + key, "INTEGER")
+                    _public_counter_v1(normalized[key], allow_zero=True)
+            if message_type.startswith("orderbook_"):
+                _native_require({"sid", "seq"} <= set(normalized), "native book has no root sid/seq")
+            if message_type == "orderbook_snapshot":
+                for side in ("yes", "no"):
+                    pointer = "/msg/" + side + "_dollars_fp"
+                    levels = field(pointer, "ARRAY")
+                    converted = []
+                    for index, level in enumerate(levels):
+                        _native_require(type(level) is list and len(level) == 2, "native snapshot requires exact decimal pairs")
+                        price = decimal(pointer + f"/{index}/0", maximum_scale=4)
+                        quantity = decimal(pointer + f"/{index}/1", maximum_scale=2)
+                        _public_on_price_grid_v1(price, bands=selected.price_bands,
+                            origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                        converted.append((price, quantity))
+                    normalized_message[side + "_dollars"] = tuple(converted)
+                disposition["event_kind"] = "BOOK_SNAPSHOT"
+            elif message_type == "orderbook_delta":
+                side = field("/msg/side", "STRING", "LOWERCASE_OUTCOME_TO_CANONICAL_SIDE")
+                _native_require(side in {"yes", "no"}, "unselected native outcome side")
+                price = decimal("/msg/price_dollars", maximum_scale=4)
+                _public_on_price_grid_v1(price, bands=selected.price_bands,
+                    origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                normalized_message.update(side=side.upper(), price_dollars=price,
+                                          delta_fp=decimal("/msg/delta_fp", maximum_scale=2, signed=True))
+                disposition["event_kind"] = "BOOK_DELTA"
+            elif message_type == "trade":
+                _native_require({"sid", "seq"} <= set(normalized), "native trade has no root sid/seq")
+                yes_price = decimal("/msg/yes_price_dollars", maximum_scale=4)
+                no_price = decimal("/msg/no_price_dollars", maximum_scale=4)
+                _native_require(selected.payout_amount_or_none is not None
+                                and selected.payout_basis_or_none == "USD_PER_CONTRACT"
+                                and Fraction(yes_price) + Fraction(no_price) == Fraction(selected.payout_amount_or_none),
+                                "native trade side prices do not conserve the accepted payout")
+                for price in (yes_price, no_price):
+                    _public_on_price_grid_v1(price, bands=selected.price_bands,
+                        origin=selected.price_origin_or_none, increment=selected.price_increment_or_none)
+                side = field("/msg/taker_side", "STRING")
+                _native_require(side in {"yes", "no"}, "unknown native trade outcome side")
+                normalized_message.update(trade_id=field("/msg/trade_id", "STRING"),
+                    yes_price_dollars=yes_price, no_price_dollars=no_price,
+                    count_fp=decimal("/msg/count_fp", maximum_scale=2), taker_side=side)
+                seconds = field("/msg/ts", "INTEGER", "DECLARED_SECONDS_TO_NS")
+                provider = _public_exact_clock_v1(seconds, unit="SECONDS")
+                if "ts_ms" in message:
+                    milliseconds = field("/msg/ts_ms", "INTEGER", "DECLARED_MILLISECONDS_TO_NS")
+                    _native_require(milliseconds // 1000 == seconds, "native trade coarse clocks disagree")
+                    provider = _public_exact_clock_v1(milliseconds, unit="MILLISECONDS")
+                normalized_message["created_time"] = provider["receipt_utc_floor"]
+                disposition["event_kind"] = "TRADE"
+            else:
+                _native_require(False, "Kalshi lifecycle translation unavailable")
+            if "clock" in message:
+                disposition["market_clock"] = field("/msg/clock", "INTEGER")
+                _public_counter_v1(disposition["market_clock"], allow_zero=True)
+            if "ts" in message and message_type != "trade":
+                timestamp = field("/msg/ts", "STRING", "EXACT_RFC3339")
+                provider = _public_exact_clock_v1(timestamp, unit="RFC3339")
+                normalized_message["created_time"] = provider["receipt_utc_floor"]
+            if "sending_ts_ms" in tree or "sending_ts_ms" in message:
+                if "sending_ts_ms" in tree and "sending_ts_ms" in message:
+                    _native_require(type(tree["sending_ts_ms"]) is type(message["sending_ts_ms"])
+                                    and tree["sending_ts_ms"] == message["sending_ts_ms"],
+                                    "conflicting native sending-clock aliases")
+                sending_pointer = "/sending_ts_ms" if "sending_ts_ms" in tree else "/msg/sending_ts_ms"
+                sending = _public_exact_clock_v1(field(sending_pointer, "INTEGER", "DECLARED_MILLISECONDS_TO_NS"),
+                                                unit="MILLISECONDS")
+            disposition.update(instrument_id=instrument, metadata_generation=selected.generation)
+    else:
+        _native_require(False, "public native operation translation unavailable")
+    frame = PITRawFrameV1(frame_id=_public_canonical_frame_ref_v1(observation.observation_id),
+        profile_id=observation.profile_id, connection_epoch=str(observation.connection_epoch),
+        capture_session_id=observation.capture_session_id, wire_dialect=wire_dialect,
+        channel=channel, raw_utf8_text_or_none=None, parsed_source_scalar_tree_or_none=normalized,
+        qtt_received_at_utc=_pit_provider_time(received["receipt_utc_floor"], "received projection"),
+        qtt_received_monotonic_ns=observation.received_monotonic_ns, process_epoch_id=observation.process_epoch_id,
+        monotonic_clock_id=observation.monotonic_clock_id, wall_clock_source_id=translation_context["wall_clock_source_id"],
+        clock_quality_receipt_ref=observation.clock_quality_ref, wall_clock_uncertainty_ns=observation.wall_uncertainty_ns,
+        source_contract_refs=(contract.contract_id,))
+    return PublicCanonicalTranslationV1(observation.observation_id, frame,
+        dict(received=received, provider_event_or_none=provider, provider_sending_or_none=sending),
+        contract.contract_id, tuple(row.metadata_id for row in metadata), disposition, tuple(lineage))

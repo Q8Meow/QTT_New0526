@@ -5,7 +5,10 @@ from __future__ import annotations
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+import os
 import sqlite3
+import time
+from types import MappingProxyType
 from typing import Mapping
 
 from .accounting import (
@@ -15,7 +18,7 @@ from .accounting import (
     JournalTransactionV1,
     ReconciliationBreakReceiptV1,
 )
-from .context import _native_ident, parse_utc
+from .context import _native_ident, _native_require, _public_counter_v1, _native_utc_nanoseconds, parse_utc
 from .errors import ContractValidationError, PersistenceContractError, ReasonCode, SerializationSafetyError, TransactionContractError
 from .idempotency import IdempotencyClaimReceiptV1, IdempotencyClaimStateV1, IdempotencyOutcomeV1
 from .lifecycle import StateTransitionReceiptV1
@@ -35,7 +38,7 @@ from .persistence import (
     PersistenceAdapterV1,
     PersistenceAvailabilityV1,
     PersistenceTransactionV1,
-    _source_action_reserved_v1,
+    _source_action_reserved_v1, _public_record_reserved_v1,
 )
 from .receipts import (
     DurableComputationExecutionReceiptRecordV1, EconomicEventRecordV1,
@@ -204,6 +207,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
     """File-backed or in-memory SQLite reference profile with append-only schema."""
 
     is_production_adapter = False
+    _ready_availability = PersistenceAvailabilityV1.AVAILABLE_REFERENCE
 
     def __init__(self, database_path: str | Path, *, busy_timeout_ms: int, max_transaction_attempts: int) -> None:
         if isinstance(busy_timeout_ms, bool) or not isinstance(busy_timeout_ms, int) or busy_timeout_ms < 0:
@@ -226,7 +230,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 timeout=busy_timeout_ms / 1000,
             )
             self._install_and_verify_schema()
-            self._availability = PersistenceAvailabilityV1.AVAILABLE_REFERENCE
+            self._availability = self._ready_availability
         except PersistenceContractError:
             if hasattr(self, "_connection"):
                 self._connection.close()
@@ -294,7 +298,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
         self._availability = PersistenceAvailabilityV1.UNAVAILABLE
 
     def begin_transaction(self) -> PersistenceTransactionV1:
-        if self.availability is not PersistenceAvailabilityV1.AVAILABLE_REFERENCE:
+        if self.availability is not self._ready_availability:
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "reference persistence is unavailable")
         if self._active_transaction is not None and self._active_transaction.is_active:
             raise TransactionContractError(ReasonCode.TRANSACTION_STATE_INVALID, "nested transactions are forbidden")
@@ -357,7 +361,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 )
 
     def insert_receipt_record(self, transaction: PersistenceTransactionV1, record: EconomicReceiptEventSpineV1) -> None:
-        if _source_action_reserved_v1(record):
+        if _source_action_reserved_v1(record) or _public_record_reserved_v1(record):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions are ephemeral only")
         self._transaction(transaction)
         payload = record.typed_payload
@@ -777,7 +781,7 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
             )
         if record_ref.startswith("SOURCE_USE::"):
             return self.load_committed_source_use_record_v1(record_ref)
-        if record_ref.startswith("SOURCE_ACTION::"):
+        if record_ref.startswith(("SOURCE_ACTION::", '["PUBLIC_')):
             raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions are ephemeral only")
         for table in APPEND_ONLY_TABLES_V1:
             identity = REFERENCE_IDENTITY_COLUMN_BY_TABLE_V1[table]
@@ -815,6 +819,9 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 params,
             ).fetchall()
             for aggregate, identity_value, recorded, payload_text in rows:
+                if identity_value.startswith('["PUBLIC_'):
+                    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                        "public records require their purpose-specific owner")
                 if table == "receipt_records" and identity_value.startswith("SOURCE_USE::"):
                     original = self.load_committed_source_use_record_v1(identity_value)
                     results.append((aggregate, original.sequence, recorded, identity_value, original))
@@ -823,6 +830,408 @@ class SQLiteReferenceAdapterV1(PersistenceAdapterV1):
                 sequence = int(payload.get("sequence", payload.get("event_sequence", payload.get("aggregate_version_after", 0)))) if isinstance(payload, dict) else 0
                 results.append((aggregate, sequence, recorded, identity_value, payload))
         return tuple(payload for *_, payload in sorted(results, key=lambda row: row[:4]))
+
+
+_SYNTHETIC_PUBLIC_ROOTS_V1 = {}
+_PUBLIC_COMMIT_WITNESSES_V1 = {}
+
+
+class _SyntheticPublicStorageRootV1:
+    def __init__(self):
+        raise TypeError("synthetic public root requires its explicit test factory")
+
+    def __reduce__(self):
+        raise TypeError("storage capabilities cannot be serialized")
+
+    def __copy__(self):
+        raise TypeError("storage capabilities cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("storage capabilities cannot be copied")
+
+
+def _public_file_identity_v1(path):
+    for ancestor in (path, *path.parents):
+        stat = ancestor.lstat()
+        _native_require(not ancestor.is_symlink() and not getattr(stat, "st_file_attributes", 0) & 0x400,
+                        "public storage path contains a link/reparse object")
+    stat = path.stat()
+    _native_require(path.is_file() and stat.st_nlink == 1, "public storage database must be a nonlinked regular file")
+    return stat.st_dev, stat.st_ino
+
+
+def _create_synthetic_public_storage_root_v1(*, database_path: Path, root_ref: str,
+                                           expires_at_ns: int):
+    """Read-only qualification of an explicit fixture file; never a native root."""
+    _native_require(type(database_path) is type(Path()) and database_path.is_absolute(), "explicit fixture path required")
+    _native_ident(root_ref)
+    _public_counter_v1(expires_at_ns)
+    result = object.__new__(_SyntheticPublicStorageRootV1)
+    result.path, result.root_ref, result.expires_at_ns = database_path, root_ref, expires_at_ns
+    result.identity, result.process_id = _public_file_identity_v1(database_path), os.getpid()
+    _SYNTHETIC_PUBLIC_ROOTS_V1[id(result)] = result
+    return result
+
+
+def _public_root_facts_v1(root):
+    if type(root) is _SyntheticPublicStorageRootV1:
+        _native_require(_SYNTHETIC_PUBLIC_ROOTS_V1.get(id(root)) is root and root.process_id == os.getpid()
+                        and time.time_ns() < root.expires_at_ns
+                        and _public_file_identity_v1(root.path) == root.identity, "synthetic storage custody changed")
+        return dict(root_ref=root.root_ref, database_path=str(root.path), expires_at_ns=root.expires_at_ns,
+                    native_qualified=False, generation=0)
+    from ...service.owner_source_use_windows import _public_storage_facts_v1
+
+    return _public_storage_facts_v1(root)
+
+
+class _PublicCommitWitnessV1:
+    def __init__(self):
+        raise TypeError("completion witness requires actual adapter commit/readback")
+
+    def __reduce__(self):
+        raise TypeError("completion witness is process-local")
+
+    def __copy__(self):
+        raise TypeError("completion witness cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("completion witness cannot be copied")
+
+
+class _SQLitePhaseATransactionV1(_SQLiteReferenceTransactionV1):
+    def __init__(self, adapter):
+        super().__init__(adapter)
+        self.public_records = {}
+        self.completion_witness = None
+        self.public_batch = None
+
+    def commit(self):
+        adapter = self._adapter
+        adapter._check_public_store_v1()
+        _native_require(self.is_active and adapter._active_transaction is self and self.public_records,
+                        "public commit requires its owned nonempty transaction")
+        if self.public_batch is not None:
+            from ..orderbook_event_state_snapshot.handoff import _require_public_pit_batch_v1
+
+            batch = _require_public_pit_batch_v1(batch=self.public_batch, adapter=adapter)
+            _native_require(tuple(self.public_records) == tuple(record.record_id for record in batch[3])
+                            and tuple(self.public_records.values()) == batch[4],
+                            "public transaction is missing an exact prepared batch member")
+        try:
+            adapter._bound_public_busy_wait_v1()
+            adapter._connection.execute("COMMIT")
+            self._active = False
+            adapter._active_transaction = None
+            for identity, expected in self.public_records.items():
+                adapter._bound_public_busy_wait_v1()
+                row = adapter._connection.execute("SELECT payload_json FROM receipt_records WHERE record_id=?", (identity,)).fetchone()
+                _native_require(row is not None and row[0] == expected, "public committed readback differs from appended bytes")
+            adapter._check_public_store_v1()
+            completed_wall, completed_mono = time.time_ns(), time.monotonic_ns()
+            witness = object.__new__(_PublicCommitWitnessV1)
+            witness.adapter, witness.transaction, witness.process_id = adapter, self, os.getpid()
+            witness.records = MappingProxyType(dict(self.public_records))
+            witness.evidence = MappingProxyType(dict(evidence_class="ADAPTER_CONFIRMED_SYNC_UPPER_BOUND",
+                completed_wall_ns=completed_wall, completed_monotonic_ns=completed_mono,
+                backend_assigned_commit_ns=None, original_record_refs=tuple(self.public_records),
+                native_qualified=adapter._native_qualified))
+            _PUBLIC_COMMIT_WITNESSES_V1[id(witness)] = witness
+            self.completion_witness = witness
+        except BaseException:
+            # Even a returned COMMIT with failed readback is not positive completion evidence.
+            adapter._availability = PersistenceAvailabilityV1.INTEGRITY_FAILURE
+            if self._active:
+                try:
+                    adapter._connection.execute("PRAGMA busy_timeout=0")
+                    adapter._connection.execute("ROLLBACK")
+                except sqlite3.Error:
+                    pass
+            self._active = False
+            adapter._active_transaction = None
+            raise
+
+    def rollback(self):
+        # Releasing this adapter's transaction must remain possible after expiry.
+        self._adapter._connection.execute("PRAGMA busy_timeout=0")
+        super().rollback()
+
+
+class SQLitePhaseAAdapterV1(SQLiteReferenceAdapterV1):
+    """Bounded file-backed Phase A store; it is never a production deployment claim."""
+
+    is_production_adapter = False
+    persistence_class = "PHASE_A_LOCAL_DURABLE"
+    _ready_availability = PersistenceAvailabilityV1.AVAILABLE_PHASE_A_LOCAL_DURABLE
+
+    def __init__(self, *, root_capability, source_use_binding, busy_timeout_ms: int):
+        from .source_policy import _public_binding_facts_v1
+
+        self._root_capability, self._public_binding = root_capability, source_use_binding
+        facts = _public_root_facts_v1(root_capability)
+        grant = _public_binding_facts_v1(source_use_binding)
+        _native_require(grant["storage_root_ref"] == facts["root_ref"]
+                        and grant["native_qualified"] == facts["native_qualified"]
+                        and grant["source_inputs"].get("storage_root") is root_capability,
+                        "storage root/grant origin mismatch")
+        self._native_qualified = facts["native_qualified"]
+        self._root_ref = facts["root_ref"]
+        self._public_generation = grant["scope_generation"]
+        self._retention_expires_ns = min(facts["expires_at_ns"], grant["retention_expires_at_ns"])
+        _public_counter_v1(busy_timeout_ms, allow_zero=True)
+        _native_require(busy_timeout_ms == grant["budget"].storage_busy_timeout_ms, "storage timeout differs from grant")
+        self._public_transaction_serial = 0
+        try:
+            # Schema qualification cannot spend a caller's whole busy allowance
+            # before the live grant can be rechecked. It performs no busy waits.
+            super().__init__(facts["database_path"], busy_timeout_ms=0, max_transaction_attempts=1)
+            self.busy_timeout_ms = busy_timeout_ms
+            self._check_public_store_v1()
+        except BaseException:
+            if hasattr(self, "_connection"):
+                self._connection.close()
+            raise
+
+    def __reduce__(self):
+        raise TypeError("public data store is process-local")
+
+    def __copy__(self):
+        raise TypeError("public data store cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("public data store cannot be copied")
+
+    def _install_and_verify_schema(self):
+        objects = self._connection.execute("SELECT type,name,sql FROM sqlite_master").fetchall()
+        tables = {name: sql for kind, name, sql in objects if kind == "table"}
+        _native_require(tables or not self._native_qualified,
+                        "native public storage requires a previously qualified schema")
+        if objects:
+            # A capture verifies an existing schema; CREATE IF NOT EXISTS must
+            # never silently replace missing guards or accept changed constraints.
+            expected_tables = {statement.split()[5]: statement.replace(" IF NOT EXISTS", "")
+                               for statement in REFERENCE_SCHEMA_V1}
+            expected_triggers = {statement.split()[5]: statement.replace(" IF NOT EXISTS", "")
+                                 for statement in append_only_trigger_statements_v1()}
+            triggers = {name: sql for kind, name, sql in objects if kind == "trigger"}
+            _native_require(tables == expected_tables and triggers == expected_triggers
+                            and all(kind in {"table", "trigger"} or
+                                    (kind == "index" and name.startswith("sqlite_autoindex_") and sql is None)
+                                    for kind, name, sql in objects), "unknown public storage schema or append guards")
+            rows = self._connection.execute("SELECT singleton,schema_version FROM qku_schema_version").fetchall()
+            _native_require(rows == [(1, REFERENCE_SCHEMA_VERSION_V1)], "public storage schema migration required")
+            for table, columns in REFERENCE_SCHEMA_COLUMNS_V1.items():
+                actual = tuple(row[1] for row in self._connection.execute("PRAGMA table_info(" + table + ")"))
+                _native_require(actual == columns, "public storage columns differ from the qualified schema")
+        super()._install_and_verify_schema()
+        for pragma, expected in (("journal_mode", "delete"), ("synchronous", 3), ("foreign_keys", 1),
+                                 ("trusted_schema", 0), ("busy_timeout", self.busy_timeout_ms)):
+            actual = self._connection.execute("PRAGMA " + pragma).fetchone()
+            _native_require(actual is not None and actual[0] == expected, "public storage pragma readback mismatch")
+        self._connection.enable_load_extension(False)
+
+    def _check_public_store_v1(self):
+        from .source_policy import _public_binding_facts_v1
+
+        root = _public_root_facts_v1(self._root_capability)
+        grant = _public_binding_facts_v1(self._public_binding)
+        _native_require(root["root_ref"] == self._root_ref and grant["storage_root_ref"] == self._root_ref
+                        and grant["source_inputs"].get("storage_root") is self._root_capability
+                        and grant["scope_generation"] == self._public_generation
+                        and grant["native_qualified"] == self._native_qualified
+                        and time.time_ns() < self._retention_expires_ns, "public storage scope/retention expired")
+        return grant
+
+    def begin_transaction(self):
+        self._bound_public_busy_wait_v1()
+        super().begin_transaction()
+        try:
+            self._check_public_store_v1()
+        except BaseException:
+            self._connection.execute("PRAGMA busy_timeout=0")
+            self._active_transaction.rollback()
+            raise
+        transaction = _SQLitePhaseATransactionV1(self)
+        self._active_transaction._active = False
+        self._active_transaction = transaction
+        return transaction
+
+    def _bound_public_busy_wait_v1(self):
+        grant = self._check_public_store_v1()
+        remaining = min(grant["budget"].deadline_monotonic_ns,
+                        self._public_binding._deadline) - time.monotonic_ns()
+        _native_require(remaining > 0, "public storage deadline expired")
+        # Floor to SQLite's millisecond unit: a sub-millisecond remainder means
+        # no busy wait, rather than rounding beyond the original permission.
+        effective = min(grant["budget"].storage_busy_timeout_ms, remaining // 1_000_000)
+        self._connection.execute("PRAGMA busy_timeout=" + str(effective))
+        return effective
+
+    def insert_receipt_record(self, transaction, record):
+        from .receipts import (_public_validate_spine_v1, _public_spine_from_json_v1,
+                               PublicNativeObservationV1, PublicPublicationRecordV1)
+
+        self._transaction(transaction)
+        _native_require(type(transaction) is _SQLitePhaseATransactionV1, "wrong public transaction type")
+        grant = self._check_public_store_v1()
+        pit = record.record_type in {EconomicRecordTypeV1.PIT_COMMIT_INTENT,
+            EconomicRecordTypeV1.PIT_CANONICAL_EVENT, EconomicRecordTypeV1.PIT_CAPTURE_AND_GAP}
+        if transaction.public_batch is not None:
+            from ..orderbook_event_state_snapshot.handoff import _require_public_pit_batch_v1
+
+            batch = _require_public_pit_batch_v1(batch=transaction.public_batch, adapter=self)
+            _native_require(any(item is record for item in batch[3]), "append is not an original prepared batch member")
+        if pit:
+            _native_require(transaction.public_batch is not None, "public PIT append requires its complete prepared batch")
+            record.__post_init__()
+            record.typed_payload.__post_init__()
+            _native_require(record.schema_version == "PIT_RECEIPT_SPINE_V2"
+                            and record.semantic_owner == "S1_PIT_DATA_PHASE_A_01"
+                            and record.implementation_owner == "QKU_RECEIPT_SPINE_PHASE_A_COORDINATOR"
+                            and record.context_ref == grant["scope_ref"]
+                            and record.authority_class == "PUBLIC_DATA_CANDIDATE_NO_OPERATING_AUTHORITY",
+                            "native PIT envelope differs from its owning branch")
+        else:
+            _public_validate_spine_v1(record)
+        payload = record.typed_payload
+        if pit:
+            _native_require(payload.profile_id is grant["scope"].profile_id, "public PIT profile mismatch")
+        elif type(payload) is PublicNativeObservationV1:
+            _native_require(record.context_ref == grant["scope_ref"] and payload.profile_id is grant["scope"].profile_id
+                            and payload.source_use_action_ref == grant["action_ref"]
+                            and payload.scope_generation == self._public_generation
+                            and payload.capture_session_id == grant["capture_session_id"]
+                            and payload.operation_id in self._public_binding._capture.requested_operation_ids
+                            and payload.native_contract_version == grant["scope"].source_contract_version
+                            and set(payload.source_binding_refs) <= set(self._public_binding._capture.source_binding_refs),
+                            "capture append scope mismatch")
+            if self._native_qualified:
+                owner = self._public_binding._owner
+                _native_require(owner is not None and any(item is payload for item in owner._observations),
+                                "native append is not an original owned receive")
+                owner._guard_v1()
+        elif type(payload) is PublicPublicationRecordV1:
+            from ..orderbook_event_state_snapshot.handoff import _require_public_publication_append_v1
+
+            _require_public_publication_append_v1(record=record, adapter=self)
+            _native_require(record.context_ref == payload.scope_ref == grant["scope_ref"] and payload.profile_id is grant["scope"].profile_id
+                            and payload.source_use_generation == self._public_generation
+                            and payload.source_use_action_ref == grant["action_ref"]
+                            and payload.capture_session_id == grant["capture_session_id"], "publication append scope mismatch")
+        else:
+            _native_require(any(row is record for row in grant["control_records"]), "control mirror is not the registered original")
+        encoded = deterministic_json(record)
+        _native_require(record.record_id not in transaction.public_records, "duplicate append in one public transaction")
+        self._bound_public_busy_wait_v1()
+        existing = self._connection.execute("SELECT payload_json FROM receipt_records WHERE record_id=?", (record.record_id,)).fetchone()
+        _native_require(existing is None, "public append cannot retry an existing identity")
+        self._bound_public_busy_wait_v1()
+        previous = self._connection.execute("SELECT payload_json FROM receipt_records WHERE aggregate_id=? LIMIT ?",
+            (record.aggregate_id, grant["budget"].max_retained_records + 1)).fetchall()
+        _native_require(len(previous) <= grant["budget"].max_retained_records, "public retained record bound exceeded")
+        previous = tuple(_public_spine_from_json_v1(row[0]) for row in previous)
+        if pit:
+            # PIT intent/event/capture share an event ordinal. The sealed batch
+            # establishes those associations; no public receive ordinal is reused.
+            _native_require(all(item.record_id in transaction.public_records for item in previous),
+                            "native PIT partition already has a committed or unknown prefix")
+        else:
+            ordinals = sorted(item.sequence for item in previous)
+            _native_require(ordinals == list(range(1, len(ordinals) + 1)) and record.sequence == len(ordinals) + 1,
+                            "public append ordinal discontinuity")
+        self._assert_cross_table_identity_available("receipt_records", record.record_id)
+        self._bound_public_busy_wait_v1()
+        self._insert(transaction, "INSERT INTO receipt_records VALUES(?,?,?,?,?)",
+                     (record.record_id, _iso(record.effective_at, "effective_at"),
+                      _iso(record.recorded_at, "recorded_at"), record.aggregate_id, encoded), "public receipt")
+        transaction.public_records[record.record_id] = encoded
+
+    def _commit_public_pit_batch_v1(self, *, batch):
+        from ..orderbook_event_state_snapshot.handoff import _require_public_pit_batch_v1
+
+        issued = _require_public_pit_batch_v1(batch=batch, adapter=self)
+        transaction = self.begin_transaction()
+        transaction.public_batch = batch
+        try:
+            for record in issued[3]:
+                self.insert_receipt_record(transaction, record)
+            transaction.commit()
+            issued[1]._retained_records = len(issued[3])
+            issued[1]._retained_bytes = sum(len(text.encode("utf-8")) for text in issued[4])
+            return transaction.completion_witness
+        except BaseException:
+            try:
+                if transaction.is_active:
+                    transaction.rollback()
+            finally:
+                issued[1]._fail_v1()
+            raise
+
+    def _read_public_v1(self, request, root_capability, publication):
+        from .persistence import PublicCaptureReadRequestV1, PublicPublicationReadRequestV1
+        from .receipts import _public_spine_from_json_v1
+
+        cls = PublicPublicationReadRequestV1 if publication else PublicCaptureReadRequestV1
+        _native_require(type(request) is cls and root_capability is self._root_capability, "public read requires exact root capability")
+        request.__post_init__()
+        grant = self._check_public_store_v1()
+        _native_require(self._active_transaction is None and self.availability is self._ready_availability,
+                        "public reads require committed available storage")
+        _native_require(request.read_purpose == "RESTORE_FOR_CURRENT_SESSION", "historical reconstruction requires its distinct evidence grant")
+        _native_require(request.root_ref == self._root_ref and request.profile_id is grant["scope"].profile_id
+                        and request.scope_ref == grant["scope_ref"]
+                        and request.capture_session_id == grant["capture_session_id"]
+                        and request.source_use_generation == self._public_generation, "public read scope mismatch")
+        refs = request.publication_refs if publication else request.observation_refs
+        expected = EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION if publication else EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE
+        result, total = [], 0
+        for identity in refs:
+            self._bound_public_busy_wait_v1()
+            row = self._connection.execute("SELECT payload_json FROM receipt_records WHERE record_id=?", (identity,)).fetchone()
+            _native_require(row is not None, "requested public original is missing")
+            total += len(row[0].encode("utf-8"))
+            _native_require(total <= request.maximum_bytes, "public read byte bound exceeded")
+            record = _public_spine_from_json_v1(row[0])
+            _native_require(record.record_type is expected, "requested public identity has the wrong receipt kind")
+            payload = record.typed_payload
+            generation = payload.source_use_generation if publication else payload.scope_generation
+            observed_ns = (payload.issuance_observation_or_none["issued_wall_ns"]
+                           if publication and payload.issuance_observation_or_none is not None
+                           else payload.internal_publication_wall_ns if publication else payload.received_wall_ns)
+            _native_require(record.record_id == identity and record.record_type is expected
+                            and payload.profile_id is request.profile_id and payload.capture_session_id == request.capture_session_id
+                            and record.context_ref == request.scope_ref
+                            and generation == request.source_use_generation
+                            and payload.source_use_action_ref == grant["action_ref"]
+                            and (not publication or payload.scope_ref == request.scope_ref)
+                            and observed_ns <= request.effective_cutoff_ns and observed_ns <= request.recorded_cutoff_ns
+                            and _native_utc_nanoseconds(record.effective_at.isoformat()) <= request.effective_cutoff_ns
+                            and _native_utc_nanoseconds(record.recorded_at.isoformat()) <= request.recorded_cutoff_ns,
+                            "public stored identity/cutoff mismatch")
+            result.append(record)
+        self._check_public_store_v1()
+        return tuple(result)
+
+    def load_committed_public_capture_v1(self, request, *, root_capability=None):
+        return self._read_public_v1(request, root_capability, False)
+
+    def load_committed_public_publication_v1(self, request, *, root_capability=None):
+        return self._read_public_v1(request, root_capability, True)
+
+    def _require_public_commit_witness_v1(self, witness):
+        _native_require(type(witness) is _PublicCommitWitnessV1
+                        and _PUBLIC_COMMIT_WITNESSES_V1.get(id(witness)) is witness
+                        and witness.adapter is self and witness.process_id == os.getpid()
+                        and witness.transaction.completion_witness is witness
+                        and not witness.transaction.is_active, "public commit witness has no issuing custody")
+        self._check_public_store_v1()
+        return witness.evidence
+
+    def get_record(self, record_ref):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "public store requires a bounded purpose-specific read")
+
+    def reconstruct_as_of(self, **kwargs):
+        raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "public store forbids wildcard history reads")
 
 
 def _f14_verify_sql_mirror_v1(table, values, record):

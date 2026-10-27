@@ -374,7 +374,7 @@ _EXPECTED_STAGE1_LAUNCH_ROLE_ROWS_JSON = r"""[
       },
       {
         "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
-        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        "disposition": "EXISTING_CANONICAL_OWNER"
       }
     ],
     "frozen_output": "Current contract inventory with lifecycle and resolution binding",
@@ -425,7 +425,7 @@ _EXPECTED_STAGE1_LAUNCH_ROLE_ROWS_JSON = r"""[
     "path_refs": [
       {
         "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
-        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        "disposition": "EXISTING_CANONICAL_OWNER"
       }
     ],
     "frozen_output": "Snapshot + contiguous deltas + gap/reconnect receipt",
@@ -1550,11 +1550,11 @@ def _stage1_launch_graph_failures() -> list[str]:
     )
     if final_dispositions != Counter(
         {
-            "EXISTING_CANONICAL_OWNER": 57,
-            "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+            "EXISTING_CANONICAL_OWNER": 59,
+            "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 9,
         }
     ):
-        failures.append("Stage-1 57/11 path-disposition closure differs")
+        failures.append("Stage-1 59/9 path-disposition closure differs")
     for _role, path, disposition in path_references:
         resolved = REPO_ROOT / path
         if disposition == "EXISTING_CANONICAL_OWNER" and not resolved.is_file():
@@ -2095,8 +2095,8 @@ def _independent_selected_component_package_core_v1() -> dict[str, object]:
         or path_dispositions
         != Counter(
             {
-                "EXISTING_CANONICAL_OWNER": 57,
-                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 11,
+                "EXISTING_CANONICAL_OWNER": 59,
+                "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED": 9,
             }
         )
         or len(set(path_values)) != 34

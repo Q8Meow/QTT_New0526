@@ -1725,7 +1725,7 @@
       "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/118",
       "identity_relation_class": "REPO_CANONICAL_ONLY",
       "same_number_mismatch_recorded": true,
-      "notes": "GitHub #118 is the audit number assigned to the merged pull request for repo-canonical PR118. This does not imply Roadmap PR #118 or Blueprint PR #118. Repo-canonical PR118 remains the implementation-truth label for the roadmap execution-state controller PR."
+      "notes": "GitHub #118 is the audit number assigned to the merged pull request for repo-canonical PR118. This does not imply Roadmap PR #118 or Blueprint PR #118. Repo-canonical PR118 remains the implementation-truth label for the roadmap execution-state controller PR. Finite launch delivery identity projection: docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json#/finite_launch_delivery_plan (Roadmap v12.0). That controller-owned projection holds exact delivery/semantic identities and separate observed execution associations; LP01/PR307 is an external completion reference, LP02 is in progress, and GitHub audit numbers do not establish semantic identity or gate acceptance."
     },
     {
       "roster_entry_id": "PR119_REPO_CANONICAL_SELF_ENTRY",

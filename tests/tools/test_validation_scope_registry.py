@@ -2479,6 +2479,7 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
+    _assert_lp02_scope_and_controller()
     scheduled = "s1-kalshi-scheduled-fee-scenario"
     scheduled_paths = frozenset({
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",
@@ -3192,3 +3193,144 @@ def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
             near_branch,
             "tests/source_evidence/test_s1_pit_data_phase_a_01.py",
         )
+
+
+def _assert_lp02_scope_and_controller():
+    from copy import deepcopy
+    import json
+    from tools import validate_qtt_roadmap_execution_state_controller as controller_owner
+    from tools.validate_master_plan_section_coverage import validate_json_schema_subset
+
+    branch = "s1-lp02-selected-data-integration"
+    expected_paths = frozenset({
+        'src/qtt/plugins/registry.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/validation.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/test_policy_state_matrix.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/context.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/serialization.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_rights.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/receipts.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/sqlite_reference.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/migrations.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/transaction.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/bindings.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/service.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/contextual_computability.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/economic_math.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/stage1_launch_graph.py',
+        'src/qtt/stage1_prediction_markets/qku_computation_control_plane/existing_owner_projection.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/adapter.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/binding.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/policy.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/source_dependency.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/validator.py',
+        'src/qtt/stage1_prediction_markets/market_data_ingest/handoff.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/builder.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/policy.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/integrity.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/input_lock.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/handoff.py',
+        'src/qtt/stage1_prediction_markets/orderbook_event_state_snapshot/validator.py',
+        'src/qtt/pretrade/pr169_pretrade1_resolvers.py',
+        'src/qtt/service/owner_source_use.py',
+        'src/qtt/service/owner_source_use_windows.py',
+        'src/qtt/stage1_prediction_markets/selected_venues/__init__.py',
+        'src/qtt/stage1_prediction_markets/selected_venues/market_data.py',
+        'tools/independent_validate_qku_computation_control_plane_architecture.py',
+        'tools/independent_validate_qku_computation_control_plane_source.py',
+        'tools/independent_validate_qku_computation_control_plane_accounting.py',
+        'tools/independent_validate_qku_computation_control_plane_security.py',
+        'tools/independent_validate_qku_computation_control_plane_operations.py',
+        'tools/independent_validate_qku_computation_control_plane_execution.py',
+        'tools/validate_no_runtime_artifacts.py',
+        'tools/validate_source_fact_binding_connector_semantic_readiness_static.py',
+        'tools/validate_qtt_roadmap_execution_state_controller.py',
+        'tools/validation_scope_registry.py',
+        'tools/ci_branch_context.py',
+        'tests/source_evidence/test_s1_pit_data_phase_a_01.py',
+        'tests/source_evidence/test_source_fact_binding_connector_semantic_readiness_static.py',
+        'tests/fail_closed/test_no_runtime_artifacts_strict.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/accounting/test_contract_matrix.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/security/test_deserialization_safety.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_service_operations.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/tranche_b/test_resolution_pipeline.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/source/test_effective_epoch.py',
+        'tests/stage1_prediction_markets/qku_computation_control_plane/source/test_conflict_resolution.py',
+        'tests/tools/test_validation_scope_registry.py',
+        'tests/tools/test_ci_branch_context.py',
+        'docs/roadmap/QTT_Roadmap_Execution_State_Controller_v1_0.json',
+        'schemas/roadmap/qtt_roadmap_execution_state_controller.schema.json',
+        'docs/roadmap/QTT_PR_Identity_Roster_v1_0.json',
+        'docs/master_plan/generated/QttRoadmapExecutionStateController.report.json',
+        'docs/master_plan/generated/PR152_GrandGlobalDebugLogicalConsistencyAuditEntireQTTRepo.report.json',
+    })
+    assert len(expected_paths) == 64
+    assert registry.S1_LP02_SELECTED_DATA_INTEGRATION_BRANCH == branch
+    assert registry.S1_LP02_SELECTED_DATA_INTEGRATION_ALLOWED_EXACT_PATHS == expected_paths
+    for path in expected_paths:
+        for prefix in ("", "refs/heads/", "refs/remotes/origin/", "origin/"):
+            for spelling in (path, "./"+path, path.replace("/", "\\")):
+                decision = registry.explain_pr_scope_decision(prefix+branch, spelling)
+                assert decision == dict(allowed=True, branch=branch, normalized_path=path,
+                    pr_id="S1_LP02_SELECTED_DATA_INTEGRATION", matched_rule=f"exact:{path}", reason="registered_exact_path")
+        for near in (branch.upper(), branch+"-copy", "prefix-"+branch, branch+"/"):
+            assert not registry.is_pr_scoped_changed_path_allowed(near, path)
+        for near in (path.upper(), path+".copy", "../"+path, "/"+path, "C:/repo/"+path,
+                     path+"/", path.replace("/", "//"), path.replace("/", "/*/"), path.replace("/", "/../")):
+            assert not registry.is_pr_scoped_changed_path_allowed(branch, near)
+    for denied in ("src/qtt/stage1_prediction_markets/qku_computation_control_plane/stack_resolver.py",
+                   "tools/run_validation_gates.py", "tools/validation_reliability.py", "tools/run_pytest_fresh_basetemp.py",
+                   ".github/workflows/qtt_validation.yml", "AGENTS.md", ".gitignore", "tests/tools/new_test.py",
+                   "docs/master_plan/generated/QttPrIdentityRoster.report.json",
+                   "schemas/roadmap/qtt_pr_identity_roster.schema.json"):
+        assert not registry.is_pr_scoped_changed_path_allowed(branch, denied)
+    controller = json.loads((REPO_ROOT/controller_owner.DEFAULT_CONTROLLER).read_text(encoding="utf-8"))
+    roster = json.loads((REPO_ROOT/controller_owner.DEFAULT_ROSTER).read_text(encoding="utf-8"))
+    schema = json.loads((REPO_ROOT/controller_owner.DEFAULT_SCHEMA).read_text(encoding="utf-8"))
+    assert not validate_json_schema_subset(controller, schema)
+    assert not controller_owner._validate_finite_launch_plan(controller, roster)
+    plan = controller["finite_launch_delivery_plan"]
+    assert plan["version"] == "12.0" and len(plan["delivery_slots"]) == 24
+    assert len(plan["semantic_package_mapping"]) == 91 and len(plan["semantic_dependency_edges"]) == 197
+    assert [(row["delivery_id"], row["state"]) for row in plan["execution_associations"]] == [
+        ("LP01", "EXTERNAL_COMPLETION_RECORDED"), ("LP02", "IMPLEMENTATION_IN_PROGRESS")]
+    assert plan["execution_associations"][1]["github_audit_url"] is None
+    report = controller_owner._build_report(controller, roster, [])
+    assert report["remaining_prelaunch_deliveries"] == 19
+    for target, alter in (
+        ("delivery_slots", lambda rows: rows[0]["direct_prerequisites"].append("LP02")),
+        ("delivery_slots", lambda rows: rows[1].update(gate="PASSED")),
+        ("semantic_package_mapping", lambda rows: rows.pop()),
+        ("semantic_dependency_edges", lambda rows: rows[0].update(producer="UNKNOWN")),
+    ):
+        changed = deepcopy(controller)
+        alter(changed["finite_launch_delivery_plan"][target])
+        assert validate_json_schema_subset(changed, schema)
+    changed = deepcopy(controller)
+    changed["finite_launch_delivery_plan"]["delivery_slots"][0]["direct_prerequisites"].append("LP02")
+    assert any("acyclic" in reason for reason in controller_owner._validate_finite_launch_plan(changed, roster))
+    changed = deepcopy(controller)
+    changed["finite_launch_delivery_plan"]["execution_associations"].append(deepcopy(plan["execution_associations"][0]))
+    assert controller_owner._validate_finite_launch_plan(changed, roster)
+    changed = deepcopy(roster)
+    next(row for row in changed["entries"] if row["roster_entry_id"]=="PR118_REPO_CANONICAL_SELF_ENTRY")["notes"]="missing"
+    assert controller_owner._validate_finite_launch_plan(controller, changed)
+    for invalid in (None, [], {"delivery_slots": [None]}, {"execution_associations": [None]}):
+        changed = deepcopy(controller)
+        changed["finite_launch_delivery_plan"] = invalid
+        failures = controller_owner._validate_finite_launch_plan(changed, roster)
+        assert failures
+        assert controller_owner._build_report(changed, roster, failures)["validation_status"] == "FAIL"
+    for field, value in (("ordinal", True), ("semantic_package_id", [])):
+        changed = deepcopy(controller)
+        changed["finite_launch_delivery_plan"]["semantic_package_mapping"][0][field] = value
+        failures = controller_owner._validate_finite_launch_plan(changed, roster)
+        assert failures
+        assert controller_owner._build_report(changed, roster, failures)["validation_status"] == "FAIL"
+    changed_roster = deepcopy(roster)
+    next(row for row in changed_roster["entries"] if row["roster_entry_id"]=="PR118_REPO_CANONICAL_SELF_ENTRY")["notes"] = None
+    assert controller_owner._validate_finite_launch_plan(controller, changed_roster)

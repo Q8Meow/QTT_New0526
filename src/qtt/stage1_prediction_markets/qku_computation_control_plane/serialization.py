@@ -220,6 +220,34 @@ def _json_value(
         return value.total_seconds()
     if isinstance(value, Enum):
         return _json_value(value.value, location=location)
+    if type(value).__name__ == "PublicDataSourceUseScopeV1":
+        from .receipts import PublicDataSourceUseScopeV1
+
+        _native_require(type(value) is PublicDataSourceUseScopeV1, "foreign public scope type")
+        value.__post_init__()
+        # This exact typed field is a protected-config alias, never key material.
+        # Untyped mappings retain the ordinary secret-key rejection policy.
+        result = {}
+        for field in fields(value):
+            if field.name != "credential_alias_ref_or_none":
+                _check_key(field.name)
+            result[field.name] = _json_value(getattr(value, field.name), location=(*location, field.name))
+        return result
+    if type(value).__name__ == "PITRawFrameV1":
+        from ..market_data_ingest.adapter import PITRawFrameV1
+
+        _native_require(type(value) is PITRawFrameV1, "foreign raw frame type")
+        value.__post_init__()
+        # These exact typed declarations are all False, as checked by the
+        # existing frame owner. They never contain credentials or headers.
+        denials = {"contains_credential", "contains_signature",
+                   "contains_authorization_header", "contains_private_state"}
+        result = {}
+        for field in fields(value):
+            if field.name not in denials:
+                _check_key(field.name)
+            result[field.name] = _json_value(getattr(value, field.name), location=(*location, field.name))
+        return result
     if is_dataclass(value) and not isinstance(value, type):
         return _json_value(
             {
