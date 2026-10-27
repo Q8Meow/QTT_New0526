@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from fractions import Fraction
 from typing import Mapping
 
 from src.qtt.stage1_prediction_markets.market_data_ingest.adapter import (
@@ -16,6 +17,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models impo
     NO_EFFECTS_V1,
     NoEffectFlagsV1,
 )
+from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _finite_decimal_text_v1
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_time import (
     PITAnchorStateV1,
     PITContinuityStateV3,
@@ -26,6 +28,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
     PITIntegrityStateV1,
     PITReasonCodeV1,
     PITTransportStateV1,
+    _require_public_stream_continuity_v1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
     deterministic_json,
@@ -315,7 +318,7 @@ class PITBookStateLevelV2:
             or self.price_increment <= 0
             or type(self.price_origin) is not Decimal
             or not self.price_origin.is_finite()
-            or (self.price - self.price_origin) % self.price_increment != 0
+            or ((Fraction(self.price) - Fraction(self.price_origin)) / Fraction(self.price_increment)).denominator != 1
         ):
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_TICK_GRID_INVALID,
@@ -325,7 +328,7 @@ class PITBookStateLevelV2:
             type(self.quantity_increment) is not Decimal
             or not self.quantity_increment.is_finite()
             or self.quantity_increment <= 0
-            or self.quantity % self.quantity_increment != 0
+            or (Fraction(self.quantity) / Fraction(self.quantity_increment)).denominator != 1
         ):
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
@@ -879,7 +882,7 @@ def _pit_validate_state_book(
     no_bids = [
         value.price for value in levels if value.canonical_side == "NO_BID"
     ]
-    if yes_bids and no_bids and max(yes_bids) + max(no_bids) > 1:
+    if yes_bids and no_bids and Fraction(max(yes_bids)) + Fraction(max(no_bids)) > 1:
         raise PITDataContractErrorV1(
             PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
             "complement-derived binary-outcome book is crossed",
@@ -1039,24 +1042,25 @@ def _pit_apply_signed_deltas(
                 PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
                 "signed delta quantity increment differs from anchored state",
             )
-        resulting = previous_quantity + delta.quantity_delta
-        if resulting < 0:
+        exact_result = Fraction(previous_quantity) + Fraction(delta.quantity_delta)
+        if exact_result < 0:
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
                 "signed delta produces a negative state quantity",
             )
-        if resulting == 0:
+        if exact_result == 0:
             by_key.pop(key, None)
             continue
-        quantity_text = str(resulting)
         quantity_scale = max(
             delta.quantity_scale,
             previous.quantity_scale if previous is not None else 0,
         )
-        if resulting.as_tuple().exponent < 0:
-            quantity_scale = -resulting.as_tuple().exponent
-        else:
-            quantity_scale = 0
+        # Preserve the original exact-addition scale without ambient rounding.
+        quantity_text = _finite_decimal_text_v1(exact_result)
+        fractional_digits = len(quantity_text.split(".", 1)[1]) if "." in quantity_text else 0
+        if fractional_digits < quantity_scale:
+            quantity_text += ("." if fractional_digits == 0 else "") + "0" * (quantity_scale - fractional_digits)
+        resulting = Decimal(quantity_text)
         by_key[key] = PITBookStateLevelV2(
             source_side=delta.source_side,
             canonical_side=delta.canonical_side,
@@ -1086,6 +1090,7 @@ def apply_pit_event_v2(
     candidate_event_ordinal: int,
     lifecycle_state: str = "ADMISSIBLE",
     transport_state: PITTransportStateV1 = PITTransportStateV1.CONNECTED_HEALTHY,
+    continuity_witness=None,
 ) -> PITBookTransitionResultV2:
     """Apply one exact selected-profile event without mutating its prior state."""
 
@@ -1099,6 +1104,12 @@ def apply_pit_event_v2(
             PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
             "candidate must be exact PITCanonicalEventCandidateV2",
         )
+    if continuity_witness is not None:
+        if candidate.profile_id is not Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            raise PITDataContractErrorV1(PITReasonCodeV1.PIT_SCOPE_NOT_SELECTED,
+                                         "Kalshi continuity cannot cover another profile")
+        _require_public_stream_continuity_v1(continuity_witness, candidate=candidate,
+            previous_sequence=None if prior_state is None else prior_state.last_provider_sequence_end_or_none)
     if type(candidate_event_ordinal) is not int or candidate_event_ordinal < 1:
         raise PITDataContractErrorV1(
             PITReasonCodeV1.PIT_DURABLE_COMMIT_INCOMPLETE,
@@ -1373,7 +1384,10 @@ def apply_pit_event_v2(
             if candidate.profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
                 applies = sequence_start <= expected <= sequence_end
             else:
-                applies = sequence_start == expected == sequence_end
+                if continuity_witness is None:
+                    applies = sequence_start == expected == sequence_end
+                else:
+                    applies = sequence_start == sequence_end and sequence_start >= expected
                 if subscription_id != prior_state.provider_subscription_id_or_none:
                     applies = False
             if not applies:

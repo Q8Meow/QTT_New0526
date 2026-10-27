@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
+from contextvars import ContextVar
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
+from fractions import Fraction
 import math
 from pathlib import Path
 from types import MappingProxyType
@@ -19,6 +21,9 @@ from .bindings import (
     ST12DMath39RawInputBindingV1,
 )
 from .context import (
+    _native_require,
+    _native_utc_nanoseconds,
+    _native_retail_finite_decimal_text_v1,
     exact_decimal,
     finite_float,
 )
@@ -509,7 +514,7 @@ class CanonicalOwnerPacketRegistryV1:
                 "packet lookup requires ComputationExecutionContextV1",
             )
         try:
-            return self._by_binding[
+            packet = self._by_binding[
                 self._context_binding_key(context, binding_id)
             ]
         except KeyError as exc:
@@ -546,14 +551,20 @@ class CanonicalOwnerPacketRegistryV1:
                 f"canonical owner packet is absent for {binding_id}",
             ) from exc
 
+        _admit_public_packet_custody_v1(registry=self, packet=packet, context=context, binding_id=binding_id)
+        return packet
+
     def packet_by_id(self, packet_id: str) -> OwnerValuePacketV1:
         try:
-            return self._by_id[packet_id]
+            packet = self._by_id[packet_id]
         except KeyError as exc:
             raise InputAuthorityError(
                 ReasonCode.INPUT_PACKET_MISMATCH,
                 f"owner packet identity is absent: {packet_id}",
             ) from exc
+
+        _admit_public_packet_custody_v1(registry=self, packet=packet, context=None)
+        return packet
 
     def with_internal_computation_receipt(
         self, packet: OwnerValuePacketV1
@@ -568,7 +579,644 @@ class CanonicalOwnerPacketRegistryV1:
                 ReasonCode.INPUT_OWNER_MISMATCH,
                 "only the exact registered MATH-01 dependency receipt may be added",
             )
-        return CanonicalOwnerPacketRegistryV1((*self._packets, packet))
+        packet = _prepare_public_computation_descendant_v1(parent=self, packet=packet)
+        registry = CanonicalOwnerPacketRegistryV1((*self._packets, packet))
+        _inherit_public_registry_custody_v1(parent=self, child=registry, descendant=packet)
+        return registry
+
+
+_PUBLIC_OWNER_REGISTRIES_V1: dict[int, tuple] = {}
+_PUBLIC_OWNER_REGISTRY_KEYS_V1: dict[tuple, object] = {}
+_PUBLIC_OWNER_PACKET_ORIGINS_V1: dict[str, tuple] = {}
+_PUBLIC_NATIVE_CONTEXT_BINDINGS_V1: set[tuple] = set()
+_PUBLIC_NATIVE_CONTEXTS_V1: set[tuple] = set()
+_PUBLIC_DERIVED_PACKET_CUSTODY_V1: dict[int, tuple] = {}
+_PUBLIC_RESPONSE_DEPENDENCIES_V1: ContextVar[dict | None] = ContextVar(
+    "public_response_dependencies_v1", default=None,
+)
+
+
+def _admit_public_packet_custody_v1(*, registry, packet, context, binding_id=None):
+    """A packet copy or a new registry cannot inherit an issued view's custody."""
+    issued = _PUBLIC_OWNER_PACKET_ORIGINS_V1.get(packet.packet_id)
+    bindings = packet.authorized_binding_ids if binding_id is None else (binding_id,)
+    keys = tuple(registry._packet_binding_key(packet, item) for item in bindings)
+    native_required = (keys[0][:-1] in _PUBLIC_NATIVE_CONTEXTS_V1
+                       or any(key in _PUBLIC_NATIVE_CONTEXT_BINDINGS_V1 for key in keys))
+    if context is not None:
+        native_required = native_required or registry._context_binding_key(context, bindings[0])[:-1] in _PUBLIC_NATIVE_CONTEXTS_V1
+    if issued is None and not native_required:
+        return
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(registry))
+    origin = None if proof is None else proof[1].get(id(packet))
+    if (issued is None or issued[0] is not packet or proof is None
+            or proof[0] is not registry or origin is None or origin[0] is not packet
+            or origin[2] is not issued[2]
+            or native_required and any(entry[12] is not True for entry, _fence in origin[4])):
+        raise InputAuthorityError(ReasonCode.INPUT_PACKET_MISMATCH,
+                                  "public packet lacks original registry/publication custody")
+    if context is not None and context != proof[2]:
+        raise InputAuthorityError(ReasonCode.INPUT_SCOPE_MISMATCH,
+                                  "issued public execution context or freshness budget changed")
+    from ..orderbook_event_state_snapshot.handoff import _require_public_publication_custody_v1
+    from .source_policy import _public_response_fence_v1
+
+    for entry, fence in origin[4]:
+        _require_public_publication_custody_v1(publication=entry[0], native_only=native_required)
+        with _public_response_fence_v1(fence):
+            pass
+    if context is not None and any(registry._context_binding_key(context, item) != key
+                                   for item, key in zip(bindings, keys)):
+        raise InputAuthorityError(ReasonCode.INPUT_SCOPE_MISMATCH, "issued public context changed")
+    dependencies = _PUBLIC_RESPONSE_DEPENDENCIES_V1.get()
+    if dependencies is not None:
+        for entry, fence in origin[4]:
+            dependencies[(id(entry[0]), id(fence))] = (entry, fence)
+
+
+def _prepare_public_computation_descendant_v1(*, parent, packet):
+    """Verify the existing edge using its registered computation/conversion owners.
+
+    Public constructor arguments alone cannot attach custody to an invented
+    descendant. This check stays in the existing resolver owner and leaves the
+    legacy stack producer and its reference receipt identities unchanged.
+    """
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(parent))
+    if proof is None:
+        return packet
+    from .serialization import deterministic_json
+    from .implementation_registry import invoke_formula_v34
+    from .unit_conversion import ConversionIdentityV1, UnitBasisDescriptorV1, UnitConversionOwnerV1
+
+    context = proof[2]
+    resolution = FormulaInputResolverV1.resolve("MATH-01", context=context, owner_registry=parent)
+    computed = invoke_formula_v34("MATH-01", resolution.authoritative_values)
+    converted, _receipt = UnitConversionOwnerV1.convert(
+        conversion_id=ConversionIdentityV1.DECIMAL_PROBABILITY_TO_FINITE_FLOAT64,
+        value=computed, source=UnitBasisDescriptorV1("Decimal", "scalar", "dimensionless", "winning payout-normalized probability"),
+        target=UnitBasisDescriptorV1("float64", "scalar", "probability points", "unit interval"),
+        context=context, receipt_id=f"CONVERSION::{context.context_id}::MATH-01::MATH-02")
+    source_packets = tuple(parent.packet_by_id(identity) for identity in resolution.packet_refs)
+    expected_clocks = PointInTimeClocksV1(**{
+        name: max(getattr(source.clocks, name) for source in source_packets)
+        for name in ("observed_time", "effective_time", "available_time", "received_time", "processed_time")
+    }, as_of_time=context.as_of)
+    _native_require(type(packet) is OwnerValuePacketV1 and packet.scope == context.scope
+                    and packet.context_id == context.context_id and packet.source_epoch_id == context.source_epoch_id
+                    and packet.input_version == context.input_version and packet.clocks == expected_clocks
+                    and packet.ttl == min(source.ttl for source in source_packets)
+                    and dict(packet.values) == {"output.implied_probability": converted}
+                    and packet.authorized_binding_ids == ("FIVAB::MATH-02::market_implied_probability",),
+                    "derived public receipt differs from the exact registered producer result")
+    closure = {}
+    for source in source_packets:
+        _admit_public_packet_custody_v1(registry=parent, packet=source, context=context)
+        origin = proof[1].get(id(source))
+        if origin is not None:
+            for entry, fence in origin[4]:
+                closure[(id(entry[0]), id(fence))] = (entry, fence)
+    _native_require(closure, "derived computation has no selected public dependency")
+    identity = deterministic_json(("PUBLIC_DERIVED_MATH01_V1", context.context_id,
+        context.as_of.isoformat(), context.source_epoch_id, context.input_version,
+        context.scope.identity_tuple, tuple(source.packet_id for source in source_packets)))
+    packet = replace(packet, packet_id=identity, producer_receipt_id=identity)
+    prior = _PUBLIC_OWNER_PACKET_ORIGINS_V1.get(identity)
+    if prior is not None:
+        _native_require(prior[0] == packet, "derived public receipt conflicts with an earlier computation")
+        packet = prior[0]
+    _PUBLIC_DERIVED_PACKET_CUSTODY_V1[id(packet)] = (packet, parent, tuple(closure.values()))
+    return packet
+
+
+def _inherit_public_registry_custody_v1(*, parent, child, descendant=None):
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(parent))
+    if proof is None:
+        return
+    _native_require(proof[0] is parent, "public registry identity changed")
+    origins = dict(proof[1])
+    if descendant is not None:
+        prepared = _PUBLIC_DERIVED_PACKET_CUSTODY_V1.get(id(descendant))
+        _native_require(prepared is not None and prepared[0] is descendant and prepared[1] is parent,
+                        "derived MATH-01 receipt lacks its actual registered producer custody")
+        closure = prepared[2]
+        entry = (descendant, child, closure[0][0], closure[0][1], closure)
+        origins[id(descendant)] = entry
+        _PUBLIC_OWNER_PACKET_ORIGINS_V1.setdefault(descendant.packet_id, entry)
+        if entry[2][12]:
+            for binding_id in descendant.authorized_binding_ids:
+                key = child._packet_binding_key(descendant, binding_id)
+                _PUBLIC_NATIVE_CONTEXT_BINDINGS_V1.add(key)
+                _PUBLIC_NATIVE_CONTEXTS_V1.add(key[:-1])
+    _PUBLIC_OWNER_REGISTRIES_V1[id(child)] = (child, MappingProxyType(origins), proof[2])
+
+
+def _join_public_owner_dependencies_v1(*, registry, dependencies):
+    """Join separately owned packets without changing their owner or origin."""
+    _native_require(type(registry) is CanonicalOwnerPacketRegistryV1
+                    and type(dependencies) is CanonicalOwnerPacketRegistryV1,
+                    "public dependency join needs the existing exact registry type")
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(registry))
+    _native_require(proof is not None and proof[0] is registry, "unissued public registry")
+    selected = tuple(proof[1].values())
+    _native_require(selected, "empty public dependency closure")
+    template = selected[0][0]
+    for packet in dependencies.packets:
+        _native_require(packet.scope == template.scope and packet.context_id == template.context_id
+                        and packet.source_epoch_id == template.source_epoch_id
+                        and packet.input_version == template.input_version
+                        and packet.clocks.as_of_time == template.clocks.as_of_time,
+                        "separately owned dependency has a different selected context")
+        _admit_public_packet_custody_v1(registry=dependencies, packet=packet, context=None)
+    if selected[0][2][12]:
+        dependency_proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(dependencies))
+        _native_require(dependency_proof is not None and dependency_proof[0] is dependencies
+                        and all(dependency_proof[1].get(id(packet)) is not None
+                                and dependency_proof[1][id(packet)][2][12] for packet in dependencies.packets),
+                        "native dependency owner custody is unavailable")
+    child = CanonicalOwnerPacketRegistryV1((*registry.packets, *dependencies.packets))
+    _inherit_public_registry_custody_v1(parent=registry, child=child)
+    other = _PUBLIC_OWNER_REGISTRIES_V1.get(id(dependencies))
+    if other is not None:
+        _PUBLIC_OWNER_REGISTRIES_V1[id(child)] = (child, MappingProxyType({
+            **_PUBLIC_OWNER_REGISTRIES_V1[id(child)][1], **other[1]}), proof[2])
+    return child
+
+
+def issue_public_owner_registry_v1(*, publication, context, binding_ids,
+                                   source_bindings, applicability=None):
+    return _issue_public_owner_registry_v1(publication=publication, context=context, binding_ids=binding_ids,
+        source_bindings=source_bindings, applicability=applicability, order_history_dependencies=None)
+
+
+def _issue_public_order_history_registry_v1(*, publication, context, source_bindings, dependencies, applicability=None):
+    """Join actual public changes to separately owned acknowledgement/priority facts."""
+    registry = _issue_public_owner_registry_v1(publication=publication, context=context,
+        binding_ids=("FIVAB::sequenced_book_events::MATH-39",), source_bindings=source_bindings,
+        applicability=applicability, order_history_dependencies=dependencies)
+    ack_binding = "FIVAB::order_ack::MATH-39"
+    ack = dependencies.packet_for(context=context, binding_id=ack_binding)
+    acknowledgement = CanonicalOwnerPacketRegistryV1((ack,))
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(dependencies))
+    if proof is not None:
+        _PUBLIC_OWNER_REGISTRIES_V1[id(acknowledgement)] = (acknowledgement, proof[1], context)
+    return _join_public_owner_dependencies_v1(registry=registry, dependencies=acknowledgement)
+
+
+def _issue_public_fee_registry_v1(*, publication, context, binding_ids, source_bindings, applicability,
+                                fills, order_ref, prior_unrounded, prior_collected, prior_rounding_overpayment,
+                                carry_evidence_refs, fresh_hypothetical_order, include_deferred_taker_rebate):
+    """Issue the existing PRETRADE fee-owned fields from sealed source evidence.
+
+    Model, fill-probability, unobserved terminal-branch and reserve packets remain separate.
+    Native admission requires account/carry custody, which the source owner holds
+    unavailable until its qualification exists; fixture origins stay synthetic.
+    """
+    import time
+    from .context import _public_refs_v1
+    from .serialization import deterministic_json
+    from .source_policy import (_resolve_public_publication_fee_epochs_v1,
+                                _prepare_public_response_fence_v1, _public_response_fence_v1)
+    from ..orderbook_event_state_snapshot.handoff import (
+        _require_public_publication_handle_v1, _public_committed_observations_v1, _public_committed_translations_v1,
+        _public_selected_metadata_sources_v1,
+    )
+    from ...pretrade.pr169_pretrade1_resolvers import (
+        compose_public_fee_cashflows_v1, compose_public_contractual_settlement_cashflow_v1,
+    )
+
+    entry = _require_public_publication_handle_v1(publication=publication)
+    _native_require(type(context) is ComputationExecutionContextV1, "fee registry requires an exact context")
+    _public_refs_v1(binding_ids)
+    _native_require(type(source_bindings) is tuple and source_bindings
+        and len({id(row) for row in source_bindings}) == len(source_bindings)
+        and all(any(row is admitted for admitted in entry[5]) for row in source_bindings),
+        "fee registry source identities are not admitted by this publication")
+    metadata_rows = tuple(row for row in entry[4] if row.instrument_id == context.scope.instrument_or_contract_scope_id
+        and row.market_id == context.scope.market_scope_id and row.profile_id.value == context.scope.venue_scope_id)
+    _native_require(len(metadata_rows) == 1 and context.source_epoch_id == entry[10] and context.input_version == entry[11]
+        and context.scope.input_snapshot_id == entry[7].record_id, "fee registry publication context mismatch")
+    metadata = metadata_rows[0]
+    _native_require(metadata.event_id_or_none is None or metadata.event_id_or_none == context.scope.event_scope_id,
+                    "fee registry event scope mismatch")
+    known = _native_utc_nanoseconds(context.as_of.isoformat())
+    _native_require(entry[8] <= known <= ((time.time_ns()+999)//1000)*1000,
+                    "fee registry context predates issuance or is in the future")
+    owned = {"entry_trade_cashflow_total", "platform_fee_total", "expected_rebate_total"}
+    terminal = {"win_terminal_cashflow_total", "lose_terminal_cashflow_total"}
+    rows = {row.binding_id: (math_id, row) for math_id in ("MATH-06", "MATH-07")
+            for row in CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+            if row.input_name in owned or math_id == "MATH-06" and row.input_name in terminal}
+    _native_require(set(binding_ids) <= set(rows), "fee registry cannot supply another owner's economic inputs")
+    selected = tuple(rows[identity] for identity in binding_ids)
+    epochs = _resolve_public_publication_fee_epochs_v1(publication=publication, instrument_id=metadata.instrument_id,
+        known_as_of_ns=known, applicability=applicability, fills=fills)
+    if entry[12]:
+        raise InputAuthorityError(ReasonCode.INPUT_OWNER_MISSING,
+                                  "native conditional-fill and order-carry owner custody unavailable")
+    settlement = None
+    requested_terminal = {row.input_name for _,row in selected} & terminal
+    if requested_terminal:
+        settlement = compose_public_contractual_settlement_cashflow_v1(metadata=metadata,
+            translations=_public_committed_translations_v1(publication=publication),known_as_of_ns=known,fills=fills)
+        _native_require(requested_terminal == {settlement["field_name"]},
+                        "unobserved settlement branch requires its separate accepted owner input")
+    originals = {row.observation_id: row for row in _public_committed_observations_v1(publication=publication)}
+    material_refs = {ref for epoch in epochs for ref in epoch.source_observation_refs}
+    material_refs.update(row[0] for row in metadata.field_lineage)
+    if settlement is not None:
+        material_refs.update(settlement["source_observation_refs"])
+    required_sources = {row.binding_id for row in _public_selected_metadata_sources_v1(publication=publication,
+        metadata=metadata_rows,known_as_of_ns=known)}
+    for ref in material_refs:
+        original = originals.get(ref)
+        if original is not None:
+            required_sources.update(original.source_binding_refs)
+        else:
+            owners = tuple(source for source in entry[5] if ref in source.original_evidence_refs)
+            _native_require(owners, "fee metadata or rule lacks its accepted source original")
+            required_sources.update(source.binding_id for source in owners)
+    _native_require(required_sources <= {source.binding_id for source in source_bindings},
+                    "fee registry omits a material catalog, accepted rule or history source")
+    source_bindings = tuple(source for source in source_bindings if source.binding_id in required_sources)
+    _native_require(all(row.accepted_upstream_owner_id == "PRETRADE1"
+        and all("FormulaExecutionContractV1::"+math_id in source.permitted_consumer_ids for source in source_bindings)
+        for math_id, row in selected), "fee source does not permit the selected PRETRADE consumer")
+    if metadata.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        _native_require(len({row.epoch_id for row in epochs if row.liquidity_role == "TAKER"}) <= 1,
+                        "Retail cross-regime order cap requires accepted cap-domain evidence")
+    terms = compose_public_fee_cashflows_v1(profile_id=metadata.profile_id, market_scope=(metadata.instrument_id,),
+        epochs=epochs, applicability=applicability, known_as_of_ns=known, fills=fills, order_ref=order_ref,
+        cap_domain_epoch_refs=tuple(epoch.epoch_id for epoch in epochs), prior_unrounded=prior_unrounded,
+        prior_collected=prior_collected, prior_rounding_overpayment=prior_rounding_overpayment,
+        carry_evidence_refs=carry_evidence_refs, fresh_hypothetical_order=fresh_hypothetical_order,
+        include_deferred_taker_rebate=include_deferred_taker_rebate)
+    if settlement is not None:
+        terms = dict(terms,**{settlement["field_name"]:settlement["value"]})
+    maximum_age_ns = ((context.maximum_age.days*86400+context.maximum_age.seconds)*1000000
+                      + context.maximum_age.microseconds)*1000
+    observed_ns = min(entry[8], metadata.known_at_ns, *(row.known_at_ns for row in source_bindings))
+    expiry = min(observed_ns+maximum_age_ns, *(epoch.expires_at_ns for epoch in epochs))
+    _native_require(known < expiry, "fee economic input is stale at the selected context")
+    fence = _prepare_public_response_fence_v1(binding=entry[1]._binding, sources=source_bindings,
+        metadata=metadata_rows, applicability=applicability, not_after_ns=expiry)
+    moment = lambda value: datetime(1970, 1, 1, tzinfo=UTC)+timedelta(microseconds=(value+999)//1000)
+    # Conditional future fill times are retained in the immutable input identity;
+    # they never replace the source's observation/availability clocks.
+    clocks = PointInTimeClocksV1(moment(observed_ns), moment(observed_ns), moment(entry[8]),
+        moment(entry[8]), moment(entry[8]), context.as_of)
+    inputs = (tuple((str(fill.contracts),str(fill.price),fill.side,fill.liquidity_role,fill.fill_at_ns) for fill in fills),
+        order_ref, str(prior_unrounded), str(prior_collected), str(prior_rounding_overpayment), carry_evidence_refs,
+        fresh_hypothetical_order, include_deferred_taker_rebate, tuple(row.epoch_id for row in epochs))
+    packets = []
+    for _, row in selected:
+        identity = deterministic_json(("PUBLIC_PRETRADE_FEE_V1", entry[7].record_id,
+            entry[7].typed_payload.source_use_action_ref, context.context_id,
+            context.scope.identity_tuple, context.source_epoch_id, context.input_version, known, maximum_age_ns,
+            applicability.qualification_ref, applicability.generation, row.binding_id, inputs))
+        packet = OwnerValuePacketV1(packet_id=identity, owner_id=row.accepted_upstream_owner_id,
+            packet_type=row.accepted_packet_or_snapshot_type, schema_id=row.schema_id, schema_version=row.schema_version,
+            context_id=context.context_id, scope=context.scope, source_epoch_id=context.source_epoch_id,
+            input_version=context.input_version, clocks=clocks, ttl=context.maximum_age,
+            values={row.exact_field_path: terms[row.input_name]}, authorized_binding_ids=(row.binding_id,),
+            producer_receipt_id=identity, producer_receipt_type=row.producer_receipt_type,
+            source_state_and_claim_lineage=row.source_state_and_claim_lineage, provider_sequence=None, revision=None)
+        prior = _PUBLIC_OWNER_PACKET_ORIGINS_V1.get(identity)
+        if prior is not None:
+            _native_require(prior[2] is entry and prior[0] == packet, "fee packet identity conflicts with an earlier issuance")
+            packet = prior[0]
+        packets.append(packet)
+    registry = CanonicalOwnerPacketRegistryV1(tuple(packets))
+    origins = {id(packet): (packet, registry, entry, fence, ((entry,fence),)) for packet in packets}
+    with _public_response_fence_v1(fence):
+        _PUBLIC_OWNER_REGISTRIES_V1[id(registry)] = (registry, MappingProxyType(origins), context)
+        for packet in packets:
+            _PUBLIC_OWNER_PACKET_ORIGINS_V1.setdefault(packet.packet_id, origins[id(packet)])
+            if entry[12]:
+                key = registry._packet_binding_key(packet, packet.authorized_binding_ids[0])
+                _PUBLIC_NATIVE_CONTEXT_BINDINGS_V1.add(key)
+                _PUBLIC_NATIVE_CONTEXTS_V1.add(key[:-1])
+        return registry
+
+
+def _project_public_order_history_v1(*, publication, context, translations, sources, dependencies):
+    """A public aggregate never creates order-aware priority classification."""
+    from ..orderbook_event_state_snapshot.handoff import _require_public_publication_custody_v1
+    from .context import _public_counter_v1
+
+    entry = _require_public_publication_custody_v1(publication=publication)
+    _native_require(type(dependencies) is CanonicalOwnerPacketRegistryV1,
+                    "public queue history requires separately owned acknowledgement and priority evidence")
+    proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(dependencies))
+    if entry[12]:
+        _native_require(proof is not None and proof[0] is dependencies and all(
+            id(packet) in proof[1] and all(origin[12] for origin, _fence in proof[1][id(packet)][4])
+            for packet in dependencies.packets), "native order-aware priority custody is unavailable")
+    resolution = FormulaInputResolverV1.resolve("MATH-39", context=context, owner_registry=dependencies)
+    _native_require(len(dependencies.packets) == 2, "queue projection accepts only its two separately owned dependencies")
+    event_packet, ack_packet = tuple(dependencies.packet_by_id(ref) for ref in resolution.packet_refs)
+    events = _extract(event_packet.values, "book.sequenced_book_events")
+    ack = _extract(ack_packet.values, "execution.order_ack")
+    history = tuple(row for row in translations if row.stream_disposition.get("instrument_id") == ack.instrument_id
+                    and row.stream_disposition.get("event_kind") in {"BOOK_SNAPSHOT", "BOOK_DELTA"})
+    _native_require(history and len(history) == len(events), "order-aware evidence does not cover the complete public change history")
+    _native_require(entry[1]._binding._capture.scope.profile_id is not Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT,
+                    "PIT_PROVIDER_SEQUENCE_UNAVAILABLE: Retail has no change-level history")
+    previous_quantity = None
+    projected = []
+    for index, (translation, event) in enumerate(zip(history, events, strict=True)):
+        body = translation.normalized_frame.parsed_source_scalar_tree_or_none
+        clock = translation.exact_clock_companion["provider_event_or_none"]
+        _native_require(clock is not None and int(clock["utc_ns_text"]) == _native_utc_nanoseconds(event.event_time.isoformat())
+                        and event.event_id == translation.observation_ref,
+                        "order-aware event identity/time differs from the exact public original")
+        native_kind = translation.stream_disposition["event_kind"]
+        _native_require((index == 0 and native_kind == "BOOK_SNAPSHOT") or (index > 0 and native_kind == "BOOK_DELTA"),
+                        "order-aware history requires one initial anchor and subsequent changes")
+        _native_require(not (event.quantity.is_zero() and event.quantity.is_signed()), "signed-zero order-aware quantity")
+        if translation.normalized_frame.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            sequence = body["seq"]
+            message = body["msg"]
+            _native_require(ack.side in {"YES_BID", "NO_BID"}, "Kalshi order-aware side requires its outcome-side book basis")
+            side = "yes" if ack.side == "YES_BID" else "no"
+            if native_kind == "BOOK_SNAPSHOT":
+                levels = message[side + "_dollars"]
+                matching = [(position, quantity) for position, (price, quantity) in enumerate(levels) if Fraction(price) == Fraction(ack.price)]
+                _native_require(len(matching) == 1, "acknowledged price has no unique displayed native level")
+                position, quantity = matching[0]
+                change = Fraction(quantity)
+                quantity_pointer = f"/msg/{side}_dollars_fp/{position}/1"
+            else:
+                _native_require(message["side"] == side.upper() and Fraction(message["price_dollars"]) == Fraction(ack.price),
+                                "native delta is outside the acknowledged side/price")
+                change = Fraction(message["delta_fp"])
+                quantity_pointer = "/msg/delta_fp"
+        else:
+            _native_require(body["U"] == body["u"], "MATH-39 cannot renumber an inclusive native update range")
+            sequence = body["u"]
+            _native_require(ack.side in {"BID", "ASK"}, "Gemini order-aware side unavailable")
+            side = "b" if ack.side == "BID" else "a"
+            matching = [(position, quantity) for position, (price, quantity) in enumerate(body[side]) if Fraction(price) == Fraction(ack.price)]
+            _native_require(len(matching) == 1, "acknowledged price has no unique native absolute update")
+            position, quantity = matching[0]
+            current = Fraction(quantity)
+            change = current if native_kind == "BOOK_SNAPSHOT" else current - previous_quantity
+            previous_quantity = current
+            quantity_pointer = f"/{side}/{position}/1"
+        _public_counter_v1(sequence, allow_zero=True)
+        material = tuple(row for source in sources for row in source.field_bindings
+                         if row[4] == quantity_pointer and row[1] == "DECIMAL_TEXT" and row[2] == "CONTRACT_COUNT"
+                         and row[5] == "EXACT_DECIMAL_TEXT")
+        _native_require(len(material) == 1 and (translation.observation_ref, quantity_pointer,
+            material[0][0], material[0][5]) in translation.field_lineage, "native queue quantity basis is unavailable")
+        expected_kind = (Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER if native_kind == "BOOK_SNAPSHOT"
+                         else Math39BookEventKindV1.PRIOR_ADDITION if change >= 0 else None)
+        _native_require(event.sequence == sequence and Fraction(event.quantity) == abs(change)
+            and (event.event_kind is expected_kind if expected_kind is not None else event.event_kind in {
+                Math39BookEventKindV1.PRIOR_CANCELLATION, Math39BookEventKindV1.TRADE_AHEAD}),
+            "order-aware classification/quantity differs from actual native change history")
+        projected.append(replace(event, producer_receipt_ref=entry[7].record_id,
+            available_at=max(event.available_at, datetime(1970,1,1,tzinfo=UTC)+timedelta(microseconds=(entry[8]+999)//1000))))
+    return tuple(projected)
+
+
+def _issue_public_owner_registry_v1(*, publication, context, binding_ids,
+                                  source_bindings, applicability, order_history_dependencies):
+    """Project only selected existing bindings from an original issued view."""
+    from ..orderbook_event_state_snapshot.handoff import (
+        _require_public_publication_custody_v1, _public_committed_translations_v1,
+        _public_selected_metadata_sources_v1, _public_committed_observations_v1,
+    )
+    from ..orderbook_event_state_snapshot.integrity import validate_pit_book_integrity_v2
+    from .context import _public_refs_v1
+    from .source_policy import _prepare_public_response_fence_v1, _public_response_fence_v1
+    from .receipts import _public_identity_v1
+    from .serialization import deterministic_json
+    import time
+
+    entry = _require_public_publication_custody_v1(publication=publication)
+    _native_require(type(context) is ComputationExecutionContextV1, "public registry requires an exact context")
+    _public_refs_v1(binding_ids)
+    _native_require(len(binding_ids) <= 64 and type(source_bindings) is tuple and source_bindings
+                    and all(any(row is admitted for admitted in entry[5]) for row in source_bindings),
+                    "public registry source identities are not admitted by this publication")
+    _native_require(context.source_epoch_id == entry[10] and context.input_version == entry[11],
+                    "public registry source epoch/input version mismatch")
+    registry_key = (id(publication), context, binding_ids, tuple(id(row) for row in source_bindings), id(applicability),
+                    id(order_history_dependencies))
+    existing = _PUBLIC_OWNER_REGISTRY_KEYS_V1.get(registry_key)
+    if existing is not None:
+        for packet in existing.packets:
+            _admit_public_packet_custody_v1(registry=existing, packet=packet, context=context)
+        return existing
+    states = tuple(state for state in entry[3].values()
+                   if state.instrument_id == context.scope.instrument_or_contract_scope_id
+                   and state.market_id == context.scope.market_scope_id
+                   and state.profile_id.value == context.scope.venue_scope_id)
+    _native_require(len(states) == 1, "public registry context does not select exactly one published instrument")
+    state = states[0]
+    _native_require(context.scope.input_snapshot_id == state.state_id,
+                    "public registry snapshot identity differs from the published state")
+    _native_require(any((state.source_receipt_ref, state.rights_receipt_ref)
+                        in set(zip(source.source_receipt_refs, source.rights_receipt_refs)) for source in source_bindings),
+                    "selected source bindings do not own this published state")
+    metadata_rows = tuple(row for row in entry[4] if row.instrument_id == state.instrument_id)
+    _native_require(len(metadata_rows) == 1, "public registry metadata selection is ambiguous")
+    metadata = metadata_rows[0]
+    original_by_id = {row.observation_id: row for row in _public_committed_observations_v1(publication=publication)}
+    committed_translations = _public_committed_translations_v1(publication=publication)
+    selected_originals = {row.observation_ref for row in committed_translations
+                          if row.stream_disposition.get("instrument_id") == state.instrument_id}
+    selected_originals.update(row[0] for row in metadata.field_lineage if row[0] in original_by_id)
+    required_sources = {ref for identity in selected_originals for ref in original_by_id[identity].source_binding_refs}
+    required_sources.update(row.binding_id for row in _public_selected_metadata_sources_v1(publication=publication,
+        metadata=metadata_rows,known_as_of_ns=_native_utc_nanoseconds(context.as_of.isoformat())))
+    for original_ref, _, _, _ in metadata.field_lineage:
+        if original_ref not in original_by_id:
+            required_sources.update(row.binding_id for row in entry[5] if original_ref in row.original_evidence_refs)
+    _native_require(required_sources <= {row.binding_id for row in source_bindings},
+                    "a material original source binding is missing")
+    source_bindings = tuple(row for row in source_bindings if row.binding_id in required_sources)
+    _native_require(metadata.event_id_or_none is None or metadata.event_id_or_none == context.scope.event_scope_id,
+                    "public registry event scope mismatch")
+    validate_pit_book_integrity_v2(state)
+    as_of_ns = _native_utc_nanoseconds(context.as_of.isoformat())
+    _native_require(entry[8] <= as_of_ns, "public registry context predates actual handle issuance")
+    _native_require(as_of_ns <= ((time.time_ns()+999)//1000)*1000, "public registry context is in the future")
+    for item in (*source_bindings, metadata):
+        _native_require(item.known_at_ns <= as_of_ns < item.expires_at_ns
+                        and item.effective_from_ns <= as_of_ns
+                        and (item.effective_until_ns_or_none is None or as_of_ns < item.effective_until_ns_or_none),
+                        "selected public rule is unavailable at the requested as-of")
+    rows = {binding.binding_id: (math_id, binding)
+            for math_id, bindings in CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID.items() for binding in bindings}
+    selected_rows = []
+    for binding_id in binding_ids:
+        _native_require(binding_id in rows, "unknown public consumer binding")
+        math_id, row = rows[binding_id]
+        _native_require(all("FormulaExecutionContractV1::"+math_id in source.permitted_consumer_ids
+                            for source in source_bindings), "public source does not permit the selected consumer")
+        selected_rows.append((math_id, row))
+    yes = tuple(sorted((level for level in state.levels if level.canonical_side == "YES_BID" and level.quantity > 0), key=lambda level: level.price))
+    no = tuple(sorted((level for level in state.levels if level.canonical_side == "NO_BID" and level.quantity > 0), key=lambda level: level.price))
+    bids = tuple(level for level in state.levels if level.canonical_side == "BID" and level.quantity > 0)
+    asks = tuple(level for level in state.levels if level.canonical_side == "ASK" and level.quantity > 0)
+    best_bid = bids[0].price_text if bids else None
+    best_ask = asks[0].price_text if asks else None
+    if state.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT and any(
+            math_id != "MATH-39" and row.input_name != "contract_price" for math_id, row in selected_rows):
+        _native_require(metadata.price_orientation == "OUTCOME_SIDE" and metadata.payout_amount_or_none is not None,
+                        "Kalshi selected price orientation/payout unavailable")
+        best_bid = yes[-1].price_text if yes else None
+        best_ask = (_native_retail_finite_decimal_text_v1(Fraction(metadata.payout_amount_or_none)-Fraction(no[-1].price))
+                    if no else None)
+    trades = tuple(row for row in committed_translations
+        if row.stream_disposition.get("instrument_id") == state.instrument_id
+        and row.stream_disposition.get("event_kind") == "TRADE")
+    price_translation = trades[-1] if trades else None
+    values = {}
+    for math_id, row in selected_rows:
+        owner, name = row.accepted_upstream_owner_id, row.input_name
+        if owner in {"SelectedVenuePublicMarketDataOwnerV1", "KalshiAcceptedOrderBookStateOwnerV1"}:
+            _native_require(state.state_vector.lifecycle_state == "ADMISSIBLE",
+                            "selected public lifecycle requires accepted metadata refresh")
+        if owner in {"SelectedVenuePublicMarketDataOwnerV1", "KalshiAcceptedOrderBookStateOwnerV1"} and name != "contract_price":
+            _native_require(metadata.lifecycle["state"] == "OPEN"
+                            and state.state_vector.availability_state.value in {"AVAILABLE_CURRENT_STATE", "AVAILABLE_CHANGE_LEVEL"},
+                            "selected public lifecycle/depth capability is unavailable")
+        if owner == "SelectedVenuePublicMarketDataOwnerV1" and math_id == "MATH-01" and name == "contract_price":
+            _native_require(price_translation is not None and metadata.lifecycle["state"] == "OPEN"
+                             and state.state_vector.lifecycle_state == "ADMISSIBLE"
+                            and metadata.price_orientation in {"YES", "NO"}
+                            and metadata.payout_basis_or_none == "USD_PER_CONTRACT",
+                            "admitted trade price orientation/payoff basis unavailable")
+            pointer = {Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: "/p",
+                       Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: "/trade/price/value",
+                       Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+                           "/msg/yes_price_dollars" if metadata.price_orientation == "YES" else "/msg/no_price_dollars"}.get(state.profile_id)
+            original = original_by_id[price_translation.observation_ref]
+            price_sources = tuple(source for source in source_bindings if source.binding_id in original.source_binding_refs)
+            fields = tuple(row for source in price_sources for row in source.field_bindings
+                if row[4] == pointer and row[1] == "DECIMAL_TEXT" and row[5] == "EXACT_DECIMAL_TEXT"
+                and row[2] == "USD_PER_CONTRACT")
+            _native_require(len(fields) == 1 and (original.observation_id,pointer,fields[0][0],fields[0][5])
+                            in price_translation.field_lineage, "trade price has no exact accepted currency-per-contract binding")
+            normalized_price = price_translation.normalized_frame.parsed_source_scalar_tree_or_none
+            price = (normalized_price["msg"][pointer.rsplit("/", 1)[1]]
+                     if state.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT else normalized_price["price"])
+            _native_require(type(price) is str and Fraction(price) >= 0, "invalid admitted contract price")
+            values[row.binding_id] = price
+        elif owner == "SelectedVenuePublicMarketDataOwnerV1" and name in {
+                "best_bid", "best_ask", "same_instrument_snapshot", "snapshot_state"}:
+            _native_require(best_bid is not None and best_ask is not None and Fraction(best_bid) <= Fraction(best_ask)
+                            and state.state_vector.continuity_state.value == "CONTIGUOUS",
+                            "public contiguous top-of-book capability is unavailable")
+            values[row.binding_id] = {"best_bid": best_bid, "best_ask": best_ask,
+                "same_instrument_snapshot": True, "snapshot_state": "CURRENT_CONTIGUOUS_BOOK"}[name]
+        elif owner in {"KalshiAcceptedOrderBookStateOwnerV1", "KalshiMarketMetadataOwnerV1"}:
+            _native_require(state.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT and math_id == "MATH-36",
+                            "Kalshi owner cannot publish another profile")
+            sequence = state.last_provider_sequence_end_or_none
+            _native_require(type(sequence) is int, "Kalshi covered native sequence unavailable")
+            public_values = {
+                "yes_bids": tuple(level.price_text for level in yes),
+                "no_bids": tuple(level.price_text for level in no),
+                "book_sequence": sequence, "expected_sequence": sequence,
+                "book_state": "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+                "payout": metadata.payout_amount_or_none,
+                "price_ranges": tuple({"minimum": low, "maximum": high, "step": step}
+                                      for low, high, step in metadata.price_bands),
+            }
+            _native_require(name in public_values and public_values[name] is not None,
+                            "selected Kalshi metadata capability unavailable")
+            values[row.binding_id] = public_values[name]
+        elif row.binding_id == "FIVAB::sequenced_book_events::MATH-39":
+            values[row.binding_id] = _project_public_order_history_v1(publication=publication, context=context,
+                translations=committed_translations, sources=source_bindings, dependencies=order_history_dependencies)
+        else:
+            raise InputAuthorityError(ReasonCode.INPUT_OWNER_MISSING,
+                                      "selected public field requires its separately accepted producer")
+    # These are the derived immutable view's receipt/processing clocks, not
+    # replacements for original QTT receive/parse clocks retained by the handle.
+    issued_at = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=(entry[8]+999)//1000)
+    observations = tuple(row for row in committed_translations
+                         if row.stream_disposition.get("instrument_id") == state.instrument_id
+                         and row.stream_disposition.get("event_kind") in {"BOOK_SNAPSHOT", "BOOK_DELTA", "BOOK_REPLACEMENT"})
+    book_selected = any(row.input_name != "contract_price" for _, row in selected_rows)
+    _native_require(observations or not book_selected, "published book input lacks original observation clocks")
+    last = (observations[-1] if observations else price_translation).exact_clock_companion
+    observed_ns = int(last["received"]["utc_ns_text"])
+    observed_at = datetime.fromisoformat(last["received"]["receipt_utc_floor"].replace("Z", "+00:00"))
+    event = last["provider_event_or_none"]
+    effective_at = (datetime.fromisoformat(event["receipt_utc_floor"].replace("Z", "+00:00"))
+                    if event is not None else observed_at)
+    clocks = PointInTimeClocksV1(observed_at, effective_at, issued_at, issued_at, issued_at, context.as_of)
+    trade_clocks = None
+    trade_observed_ns = None
+    if price_translation is not None:
+        trade_clock = price_translation.exact_clock_companion
+        trade_observed_ns = int(trade_clock["received"]["utc_ns_text"])
+        trade_observed = datetime.fromisoformat(trade_clock["received"]["receipt_utc_floor"].replace("Z", "+00:00"))
+        trade_effective = trade_clock["provider_event_or_none"]
+        _native_require(trade_effective is not None, "admitted trade has no exact provider event time")
+        trade_effective = datetime.fromisoformat(trade_effective["receipt_utc_floor"].replace("Z", "+00:00"))
+        trade_clocks = PointInTimeClocksV1(trade_observed, trade_effective, issued_at, issued_at, issued_at, context.as_of)
+    metadata_observed = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=metadata.known_at_ns//1000)
+    metadata_effective = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=metadata.effective_from_ns//1000)
+    metadata_clocks = PointInTimeClocksV1(metadata_observed, metadata_effective, issued_at, issued_at, issued_at, context.as_of)
+    maximum_age_ns = ((context.maximum_age.days*86400+context.maximum_age.seconds)*1000000
+                      + context.maximum_age.microseconds)*1000
+    observed_boundaries = tuple(metadata.known_at_ns if row.accepted_upstream_owner_id == "KalshiMarketMetadataOwnerV1"
+                                else trade_observed_ns if row.input_name == "contract_price"
+                                else observed_ns for _, row in selected_rows)
+    economic_expiry = min(observed_boundaries)+maximum_age_ns
+    additional_closure = {}
+    if order_history_dependencies is not None:
+        dependency_proof = _PUBLIC_OWNER_REGISTRIES_V1.get(id(order_history_dependencies))
+        for dependency in order_history_dependencies.packets:
+            ttl_ns = ((dependency.ttl.days*86400+dependency.ttl.seconds)*1000000+dependency.ttl.microseconds)*1000
+            economic_expiry = min(economic_expiry, _native_utc_nanoseconds(dependency.clocks.observed_time.isoformat())+ttl_ns)
+            if dependency_proof is not None:
+                for owner_entry, owner_fence in dependency_proof[1][id(dependency)][4]:
+                    additional_closure[(id(owner_entry[0]),id(owner_fence))] = (owner_entry,owner_fence)
+    _native_require(as_of_ns < economic_expiry, "public economic input is stale at the selected context")
+    fence = _prepare_public_response_fence_v1(binding=entry[1]._binding, sources=source_bindings,
+        metadata=metadata_rows, applicability=applicability, not_after_ns=economic_expiry)
+    packets = tuple(OwnerValuePacketV1(
+        packet_id=deterministic_json(("PUBLIC_OWNER_PACKET_V1", entry[7].record_id,
+            entry[7].typed_payload.source_use_action_ref, context.context_id, context.scope.identity_tuple,
+            context.source_epoch_id, context.input_version, row.binding_id, entry[8], as_of_ns, maximum_age_ns)),
+        owner_id=row.accepted_upstream_owner_id, packet_type=row.accepted_packet_or_snapshot_type,
+        schema_id=row.schema_id, schema_version=row.schema_version, context_id=context.context_id,
+        scope=context.scope, source_epoch_id=context.source_epoch_id, input_version=context.input_version,
+        clocks=metadata_clocks if row.accepted_upstream_owner_id == "KalshiMarketMetadataOwnerV1"
+            else trade_clocks if row.input_name == "contract_price" else clocks,
+        ttl=context.maximum_age, values={row.exact_field_path: values[row.binding_id]},
+        authorized_binding_ids=(row.binding_id,), producer_receipt_id=entry[7].record_id,
+        producer_receipt_type=row.producer_receipt_type, source_state_and_claim_lineage=row.source_state_and_claim_lineage,
+        provider_sequence=None if row.input_name == "contract_price" else state.last_provider_sequence_end_or_none, revision=None,
+    ) for index, (_math_id, row) in enumerate(selected_rows))
+    retained = []
+    for packet in packets:
+        prior = _PUBLIC_OWNER_PACKET_ORIGINS_V1.get(packet.packet_id)
+        if prior is not None:
+            _native_require(prior[2] is entry and prior[0] == packet,
+                            "public packet identity conflicts with an earlier issuance")
+            packet = prior[0]
+        retained.append(packet)
+    packets = tuple(retained)
+    registry = CanonicalOwnerPacketRegistryV1(packets)
+    closure = ((entry,fence), *additional_closure.values())
+    origins = {id(packet): (packet, registry, entry, fence, closure, order_history_dependencies) for packet in packets}
+    with _public_response_fence_v1(fence):
+        _PUBLIC_OWNER_REGISTRIES_V1[id(registry)] = (registry, MappingProxyType(origins), context)
+        _PUBLIC_OWNER_REGISTRY_KEYS_V1[registry_key] = registry
+        for packet in packets:
+            _PUBLIC_OWNER_PACKET_ORIGINS_V1.setdefault(packet.packet_id, origins[id(packet)])
+            if entry[12]:
+                key = registry._packet_binding_key(packet, packet.authorized_binding_ids[0])
+                _PUBLIC_NATIVE_CONTEXT_BINDINGS_V1.add(key)
+                _PUBLIC_NATIVE_CONTEXTS_V1.add(key[:-1])
+        return registry
 
 
 def _extract(values: Mapping[str, object], field_path: str) -> object:
@@ -984,6 +1632,21 @@ def _resolve_formula_input_binding(
     require_sequence, require_revision = _sequence_revision_requirements(
         binding.provider_native_sequence_or_revision
     )
+    public_origin = _PUBLIC_OWNER_PACKET_ORIGINS_V1.get(packet.packet_id)
+    if public_origin is not None and public_origin[0] is packet:
+        # The frozen public binding declares sequence/revision alternatives.
+        # Issued book inputs carry the actual covered sequence; do not invent a
+        # provider revision from a local generation or receive ordinal.
+        if "sequence/revision required" in binding.provider_native_sequence_or_revision.casefold():
+            require_sequence, require_revision = True, False
+            if binding.binding_id == "FIVAB::MATH-01::contract_price":
+                # The private factory emits this binding only from an admitted
+                # committed scalar trade. Its exact snapshot is the alternative
+                # named by the existing binding; no sequence is manufactured.
+                _native_require(packet.scope.input_snapshot_id == context.scope.input_snapshot_id
+                                and packet.provider_sequence is None and packet.revision is None,
+                                "scalar trade snapshot identity differs")
+                require_sequence = False
     freshness = FreshnessResolverV1.validate(
         receipt_id=f"FRESHNESS::{packet.packet_id}::{binding.binding_id}",
         clocks=packet.clocks,
@@ -1190,13 +1853,9 @@ def resolve_math39_formula_inputs(
                 ReasonCode.POINT_IN_TIME_VIOLATION,
                 "MATH-39 event temporal custody differs from acknowledgement",
             )
-    by_kind = {
-        kind: sum(
-            (row.quantity for row in events if row.event_kind is kind),
-            start=Decimal(0),
-        )
-        for kind in Math39BookEventKindV1
-    }
+    by_kind = {kind: Decimal(_native_retail_finite_decimal_text_v1(sum(
+        (Fraction(row.quantity) for row in events if row.event_kind is kind), start=Fraction(0))))
+        for kind in Math39BookEventKindV1}
     values = MappingProxyType(
         {
             "displayed_quantity_before_order": by_kind[
@@ -1313,7 +1972,7 @@ class FormulaInputResolverV1:
                 {row.input_name: row.value for row in resolved}
             ),
             packet_refs=tuple(dict.fromkeys(row.packet_id for row in resolved)),
-            receipt_refs=tuple(
+            receipt_refs=tuple(dict.fromkeys(
                 item
                 for row in resolved
                 for item in (
@@ -1321,7 +1980,7 @@ class FormulaInputResolverV1:
                     row.point_in_time_receipt.receipt_id,
                     row.freshness_receipt.receipt_id,
                 )
-            ),
+            )),
         )
 
 

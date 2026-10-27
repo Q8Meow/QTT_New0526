@@ -1299,6 +1299,7 @@ class PITMarketDataIngestDispatcherV2:
         "_contracts",
         "_polymarket_dialect_by_epoch",
         "_polymarket_data_seen_by_capture",
+        "_polymarket_data_attempted_by_capture",
         "_polymarket_fallback_used_by_capture",
     )
 
@@ -1309,6 +1310,7 @@ class PITMarketDataIngestDispatcherV2:
         self._contracts = _pit_validator_contract_map(contracts)
         self._polymarket_dialect_by_epoch: dict[tuple[str, str], str] = {}
         self._polymarket_data_seen_by_capture: dict[str, bool] = {}
+        self._polymarket_data_attempted_by_capture: dict[str, bool] = {}
         self._polymarket_fallback_used_by_capture: dict[str, bool] = {}
 
     @property
@@ -1365,18 +1367,26 @@ def _pit_validate_polymarket_dialect_transition(
             PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
             "Polymarket Retail dialect changed after epoch lock",
         )
-    seen_data = dispatcher._polymarket_data_seen_by_capture.get(
+    seen_data = dispatcher._polymarket_data_attempted_by_capture.get(
         frame.capture_session_id, False
     )
     fallback_used = dispatcher._polymarket_fallback_used_by_capture.get(
         frame.capture_session_id, False
     )
     if frame.wire_dialect == fallback:
-        if not explicit_pre_data_subscription_error or seen_data or fallback_used:
+        continuing_accepted_fallback = locked == fallback and fallback_used
+        if continuing_accepted_fallback:
+            if explicit_pre_data_subscription_error:
+                raise PITDataContractErrorV1(
+                    PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
+                    "accepted fallback cannot consume another subscription exception",
+                )
+        elif not explicit_pre_data_subscription_error or seen_data or fallback_used:
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
                 "Retail fallback requires one explicit pre-data error only",
             )
+        # An attempted exception is consumed even if decoding subsequently fails.
         dispatcher._polymarket_fallback_used_by_capture[frame.capture_session_id] = True
     elif frame.wire_dialect == primary:
         if explicit_pre_data_subscription_error or fallback_used:
@@ -1389,7 +1399,7 @@ def _pit_validate_polymarket_dialect_transition(
             PITReasonCodeV1.PIT_SCHEMA_OR_WIRE_DIALECT_INVALID,
             "Retail frame dialect is outside the exact two-form policy",
         )
-    dispatcher._polymarket_dialect_by_epoch[epoch_key] = frame.wire_dialect
+    dispatcher._polymarket_data_attempted_by_capture[frame.capture_session_id] = True
 
 
 def _pit_candidate_levels(
@@ -1968,5 +1978,8 @@ def ingest_pit_frame_v2(
     )
     validate_pit_ingest_record_v2(candidate, contract=contract)
     if frame.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        dispatcher._polymarket_dialect_by_epoch[
+            (frame.capture_session_id, frame.connection_epoch)
+        ] = frame.wire_dialect
         dispatcher._polymarket_data_seen_by_capture[frame.capture_session_id] = True
     return candidate

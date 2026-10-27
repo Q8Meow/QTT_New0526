@@ -439,6 +439,7 @@ _PIT_PROFILE_PROTOCOL_POLICY_V2: Mapping[
                     "prediction_markets.depth",
                     "prediction_markets.bookTicker",
                     "prediction_markets.trades",
+                    "prediction_markets.contractStatus",
                 ),
                 "wire_dialect_policy": "GEMINI_TITAN_DIFFERENTIAL_DEPTH_V1",
                 "sequence_model": "INTEGER_INCLUSIVE_RANGE_U_u",

@@ -22,12 +22,53 @@ from decimal import (
     ROUND_UP,
 )
 from enum import StrEnum
+from types import MappingProxyType
 
 from .errors import ContractValidationError, NumericDomainError, ReasonCode
 
 
 DECIMAL_PRECISION = 34
 DECIMAL_ROUNDING = ROUND_HALF_EVEN
+
+
+def _public_counter_v1(value: object, *, allow_zero: bool = False) -> int:
+    _native_require(type(value) is int and (0 if allow_zero else 1) <= value < 2**63,
+                    "public capture counter is outside its exact integer domain")
+    return value
+
+
+def _public_refs_v1(value: object, *, allow_empty: bool = False) -> tuple[str, ...]:
+    _native_require(type(value) is tuple and len(value) <= 4096
+                    and (allow_empty or bool(value)), "invalid public reference tuple")
+    for item in value:
+        _native_ident(item)
+    _native_require(len(value) == len(set(value)), "duplicate public reference")
+    return value
+
+
+def _public_scalar_tree_v1(value: object, *, _depth: int = 0, _count=None):
+    """Copy a bounded data-only tree; native Decimal fields must be projected first."""
+    count = [0] if _count is None else _count
+    count[0] += 1
+    _native_require(_depth <= 16 and count[0] <= 4096, "public record containment")
+    if value is None or type(value) is bool:
+        return value
+    if type(value) is int:
+        _native_require(-(2**63) < value < 2**63, "public scalar integer overflow")
+        return value
+    if type(value) is str:
+        _native_require(len(value.encode("utf-8", errors="strict")) <= 65536,
+                        "public scalar text containment")
+        return value
+    if type(value) in (tuple, list):
+        return tuple(_public_scalar_tree_v1(v, _depth=_depth + 1, _count=count) for v in value)
+    _native_require(type(value) in (dict, MappingProxyType), "public record contains a non-data value")
+    copied = {}
+    for key, item in value.items():
+        _native_ident(key)
+        count[0] += 1
+        copied[key] = _public_scalar_tree_v1(item, _depth=_depth + 1, _count=count)
+    return MappingProxyType(copied)
 
 
 class QuantizationRoundingV1(StrEnum):
@@ -481,6 +522,75 @@ def _native_retail_finite_decimal_text_v1(value: Fraction) -> str:
     if scale:
         digits = (digits[:-scale] + '.' + digits[-scale:]).rstrip('0').rstrip('.')
     return ('-' if n < 0 else '') + digits if n else '0'
+
+
+# The public-data bridge shares the existing exact renderer.  The historical
+# Retail name remains an alias-compatible entry point for its original callers.
+_finite_decimal_text_v1 = _native_retail_finite_decimal_text_v1
+
+
+def _public_price_bands_v1(bands: object) -> tuple[tuple[str, str, str], ...]:
+    """Exact contiguous [0,1] bands, with right-hand internal boundary ownership."""
+    _native_require(type(bands) is tuple and 1 <= len(bands) <= 256, "invalid price band containment")
+    previous = Fraction(0)
+    for row in bands:
+        _native_require(type(row) is tuple and len(row) == 3, "invalid price band")
+        decimals = tuple(_native_retail_decimal_string_v1(v) for v in row)
+        _native_require(all(v.as_tuple().exponent >= -4 for v in decimals), "price band scale exceeds four")
+        start, end, step = map(Fraction, decimals)
+        _native_require(start == previous and start < end <= 1 and step > 0
+                        and ((end - start) / step).denominator == 1, "invalid price band coverage/lattice")
+        previous = end
+    _native_require(previous == 1, "price bands do not cover selected payout domain")
+    return bands
+
+
+def _public_on_price_grid_v1(value: str, *, bands: tuple, origin: str | None,
+                             increment: str | None) -> tuple[str, str]:
+    """Validate the source grid and return its exact owning origin/increment."""
+    price = Fraction(_native_retail_decimal_string_v1(value))
+    if bands:
+        _public_price_bands_v1(bands)
+        for index, row in enumerate(bands):
+            start, end, step = (Fraction(_native_retail_decimal_string_v1(v)) for v in row)
+            if start <= price < end or (index == len(bands) - 1 and price == end):
+                _native_require(((price - start) / step).denominator == 1, "price is off its source band")
+                return row[0], row[2]
+        _native_require(False, "price outside selected source bands")
+    _native_require(origin is not None and increment is not None, "source price grid unavailable")
+    start, step = (Fraction(_native_retail_decimal_string_v1(v)) for v in (origin, increment))
+    _native_require(step > 0 and price >= start and ((price - start) / step).denominator == 1,
+                    "price is off its source scalar grid")
+    return origin, increment
+
+
+def _public_nanoseconds_v1(value: object) -> int:
+    """Validate an explicit public-clock/counter value without numeric coercion."""
+    _native_require(type(value) is int and 0 <= value < 2**63, "PUBLIC_NANOSECONDS")
+    return value
+
+
+def _public_exact_clock_v1(value: object, *, unit: str) -> dict[str, object]:
+    """Project a declared native clock through the existing exact UTC owner.
+
+    The operation's field binding supplies ``unit``; magnitude never selects it.
+    The datetime projection retains the nanosecond remainder and is not used as
+    the authoritative comparison value.
+    """
+    _native_require(type(unit) is str, "PUBLIC_CLOCK_UNIT")
+    if unit == "RFC3339":
+        result = _native_utc_receipt_pair(value)
+        _public_nanoseconds_v1(int(result["utc_ns_text"]))
+        return result
+    factors = {"SECONDS": 1_000_000_000, "MILLISECONDS": 1_000_000, "NANOSECONDS": 1}
+    _native_require(unit in factors, "PUBLIC_CLOCK_UNIT")
+    ns = _public_nanoseconds_v1(_public_nanoseconds_v1(value) * factors[unit])
+    seconds, fraction = divmod(ns, 1_000_000_000)
+    dt = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds)
+    stamp = f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}T{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}"
+    result = _native_utc_receipt_pair(stamp + f".{fraction:09d}Z")
+    _native_require(int(result["utc_ns_text"]) == ns, "PUBLIC_CLOCK_PROJECTION")
+    return result
 
 
 def _native_retail_known_v1(value, required):

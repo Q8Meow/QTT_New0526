@@ -20,6 +20,175 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_laun
 )
 
 
+def project_accepted_public_field_bindings_v1(*, source_binding, acceptance_results: tuple,
+                                            originals: tuple, review_facts):
+    from ..qku_computation_control_plane.errors import ContractValidationError, ReasonCode
+
+    try:
+        return _project_accepted_public_field_bindings_v1(source_binding=source_binding,
+            acceptance_results=acceptance_results, originals=originals, review_facts=review_facts)
+    except (KeyError, TypeError, ValueError, AttributeError) as error:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "accepted public source projection is malformed") from error
+
+
+def _project_accepted_public_field_bindings_v1(*, source_binding, acceptance_results, originals, review_facts):
+    """Check accepted upstream facts and original bytes, without granting use.
+
+    A reviewed claim binds the complete acceptance bundle's canonical digest.
+    The original source text remains separate from the structured extraction;
+    constructing either a source binding or an acceptance result is insufficient.
+    """
+    import hashlib
+    from dataclasses import fields
+    from src.qtt.source_evidence.acceptance import validator as accepted
+    from ..qku_computation_control_plane.context import _native_require, _native_utc_nanoseconds, _public_scalar_tree_v1
+    from ..qku_computation_control_plane.receipts import SourceUseReviewFactsV1
+    from ..qku_computation_control_plane.serialization import _native_strict_json
+    from ..qku_computation_control_plane.source_policy import PublicDataSourceBindingV1
+
+    _native_require(type(source_binding) is PublicDataSourceBindingV1 and type(review_facts) is SourceUseReviewFactsV1,
+                    "accepted public field projection requires exact source/review inputs")
+    source_binding.__post_init__()
+    review_facts.__post_init__()
+    _native_require(type(acceptance_results) is tuple and 0 < len(acceptance_results) <= 4096
+        and type(originals) is tuple and len(originals) == len(acceptance_results), "accepted source/original vector missing")
+    original_by_id = {}
+    for row in originals:
+        _native_require(type(row) is tuple and len(row) == 3 and type(row[0]) is str
+            and type(row[1]) is type(row[2]) is bytes and 0 < len(row[1]) <= 1048576 and 0 < len(row[2]) <= 1048576
+            and row[0] not in original_by_id, "invalid accepted source original bytes")
+        original_by_id[row[0]] = row[1:]
+    _native_require(sum(len(raw)+len(canonical) for raw,canonical in original_by_id.values()) <= 16777216,
+                    "accepted source originals exceed containment")
+    projected, snapshots, claims, packet_ids = [], [], [], set()
+    external = True
+    for result in acceptance_results:
+        _native_require(type(result) is accepted.ExecuteAcceptanceResult and result.reject_receipt is None,
+                        "source projection requires an accepted upstream result")
+        raw_bundle = accepted.canonical_json_bytes({item.name:getattr(result,item.name) for item in fields(result)})
+        _native_require(len(raw_bundle) <= 65536, "accepted source bundle exceeds containment")
+        bundle = _native_strict_json(raw_bundle, max_bytes=65536)
+        packet, ledger, decision = (bundle[name] for name in ("accepted_packet","accepted_ledger_record","decision_receipt"))
+        _native_require(all(type(row) is dict for row in (packet,ledger,decision))
+            and not accepted.validate_accepted_packet(packet) and not accepted.validate_ledger_record(ledger)
+            and not accepted.validate_decision_receipt(decision) and decision["decision"] == "ACCEPTED",
+            "upstream source acceptance validation failed")
+        packet_id = packet["accepted_source_evidence_packet_id"]
+        _native_require(packet_id in original_by_id and packet_id not in packet_ids, "accepted original reference mismatch")
+        packet_ids.add(packet_id)
+        for name in ("accepted_source_evidence_packet_id", "candidate_source_evidence_packet_id", "acceptance_decision_packet_id",
+                     "target_field_path"):
+            _native_require(packet[name] == ledger[name] == decision[name], "accepted packet/ledger/decision association differs")
+        _native_require(ledger["accepted_ledger_record_id"] == decision["accepted_ledger_record_id"]
+            and ledger["acceptance_decision_receipt_ref"] == decision["acceptance_decision_packet_id"],
+            "accepted ledger decision differs")
+        for name in ("retrieval_manifest_id", "source_target_id", "retrieval_target_id", "venue_id", "platform_scope",
+                     "applicability_scope", "canonical_text_digest_sha256", "source_digest_sha256", "source_locator",
+                     "source_locator_type", "source_locator_status", "source_authority_class", "accepted_at_utc", "accepted_by_tool"):
+            _native_require(packet[name] == ledger[name], "accepted source provenance differs: " + name)
+        _native_require(packet["production_external_fact_authority"] is ledger["production_external_fact_authority"]
+            is decision["production_external_fact_authority"] and type(packet["production_external_fact_authority"]) is bool,
+            "accepted source fact classification differs")
+        external = external and packet["production_external_fact_authority"] is True and packet["source_authority_class"] in accepted.OFFICIAL_SOURCE_CLASSES
+        conflict, revalidation = bundle["conflict_report"], bundle["revalidation_status"]
+        _native_require(type(conflict) is type(revalidation) is dict
+            and decision["conflict_report_ref"] == packet["conflict_check_id"] == conflict["conflict_check_id"]
+            and decision["revalidation_status_ref"] == packet["revalidation_trigger_id"] == revalidation["revalidation_trigger_id"],
+            "accepted source conflict/revalidation association differs")
+        for row in (conflict,revalidation):
+            _native_require(row["candidate_source_evidence_packet_id"] == packet["candidate_source_evidence_packet_id"]
+                and row["target_field_path"] == packet["target_field_path"] and row["runtime_live_use_allowed_flag"] is False
+                and row["connector_semantic_binding_allowed_flag"] is False, "accepted source review scope differs")
+        _native_require(conflict["acceptance_blocked_by_conflict"] is False and conflict["owner_or_risk_review_required"] is False
+            and conflict["conflict_state"] == packet["conflict_state"] == ledger["conflict_state"]
+            and conflict["conflict_state"] in accepted.VALID_CONFLICT_STATES
+            and conflict["conflict_resolution_state"] == packet["conflict_resolution_state"] == ledger["conflict_resolution_state"]
+            and conflict["conflict_resolution_state"] in accepted.VALID_CONFLICT_RESOLUTION_STATES
+            and revalidation["acceptance_blocked_by_staleness"] is False
+            and revalidation["revalidation_state"] == ledger["revalidation_state"]
+            and revalidation["revalidation_state"] in accepted.FRESH_REVALIDATION_STATES
+            and revalidation["revalidation_due_condition"] == packet["revalidation_due_condition"]
+            and revalidation["revalidation_due_condition"] in accepted.FRESH_REVALIDATION_DUE_CONDITIONS,
+            "accepted source conflict or revalidation is not current")
+        external = external and revalidation["revalidation_state"] != "TEST_FIXTURE_CURRENT"
+        raw, canonical = original_by_id[packet_id]
+        raw_digest, canonical_digest = hashlib.sha256(raw).hexdigest(), hashlib.sha256(canonical).hexdigest()
+        _native_require(raw_digest == packet["raw_capture_digest_sha256"]
+            and canonical_digest == packet["canonical_text_digest_sha256"] == ledger["canonicalized_content_digest"],
+            "accepted original bytes differ from provenance")
+        locator = packet["exact_quote_or_machine_field_locator"]
+        _native_require(type(locator) is dict and packet["quote_span_locator_or_machine_field_locator"] == ledger["accepted_value_locator"]
+            and packet["quote_span_locator_or_machine_field_locator"] in {"QUOTE_SPAN_LOCATOR","MACHINE_FIELD_LOCATOR"}
+            and locator.get("quote_span_locator") == ledger["quote_span_locator"]
+            and locator.get("machine_field_locator") == ledger["machine_field_locator"]
+            and type(locator.get("quote_span_locator" if ledger["accepted_value_locator"] == "QUOTE_SPAN_LOCATOR" else "machine_field_locator")) is dict,
+            "accepted exact value locator differs")
+        known = max(_native_utc_nanoseconds(packet[name]) for name in ("source_retrieved_at_utc","accepted_at_utc"))
+        _native_require(known <= source_binding.known_at_ns
+            and _native_utc_nanoseconds(review_facts.factual_checked_at_utc.isoformat()) <= source_binding.known_at_ns
+            and source_binding.expires_at_ns <= _native_utc_nanoseconds(review_facts.source_expires_at_utc.isoformat())
+            and source_binding.review_scope_ref == review_facts.document_ref, "accepted field knowledge/review interval differs")
+        value = packet["extracted_fact_payload"]
+        expected_keys = {"schema_version","profile_id","legal_product_ref","source_contract_version",
+                         "allowed_operation_ids","permitted_consumer_ids","field_bindings"}
+        _native_require(type(value) is dict and expected_keys <= set(value) <= expected_keys | {
+            "venue_semantics", "fee_rules", "account_applicability", "contract_terms"}
+            and packet["extracted_fact_type"] == ledger["accepted_value_type"] == "OBJECT"
+            and packet["accepted_value_label"] == ledger["accepted_value_label"]
+            and value["schema_version"] == "PUBLIC_ACCEPTED_FIELD_BINDINGS_V1"
+            and value["profile_id"] == source_binding.profile_id.value
+            and value["legal_product_ref"] == source_binding.legal_product_ref
+            and value["source_contract_version"] in source_binding.source_contract_versions
+            and packet["source_target_id"] in source_binding.source_ids
+            and set(value["allowed_operation_ids"]) == set(source_binding.allowed_operation_ids)
+            and set(value["permitted_consumer_ids"]) == set(source_binding.permitted_consumer_ids),
+            "accepted public field fact scope differs")
+        scope = packet["applicability_scope"]
+        venue = {Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: "KALSHI",
+                 Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: "POLYMARKET",
+                 Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: "GEMINI"}[source_binding.profile_id]
+        _native_require(type(scope) is dict and scope.get("venue_id") == packet["venue_id"]
+            and scope.get("platform_scope") == packet["platform_scope"]
+            and packet["venue_id"] in {venue, "PREDICTION_MARKETS_GENERAL"}
+            and packet["platform_scope"] in {venue, "PREDICTION_MARKETS_GENERAL"}
+            and scope.get("wildcard_scope_allowed") is False and scope.get("cross_venue_scope_allowed") is False
+            and packet["target_field_path"] in scope.get("target_field_paths", ()), "accepted field applicability is not exact")
+        rows = value["field_bindings"]
+        _native_require(type(rows) is list and 0 < len(rows) <= 4096, "accepted material field vector absent")
+        for row in rows:
+            _native_require(type(row) is list and len(row) == 5 and all(type(item) is str for item in row),
+                            "accepted material field vector invalid")
+            name, wire, unit, pointer, transform = row
+            projected.append((name,wire,unit,packet_id,pointer,transform))
+        if "venue_semantics" in value:
+            from ..qku_computation_control_plane.source_policy import _validate_public_semantic_facts_v1
+
+            _validate_public_semantic_facts_v1(profile_id=source_binding.profile_id,
+                facts=value["venue_semantics"], field_bindings=tuple(projected), original_ref=packet_id)
+        if "fee_rules" in value:
+            from ..qku_computation_control_plane.source_policy import _project_public_fee_rule_facts_v1
+
+            _project_public_fee_rule_facts_v1(source_binding=source_binding,
+                facts=value["fee_rules"], field_bindings=tuple(projected), original_ref=packet_id)
+        if "account_applicability" in value:
+            from ..qku_computation_control_plane.source_policy import _project_public_account_applicability_facts_v1
+
+            _project_public_account_applicability_facts_v1(source_binding=source_binding,
+                facts=value["account_applicability"], field_bindings=tuple(projected), original_ref=packet_id)
+        if "contract_terms" in value:
+            from .binding import _validate_public_contract_terms_v1
+
+            _validate_public_contract_terms_v1(facts=value["contract_terms"],field_bindings=tuple(projected),original_ref=packet_id)
+        claim = "PUBLIC_ACCEPTED_SOURCE_V1::" + packet_id + "::" + hashlib.sha256(raw_bundle).hexdigest()
+        _native_require(claim in review_facts.reviewed_claims, "accepted source bundle lacks its exact authenticated-review claim")
+        claims.append(claim)
+        snapshots.append(_public_scalar_tree_v1(bundle))
+    _native_require(packet_ids == set(source_binding.original_evidence_refs) == set(original_by_id)
+        and len(projected) == len(source_binding.field_bindings) and set(projected) == set(source_binding.field_bindings),
+        "accepted material fields do not exactly cover the selected source binding")
+    return (source_binding, tuple(claims), tuple(snapshots), originals, external)
+
+
 DEPENDENCY_STATE_BY_EVENT_KIND = {
     "MARKET_CATALOG_INPUT_METADATA_ENVELOPE": "ACCEPTED_SOURCE_GATED",
     "MARKET_STATUS_INPUT_METADATA_ENVELOPE": "CONNECTOR_SEMANTIC_GATED",
@@ -314,6 +483,9 @@ def _pit_dependency_surface(
     event_kind: PITEventKindV2,
 ) -> tuple[policy.PITAccessClassV1, str, policy.PITReadActionV1]:
     protocol = policy._pit_profile_protocol_policy_v2(profile_id)
+    if profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT and event_kind is PITEventKindV2.LIFECYCLE:
+        return (policy.PITAccessClassV1.PUBLIC_UNAUTHENTICATED_READ,
+                "prediction_markets.contractStatus", policy.PITReadActionV1.WEBSOCKET_SUBSCRIBE)
     if profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
         authenticated = (
             policy.PITAccessClassV1.AUTHENTICATED_PUBLIC_MARKET_DATA_READ

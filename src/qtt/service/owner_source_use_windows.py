@@ -15,6 +15,7 @@ from types import SimpleNamespace
 
 
 _ROOTS = {}
+_PUBLIC_STORAGE_ROOTS_V1 = {}
 
 
 def _require(ok):
@@ -369,6 +370,9 @@ def _bootstrap_owner_source_use_v1():
         root = object.__new__(_SourceUseNativeRootV1)
         root.api, root.handles, root.enrollment, root.sid = api, retained, enrollment, sid
         root.closed, root.operation = False, None
+        root.control_path = program_data / "QTT" / "OwnerControl"
+        root.public_configuration = None
+        root.public_storage_handles = []
         from threading import RLock
 
         root.operation_lock = RLock()
@@ -383,16 +387,288 @@ def _bootstrap_owner_source_use_v1():
         raise
 
 
+class _PublicStorageRootV1:
+    def __init__(self):
+        raise TypeError("public storage root requires protected native bootstrap")
+
+    def __reduce__(self):
+        raise TypeError("public storage root cannot be serialized")
+
+    def __copy__(self):
+        raise TypeError("public storage root cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("public storage root cannot be copied")
+
+
+def _check_public_data_acl_v1(acl, sid, directory):
+    # Data is writable by the capture principal; app/config/key ACLs remain immutable.
+    _require(type(acl) is dict and set(acl) == {"owner", "protected", "present", "defaulted", "aces"}
+             and acl["owner"] in {"S-1-5-18", "S-1-5-32-544"} and acl["protected"] is True
+             and type(acl["present"]) is int and acl["present"] == 1
+             and type(acl["defaulted"]) is int and acl["defaulted"] == 0
+             and type(acl["aces"]) is tuple and len(acl["aces"]) == 3)
+    expected = {"S-1-5-18": 0x1F01FF, "S-1-5-32-544": 0x1F01FF, sid: 0x1301BF}
+    _require(len(expected) == 3)
+    seen = set()
+    for ace in acl["aces"]:
+        _require(type(ace) is tuple and len(ace) == 4)
+        principal, mask, flags, kind = ace
+        _require(principal in expected and principal not in seen
+                 and all(type(v) is int for v in (mask, flags, kind))
+                 and mask == expected[principal] and kind == 0
+                 and flags in ({0, 3} if directory else {0}))
+        seen.add(principal)
+
+
+def _open_public_data_object_v1(root, path, directory):
+    api = root.api
+    handle = api.kernel.CreateFileW(str(path), 0x20000 | 0x80, 3, None, 3,
+                                    0x200000 | (0x2000000 if directory else 0), None)
+    _require(handle not in (None, ctypes.c_void_p(-1).value))
+    root.public_storage_handles.append(handle)
+    state = _object_state_v1(api, handle, path, directory)
+    _check_public_data_acl_v1(_observe_acl_v1(api, handle), root.sid, directory)
+    _require(_object_state_v1(api, handle, path, directory) == state)
+    return handle, state
+
+
+def _load_public_capture_configuration_v1(root):
+    """Explicit metadata-only bootstrap; it neither reads keys nor opens SQLite."""
+    _require_native_root_v1(root)
+    if root.public_configuration is not None:
+        return root.public_configuration
+    from ..stage1_prediction_markets.qku_computation_control_plane.serialization import _native_strict_json, validate_relative_path
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import (
+        _native_ident, _public_counter_v1, _public_nanoseconds_v1, _public_scalar_tree_v1,
+    )
+    from ..stage1_prediction_markets.qku_computation_control_plane.migrations import REFERENCE_SCHEMA_VERSION_V1
+    import sqlite3
+    import time
+
+    config_path = root.control_path / "public_capture.json"
+    handle, state = _open_control_object_v1(root.api, config_path, False, root.sid, root.handles)
+    raw = _read_control_bytes_v1(root.api, handle, state[3], 65536)
+    _require(_object_state_v1(root.api, handle, config_path, False) == state)
+    config = _native_strict_json(raw)
+    _require(type(config) is dict and set(config) == {
+        "schema_version", "enrollment_ref", "approval_sid", "configuration_generation", "valid_from_ns",
+        "expires_at_ns", "credential_bindings", "storage_binding"}
+        and config["schema_version"] == "QTT_PUBLIC_CAPTURE_CONFIG_V1"
+        and config["enrollment_ref"] == root.enrollment.enrollment_ref and config["approval_sid"] == root.sid)
+    now = time.time_ns()
+    for key in ("valid_from_ns", "expires_at_ns"):
+        _public_nanoseconds_v1(config[key])
+    _public_counter_v1(config["configuration_generation"], allow_zero=True)
+    _require(config["valid_from_ns"] <= now < config["expires_at_ns"])
+    rows, aliases = config["credential_bindings"], {}
+    _require(type(rows) is list and len(rows) <= 3)
+    if rows:
+        _open_control_object_v1(root.api, root.control_path / "keys", True, root.sid, root.handles)
+    for row in rows:
+        _require(type(row) is dict and set(row) == {"alias_ref", "profile_id", "account_scope_ref",
+            "product_scope_ref", "key_identifier", "algorithm", "relative_key_file", "valid_from_ns", "expires_at_ns",
+            "generation", "allowed_handshake_paths"})
+        for key in ("alias_ref", "profile_id", "account_scope_ref", "product_scope_ref", "key_identifier", "algorithm"):
+            _native_ident(row[key])
+        _require(row["alias_ref"] not in aliases)
+        expected = {"POLYMARKET_US_RETAIL_DIRECT": ("/v1/ws/markets", {"RETAIL_ED25519"}),
+                    "KALSHI_US_DCM_DIRECT": ("/trade-api/ws/v2", {"KALSHI_ED25519", "KALSHI_RSA_PSS"})}
+        _require(row["profile_id"] in expected)
+        path, algorithms = expected[row["profile_id"]]
+        _require(row["allowed_handshake_paths"] == [path] and row["algorithm"] in algorithms)
+        relative = validate_relative_path(row["relative_key_file"])
+        _require("/" not in relative and "\\" not in relative)
+        for key in ("valid_from_ns", "expires_at_ns"):
+            _public_nanoseconds_v1(row[key])
+        _public_counter_v1(row["generation"], allow_zero=True)
+        _require(config["valid_from_ns"] <= row["valid_from_ns"] <= now < row["expires_at_ns"] <= config["expires_at_ns"])
+        key_path = root.control_path / "keys" / relative
+        key_handle, key_state = _open_control_object_v1(root.api, key_path, False, root.sid, root.handles)
+        _require(0 < key_state[3] <= 65536)
+        aliases[row["alias_ref"]] = (_public_scalar_tree_v1(row), key_path, key_handle, key_state)
+    storage = config["storage_binding"]
+    _require(type(storage) is dict and set(storage) == {"root_ref", "relative_directory", "database_filename",
+        "schema_version", "qualification_ref", "runtime_version", "sqlite_version", "writer_sid", "valid_from_ns",
+        "expires_at_ns", "generation", "retention_policy_ref"})
+    _require(storage["relative_directory"] == "capture" and storage["database_filename"] == "public_data.sqlite3"
+             and type(storage["schema_version"]) is str and storage["schema_version"] == REFERENCE_SCHEMA_VERSION_V1
+             and storage["runtime_version"] == ".".join(str(v) for v in sys.version_info[:3])
+             and storage["sqlite_version"] == sqlite3.sqlite_version and storage["writer_sid"] == root.sid)
+    for key in ("root_ref", "qualification_ref", "retention_policy_ref"):
+        _native_ident(storage[key])
+    for key in ("valid_from_ns", "expires_at_ns"):
+        _public_nanoseconds_v1(storage[key])
+    _public_counter_v1(storage["generation"], allow_zero=True)
+    _require(config["valid_from_ns"] <= storage["valid_from_ns"] <= now < storage["expires_at_ns"] <= config["expires_at_ns"])
+    directory = root.control_path / "capture"
+    database = directory / "public_data.sqlite3"
+    directory_handle, directory_state = _open_public_data_object_v1(root, directory, True)
+    database_handle, database_state = _open_public_data_object_v1(root, database, False)
+    qualified = object.__new__(_PublicStorageRootV1)
+    qualified.owner, qualified.configuration = root, _public_scalar_tree_v1(storage)
+    qualified.directory, qualified.database = directory, database
+    qualified.handles = (directory_handle, database_handle)
+    qualified.identities = (directory_state, database_state)
+    qualified.configuration_handle, qualified.configuration_identity = handle, state
+    qualified.configuration_path = config_path
+    qualified.process_id = os.getpid()
+    _PUBLIC_STORAGE_ROOTS_V1[id(qualified)] = qualified
+    root.public_configuration = (config["configuration_generation"], aliases, qualified)
+    return root.public_configuration
+
+
+def _public_storage_facts_v1(qualified):
+    import time
+
+    _require(type(qualified) is _PublicStorageRootV1 and _PUBLIC_STORAGE_ROOTS_V1.get(id(qualified)) is qualified
+             and qualified.process_id == os.getpid())
+    root = qualified.owner
+    _require_native_root_v1(root)
+    config = qualified.configuration
+    _require(config["valid_from_ns"] <= time.time_ns() < config["expires_at_ns"])
+    _require(_object_state_v1(root.api, qualified.configuration_handle, qualified.configuration_path, False)
+             == qualified.configuration_identity)
+    for path, handle, saved, directory in zip((qualified.directory, qualified.database), qualified.handles,
+                                             qualified.identities, (True, False), strict=True):
+        state = _object_state_v1(root.api, handle, path, directory)
+        _require(state[:3] == saved[:3] and state[4:] == saved[4:])
+        _check_public_data_acl_v1(_observe_acl_v1(root.api, handle), root.sid, directory)
+    return dict(config, database_path=str(qualified.database), native_qualified=True)
+
+
+def _public_scope_resources_v1(root, scope):
+    """Reobserve only protected metadata; never load a key or open data storage."""
+    from types import MappingProxyType
+    from ..stage1_prediction_markets.qku_computation_control_plane.receipts import PublicDataSourceUseScopeV1
+    import time
+
+    _require(type(scope) is PublicDataSourceUseScopeV1)
+    scope.__post_init__()
+    configuration = _load_public_capture_configuration_v1(root)
+    generation, aliases, qualified = configuration
+    storage = _public_storage_facts_v1(qualified)
+    _require(storage["root_ref"] == scope.storage_root_ref
+             and scope.retention_expires_at_ns <= storage["expires_at_ns"])
+    expiry = storage["expires_at_ns"]
+    alias = None
+    if scope.credential_alias_ref_or_none is not None:
+        alias = aliases.get(scope.credential_alias_ref_or_none)
+        _require(alias is not None)
+        row, path, handle, state = alias
+        _require(row["profile_id"] == scope.profile_id.value
+                 and row["account_scope_ref"] == scope.account_scope_ref_or_none
+                 and row["valid_from_ns"] <= time.time_ns() < row["expires_at_ns"]
+                 and _object_state_v1(root.api, handle, path, False) == state)
+        _check_acl_v1(_observe_acl_v1(root.api, handle), root.sid, False)
+        expiry = min(expiry, row["expires_at_ns"])
+    return MappingProxyType(dict(configuration=configuration, configuration_generation=generation,
+        storage_root=qualified, alias=alias, expires_at_ns=expiry, native_qualified=True))
+
+
+def _public_resources_resident_v1(root, resources, wall_ns):
+    """Resident final fence only: no filesystem, cryptographic or device calls."""
+    _require_native_root_v1(root)
+    _require(root.public_configuration is resources["configuration"]
+             and root.public_configuration[0] == resources["configuration_generation"]
+             and wall_ns < resources["expires_at_ns"])
+    qualified = resources["storage_root"]
+    _require(_PUBLIC_STORAGE_ROOTS_V1.get(id(qualified)) is qualified and qualified.owner is root
+             and qualified.process_id == os.getpid())
+    alias = resources["alias"]
+    if alias is not None:
+        _require(root.public_configuration[1].get(alias[0]["alias_ref"]) is alias)
+
+
+def _check_public_credential_file_v1(*, binding, credential_row):
+    """Reobserve only the admitted alias file; no key bytes or discovery."""
+    from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+        _public_binding_facts_v1, _resolve_public_operational_inputs_v1,
+    )
+
+    facts = _public_binding_facts_v1(binding)
+    _require(facts["native_qualified"] is True and binding._owner is not None)
+    root, resources = binding._root, binding._resources
+    _require_native_root_v1(root)
+    _require(resources is not None and root.public_configuration is resources["configuration"])
+    alias = resources["alias"]
+    _require(alias is not None and alias[0] is credential_row
+             and root.public_configuration[1].get(credential_row["alias_ref"]) is alias)
+    row, path, handle, saved = alias
+    _, wall, _ = binding._owner._guard_v1()
+    plan = _resolve_public_operational_inputs_v1(binding=binding, evaluated_at_ns=wall)
+    streams = [item for item in plan if item[0].operation_id in {"K_WS", "P_WS"}]
+    _require(row["alias_ref"] == facts["scope"].credential_alias_ref_or_none
+             and row["profile_id"] == facts["scope"].profile_id.value
+             and row["account_scope_ref"] == facts["scope"].account_scope_ref_or_none
+             and streams and all(row["product_scope_ref"] == item[1].legal_product_ref
+                 and row["allowed_handshake_paths"] == (item[4]["path"],) and not item[4]["query"]
+                 for item in streams)
+             and _object_state_v1(root.api, handle, path, False) == saved)
+    _check_acl_v1(_observe_acl_v1(root.api, handle), root.sid, False)
+
+
+def _read_public_credential_key_v1(*, binding):
+    """One bounded key load in the explicit capture effect, never bootstrap."""
+    from ..stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from ..stage1_prediction_markets.qku_computation_control_plane.errors import ReasonCode, SourcePolicyError
+    from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+        _public_binding_facts_v1, _resolve_public_operational_inputs_v1,
+    )
+
+    facts = _public_binding_facts_v1(binding)
+    _native_require(facts["native_qualified"] is True and binding._owner is not None,
+                    "synthetic permission cannot read a protected credential")
+    _, wall, _ = binding._owner._guard_v1()
+    _resolve_public_operational_inputs_v1(binding=binding, evaluated_at_ns=wall)
+    root, resources = binding._root, binding._resources
+    _require(resources is not None and resources["alias"] is not None)
+    row, path, original_handle, saved = resources["alias"]
+    _check_public_credential_file_v1(binding=binding, credential_row=row)
+    handles, failures = [], []
+    try:
+        # A fresh owned handle starts at offset zero. Never seek/reuse or close
+        # the bootstrap's metadata handle, including on a failed key load.
+        handle, state = _open_control_object_v1(root.api, path, False, root.sid, handles)
+        _require(state == saved)
+        raw = _read_control_bytes_v1(root.api, handle, state[3], 65536)
+        _require(_object_state_v1(root.api, handle, path, False) == state
+                 and _object_state_v1(root.api, original_handle, path, False) == saved)
+        _check_acl_v1(_observe_acl_v1(root.api, handle), root.sid, False)
+    finally:
+        for owned in reversed(handles):
+            if not root.api.kernel.CloseHandle(owned):
+                failures.append(owned)
+        root.handles.extend(reversed(failures))
+        _require(not failures)
+    try:
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+        key = load_pem_private_key(raw, password=None)
+    except Exception:
+        raise SourcePolicyError(ReasonCode.CAPABILITY_DENIED,
+                                "protected public credential key parser or encoding unavailable") from None
+    finally:
+        # Drop this reference; Python does not promise erasure of all copies.
+        raw = None
+    _check_public_credential_file_v1(binding=binding, credential_row=row)
+    return row, key
+
+
 def _close_native_root_v1(root):
     _require_native_root_v1(root)
     _require(root.operation is None or not root.operation.worker.is_alive())
     _require(root.completion_worker is None or not root.completion_worker.is_alive())
     failures = []
-    for handle in reversed(root.handles):
+    for handle in reversed([*root.handles, *getattr(root, "public_storage_handles", ())]):
         if not root.api.kernel.CloseHandle(handle):
             failures.append(handle)
     root.closed = True
     root.handles = list(reversed(failures))
+    root.public_storage_handles = []
+    for identity, capability in tuple(_PUBLIC_STORAGE_ROOTS_V1.items()):
+        if capability.owner is root:
+            _PUBLIC_STORAGE_ROOTS_V1.pop(identity)
     if not failures:
         _ROOTS.pop(id(root), None)
     _require(not failures)

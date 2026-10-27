@@ -348,6 +348,10 @@ def _assert_source_use_native_boundaries(root):
         source + '\ndef alternate_caller():\n    return _webauthn_table_v1(None)\n',
         source.replace('from fido2.client import win_api', 'from fido2.client import windows as win_api'),
         source + '\nfrom fido2.client import win_api\n',
+        source.replace('root.public_configuration = None', 'root.public_configuration = {}'),
+        source.replace('0x20000 | 0x80, 3, None, 3,', '0x20000 | 0x80, 7, None, 3,'),
+        source + '\ndef alternate_public_caller():\n    return _read_public_credential_key_v1(binding=None)\n',
+        source + '\ndef alternate_storage_caller():\n    return _open_public_data_object_v1(None, None, False)\n',
     ]
     assert runtime.source_use_native_contract_v1(relative, tree) == ()
     for candidate in (source, *mutations):
@@ -367,6 +371,46 @@ def _assert_source_use_native_boundaries(root):
     assert len(runtime.kalshi_fee_native_admission_v1(policy_path, ast.parse(policy))[0]) == 2
     _assert_source_use_independent_censuses(repo)
     _assert_source_use_operations_thread_sites(repo)
+    _assert_lp02_public_transport_boundaries(repo, root / 'public-data')
+
+
+def _assert_lp02_public_transport_boundaries(repo, root):
+    import ast
+    from pathlib import PurePosixPath
+    from tools import validate_no_runtime_artifacts as runtime
+    from tools import validate_source_fact_binding_connector_semantic_readiness_static as readiness
+
+    relative = 'src/qtt/stage1_prediction_markets/selected_venues/market_data.py'
+    source = (repo / relative).read_text(encoding='utf-8')
+    tree = ast.parse(source)
+    admitted, failures = runtime.public_data_native_admission_v1(relative, tree)
+    assert not failures and len(admitted) == 5
+    assert runtime.source_use_native_contract_v1(relative, tree) == ()
+    target = root / relative
+    target.parent.mkdir(parents=True)
+    mutations = (
+        source.replace('proxy=None', 'proxy=True'),
+        source.replace('compression=None', 'compression="deflate"'),
+        source.replace('ping_interval=None', 'ping_interval=20'),
+        source.replace('port=443', 'port=80'),
+        source.replace('ssl.CERT_REQUIRED', 'ssl.CERT_NONE'),
+        source.replace('17.0.1', '17.0.2'),
+        source.replace('facts["native_qualified"] is True', 'True'),
+        source.replace('context=_public_tls_context_v1()', 'context=None'),
+        source.replace('    ephemeral.clear()', '    pass'),
+        source + '\nimport http.client\n',
+        source + '\nfrom websockets.sync.client import connect\n',
+        source + '\n_public_open_https_v1({}, 1, binding=None)\n',
+        source + '\nlaunch = _public_open_https_v1\nlaunch({}, 1, binding=None)\n',
+        source + '\ndef extra():\n    return _public_open_websocket_v1({}, {}, binding=None)\n',
+    )
+    for candidate in (source, *mutations):
+        target.write_text(candidate, encoding='utf-8')
+        expected = candidate != source
+        assert bool(runtime._scan_python_content(PurePosixPath(relative), candidate, ['forbid_source_retrieval'])) is expected
+        assert bool(readiness._scan_forbidden_python_usage(root)) is expected
+    target.write_text(source, encoding='utf-8')
+    assert not runtime.public_data_native_admission_v1('src/qtt/alternate.py', tree)[0]
 
 
 def _assert_source_use_operations_thread_sites(repo):
@@ -386,6 +430,13 @@ class KalshiFeeObservationOwnerV1:
     assert check(file_name="source_policy.py", source=exact) == ()
     actual = (repo / "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py").read_text(encoding="utf-8")
     assert check(file_name="source_policy.py", source=actual) == ()
+    for changed in (
+        actual.replace('threading.get_ident()', 'threading.Thread()', 1),
+        actual.replace('threading.RLock()', 'threading.Lock()', 1),
+        actual + '\nimport threading\n',
+        actual + '\nworker = threading.Thread\n',
+    ):
+        assert check(file_name="source_policy.py", source=changed)
     for name in ("another.py", "source_policy.py.bak", "other/source_policy.py"):
         assert check(file_name=name, source=exact)
     for mutated in (

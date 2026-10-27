@@ -1780,7 +1780,8 @@ def _f14_execution_contract_failures_v1(repo_root):
         tree = ast.parse((owner / name).read_text(encoding='utf-8'))
         methods = set(_class_methods(tree, cls))
         inherited_denials = {'load_committed_source_action_v1', 'load_committed_source_action_head_v1',
-            'load_source_action_for_update_v1', 'load_source_action_head_for_update_v1'}
+            'load_source_action_for_update_v1', 'load_source_action_head_for_update_v1',
+            'load_committed_public_capture_v1', 'load_committed_public_publication_v1'}
         required = _F14_EXPECTED_METHODS if cls == 'PersistenceAdapterV1' else _F14_EXPECTED_METHODS - inherited_denials
         if (cls == 'PersistenceAdapterV1' and methods != required) or not required <= methods:
             failures.append('F14 committed reader/interface roster changed: ' + cls)
@@ -1802,6 +1803,13 @@ def _f14_execution_contract_failures_v1(repo_root):
 _F14_EXPECTED_DISCRIMINATORS = frozenset(('DURABLE_COMPUTATION_RECEIPT', 'ECONOMIC_EVENT', 'JOURNAL_TRANSACTION', 'JOURNAL_POSTING', 'STATE_TRANSITION', 'IDEMPOTENCY_CLAIM', 'OUTBOX_INTENT', 'REVERSAL', 'RECONCILIATION_BREAK', 'ORDER_INTENT', 'EXECUTION_CUSTODY', 'MODE_SNAPSHOT_CONTROL', 'ST12F_EVIDENCE_CONTROL', 'PIT_COMMIT_INTENT', 'PIT_COMMIT_COMPLETION', 'PIT_AVAILABILITY', 'PIT_CANONICAL_EVENT', 'PIT_CAPTURE_AND_GAP', 'PIT_CHECKPOINT', 'PRIVATE_OBSERVATION_CLOCK', 'PRIVATE_EVIDENCE_WITNESS', 'SOURCE_USE_CONTROL', 'SOURCE_USE_ATTRIBUTED_ACTION'))
 _F14_EXPECTED_METHODS = frozenset(('availability', 'begin_transaction', 'insert_receipt_record', 'insert_value_lineage_edge', 'insert_economic_event', 'insert_journal_transaction', 'insert_journal_posting', 'insert_state_transition', 'acquire_idempotency_claim', 'bind_idempotency_result', 'insert_outbox_intent', 'insert_reversal_link', 'load_committed_reversal_history', 'insert_reconciliation_break', 'get_record', 'load_committed_private_clock_receipt_v1', 'get_idempotency_result', 'reconstruct_as_of', 'load_committed_private_evidence_witness_v1', 'load_committed_private_evidence_snapshot_v1', 'load_committed_source_use_record_v1', 'load_committed_source_use_head_v1', 'load_source_use_head_for_update_v1', 'load_source_use_record_for_update_v1', 'load_committed_source_action_v1', 'load_committed_source_action_head_v1', 'load_source_action_for_update_v1', 'load_source_action_head_for_update_v1'))
 _F14_EXPECTED_NATIVE_INSTALL = 'python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1'
+
+# LP02 adds only these exact public-purpose records/read interfaces. The
+# inherited private roster and each reference adapter's default denial remain.
+_F14_EXPECTED_DISCRIMINATORS = _F14_EXPECTED_DISCRIMINATORS | frozenset((
+    'PUBLIC_SOURCE_USE_CONTROL', 'PUBLIC_NATIVE_CAPTURE', 'PUBLIC_NATIVE_PUBLICATION'))
+_F14_EXPECTED_METHODS = _F14_EXPECTED_METHODS | frozenset((
+    'load_committed_public_capture_v1', 'load_committed_public_publication_v1'))
 
 
 def _source_use_execution_contract_failures_v1(trees):
@@ -1868,6 +1876,73 @@ def _source_use_execution_contract_failures_v1(trees):
             failures.append("generic UOW can admit ephemeral source-control storage")
     except (KeyError, StopIteration, ValueError) as error:
         failures.append(str(error))
+    return failures
+
+
+def _lp02_public_execution_contract_failures_v1(trees):
+    """Independently inspect the added public storage boundary without imports."""
+    failures = []
+
+    def member(file, owner, name):
+        parents = [trees[file]] if owner is None else [n for n in trees[file].body
+            if isinstance(n, ast.ClassDef) and n.name == owner]
+        found = [n for parent in parents for n in parent.body if isinstance(n, ast.FunctionDef) and n.name == name]
+        if len(found) != 1:
+            raise ValueError('LP02 public execution member missing: ' + name)
+        return found[0]
+
+    def calls(node):
+        return {ast.unparse(n.func) for n in ast.walk(node) if isinstance(n, ast.Call)}
+
+    try:
+        validator = member('receipts.py', None, '_public_validate_spine_v1')
+        dispatch = next(n.value for n in validator.body if isinstance(n, ast.Assign)
+            and any(isinstance(t, ast.Name) and t.id == 'types' for t in n.targets))
+        expected = {
+            'EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL': ('PublicSourceUseOriginalV1', 'PublicDataSourceUseActionV1'),
+            'EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE': ('PublicNativeObservationV1',),
+            'EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION': ('PublicPublicationRecordV1',),
+        }
+        actual = {ast.unparse(k): tuple(ast.unparse(v) for v in values.elts)
+                  for k, values in zip(dispatch.keys, dispatch.values, strict=True)}
+        if actual != expected:
+            failures.append('LP02 public discriminator/payload closure changed')
+        for name in ('load_committed_public_capture_v1', 'load_committed_public_publication_v1'):
+            denied = member('persistence.py', 'PersistenceAdapterV1', name)
+            if not any(isinstance(n, ast.Raise) for n in ast.walk(denied)):
+                failures.append('LP02 base public read default denial missing: ' + name)
+            selected = member('sqlite_reference.py', 'SQLitePhaseAAdapterV1', name)
+            if 'self._read_public_v1' not in calls(selected):
+                failures.append('LP02 public read escaped scoped owner: ' + name)
+        for file, owner in (('persistence.py', 'InMemoryPersistenceAdapterV1'),
+                            ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
+            insert = member(file, owner, 'insert_receipt_record')
+            if not isinstance(insert.body[0], ast.If) or '_public_record_reserved_v1' not in calls(insert.body[0]):
+                failures.append('LP02 reference public insert denial missing: ' + owner)
+            for name in ('get_record', 'reconstruct_as_of'):
+                body = member(file, owner, name)
+                constants = {n.value for n in ast.walk(body) if isinstance(n, ast.Constant) and type(n.value) is str}
+                if '["PUBLIC_' not in constants and '_public_record_reserved_v1' not in calls(body):
+                    failures.append('LP02 reference generic public read denial missing: ' + owner + '.' + name)
+        read = member('sqlite_reference.py', 'SQLitePhaseAAdapterV1', '_read_public_v1')
+        if not {'request.__post_init__', 'self._check_public_store_v1', '_public_spine_from_json_v1'} <= calls(read):
+            failures.append('LP02 public read scope/closed reconstruction missing')
+        append = member('sqlite_reference.py', 'SQLitePhaseAAdapterV1', 'insert_receipt_record')
+        if not {'self._transaction', 'self._check_public_store_v1', '_public_validate_spine_v1'} <= calls(append):
+            failures.append('LP02 public append owner/permission validation missing')
+        commit = member('sqlite_reference.py', '_SQLitePhaseATransactionV1', 'commit')
+        commits = [n for n in ast.walk(commit) if isinstance(n, ast.Call) and ast.unparse(n.func) == 'adapter._connection.execute'
+                   and n.args and isinstance(n.args[0], ast.Constant) and n.args[0].value == 'COMMIT']
+        readbacks = [n for n in ast.walk(commit) if isinstance(n, ast.Call) and ast.unparse(n.func) == 'adapter._connection.execute'
+                    and n.args and isinstance(n.args[0], ast.Constant)
+                    and n.args[0].value == 'SELECT payload_json FROM receipt_records WHERE record_id=?']
+        issuance = [n for n in ast.walk(commit) if isinstance(n, ast.Assign)
+                    and any(ast.unparse(t) == 'self.completion_witness' for t in n.targets)]
+        if len(commits) != 1 or len(readbacks) != 1 or len(issuance) != 1 or not (
+                commits[0].lineno < readbacks[0].lineno < issuance[0].lineno):
+            failures.append('LP02 commit/readback/witness ordering missing')
+    except (ValueError, StopIteration, AttributeError, TypeError, KeyError) as exc:
+        failures.append(str(exc))
     return failures
 
 
@@ -1965,6 +2040,7 @@ def main() -> int:
         "load_source_use_head_for_update_v1", "load_source_use_record_for_update_v1",
         "load_committed_source_action_v1", "load_committed_source_action_head_v1",
         "load_source_action_for_update_v1", "load_source_action_head_for_update_v1",
+        "load_committed_public_capture_v1", "load_committed_public_publication_v1",
         "reconstruct_as_of",
     }
     if persistence_methods != expected_methods:
@@ -2117,6 +2193,7 @@ def main() -> int:
         failures.append("centralized contract matrices are missing")
     failures.extend(_f14_execution_contract_failures_v1(REPO_ROOT))
     failures.extend(_source_use_execution_contract_failures_v1(trees))
+    failures.extend(_lp02_public_execution_contract_failures_v1(trees))
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1

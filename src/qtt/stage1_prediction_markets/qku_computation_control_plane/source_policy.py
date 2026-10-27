@@ -7,13 +7,22 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from fractions import Fraction
 from enum import StrEnum
 import json
+import os
+import threading
+import time
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Mapping
 
 from .errors import ReasonCode, SourcePolicyError
+from .context import (
+    _native_ident, _native_require, _native_retail_decimal_string_v1,
+    _public_counter_v1, _public_nanoseconds_v1, _public_refs_v1,
+    _native_utc_nanoseconds,
+)
 from .models import NO_EFFECTS_V1, NoEffectFlagsV1
 from .point_in_time import (
     PITDataContractErrorV1,
@@ -27,6 +36,1127 @@ from .source_rights import reject_secret_material
 
 if TYPE_CHECKING:
     from .persistence import PersistenceAdapterV1
+
+
+def _public_interval_v1(row, *, known_name="known_at_ns"):
+    for name in (known_name, "effective_from_ns", "expires_at_ns"):
+        _public_nanoseconds_v1(getattr(row, name))
+    end = row.effective_until_ns_or_none
+    if end is not None:
+        _public_nanoseconds_v1(end)
+        _native_require(row.effective_from_ns < end, "public effective interval is empty")
+    _native_require(getattr(row, known_name) < row.expires_at_ns, "public source expired before availability")
+    _public_counter_v1(row.generation, allow_zero=True)
+
+
+@dataclass(frozen=True, slots=True)
+class PublicDataSourceBindingV1:
+    """Data-only candidate. Receipt admission and a current permit remain separate."""
+
+    binding_id: str
+    profile_id: Stage1VenueProfileIdV1
+    legal_product_ref: str
+    source_ids: tuple[str, ...]
+    source_contract_versions: tuple[str, ...]
+    source_receipt_refs: tuple[str, ...]
+    rights_receipt_refs: tuple[str, ...]
+    original_evidence_refs: tuple[str, ...]
+    review_scope_ref: str
+    allowed_operation_ids: tuple[str, ...]
+    field_bindings: tuple[tuple[str, str, str, str, str, str], ...]
+    known_at_ns: int
+    effective_from_ns: int
+    effective_until_ns_or_none: int | None
+    expires_at_ns: int
+    generation: int
+    permitted_consumer_ids: tuple[str, ...]
+
+    def __post_init__(self):
+        from .receipts import _PUBLIC_OPERATIONS_V1, _PUBLIC_CONSUMERS_V1, _public_profile_v1
+        from ..market_data_ingest.binding import PUBLIC_FIELD_TRANSFORMS_V1
+
+        _public_profile_v1(self.profile_id)
+        for name in ("binding_id", "legal_product_ref", "review_scope_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("source_ids", "source_contract_versions", "source_receipt_refs",
+                     "rights_receipt_refs", "original_evidence_refs", "allowed_operation_ids",
+                     "permitted_consumer_ids"):
+            _public_refs_v1(getattr(self, name))
+        _native_require(len(self.source_ids) == len(self.source_contract_versions)
+                        == len(self.source_receipt_refs) == len(self.rights_receipt_refs),
+                        "unbound source/contract/receipt vector")
+        _native_require(set(self.allowed_operation_ids) <= _PUBLIC_OPERATIONS_V1[self.profile_id]
+                        and set(self.permitted_consumer_ids) <= _PUBLIC_CONSUMERS_V1,
+                        "unsupported public source purpose")
+        _native_require(type(self.field_bindings) is tuple and 0 < len(self.field_bindings) <= 4096,
+                        "missing or unbounded field bindings")
+        names = set()
+        for row in self.field_bindings:
+            _native_require(type(row) is tuple and len(row) == 6, "invalid material field binding")
+            name, wire, unit, original, pointer, transform = row
+            for value in row:
+                _native_ident(value)
+            _native_require(name not in names and wire in {
+                "STRING", "INTEGER", "DECIMAL_NUMBER", "DECIMAL_TEXT", "BOOLEAN", "OBJECT", "ARRAY"}
+                and original in self.original_evidence_refs and pointer.startswith("/")
+                and transform in PUBLIC_FIELD_TRANSFORMS_V1,
+                "ambiguous or unbound material field")
+            names.add(name)
+        _public_interval_v1(self)
+
+
+@dataclass(frozen=True, slots=True)
+class SelectedAccountApplicabilityV1:
+    profile_id: Stage1VenueProfileIdV1
+    account_scope_ref: str
+    product_scope_ref: str
+    effective_from_ns: int
+    effective_until_ns: int
+    available_at_ns: int
+    source_receipt_refs: tuple[str, ...]
+    qualification_ref: str
+    generation: int
+    fee_profile_id_or_none: str | None
+    balance_increment_text_or_none: str | None
+    maker_tier_or_none: int | None
+    taker_tier_or_none: int | None
+    promotion_eligibility_or_none: bool | None
+    limitations: tuple[str, ...]
+
+    def __post_init__(self):
+        from .receipts import _public_profile_v1
+
+        _public_profile_v1(self.profile_id)
+        for name in ("account_scope_ref", "product_scope_ref", "qualification_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("effective_from_ns", "effective_until_ns", "available_at_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        _native_require(self.effective_from_ns < self.effective_until_ns
+                        and self.available_at_ns < self.effective_until_ns,
+                        "invalid account applicability interval")
+        _public_refs_v1(self.source_receipt_refs)
+        _public_refs_v1(self.limitations, allow_empty=True)
+        _public_counter_v1(self.generation, allow_zero=True)
+        if self.fee_profile_id_or_none is not None:
+            _native_ident(self.fee_profile_id_or_none)
+        if self.balance_increment_text_or_none is not None:
+            _native_require(Fraction(_native_retail_decimal_string_v1(self.balance_increment_text_or_none)) > 0,
+                            "account balance increment must be positive")
+        for value, maximum in ((self.maker_tier_or_none, 4), (self.taker_tier_or_none, 6)):
+            if value is not None:
+                _native_require(type(value) is int and 1 <= value <= maximum, "invalid independent account tier")
+        if self.promotion_eligibility_or_none is not None:
+            _native_require(type(self.promotion_eligibility_or_none) is bool, "invalid promotion fact")
+        if any(value is None for value in (self.fee_profile_id_or_none, self.balance_increment_text_or_none,
+                                          self.maker_tier_or_none, self.taker_tier_or_none,
+                                          self.promotion_eligibility_or_none)):
+            _native_require(bool(self.limitations), "missing account facts require unavailable reasons")
+
+
+def _project_public_account_applicability_facts_v1(*, source_binding, facts, field_bindings, original_ref):
+    """Project accepted account facts; the outer packet retains legal product."""
+    required = {"account_scope_ref", "product_scope_ref", "effective_from_ns", "effective_until_ns", "generation",
+        "fee_profile_id_or_none", "balance_increment_text_or_none", "maker_tier_or_none", "taker_tier_or_none",
+        "promotion_eligibility_or_none", "limitations"}
+    _native_require(type(facts) in (dict, MappingProxyType) and set(facts) == required,
+                    "accepted account applicability has missing or extra fields")
+    _native_require(tuple(row for row in field_bindings if row == (
+        "account_applicability", "OBJECT", "EVIDENCE_USE_ACCOUNT_APPLICABILITY", original_ref,
+        "/account_applicability", "EXACT_IDENTITY")), "account applicability lacks its exact source field")
+    _native_require(type(facts["limitations"]) in (tuple,list), "account limitations must be an exact vector")
+    for name in ("effective_from_ns", "effective_until_ns"):
+        _public_nanoseconds_v1(facts[name])
+    _native_require(facts["effective_from_ns"] < facts["effective_until_ns"], "accepted account interval is empty")
+    if source_binding.profile_id is not Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT:
+        _native_require(facts["maker_tier_or_none"] is None and facts["taker_tier_or_none"] is None,
+                        "Retail tiers cannot classify another selected profile")
+    if source_binding.profile_id is not Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
+        _native_require(facts["promotion_eligibility_or_none"] is None,
+                        "Gemini promotion cannot classify another selected profile")
+    ends = [facts["effective_until_ns"], source_binding.expires_at_ns]
+    if source_binding.effective_until_ns_or_none is not None:
+        ends.append(source_binding.effective_until_ns_or_none)
+    return SelectedAccountApplicabilityV1(source_binding.profile_id, facts["account_scope_ref"], facts["product_scope_ref"],
+        max(facts["effective_from_ns"],source_binding.effective_from_ns), min(ends), source_binding.known_at_ns,
+        source_binding.source_receipt_refs, original_ref, facts["generation"], facts["fee_profile_id_or_none"],
+        facts["balance_increment_text_or_none"], facts["maker_tier_or_none"], facts["taker_tier_or_none"],
+        facts["promotion_eligibility_or_none"], tuple(facts["limitations"]))
+
+
+def compile_accepted_public_account_applicability_v1(*, source_binding, acceptance_results: tuple,
+                                                    originals: tuple, review_facts):
+    """Data-only account projection through the existing acceptance owner."""
+    from ..market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+
+    projection = project_accepted_public_field_bindings_v1(source_binding=source_binding,
+        acceptance_results=acceptance_results, originals=originals, review_facts=review_facts)
+    rows = []
+    for bundle in projection[2]:
+        packet = bundle["accepted_packet"]
+        facts = packet["extracted_fact_payload"].get("account_applicability")
+        if facts is not None:
+            rows.append(_project_public_account_applicability_facts_v1(source_binding=source_binding, facts=facts,
+                field_bindings=source_binding.field_bindings, original_ref=packet["accepted_source_evidence_packet_id"]))
+    if len(rows) != 1:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "accepted account applicability missing or conflicting")
+    return rows[0]
+
+
+def _public_accepted_account_state_v1(*, inputs, applicability, native_only, known_as_of_ns, effective_at_ns=None):
+    """Retain qualification custody and its conflict-free effective interval."""
+    _public_nanoseconds_v1(known_as_of_ns)
+    effective_at_ns = known_as_of_ns if effective_at_ns is None else _public_nanoseconds_v1(effective_at_ns)
+    matched, refs = [], []
+    start, end = applicability.effective_from_ns, applicability.effective_until_ns
+    for projection in inputs.get("qualified_source_bindings", ()):
+        _native_require(type(projection) is tuple and len(projection) == 5, "malformed retained account source proof")
+        source = projection[0]
+        if not any(source is row for row in inputs["source_bindings"]) or native_only and projection[4] is not True:
+            continue
+        for bundle in projection[2]:
+            packet = bundle["accepted_packet"]
+            facts = packet["extracted_fact_payload"].get("account_applicability")
+            if facts is None:
+                continue
+            candidate = _project_public_account_applicability_facts_v1(source_binding=source, facts=facts,
+                field_bindings=source.field_bindings, original_ref=packet["accepted_source_evidence_packet_id"])
+            if candidate.available_at_ns > known_as_of_ns:
+                continue
+            if (candidate.profile_id, candidate.account_scope_ref, candidate.product_scope_ref) != (
+                    applicability.profile_id, applicability.account_scope_ref, applicability.product_scope_ref):
+                continue
+            if candidate != applicability:
+                _native_require(not candidate.effective_from_ns <= effective_at_ns < candidate.effective_until_ns,
+                                "conflicting current accepted account qualification")
+                if candidate.effective_from_ns > effective_at_ns and candidate.effective_from_ns < end:
+                    end = candidate.effective_from_ns
+                    refs.append(candidate.qualification_ref)
+                elif candidate.effective_until_ns <= effective_at_ns and candidate.effective_until_ns > start:
+                    start = candidate.effective_until_ns
+                    refs.append(candidate.qualification_ref)
+            elif (candidate.available_at_ns <= known_as_of_ns < candidate.effective_until_ns
+                    and candidate.effective_from_ns <= effective_at_ns < candidate.effective_until_ns):
+                matched.append(source)
+                refs.append(candidate.qualification_ref)
+    return tuple(matched), start, end, tuple(dict.fromkeys(refs))
+
+
+def _public_accepted_account_sources_v1(**kwargs):
+    """Keep the accepted legal-product/class relation in the retained proof."""
+    return _public_accepted_account_state_v1(**kwargs)[0]
+
+
+@dataclass(frozen=True, slots=True)
+class PublicRequestRateBindingV1:
+    binding_id: str
+    profile_id: Stage1VenueProfileIdV1
+    operation_classes: tuple[str, ...]
+    counter_scope: str
+    source_refs: tuple[str, ...]
+    effective_from_ns: int
+    expires_at_ns: int
+    allocation_ref: str
+    maximum_requests_per_window: int
+    window_ns: int
+    minimum_request_interval_ns: int
+    token_capacity_or_none: str | None
+    token_refill_per_second_or_none: str | None
+    token_costs: tuple[tuple[str, str], ...]
+    generation: int
+    limitations: tuple[str, ...]
+
+    def __post_init__(self):
+        from .receipts import _PUBLIC_OPERATIONS_V1, _public_profile_v1
+
+        _public_profile_v1(self.profile_id)
+        for name in ("binding_id", "counter_scope", "allocation_ref"):
+            _native_ident(getattr(self, name))
+        _public_refs_v1(self.operation_classes)
+        _native_require(set(self.operation_classes) <= _PUBLIC_OPERATIONS_V1[self.profile_id],
+                        "rate allocation includes an unsupported operation")
+        _public_refs_v1(self.source_refs)
+        _public_refs_v1(self.limitations, allow_empty=True)
+        for name in ("maximum_requests_per_window", "window_ns", "minimum_request_interval_ns"):
+            _public_counter_v1(getattr(self, name))
+        for name in ("effective_from_ns", "expires_at_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        _native_require(self.effective_from_ns < self.expires_at_ns, "expired rate allocation")
+        _public_counter_v1(self.generation, allow_zero=True)
+        _native_require((self.token_capacity_or_none is None) == (self.token_refill_per_second_or_none is None),
+                        "incomplete token allocation")
+        for value in (self.token_capacity_or_none, self.token_refill_per_second_or_none):
+            if value is not None:
+                _native_require(Fraction(_native_retail_decimal_string_v1(value)) > 0, "nonpositive token allocation")
+        _native_require(type(self.token_costs) is tuple, "invalid token cost vector")
+        names = set()
+        for row in self.token_costs:
+            _native_require(type(row) is tuple and len(row) == 2, "invalid endpoint token cost")
+            name, value = row
+            _native_require(name in self.operation_classes and name not in names
+                            and Fraction(_native_retail_decimal_string_v1(value)) > 0, "invalid endpoint cost")
+            names.add(name)
+        _native_require((not self.token_costs) if self.token_capacity_or_none is None
+                        else names == set(self.operation_classes), "endpoint costs do not cover the allocation")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicFeeEpochV1:
+    epoch_id: str
+    profile_id: Stage1VenueProfileIdV1
+    product_class: str
+    market_scope: tuple[str, ...]
+    account_scope_ref_or_none: str | None
+    liquidity_role: str
+    formula_family: str
+    coefficients: tuple[tuple[str, str], ...]
+    rounding_rule: str
+    effective_from_ns: int
+    effective_until_ns_or_none: int | None
+    known_at_ns: int
+    expires_at_ns: int
+    source_observation_refs: tuple[str, ...]
+    account_applicability_ref_or_none: str | None
+    supersedes_epoch_ref_or_none: str | None
+    generation: int
+    limitations: tuple[str, ...]
+
+    def __post_init__(self):
+        from .receipts import _public_profile_v1
+
+        _public_profile_v1(self.profile_id)
+        _native_ident(self.epoch_id)
+        _native_ident(self.product_class)
+        _public_refs_v1(self.market_scope)
+        _public_refs_v1(self.source_observation_refs)
+        _public_refs_v1(self.limitations, allow_empty=True)
+        for name in ("account_scope_ref_or_none", "account_applicability_ref_or_none", "supersedes_epoch_ref_or_none"):
+            if getattr(self, name) is not None:
+                _native_ident(getattr(self, name))
+        _native_require(self.supersedes_epoch_ref_or_none != self.epoch_id, "self-superseding fee epoch")
+        _native_require(type(self.liquidity_role) is str and self.liquidity_role in {"MAKER", "TAKER"},
+                        "invalid fee liquidity role")
+        fields = {"QUADRATIC": {"rate", "multiplier"}, "RETAIL_COMBO": {"quadratic_rate", "quartic_rate"},
+                  "GEMINI_LEGACY_MIN_SIDE": {"rate"}, "EXPLICIT_ZERO": set()}
+        _native_require(type(self.formula_family) is str and self.formula_family in fields,
+                        "unsupported source fee family")
+        _native_require(type(self.coefficients) is tuple, "invalid fee coefficients")
+        names = set()
+        for row in self.coefficients:
+            _native_require(type(row) is tuple and len(row) == 2, "invalid fee coefficient")
+            name, value = row
+            _native_require(name not in names and name in fields[self.formula_family]
+                            and Fraction(_native_retail_decimal_string_v1(value)) > 0,
+                            "unsupported or nonpositive fee coefficient; zero requires an explicit zero rule")
+            names.add(name)
+        _native_require(names == fields[self.formula_family], "missing fee coefficient")
+        _native_require(type(self.rounding_rule) is str and self.rounding_rule in {
+            "HALF_EVEN_CENT", "CEILING_CENT", "KALSHI_ACCOUNT_GRID", "UNAVAILABLE", "EXACT_ZERO"},
+            "unknown fee rounding rule")
+        if self.formula_family == "EXPLICIT_ZERO":
+            _native_require(self.rounding_rule == "EXACT_ZERO", "zero fee requires an affirmative zero rule")
+        if self.formula_family == "RETAIL_COMBO":
+            _native_require(self.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+                            and self.liquidity_role == "TAKER", "combo rule profile/role mismatch")
+        if self.formula_family == "GEMINI_LEGACY_MIN_SIDE":
+            _native_require(self.profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT,
+                            "legacy Gemini fee profile mismatch")
+        _public_interval_v1(self)
+
+
+def _project_public_fee_rule_facts_v1(*, source_binding, facts, field_bindings, original_ref):
+    """Project source-accepted, closed fee templates; no account or use grant."""
+    required = {"rule_id", "product_class", "market_scope", "account_scope_ref_or_none", "liquidity_role",
+        "formula_family", "coefficients", "rounding_rule", "effective_from_ns", "effective_until_ns_or_none",
+        "account_applicability_ref_or_none", "supersedes_rule_ref_or_none", "generation", "limitations",
+        "native_fee_type_or_none"}
+    _native_require(type(facts) in (list, tuple) and 0 < len(facts) <= 4096, "accepted fee rules unavailable")
+    projected, identities = [], set()
+    for index, row in enumerate(facts):
+        _native_require(type(row) in (dict, MappingProxyType) and set(row) == required,
+                        "accepted fee rule has missing or extra fields")
+        rule_id = _native_ident(row["rule_id"])
+        _native_require(rule_id not in identities, "duplicate accepted fee rule identity")
+        identities.add(rule_id)
+        matching = tuple(item for item in field_bindings if item == (
+            "fee_rules." + rule_id, "OBJECT", "EVIDENCE_USE_FEE_RULE", original_ref,
+            "/fee_rules/" + str(index), "EXACT_IDENTITY"))
+        _native_require(len(matching) == 1, "fee rule lacks exact accepted source-field binding")
+        for name in ("market_scope", "coefficients", "limitations"):
+            _native_require(type(row[name]) in (list, tuple), "fee rule vector is not a closed array")
+        _native_require(all(type(item) in (list, tuple) and len(item) == 2 for item in row["coefficients"]),
+                        "fee coefficient is not a named exact scalar")
+        native_type = row["native_fee_type_or_none"]
+        if source_binding.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            _native_ident(native_type)
+        else:
+            _native_require(native_type is None, "non-Kalshi rule cannot borrow a Kalshi native fee type")
+        epoch = PublicFeeEpochV1(rule_id, source_binding.profile_id, row["product_class"], tuple(row["market_scope"]),
+            row["account_scope_ref_or_none"], row["liquidity_role"], row["formula_family"],
+            tuple(tuple(item) for item in row["coefficients"]), row["rounding_rule"],
+            row["effective_from_ns"], row["effective_until_ns_or_none"], source_binding.known_at_ns,
+            source_binding.expires_at_ns, (original_ref,), row["account_applicability_ref_or_none"],
+            row["supersedes_rule_ref_or_none"], row["generation"], tuple(row["limitations"]))
+        projected.append((native_type, epoch))
+    return tuple(projected)
+
+
+def compile_accepted_public_fee_rules_v1(*, source_binding, acceptance_results: tuple,
+                                       originals: tuple, review_facts):
+    """Retain the existing acceptance owner's exact knowledge/source linkage.
+
+    Returned templates still need market, native observation and account joins;
+    neither an accepted document nor this data-only projection issues packets.
+    """
+    from ..market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+
+    projection = project_accepted_public_field_bindings_v1(source_binding=source_binding,
+        acceptance_results=acceptance_results, originals=originals, review_facts=review_facts)
+    result = []
+    for bundle in projection[2]:
+        packet = bundle["accepted_packet"]
+        facts = packet["extracted_fact_payload"].get("fee_rules")
+        if facts is not None:
+            result.extend(_project_public_fee_rule_facts_v1(source_binding=source_binding, facts=facts,
+                field_bindings=source_binding.field_bindings,
+                original_ref=packet["accepted_source_evidence_packet_id"]))
+    if not result:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "accepted fee family/product mapping unavailable")
+    _native_require(len(result) <= 4096 and len({epoch.epoch_id for _, epoch in result}) == len(result),
+                    "accepted fee rules conflict across source packets")
+    return tuple(result)
+
+
+def _resolve_public_publication_fee_epochs_v1(*, publication, instrument_id: str,
+                                             known_as_of_ns: int, applicability, fills: tuple):
+    """Join sealed source history to accepted fee templates for proposed fills."""
+    from dataclasses import replace
+    from ..orderbook_event_state_snapshot.handoff import (
+        _require_public_publication_handle_v1, _public_reference_translations_v1,
+        _public_committed_observation_plans_v1,
+    )
+    from ...pretrade.pr169_pretrade1_resolvers import PublicConditionalFillV1
+    from .receipts import _public_identity_v1
+
+    entry = _require_public_publication_handle_v1(publication=publication)
+    _public_nanoseconds_v1(known_as_of_ns)
+    use_expiry = _PUBLIC_RESPONSE_FENCES_V1[id(entry[14])][5]
+    _native_require(entry[8] <= known_as_of_ns < use_expiry,
+                    "fee decision predates issuance or exceeds source-use expiry")
+    metadata_rows = tuple(row for row in entry[4] if row.instrument_id == instrument_id)
+    _native_require(len(metadata_rows) == 1, "fee market metadata selection is ambiguous")
+    metadata = metadata_rows[0]
+    _native_require(metadata.known_at_ns <= known_as_of_ns < metadata.expires_at_ns,
+                    "fee metadata is unavailable at the decision")
+    _native_require(type(fills) is tuple and 0 < len(fills) <= 4096
+        and all(type(fill) is PublicConditionalFillV1 for fill in fills), "proposed fee fills unavailable")
+    _native_require(type(applicability) is SelectedAccountApplicabilityV1
+        and entry[1]._inputs["account_applicability_or_none"] is applicability,
+        "fee account dependency has no admitted original identity")
+    applicability.__post_init__()
+    _native_require(applicability.profile_id is metadata.profile_id
+        and applicability.account_scope_ref == entry[1]._scope.account_scope_ref_or_none
+        and applicability.qualification_ref == entry[1]._binding._capture.account_applicability_ref_or_none
+        and applicability.available_at_ns <= known_as_of_ns < applicability.effective_until_ns,
+        "fee account dependency is unavailable or outside the publication scope")
+    account_sources, _, account_available_until, current_account_refs = _public_accepted_account_state_v1(inputs=entry[1]._inputs,
+        applicability=applicability, native_only=entry[12], known_as_of_ns=known_as_of_ns)
+    if entry[12]:
+        if len(account_sources) != 1 or not any(account_sources[0] is row for row in entry[5]):
+            raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "native account fee qualification custody unavailable")
+    qualified = entry[1]._inputs.get("qualified_source_bindings", ())
+    templates = []
+    for projection in qualified:
+        _native_require(type(projection) is tuple and len(projection) == 5,
+                        "fee source has no admitted original qualification")
+        source = projection[0]
+        if not any(source is admitted for admitted in entry[5]) or source.profile_id is not metadata.profile_id:
+            continue
+        for bundle in projection[2]:
+            packet = bundle["accepted_packet"]
+            facts = packet["extracted_fact_payload"].get("fee_rules")
+            if facts is not None:
+                templates.extend(_project_public_fee_rule_facts_v1(source_binding=source, facts=facts,
+                    field_bindings=source.field_bindings, original_ref=packet["accepted_source_evidence_packet_id"]))
+    if not templates:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "publication lacks accepted fee family/product mapping")
+    _native_require(len(templates) <= 4096 and len({row.epoch_id for _, row in templates}) == len(templates),
+                    "publication fee mappings conflict")
+    histories = {"K_SERIES_FEES": [], "K_EVENT_FEES": []}
+    history_refs = []
+    if metadata.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+        _native_require(metadata.series_id_or_none is not None and metadata.event_id_or_none is not None,
+                        "Kalshi fee parent identity unavailable")
+        selected = {name: [] for name in histories}
+        for translated in _public_reference_translations_v1(publication=publication):
+            op = translated.stream_disposition.get("operation_id")
+            if op in selected and instrument_id in translated.stream_disposition["instrument_ids"]:
+                selected[op].append(translated)
+        _native_require(selected["K_SERIES_FEES"] and selected["K_EVENT_FEES"],
+                        "complete Series/Event fee history unavailable")
+        for op, translations in selected.items():
+            cursor, seen_cursors, identities, instants = None, set(), set(), set()
+            for index, translated in enumerate(translations):
+                plan = _public_committed_observation_plans_v1(publication=publication).get(translated.observation_ref)
+                _native_require(plan is not None and plan[0].operation_id == op,
+                                "fee history lost its original request plan")
+                request = plan[0]
+                values = translated.normalized_frame.parsed_source_scalar_tree_or_none
+                if op == "K_SERIES_FEES":
+                    _native_require(request.request_options["show_historical"] is True
+                        and request.request_options["series_ticker"] == metadata.series_id_or_none,
+                        "Series fee history omitted historical changes")
+                    # Every Series response is a complete history snapshot.
+                    # Repeated rows in a later fetch are not duplicate pages.
+                    identities, instants = set(), set()
+                    histories[op] = []
+                else:
+                    if request.pagination_cursor_or_none is None:
+                        _native_require(index == 0 or cursor == "",
+                                        "Event fee history pagination is incomplete or reordered")
+                        cursor, seen_cursors, identities, instants = None, set(), set(), set()
+                        histories[op] = []
+                    _native_require(request.request_options["event_ticker"] == metadata.event_id_or_none
+                        and request.pagination_cursor_or_none == cursor,
+                        "Event fee history pagination is incomplete or reordered")
+                    cursor = values["cursor"]
+                    _native_require(not cursor or cursor not in seen_cursors, "Event fee history cursor repeats")
+                    seen_cursors.add(cursor)
+                history_refs.append(translated.observation_ref)
+                for change in values["fee_changes"]:
+                    instant = int(change["scheduled_at"]["utc_ns_text"])
+                    _native_require(change["id"] not in identities and instant not in instants
+                        and change["series_ticker"] == metadata.series_id_or_none
+                        and (op != "K_EVENT_FEES" or change["event_ticker"] == metadata.event_id_or_none),
+                        "duplicate/conflicting fee history or parent identity")
+                    identities.add(change["id"])
+                    instants.add(instant)
+                    histories[op].append((instant, change))
+            _native_require(op != "K_EVENT_FEES" or cursor == "", "Event fee history has an unread page")
+            histories[op].sort(key=lambda row: row[0])
+        _native_require(histories["K_SERIES_FEES"], "Series fee history lacks a baseline")
+    all_epochs = {epoch.epoch_id: epoch for _, epoch in templates}
+    native_types = {epoch.epoch_id: name for name, epoch in templates}
+    emitted, previous_fill = {}, known_as_of_ns
+    for fill in fills:
+        fill.__post_init__()
+        _native_require(fill.fill_at_ns >= previous_fill, "fee fills are reordered or precede the decision")
+        _, account_start, account_end, account_refs = _public_accepted_account_state_v1(
+            inputs=entry[1]._inputs, applicability=applicability,
+            native_only=entry[12], known_as_of_ns=known_as_of_ns, effective_at_ns=fill.fill_at_ns)
+        previous_fill = fill.fill_at_ns
+        native_type, multiplier, start, end = None, None, 0, None
+        if metadata.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT:
+            series = [row for row in histories["K_SERIES_FEES"] if row[0] <= fill.fill_at_ns]
+            event = [row for row in histories["K_EVENT_FEES"] if row[0] <= fill.fill_at_ns]
+            _native_require(series, "Series fee baseline unavailable at the fill")
+            chosen = event[-1] if event and not event[-1][1]["override_cleared"] else series[-1]
+            native_type, multiplier = chosen[1]["fee_type"], chosen[1]["fee_multiplier"]
+            start = max(series[-1][0], event[-1][0] if event else 0)
+            future = [instant for history in histories.values() for instant, _ in history if instant > fill.fill_at_ns]
+            end = min(future) if future else None
+        eligible_by_id = {epoch.epoch_id: epoch for name, epoch in templates if name == native_type}
+        # Preserve predecessor evidence across native-type transitions. The one
+        # fee selector validates scope, generation and known/effective axes.
+        for epoch in tuple(eligible_by_id.values()):
+            visited = {epoch.epoch_id}
+            while epoch.supersedes_epoch_ref_or_none is not None:
+                predecessor = all_epochs.get(epoch.supersedes_epoch_ref_or_none)
+                _native_require(predecessor is not None and predecessor.epoch_id not in visited,
+                                "fee supersession lacks its original predecessor closure")
+                visited.add(predecessor.epoch_id)
+                eligible_by_id[predecessor.epoch_id] = predecessor
+                epoch = predecessor
+        eligible = tuple(eligible_by_id.values())
+        selected = resolve_public_fee_epoch_v1(epochs=eligible, profile_id=metadata.profile_id,
+            market_scope=(instrument_id,), applicability=applicability, known_as_of_ns=known_as_of_ns,
+            effective_at_ns=fill.fill_at_ns, liquidity_role=fill.liquidity_role)
+        _native_require(selected.product_class == metadata.product_class, "fee rule product differs from admitted metadata")
+        _native_require(native_types[selected.epoch_id] == native_type,
+                        "accepted fee family does not match the effective native fee type")
+        coefficients = selected.coefficients
+        if native_type is not None:
+            _native_require(selected.formula_family in {"QUADRATIC", "EXPLICIT_ZERO"}, "unsupported native fee family")
+            if selected.formula_family == "QUADRATIC":
+                _native_require(multiplier is not None and Fraction(multiplier) > 0,
+                                "zero/unknown multiplier is not an affirmative zero-fee rule")
+                coefficients = tuple((name, multiplier if name == "multiplier" else value) for name, value in coefficients)
+            start = max(start, selected.effective_from_ns)
+        else:
+            start = selected.effective_from_ns
+        start = max(start, metadata.effective_from_ns, account_start)
+        ends = [value for value in (end, selected.effective_until_ns_or_none, metadata.effective_until_ns_or_none,
+                                   account_end, selected.expires_at_ns, metadata.expires_at_ns,
+                                   use_expiry) if value is not None]
+        for successor in all_epochs.values():
+            if not (successor.known_at_ns <= known_as_of_ns < successor.expires_at_ns
+                    and successor.effective_from_ns > fill.fill_at_ns
+                    and (successor.profile_id, successor.product_class, successor.market_scope, successor.liquidity_role,
+                         successor.account_scope_ref_or_none, successor.account_applicability_ref_or_none)
+                    == (selected.profile_id, selected.product_class, selected.market_scope, selected.liquidity_role,
+                        selected.account_scope_ref_or_none, selected.account_applicability_ref_or_none)):
+                continue
+            cursor, visited = successor, set()
+            while cursor.supersedes_epoch_ref_or_none is not None:
+                predecessor = all_epochs.get(cursor.supersedes_epoch_ref_or_none)
+                _native_require(predecessor is not None and predecessor.epoch_id not in visited
+                    and predecessor.generation < cursor.generation and predecessor.known_at_ns <= cursor.known_at_ns
+                    and (predecessor.profile_id, predecessor.product_class, predecessor.market_scope, predecessor.liquidity_role,
+                         predecessor.account_scope_ref_or_none, predecessor.account_applicability_ref_or_none)
+                    == (cursor.profile_id, cursor.product_class, cursor.market_scope, cursor.liquidity_role,
+                        cursor.account_scope_ref_or_none, cursor.account_applicability_ref_or_none),
+                    "future fee supersession has an invalid predecessor")
+                visited.add(predecessor.epoch_id)
+                if predecessor.epoch_id == selected.epoch_id:
+                    ends.append(successor.effective_from_ns)
+                    break
+                cursor = predecessor
+        end = min(ends) if ends else None
+        expiry = min(selected.expires_at_ns, metadata.expires_at_ns, account_available_until, use_expiry)
+        action = entry[1]._binding._event.typed_payload
+        identity = _public_identity_v1("PUBLIC_FEE_EPOCH_V1", selected.epoch_id, action.process_ref, action.sequence,
+            entry[10], entry[11], entry[7].typed_payload.partition_ordinal, start,
+            "OPEN" if end is None else end, known_as_of_ns, expiry, *sorted(row.instrument_id for row in entry[4]))
+        result = replace(selected, epoch_id=identity, coefficients=coefficients, effective_from_ns=start,
+            effective_until_ns_or_none=end, known_at_ns=max(selected.known_at_ns, metadata.known_at_ns, entry[8]),
+            expires_at_ns=expiry,
+            source_observation_refs=tuple(dict.fromkeys((*selected.source_observation_refs, *history_refs,
+                *current_account_refs, *account_refs))),
+            supersedes_epoch_ref_or_none=None)
+        _native_require(result.effective_from_ns <= fill.fill_at_ns
+            and (result.effective_until_ns_or_none is None or fill.fill_at_ns < result.effective_until_ns_or_none),
+            "selected fee/metadata interval does not cover proposed fill")
+        prior = emitted.setdefault(identity, result)
+        _native_require(prior == result, "derived fee epoch identity conflicts")
+    return tuple(emitted.values())
+
+
+def resolve_public_contractual_settlement_v1(*, metadata, translations: tuple,
+                                            known_as_of_ns: int, effective_at_ns: int,
+                                            position_outcome: str):
+    """Select a data-only contractual value; publication custody is separate.
+
+    Neither accepted resolution nor this value establishes account cash posting.
+    Scalar, void and resettlement formulas need their separately accepted mapping.
+    """
+    from ..market_data_ingest.binding import PublicMetadataSnapshotV1
+    from ..market_data_ingest.adapter import PublicCanonicalTranslationV1
+    from .context import _native_retail_finite_decimal_text_v1
+
+    _native_require(type(metadata) is PublicMetadataSnapshotV1, "contractual settlement metadata unavailable")
+    metadata.__post_init__()
+    _public_nanoseconds_v1(known_as_of_ns)
+    _public_nanoseconds_v1(effective_at_ns)
+    _native_require(type(position_outcome) is str and position_outcome in {"YES", "NO"},
+                    "contractual position outcome is not bound")
+    _native_require(metadata.known_at_ns <= known_as_of_ns < metadata.expires_at_ns
+        and metadata.effective_from_ns <= effective_at_ns
+        and (metadata.effective_until_ns_or_none is None or effective_at_ns < metadata.effective_until_ns_or_none),
+        "contractual settlement metadata unavailable at known/effective time")
+    resolution = metadata.resolution
+    required = {"state", "outcome", "final", "revision", "effective_at_ns", "known_at_ns", "observation_ref"}
+    if (metadata.product_class != "BINARY" or metadata.payout_basis_or_none != "USD_PER_CONTRACT"
+            or metadata.lifecycle["state"] not in {"RESOLVED", "SETTLED"}
+            or metadata.payout_amount_or_none is None or not required <= set(resolution)
+            or resolution["state"] not in {"RESOLVED", "SETTLED"} or resolution["final"] is not True
+            or resolution["outcome"] not in {"YES", "NO"} or resolution.get("unavailable_reason") is not None):
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING,
+            "accepted binary payout/outcome/finality unavailable; scalar or void mapping cannot be inferred")
+    _native_ident(resolution["revision"])
+    _native_ident(resolution["observation_ref"])
+    _native_require(resolution["known_at_ns"] <= metadata.known_at_ns <= known_as_of_ns
+        and resolution["effective_at_ns"] <= effective_at_ns, "later resolution cannot enter an earlier decision")
+    lineage = {row[2]: row for row in metadata.field_lineage}
+    source_fields = {"state", "outcome", "final", "revision", "effective_at_ns"}
+    material = {"product_class", "payout_amount", "payout_basis", *("resolution." + key for key in source_fields)}
+    _native_require(material <= set(lineage)
+        and all(sum(row[2] == name for row in metadata.field_lineage) == 1 for name in material)
+        and all(lineage["resolution." + key][0] == resolution["observation_ref"] for key in source_fields),
+        "contractual settlement lacks exact accepted material-field lineage")
+    _native_require(type(translations) is tuple and len(translations) <= 4096,
+                    "invalid bounded settlement observation history")
+    latest_book = None
+    unresolved_preliminary = False
+    observed_refs = []
+    seen_observations, previous_order, clock_scope = set(), None, None
+    for translation in translations:
+        _native_require(type(translation) is PublicCanonicalTranslationV1, "untyped settlement observation")
+        translation.__post_init__()
+        disposition = translation.stream_disposition
+        if disposition.get("instrument_id") != metadata.instrument_id:
+            continue
+        _native_require(translation.normalized_frame.profile_id is metadata.profile_id,
+                        "cross-profile settlement observation")
+        frame = translation.normalized_frame
+        received = int(translation.exact_clock_companion["received"]["utc_ns_text"])
+        _native_require(received <= known_as_of_ns, "later public observation cannot enter an earlier settlement")
+        current_scope = (frame.capture_session_id, frame.process_epoch_id, frame.monotonic_clock_id)
+        order = (received, frame.qtt_received_monotonic_ns)
+        _native_require(translation.observation_ref not in seen_observations
+            and (clock_scope is None or current_scope == clock_scope)
+            and (previous_order is None or order[0] >= previous_order[0] and order[1] > previous_order[1]),
+            "settlement history is reordered, duplicated or has ambiguous receive clocks")
+        seen_observations.add(translation.observation_ref)
+        previous_order, clock_scope = order, current_scope
+        if disposition.get("event_kind") == "LIFECYCLE":
+            _native_require(translation.observation_ref == resolution["observation_ref"]
+                or received < resolution["known_at_ns"], "public lifecycle invalidates the accepted resolution")
+            observed_refs.append(translation.observation_ref)
+        if (metadata.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+                and disposition.get("event_kind") == "BOOK_REPLACEMENT"):
+            latest_book = translation
+            flag = frame.parsed_source_scalar_tree_or_none.get("settlement_preliminary_or_none")
+            unresolved_preliminary = unresolved_preliminary or (
+                received >= resolution["known_at_ns"] and flag is not False)
+    if latest_book is not None:
+        # A later false cannot revive a resolution invalidated by a preliminary
+        # observation. Only a strictly later accepted finality revision can.
+        if unresolved_preliminary:
+            raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING,
+                "Retail settlement is preliminary or its preliminary status is unavailable")
+        observed_refs.append(latest_book.observation_ref)
+    payout = Fraction(metadata.payout_amount_or_none)
+    yes_value = payout if resolution["outcome"] == "YES" else Fraction(0)
+    if "value" in resolution:
+        _native_require(Fraction(_native_retail_decimal_string_v1(resolution["value"])) == yes_value,
+                        "accepted settlement value differs from the binary payout/outcome")
+    value = yes_value if position_outcome == "YES" else payout - yes_value
+    return MappingProxyType(dict(value_per_contract=_native_retail_finite_decimal_text_v1(value),
+        position_outcome=position_outcome, resolved_outcome=resolution["outcome"],
+        metadata_ref=metadata.metadata_id, resolution_ref=resolution["observation_ref"],
+        resolution_revision=resolution["revision"], original_observation_refs=tuple(dict.fromkeys(observed_refs)),
+        known_at_ns=metadata.known_at_ns, effective_at_ns=resolution["effective_at_ns"],
+        accounting_class="PUBLIC_CONTRACTUAL_SETTLEMENT_NOT_ACCOUNT_CASH", no_order_authority=True))
+
+
+def resolve_public_fee_epoch_v1(*, epochs: tuple[PublicFeeEpochV1, ...],
+                              profile_id: Stage1VenueProfileIdV1, market_scope: tuple[str, ...],
+                              applicability: SelectedAccountApplicabilityV1 | None,
+                              known_as_of_ns: int, effective_at_ns: int, liquidity_role: str) -> PublicFeeEpochV1:
+    """Select accepted source facts without retrieval-order or absent-as-zero inference."""
+    from .receipts import _public_profile_v1
+
+    _public_profile_v1(profile_id)
+    _public_refs_v1(market_scope)
+    _public_nanoseconds_v1(known_as_of_ns)
+    _public_nanoseconds_v1(effective_at_ns)
+    _native_require(type(epochs) is tuple and len(epochs) <= 4096
+                    and type(liquidity_role) is str and liquidity_role in {"MAKER", "TAKER"},
+                    "invalid fee selection inputs")
+    if applicability is not None:
+        _native_require(type(applicability) is SelectedAccountApplicabilityV1, "invalid account applicability")
+        applicability.__post_init__()
+        _native_require(applicability.profile_id is profile_id and applicability.available_at_ns <= known_as_of_ns
+                        and applicability.effective_from_ns <= effective_at_ns < applicability.effective_until_ns
+                        and known_as_of_ns < applicability.effective_until_ns, "account applicability unavailable")
+    else:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "exact fee selection requires account/product applicability")
+    selected = []
+    identities = set()
+    for epoch in epochs:
+        _native_require(type(epoch) is PublicFeeEpochV1, "invalid fee epoch type")
+        epoch.__post_init__()
+        _native_require(epoch.epoch_id not in identities, "duplicate fee epoch identity")
+        identities.add(epoch.epoch_id)
+        if not (epoch.profile_id is profile_id and epoch.market_scope == market_scope
+                and epoch.product_class == applicability.product_scope_ref
+                and epoch.account_scope_ref_or_none in (None, applicability.account_scope_ref)
+                and epoch.account_applicability_ref_or_none in (None, applicability.qualification_ref)
+                and epoch.liquidity_role == liquidity_role and epoch.known_at_ns <= known_as_of_ns < epoch.expires_at_ns
+                and epoch.effective_from_ns <= effective_at_ns
+                and (epoch.effective_until_ns_or_none is None or effective_at_ns < epoch.effective_until_ns_or_none)):
+            continue
+        if epoch.account_scope_ref_or_none is not None or epoch.account_applicability_ref_or_none is not None:
+            _native_require(applicability is not None
+                            and epoch.account_scope_ref_or_none == applicability.account_scope_ref
+                            and epoch.account_applicability_ref_or_none == applicability.qualification_ref
+                            and epoch.product_class == applicability.product_scope_ref,
+                            "fee epoch has no matching account/product qualification")
+        selected.append(epoch)
+    by_id = {row.epoch_id: row for row in epochs}
+    superseded = set()
+    for selected_epoch in selected:
+        epoch = selected_epoch
+        while epoch.supersedes_epoch_ref_or_none is not None:
+            predecessor = by_id.get(epoch.supersedes_epoch_ref_or_none)
+            _native_require(predecessor is not None and predecessor.profile_id is epoch.profile_id
+                and predecessor.market_scope == epoch.market_scope and predecessor.product_class == epoch.product_class
+                and predecessor.liquidity_role == epoch.liquidity_role
+                and predecessor.account_scope_ref_or_none == epoch.account_scope_ref_or_none
+                and predecessor.account_applicability_ref_or_none == epoch.account_applicability_ref_or_none
+                and predecessor.generation < epoch.generation and predecessor.known_at_ns <= epoch.known_at_ns,
+                "fee supersession differs from the same scoped predecessor")
+            superseded.add(predecessor.epoch_id)
+            epoch = predecessor
+    selected = [row for row in selected if row.epoch_id not in superseded]
+    if len(selected) != 1:
+        raise SourcePolicyError(ReasonCode.INVALID_CONTRACT, "fee epoch missing or conflicting at selected known/effective axes")
+    _native_require(selected[0].rounding_rule != "UNAVAILABLE", "exact fee rounding unavailable")
+    result = selected[0]
+    if profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT and liquidity_role == "MAKER":
+        _native_require(applicability.maker_tier_or_none is not None, "independent maker tier unavailable")
+        rate = ("0", "0.0035", "0.0070", "0.0104")[applicability.maker_tier_or_none - 1]
+        _native_require((result.formula_family == "EXPLICIT_ZERO" and rate == "0") or (
+            result.formula_family == "QUADRATIC" and {key: Fraction(value) for key,value in result.coefficients}
+            == {"rate": Fraction(rate), "multiplier": Fraction(1)}),
+            "Retail maker fee rule differs from the independently qualified tier")
+    if profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT and liquidity_role == "MAKER" and result.formula_family == "EXPLICIT_ZERO":
+        _native_require(applicability.promotion_eligibility_or_none is True,
+                        "Gemini maker waiver eligibility unavailable")
+    return result
+
+
+# These closed rules describe evidence use. Their presence here establishes no
+# source fact: the compiler requires the accepted extraction and its originals.
+_PUBLIC_COMMON_SEMANTICS_V1 = MappingProxyType({
+    "settlement_semantics.public_value": "CONTRACTUAL_VALUE_REQUIRES_ACCEPTED_PAYOUT_OUTCOME_AND_FINALITY",
+    "settlement_semantics.account_cash": "PUBLIC_RESOLUTION_NEVER_RELEASES_ACCOUNT_CASH",
+    "emergency_profile.unknown_custody_policy": "SAFE_HOLD_RETAIN_OBLIGATIONS_UNTIL_PRIVATE_RECONCILIATION",
+    "emergency_profile.rearm_requirements": "CURRENT_SCOPE_AND_PRIVATE_ORDER_FILL_CASH_POSITION_RECONCILIATION",
+})
+_PUBLIC_VENUE_SEMANTICS_V1 = MappingProxyType({
+    Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: MappingProxyType({
+        "order_semantics.side_orientation": "YES_BOOK_BID_BUYS_YES_ASK_SELLS_YES",
+        "order_semantics.time_in_force": "EXPLICIT_FOK_GTC_IOC_NO_GTT_WIRE_ENUM",
+        "order_semantics.expiration": "IOC_NO_EXPIRY_GTC_EXPIRY_UNIX_SECONDS",
+        "order_semantics.reduce_only": "REDUCE_ONLY_REQUIRES_IOC",
+        "order_semantics.explicit_controls": "QTT_EXPLICIT_STP_BOOLEANS_CLIENT_SUBACCOUNT_AND_METADATA_SHARD",
+        "quantity_price_semantics.count": "EXACT_DECIMAL_TEXT_ACCEPTED_QUANTITY_GRID",
+        "quantity_price_semantics.price": "EXACT_ACCEPTED_BANDS_NO_SNAP_NO_OUTCOME_REINTERPRETATION",
+        "quantity_price_semantics.amend_count": "FILLED_PLUS_DESIRED_REMAINING",
+        "quantity_price_semantics.reduction": "EXCLUSIVE_POSITIVE_REDUCE_BY_OR_NONNEGATIVE_REDUCE_TO_BOUNDED_BY_REMAINING",
+        "queue_semantics.decrease_or_expiry": "PRESERVES_PRIORITY",
+        "queue_semantics.increase_or_price": "LOSES_PRIORITY",
+        "maintenance_semantics.trading_pause": "NO_CREATE_OR_AMEND_CANCEL_ALLOWED",
+        "maintenance_semantics.exchange_pause": "NO_CREATE_AMEND_OR_CANCEL",
+        "maintenance_semantics.resting_orders": "PERSIST_UNLESS_ACCEPTED_CANCEL_ON_PAUSE",
+        "emergency_profile.single_cancel": "EXACT_ORDER_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.batch_cancel": "EXACT_ENUMERATED_ORDER_SCOPE_NO_ATOMICITY_INFERENCE",
+        "emergency_profile.group_cancel": "EXACT_ORDER_GROUP_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.pause_new_order_behavior": "TRADING_OR_EXCHANGE_PAUSE_BLOCKS_CREATE_AND_AMEND",
+        "emergency_profile.pause_cancel_behavior": "TRADING_PAUSE_ALLOWS_CANCEL_EXCHANGE_PAUSE_BLOCKS_CANCEL",
+        "emergency_profile.terminal_evidence_sources": "PRIVATE_ORDER_FILL_AND_OPEN_ORDER_RECONCILIATION",
+        "emergency_profile.reduction_mechanism": "EXCLUSIVE_REDUCE_BY_OR_REDUCE_TO_WITH_KNOWN_REMAINING",
+        "emergency_profile.scope_blast_radius": "ORDER_BATCH_AND_GROUP_SCOPES_ARE_DISTINCT",
+    }),
+    Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: MappingProxyType({
+        "order_semantics.intent": "EXACTLY_ONE_INTENT_REPRESENTATION",
+        "order_semantics.time_in_force": "DISTINCT_DAY_GTC_GTD_IOC_FOK_GTD_REQUIRES_EXPIRY",
+        "order_semantics.explicit_controls": "QTT_EXPLICIT_AUTOMATIC_MANUAL_MAKER_ONLY_AND_SYNCHRONOUS_FLAGS",
+        "order_semantics.maker_only": "PARTICIPATE_DONT_INITIATE_REFUSES_MARKETABLE_LIQUIDITY",
+        "order_semantics.cancel_response": "ID_OR_EMPTY_CANCEL_RESPONSE_IS_NOT_TERMINAL_PROOF",
+        "quantity_price_semantics.count": "EXACT_JSON_NUMBER_NO_SILENT_SNAPPING",
+        "quantity_price_semantics.price": "YES_ORIENTED_EXACT_MONEY_NO_SILENT_SNAPPING",
+        "queue_semantics.modification": "UNKNOWN_REQUIRES_ACCEPTED_BINDING",
+        "maintenance_semantics.order_processing_stopgap": "FIVE_SECOND_ORDER_LATENCY_REJECTION_NOT_RATE_LIMIT_RESET",
+        "emergency_profile.single_cancel": "EXACT_ORDER_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.all_cancel": "EXPLICIT_ALL_SCOPE_REQUIRES_PRIVATE_RECONCILIATION",
+        "emergency_profile.group_cancel": "EXACT_MARKET_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.terminal_evidence_sources": "PRIVATE_ORDER_FILL_AND_OPEN_ORDER_RECONCILIATION",
+        "emergency_profile.scope_blast_radius": "ORDER_MARKET_AND_ALL_SCOPES_ARE_DISTINCT",
+    }),
+    Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT: MappingProxyType({
+        "order_semantics.side_outcome_type": "WS_BUY_SELL_YES_NO_LIMIT_MARKET_DISTINCT_FROM_REST",
+        "order_semantics.time_in_force": "DISTINCT_GTC_IOC_FOK_MOC",
+        "order_semantics.stop_limit": "FRESH_LAST_TRADE_BUY_LAST_LE_STOP_LE_LIMIT_SELL_LIMIT_LE_STOP_LE_LAST",
+        "order_semantics.stop_market": "PRIVATE_EVENT_ENUM_DOES_NOT_ESTABLISH_STOP_MARKET_SUBMISSION",
+        "order_semantics.terminality": "NEW_MAY_LATER_CANCEL_FILLED_IOC_MAY_END_CANCELED_QUANTITIES_CONTROL_OBLIGATIONS",
+        "quantity_price_semantics.price": "ACCEPTED_PRICE_MINIMUM_ORIGIN_AND_INCREMENT_NO_SNAP",
+        "quantity_price_semantics.quantity": "DISTINCT_MINIMUM_INCREMENT_AND_UNAVAILABLE_UNPROVEN_ORIGIN",
+        "quantity_price_semantics.executed": "PER_FILL_EXECUTED_DISTINCT_FROM_TERMINAL_CUMULATIVE_EXECUTED",
+        "emergency_profile.single_cancel": "EXACT_ORDER_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.all_cancel": "EXPLICIT_ACCOUNT_ALL_SCOPE_REQUIRES_PRIVATE_RECONCILIATION",
+        "emergency_profile.session_cancel": "EXACT_SESSION_SCOPE_REQUIRES_PRIVATE_TERMINAL_EVIDENCE",
+        "emergency_profile.terminal_evidence_sources": "PRIVATE_ORDER_FILL_AND_OPEN_ORDER_RECONCILIATION",
+        "emergency_profile.scope_blast_radius": "ORDER_SESSION_AND_ACCOUNT_ALL_SCOPES_ARE_DISTINCT",
+    }),
+})
+_PUBLIC_EMERGENCY_FIELDS_V1 = (
+    "single_cancel", "batch_cancel", "all_cancel", "group_cancel", "session_cancel",
+    "pause_new_order_behavior", "pause_cancel_behavior", "disconnect_order_behavior",
+    "terminal_evidence_sources", "reduction_mechanism", "scope_blast_radius",
+    "unknown_custody_policy", "rearm_requirements",
+)
+_PUBLIC_UNOBSERVED_SEMANTICS_V1 = (
+    "queue_semantics.native_queue_position", "queue_semantics.batch_atomicity",
+    "queue_semantics.taker_delay", "maintenance_semantics.account_capacity",
+    "settlement_semantics.cash_posting",
+)
+
+
+def _public_semantic_rules_v1(profile_id):
+    from .receipts import _public_profile_v1
+
+    _public_profile_v1(profile_id)
+    return dict(_PUBLIC_COMMON_SEMANTICS_V1, **_PUBLIC_VENUE_SEMANTICS_V1[profile_id])
+
+
+def _validate_public_semantic_facts_v1(*, profile_id, facts, field_bindings, original_ref):
+    """Validate a closed accepted extraction; no source acceptance is issued."""
+    rules = _public_semantic_rules_v1(profile_id)
+    _native_require(type(facts) in (dict, MappingProxyType) and len(facts) <= len(rules),
+                    "invalid accepted venue semantics")
+    for name, value in facts.items():
+        _native_require(type(name) is str and name in rules and type(value) in (dict, MappingProxyType)
+            and set(value) == {"disposition", "rule_id"}, "unselected venue semantic field")
+        _native_require(value["disposition"] in {"SOURCE_BOUND_SUPPORTED", "SOURCE_BOUND_UNSUPPORTED", "NOT_APPLICABLE_WITH_PROOF"}
+            and type(value["disposition"]) is str and type(value["rule_id"]) is str and value["rule_id"] == rules[name],
+            "unsupported native semantic rule")
+        matches = tuple(row for row in field_bindings if row[0] == "venue_semantics." + name and row[3] == original_ref)
+        _native_require(len(matches) == 1 and matches[0][1] == "OBJECT" and matches[0][2] == "EVIDENCE_USE_SEMANTICS"
+            and matches[0][5] == "EXACT_IDENTITY", "venue semantic fact lacks exact accepted field lineage")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicVenueSemanticFactV1:
+    disposition: str
+    rule_id_or_none: str | None
+    field_lineage: tuple[tuple[str, str, str, str], ...]
+    unavailable_reason_or_none: str | None
+
+    def __post_init__(self):
+        from ..market_data_ingest.binding import _public_field_lineage_v1
+
+        _native_require(type(self.disposition) is str and self.disposition in {
+            "SOURCE_BOUND_SUPPORTED", "SOURCE_BOUND_UNSUPPORTED", "UNAVAILABLE_MISSING_BINDING", "NOT_APPLICABLE_WITH_PROOF"},
+            "invalid semantic capability disposition")
+        if self.disposition == "UNAVAILABLE_MISSING_BINDING":
+            _native_require(self.rule_id_or_none is None and self.field_lineage == (),
+                            "unavailable semantic capability cannot claim a rule")
+            _native_ident(self.unavailable_reason_or_none)
+        else:
+            _native_ident(self.rule_id_or_none)
+            _public_field_lineage_v1(self.field_lineage)
+            _native_require(self.unavailable_reason_or_none is None, "bound semantic capability has an unavailable reason")
+
+
+@dataclass(frozen=True, slots=True)
+class PublicVenueSemanticSectionV1:
+    section: str
+    fields: tuple[tuple[str, PublicVenueSemanticFactV1], ...]
+
+    def __post_init__(self):
+        _native_require(type(self.section) is str and self.section in {
+            "order_semantics", "quantity_price_semantics", "queue_semantics", "maintenance_semantics", "settlement_semantics"},
+            "unselected semantic section")
+        _native_require(type(self.fields) is tuple and 0 < len(self.fields) <= 64, "invalid semantic section fields")
+        names = set()
+        for row in self.fields:
+            _native_require(type(row) is tuple and len(row) == 2 and type(row[1]) is PublicVenueSemanticFactV1,
+                            "invalid typed semantic fact")
+            _native_ident(row[0])
+            _native_require(row[0] not in names, "duplicate semantic field")
+            names.add(row[0])
+            row[1].__post_init__()
+
+
+@dataclass(frozen=True, slots=True)
+class PublicEmergencySemanticProfileV1:
+    single_cancel: PublicVenueSemanticFactV1
+    batch_cancel: PublicVenueSemanticFactV1
+    all_cancel: PublicVenueSemanticFactV1
+    group_cancel: PublicVenueSemanticFactV1
+    session_cancel: PublicVenueSemanticFactV1
+    pause_new_order_behavior: PublicVenueSemanticFactV1
+    pause_cancel_behavior: PublicVenueSemanticFactV1
+    disconnect_order_behavior: PublicVenueSemanticFactV1
+    terminal_evidence_sources: PublicVenueSemanticFactV1
+    reduction_mechanism: PublicVenueSemanticFactV1
+    scope_blast_radius: PublicVenueSemanticFactV1
+    unknown_custody_policy: PublicVenueSemanticFactV1
+    rearm_requirements: PublicVenueSemanticFactV1
+    source_refs: tuple[str, ...]
+    native_version: str
+    known_at_ns: int
+    effective_from_ns: int
+    expires_at_ns: int
+    generation: int
+
+    def __post_init__(self):
+        _public_refs_v1(self.source_refs)
+        _native_ident(self.native_version)
+        for name in _PUBLIC_EMERGENCY_FIELDS_V1:
+            fact = getattr(self, name)
+            _native_require(type(fact) is PublicVenueSemanticFactV1, "emergency capability must have a typed disposition")
+            fact.__post_init__()
+        for name in ("known_at_ns", "effective_from_ns", "expires_at_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        _native_require(max(self.known_at_ns, self.effective_from_ns) < self.expires_at_ns, "expired emergency semantics")
+        _public_counter_v1(self.generation, allow_zero=True)
+
+
+@dataclass(frozen=True, slots=True)
+class SelectedVenueRealityBindingV1:
+    binding_id: str
+    profile_id: Stage1VenueProfileIdV1
+    source_epoch_id: str
+    native_version: str
+    instrument_scope: tuple[str, ...]
+    account_scope_ref_or_none: str | None
+    source_refs: tuple[str, ...]
+    known_at_ns: int
+    effective_from_ns: int
+    expires_at_ns: int
+    generation: int
+    order_semantics: PublicVenueSemanticSectionV1
+    quantity_price_semantics: PublicVenueSemanticSectionV1
+    fee_binding_refs: tuple[str, ...]
+    rate_binding_ref_or_none: str | None
+    queue_semantics: PublicVenueSemanticSectionV1
+    maintenance_semantics: PublicVenueSemanticSectionV1
+    settlement_semantics: PublicVenueSemanticSectionV1
+    emergency_profile: PublicEmergencySemanticProfileV1
+    unavailable_capabilities: tuple[str, ...]
+    no_order_authority: bool
+
+    def __post_init__(self):
+        rules = _public_semantic_rules_v1(self.profile_id)
+        for name in ("binding_id", "source_epoch_id", "native_version"):
+            _native_ident(getattr(self, name))
+        for name in ("account_scope_ref_or_none", "rate_binding_ref_or_none"):
+            if getattr(self, name) is not None:
+                _native_ident(getattr(self, name))
+        for name in ("instrument_scope", "source_refs", "fee_binding_refs", "unavailable_capabilities"):
+            _public_refs_v1(getattr(self, name), allow_empty=name in {"fee_binding_refs", "unavailable_capabilities"})
+        for name in ("known_at_ns", "effective_from_ns", "expires_at_ns"):
+            _public_nanoseconds_v1(getattr(self, name))
+        _native_require(max(self.known_at_ns, self.effective_from_ns) < self.expires_at_ns
+            and self.no_order_authority is True, "reality binding expired or claims order authority")
+        _public_counter_v1(self.generation, allow_zero=True)
+        expected = set(rules) | set(_PUBLIC_UNOBSERVED_SEMANTICS_V1) | {
+            "emergency_profile." + name for name in _PUBLIC_EMERGENCY_FIELDS_V1}
+        actual = {}
+        for name in ("order_semantics", "quantity_price_semantics", "queue_semantics", "maintenance_semantics", "settlement_semantics"):
+            section = getattr(self, name)
+            _native_require(type(section) is PublicVenueSemanticSectionV1 and section.section == name,
+                            "wrong typed venue semantic section")
+            section.__post_init__()
+            actual.update((name + "." + key, value) for key, value in section.fields)
+        emergency = self.emergency_profile
+        _native_require(type(emergency) is PublicEmergencySemanticProfileV1, "untyped emergency semantics")
+        emergency.__post_init__()
+        _native_require(all(getattr(emergency, name) == getattr(self, name) for name in (
+            "source_refs", "native_version", "known_at_ns", "effective_from_ns", "expires_at_ns", "generation")),
+            "emergency source/version/time/generation mismatch")
+        actual.update(("emergency_profile." + name, getattr(emergency, name)) for name in _PUBLIC_EMERGENCY_FIELDS_V1)
+        _native_require(set(actual) == expected, "venue reality field set is not closed")
+        unavailable = set()
+        for name, fact in actual.items():
+            if fact.disposition == "UNAVAILABLE_MISSING_BINDING":
+                unavailable.add(name)
+            else:
+                _native_require(name in rules and fact.rule_id_or_none == rules[name]
+                    and all(row[0] in self.source_refs and row[2] == "venue_semantics." + name for row in fact.field_lineage),
+                    "venue semantic rule or lineage differs from the selected profile")
+                if fact.rule_id_or_none == "UNKNOWN_REQUIRES_ACCEPTED_BINDING":
+                    unavailable.add(name)
+        if not self.fee_binding_refs:
+            unavailable.add("fee_binding_refs")
+        if self.rate_binding_ref_or_none is None:
+            unavailable.add("rate_binding_ref_or_none")
+        _native_require(set(self.unavailable_capabilities) == unavailable, "venue unavailable capabilities differ from facts")
+
+
+def compile_selected_venue_reality_binding_v1(*, source_binding, acceptance_results, originals, review_facts,
+                                            source_epoch_id, metadata, applicability, fee_epochs, rate_binding,
+                                            known_as_of_ns):
+    """Compile evidence-use semantics through the existing accepted source owner.
+
+    Synthetic acceptance remains synthetic. Native use additionally requires the
+    current source-use/publication custody and never follows from this record.
+    """
+    from ..market_data_ingest.binding import PublicMetadataSnapshotV1
+    from ..market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+    from .receipts import _public_identity_v1
+
+    projection = project_accepted_public_field_bindings_v1(source_binding=source_binding,
+        acceptance_results=acceptance_results, originals=originals, review_facts=review_facts)
+    _native_ident(source_epoch_id)
+    _public_nanoseconds_v1(known_as_of_ns)
+    _native_require(source_binding.known_at_ns <= known_as_of_ns < source_binding.expires_at_ns
+        and source_binding.effective_from_ns <= known_as_of_ns
+        and (source_binding.effective_until_ns_or_none is None or known_as_of_ns < source_binding.effective_until_ns_or_none),
+        "venue semantics source is not current")
+    _native_require(type(metadata) is tuple and 0 < len(metadata) <= 4096
+        and all(type(row) is PublicMetadataSnapshotV1 for row in metadata), "venue semantics metadata unavailable")
+    for row in metadata:
+        row.__post_init__()
+        _native_require(row.profile_id is source_binding.profile_id and row.known_at_ns <= known_as_of_ns < row.expires_at_ns
+            and row.effective_from_ns <= known_as_of_ns
+            and (row.effective_until_ns_or_none is None or known_as_of_ns < row.effective_until_ns_or_none),
+            "venue semantics metadata scope/interval differs")
+    instruments = tuple(sorted(row.instrument_id for row in metadata))
+    _public_refs_v1(instruments)
+    ends = [source_binding.expires_at_ns, *(row.expires_at_ns for row in metadata)]
+    ends.extend(row.effective_until_ns_or_none for row in (source_binding, *metadata) if row.effective_until_ns_or_none is not None)
+    known = max(source_binding.known_at_ns, *(row.known_at_ns for row in metadata))
+    effective = max(source_binding.effective_from_ns, *(row.effective_from_ns for row in metadata))
+    if applicability is not None:
+        _native_require(type(applicability) is SelectedAccountApplicabilityV1, "untyped venue account applicability")
+        applicability.__post_init__()
+        _native_require(applicability.profile_id is source_binding.profile_id
+            and applicability.available_at_ns <= known_as_of_ns
+            and applicability.effective_from_ns <= known_as_of_ns < applicability.effective_until_ns,
+            "venue account applicability is not current")
+        known, effective = max(known, applicability.available_at_ns), max(effective, applicability.effective_from_ns)
+        ends.append(applicability.effective_until_ns)
+    _native_require(type(fee_epochs) is tuple and len(fee_epochs) <= 4096, "invalid venue fee bindings")
+    for epoch in fee_epochs:
+        _native_require(type(epoch) is PublicFeeEpochV1, "untyped venue fee binding")
+        epoch.__post_init__()
+        _native_require(epoch.profile_id is source_binding.profile_id and set(epoch.market_scope) <= set(instruments)
+            and epoch.known_at_ns <= known_as_of_ns < epoch.expires_at_ns, "venue fee scope/knowledge differs")
+        ends.append(epoch.expires_at_ns)
+        known = max(known, epoch.known_at_ns)
+    if rate_binding is not None:
+        _native_require(type(rate_binding) is PublicRequestRateBindingV1, "untyped venue rate binding")
+        rate_binding.__post_init__()
+        _native_require(rate_binding.profile_id is source_binding.profile_id
+            and rate_binding.effective_from_ns <= known_as_of_ns < rate_binding.expires_at_ns
+            and set(rate_binding.source_refs) <= set(source_binding.original_evidence_refs), "venue rate scope/source differs")
+        effective = max(effective, rate_binding.effective_from_ns)
+        ends.append(rate_binding.expires_at_ns)
+    rules = _public_semantic_rules_v1(source_binding.profile_id)
+    selected = {}
+    for bundle in projection[2]:
+        packet = bundle["accepted_packet"]
+        original_ref = packet["accepted_source_evidence_packet_id"]
+        facts = packet["extracted_fact_payload"].get("venue_semantics", {})
+        _validate_public_semantic_facts_v1(profile_id=source_binding.profile_id, facts=facts,
+            field_bindings=source_binding.field_bindings, original_ref=original_ref)
+        for name, fact in facts.items():
+            _native_require(name not in selected, "conflicting accepted venue semantic facts")
+            lineage = tuple((original, pointer, field_name, transform) for field_name, wire, unit, original, pointer, transform
+                in source_binding.field_bindings if field_name == "venue_semantics." + name and original == original_ref)
+            selected[name] = PublicVenueSemanticFactV1(fact["disposition"], fact["rule_id"], lineage, None)
+    expected = set(rules) | set(_PUBLIC_UNOBSERVED_SEMANTICS_V1) | {
+        "emergency_profile." + name for name in _PUBLIC_EMERGENCY_FIELDS_V1}
+    for name in sorted(expected - set(selected)):
+        selected[name] = PublicVenueSemanticFactV1("UNAVAILABLE_MISSING_BINDING", None, (), "OWNER_DATA_MISSING::" + name)
+    unavailable = {name for name, fact in selected.items() if fact.disposition == "UNAVAILABLE_MISSING_BINDING"
+        or fact.rule_id_or_none == "UNKNOWN_REQUIRES_ACCEPTED_BINDING"}
+    if not fee_epochs:
+        unavailable.add("fee_binding_refs")
+    if rate_binding is None:
+        unavailable.add("rate_binding_ref_or_none")
+    version = _public_identity_v1("PUBLIC_NATIVE_SOURCE_VERSIONS_V1", *source_binding.source_contract_versions)
+    generation = max(source_binding.generation, *(row.generation for row in metadata),
+        *(row.generation for row in fee_epochs), *(() if applicability is None else (applicability.generation,)),
+        *(() if rate_binding is None else (rate_binding.generation,)))
+    common = dict(source_refs=source_binding.original_evidence_refs, native_version=version,
+        known_at_ns=known, effective_from_ns=effective, expires_at_ns=min(ends), generation=generation)
+    sections = {section: PublicVenueSemanticSectionV1(section, tuple(sorted(
+        (name.split(".", 1)[1], fact) for name, fact in selected.items() if name.startswith(section + "."))))
+        for section in ("order_semantics", "quantity_price_semantics", "queue_semantics", "maintenance_semantics", "settlement_semantics")}
+    identity = _public_identity_v1("SELECTED_VENUE_REALITY_V1", source_binding.profile_id.value, source_epoch_id,
+        source_binding.binding_id, version, generation, known, effective, min(ends), *instruments)
+    return SelectedVenueRealityBindingV1(binding_id=identity, profile_id=source_binding.profile_id,
+        source_epoch_id=source_epoch_id, instrument_scope=instruments,
+        account_scope_ref_or_none=None if applicability is None else applicability.account_scope_ref,
+        fee_binding_refs=tuple(epoch.epoch_id for epoch in fee_epochs),
+        rate_binding_ref_or_none=None if rate_binding is None else rate_binding.binding_id,
+        emergency_profile=PublicEmergencySemanticProfileV1(**{name: selected["emergency_profile." + name]
+            for name in _PUBLIC_EMERGENCY_FIELDS_V1}, **common),
+        unavailable_capabilities=tuple(sorted(unavailable)), no_order_authority=True, **sections, **common)
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +1226,525 @@ def read_recorded_source_use_status_v1(
                                     head.recorded_at, evaluated_at_utc, state)
 
 
+_PUBLIC_BINDINGS_V1 = {}
+_PUBLIC_CREDENTIALS_V1 = {}
+
+
+class PublicCredentialBindingV1:
+    """Opaque parsed-key custody, issued only inside an admitted capture effect."""
+
+    __slots__ = ("_binding", "_row", "_key", "_expiry", "_generation", "_resources", "_process_id", "_native_qualified")
+
+    def __init__(self):
+        raise TypeError("public credential requires the protected capture effect")
+
+    def __repr__(self):
+        return "<PublicCredentialBindingV1 opaque>"
+
+    def __reduce__(self):
+        raise TypeError("public credentials cannot be serialized")
+
+    def __copy__(self):
+        raise TypeError("public credentials cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("public credentials cannot be copied")
+
+
+class PublicSourceUseBindingV1:
+    """Private process-bound issuance, separate from data-only scope records."""
+
+    __slots__ = ("_authority", "_root", "_generation", "_event", "_capture", "_control_records",
+                 "_native_qualified", "_process_id", "_thread_id", "_deadline", "_failed", "_owner",
+                 "_source_inputs", "_publication_lock", "_resources", "_started", "_input_view")
+
+    def __init__(self):
+        raise TypeError("public source-use binding requires authenticated owner issuance")
+
+    def __reduce__(self):
+        raise TypeError("public permission cannot be serialized")
+
+    def __copy__(self):
+        raise TypeError("public permission cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("public permission cannot be copied")
+
+
+def _public_binding_facts_v1(binding):
+    import os
+    import threading
+    import time
+    from .receipts import _public_identity_v1
+
+    _native_require(type(binding) is PublicSourceUseBindingV1 and _PUBLIC_BINDINGS_V1.get(id(binding)) is binding
+                    and binding._process_id == os.getpid() and binding._thread_id == threading.get_ident()
+                    and not binding._failed and time.monotonic_ns() < binding._deadline,
+                    "public permission has no current process/thread custody")
+    if binding._authority is not None:
+        with binding._authority._lock:
+            binding._authority._check_public_binding_v1(binding)
+    request = binding._capture
+    _native_require(time.time_ns() < request.operating_expires_at_ns
+                    and time.time_ns() < request.scope.retention_expires_at_ns,
+                    "public operating/retention permission expired")
+    return MappingProxyType(dict(scope=request.scope,
+        scope_ref=_public_identity_v1("PUBLIC_SCOPE_V1", request.request_id, binding._generation),
+        scope_generation=binding._generation, storage_root_ref=request.scope.storage_root_ref,
+        retention_expires_at_ns=request.scope.retention_expires_at_ns, budget=request.scope.budget,
+        native_qualified=binding._native_qualified, capture_session_id=request.capture_session_id,
+        action_ref=binding._event.record_id, control_records=binding._control_records,
+        source_inputs=binding._source_inputs))
+
+
+def _create_synthetic_public_binding_v1(*, capture, control_records: tuple, source_inputs: Mapping):
+    """Explicit synthetic fixture issuer; its binding cannot open a native store or registry."""
+    import os
+    import threading
+    from .receipts import PublicCaptureRequestV1, PublicDataSourceUseActionV1, _public_validate_spine_v1
+
+    _native_require(type(capture) is PublicCaptureRequestV1 and type(control_records) is tuple and control_records,
+                    "synthetic public binding requires exact fixture records")
+    capture.__post_init__()
+    for row in control_records:
+        _public_validate_spine_v1(row)
+    event = control_records[-1]
+    _native_require(type(event.typed_payload) is PublicDataSourceUseActionV1
+                    and event.typed_payload.action == "OBSERVE_ONCE" and event.typed_payload.capture == capture,
+                    "synthetic capture fixture has no matching final action")
+    _native_require(type(source_inputs) in (dict, MappingProxyType), "invalid synthetic source inputs")
+    result = object.__new__(PublicSourceUseBindingV1)
+    result._authority = result._root = None
+    result._generation, result._event, result._capture = event.typed_payload.generation_after, event, capture
+    result._control_records, result._native_qualified = control_records, False
+    result._process_id, result._thread_id = os.getpid(), threading.get_ident()
+    result._deadline, result._failed, result._owner = capture.scope.budget.deadline_monotonic_ns, False, None
+    result._source_inputs, result._publication_lock = MappingProxyType(dict(source_inputs)), threading.RLock()
+    result._resources, result._started = None, False
+    result._input_view = None
+    _PUBLIC_BINDINGS_V1[id(result)] = result
+    _public_binding_facts_v1(result)
+    return result
+
+
+_PUBLIC_RESPONSE_FENCES_V1 = {}
+
+
+class _PublicResponseFenceV1:
+    def __init__(self):
+        raise TypeError("public response fence requires original source custody")
+
+    def __reduce__(self):
+        raise TypeError("public response fence is process-local")
+
+
+def _prepare_public_response_fence_v1(*, binding, sources, metadata, applicability=None, not_after_ns=None):
+    """Perform source/root checks before entering the short resident fence."""
+    from ..market_data_ingest.binding import PublicMetadataSnapshotV1
+    from .sqlite_reference import _public_root_facts_v1, _SYNTHETIC_PUBLIC_ROOTS_V1
+    from ...service.owner_source_use_windows import _ROOTS, _PUBLIC_STORAGE_ROOTS_V1
+    from .persistence import PersistenceAvailabilityV1
+
+    facts = _public_binding_facts_v1(binding)
+    inputs, owner = binding._source_inputs, binding._owner
+    _native_require(owner is not None and owner._inputs is inputs
+                    and type(sources) is tuple and sources and type(metadata) is tuple and metadata,
+                    "response fence requires its selected source and metadata closure")
+    before, wall, after = time.monotonic_ns(), time.time_ns(), time.monotonic_ns()
+    _native_require(0 <= before <= after <= 2**63-1 and type(wall) is int
+                    and after-before <= facts["budget"].maximum_wall_uncertainty_ns, "response fence clock quality unavailable")
+    root = inputs["storage_root"]
+    root_facts = _public_root_facts_v1(root)
+    expiries = [binding._capture.operating_expires_at_ns, facts["retention_expires_at_ns"], root_facts["expires_at_ns"]]
+    if not_after_ns is not None:
+        _public_nanoseconds_v1(not_after_ns)
+        expiries.append(not_after_ns)
+    selected = []
+    for rows, key, cls in ((sources, "source_bindings", PublicDataSourceBindingV1),
+                           (metadata, "metadata", PublicMetadataSnapshotV1)):
+        for row in rows:
+            admitted = owner._active_metadata if key == "metadata" else inputs[key]
+            _native_require(type(row) is cls and any(item is row for item in admitted),
+                            "response dependency has no admitted source-owner identity")
+            row.__post_init__()
+            _native_require(row.known_at_ns <= wall < row.expires_at_ns and row.effective_from_ns <= wall
+                            and (row.effective_until_ns_or_none is None or wall < row.effective_until_ns_or_none),
+                            "selected response dependency is expired or ineffective")
+            expiries.append(row.expires_at_ns)
+            if row.effective_until_ns_or_none is not None:
+                expiries.append(row.effective_until_ns_or_none)
+            selected.append((row, row.generation))
+    if applicability is not None:
+        _native_require(type(applicability) is SelectedAccountApplicabilityV1
+                        and inputs["account_applicability_or_none"] is applicability,
+                        "response account dependency has no admitted identity")
+        applicability.__post_init__()
+        _native_require(applicability.available_at_ns <= wall
+                        and applicability.effective_from_ns <= wall < applicability.effective_until_ns,
+                        "response account dependency is unavailable")
+        expiries.append(applicability.effective_until_ns)
+        selected.append((applicability, applicability.generation))
+    authority = binding._authority
+    native = None
+    if authority is not None:
+        resources = binding._resources
+        expiries.extend((resources["expires_at_ns"], _native_utc_nanoseconds(authority._expires.isoformat()),
+            _native_utc_nanoseconds(authority._review.typed_payload.expires_at_utc.isoformat()),
+            _native_utc_nanoseconds(authority._use.typed_payload.expires_at_utc.isoformat())))
+        native = (authority._head, authority._review, authority._use, authority._selected_scope,
+                  authority._adapter._original_control_scope, resources, resources["configuration"],
+                  resources["configuration_generation"], _ROOTS, _PUBLIC_STORAGE_ROOTS_V1,
+                  PersistenceAvailabilityV1.AVAILABLE_OWNER_CONTROL_EPHEMERAL)
+    _native_require(wall < min(expiries) and after < binding._deadline, "response permission expired")
+    fence = object.__new__(_PublicResponseFenceV1)
+    _PUBLIC_RESPONSE_FENCES_V1[id(fence)] = (fence, binding, owner, inputs, binding._generation, min(expiries),
+        binding._deadline, (tuple(selected), owner._active_metadata), native, wall, after, _SYNTHETIC_PUBLIC_ROOTS_V1, root,
+        facts["budget"].maximum_wall_uncertainty_ns)
+    return fence
+
+
+def _check_public_response_fence_v1(fence):
+    """Resident identities and exact clocks only; no imports, I/O or refresh."""
+    row = _PUBLIC_RESPONSE_FENCES_V1.get(id(fence))
+    _native_require(type(fence) is _PublicResponseFenceV1 and row is not None and row[0] is fence,
+                    "response fence has no original issuance")
+    _, binding, owner, inputs, generation, expiry, deadline, selected, native, last_wall, last_mono, roots, root, uncertainty = row
+    before, wall, after = time.monotonic_ns(), time.time_ns(), time.monotonic_ns()
+    _native_require(type(before) is type(wall) is type(after) is int
+                    and 0 <= last_mono <= before <= after < deadline and last_wall <= wall < expiry
+                    and owner._last_wall <= wall and owner._last_mono <= before
+                    and after-before <= uncertainty and _PUBLIC_BINDINGS_V1.get(id(binding)) is binding
+                    and binding._owner is owner and binding._source_inputs is inputs and owner._inputs is inputs
+                    and binding._generation == generation
+                    and not binding._failed and binding._process_id == os.getpid()
+                    and binding._thread_id == threading.get_ident(),
+                    "response dependency generation, custody or exclusive deadline changed")
+    _native_require(owner._active_metadata is selected[1], "response metadata version changed")
+    for item, expected in selected[0]:
+        _native_require(item.generation == expected, "response dependency generation changed")
+    authority = binding._authority
+    if native is None:
+        _native_require(authority is None and not binding._native_qualified and roots.get(id(root)) is root,
+                        "synthetic response origin changed")
+    else:
+        head, review, use, scope, control_scope, resources, configuration, configuration_generation, native_roots, storage_roots, available = native
+        _native_require(authority is not None and not authority._stopped
+                        and authority._bindings.get(id(binding)) is binding and authority._active_permit is binding
+                        and authority._head is head is binding._event and authority._review is review and authority._use is use
+                        and authority._selected_scope is scope and head.typed_payload.capture is binding._capture
+                        and binding._native_qualified is True
+                        and authority._public_input_view is binding._input_view and binding._input_view is not None
+                        and binding._source_inputs["qualified_source_bindings"] is binding._input_view[5]
+                        and all(binding._source_inputs[name] is value for name,value in binding._input_view[4].items())
+                        and authority._adapter._control_scope is control_scope is authority._adapter._original_control_scope
+                        and authority._adapter.availability is available and binding._resources is resources
+                        and binding._root is authority._root and native_roots.get(id(binding._root)) is binding._root
+                        and not binding._root.closed and binding._root.public_configuration is configuration
+                        and configuration[0] == configuration_generation and storage_roots.get(id(root)) is root
+                        and resources["storage_root"] is root and root.owner is binding._root,
+                        "native response authority/root changed")
+    owner._last_wall, owner._last_mono = wall, after
+    _PUBLIC_RESPONSE_FENCES_V1[id(fence)] = (*row[:9], wall, after, *row[11:])
+    return wall, after
+
+
+@contextmanager
+def _public_response_fence_v1(fence):
+    row = _PUBLIC_RESPONSE_FENCES_V1.get(id(fence))
+    _native_require(type(fence) is _PublicResponseFenceV1 and row is not None and row[0] is fence,
+                    "unissued public response fence")
+    binding, owner = row[1], row[2]
+    authority_lock = binding._authority._lock if binding._authority is not None else binding._publication_lock
+    # S -> O -> A -> P. Callers only install/return an already assembled immutable
+    # result here; source lookup, serialization and external effects precede it.
+    with owner._lock, owner._observation_lock, authority_lock, binding._publication_lock:
+        _check_public_response_fence_v1(fence)
+        yield
+        _check_public_response_fence_v1(fence)
+
+
+def _resolve_public_operational_inputs_v1(*, binding, evaluated_at_ns: int):
+    """Join the original binding's immutable inputs before capture/publication."""
+    from .sqlite_reference import _public_root_facts_v1
+
+    facts = _public_binding_facts_v1(binding)
+    inputs = facts["source_inputs"]
+    # Preserve the typed missing-input result before touching a root.
+    if "storage_root" not in inputs:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING, "public source-owner storage input unavailable")
+    root = _public_root_facts_v1(inputs["storage_root"])
+    return _validate_public_operational_input_view_v1(inputs=inputs, capture=binding._capture,
+        root=root, native_qualified=facts["native_qualified"], evaluated_at_ns=evaluated_at_ns)
+
+
+def _validate_public_operational_input_view_v1(*, inputs, capture, root, native_qualified, evaluated_at_ns):
+    """Pure shared join of previously observed root facts and typed owner views."""
+    from ..market_data_ingest.adapter import PublicDataReadRequestV1, compile_public_read_request_v1
+    from ..market_data_ingest.binding import PublicMetadataSnapshotV1, SelectedPITPublicDataContractV2
+    from .receipts import PublicCaptureRequestV1
+
+    _native_require(type(capture) is PublicCaptureRequestV1 and type(inputs) in (dict, MappingProxyType)
+                    and type(native_qualified) is bool, "invalid public operational input view")
+    capture.__post_init__()
+    _public_nanoseconds_v1(evaluated_at_ns)
+    scope = capture.scope
+    required = {"requests", "contracts", "metadata", "source_bindings", "rate_bindings",
+                "exclusive_allocation_refs", "storage_root", "process_epoch_id", "monotonic_clock_id",
+                "wall_clock_source_id", "clock_quality_ref", "wall_uncertainty_ns", "account_applicability_or_none"}
+    missing = sorted(required - set(inputs))
+    if missing:
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING,
+                                "public source-owner operational inputs unavailable: " + ", ".join(missing))
+    for name in ("requests", "contracts", "metadata", "source_bindings", "rate_bindings"):
+        _native_require(type(inputs[name]) is tuple and len(inputs[name]) <= 4096,
+                        "invalid bounded public source-owner input: " + name)
+    _native_require(inputs["requests"] and len(inputs["requests"]) <= scope.budget.max_requests,
+                    "finite request selection is absent or exceeds the original budget")
+    for name in ("process_epoch_id", "monotonic_clock_id", "wall_clock_source_id", "clock_quality_ref"):
+        _native_ident(inputs[name])
+    _public_nanoseconds_v1(inputs["wall_uncertainty_ns"])
+    _native_require(inputs["wall_uncertainty_ns"] <= scope.budget.maximum_wall_uncertainty_ns,
+                    "source clock quality exceeds the admitted uncertainty")
+    _native_require(root["root_ref"] == scope.storage_root_ref
+                    and root["native_qualified"] is native_qualified, "source storage origin/scope differs")
+    _public_refs_v1(inputs["exclusive_allocation_refs"])
+    sources, metadata, contracts = {}, {}, {}
+    for row in inputs["source_bindings"]:
+        _native_require(type(row) is PublicDataSourceBindingV1, "untyped public source binding")
+        row.__post_init__()
+        _native_require(row.binding_id not in sources and row.profile_id is scope.profile_id
+                        and set(row.source_ids) <= set(scope.source_ids)
+                        and set(row.allowed_operation_ids) <= set(scope.native_operation_ids)
+                        and set(row.permitted_consumer_ids) <= set(scope.permitted_consumer_ids)
+                        and scope.source_contract_version in row.source_contract_versions
+                        and row.known_at_ns <= evaluated_at_ns < row.expires_at_ns
+                        and row.effective_from_ns <= evaluated_at_ns
+                        and (row.effective_until_ns_or_none is None or evaluated_at_ns < row.effective_until_ns_or_none),
+                        "public source binding is conflicting, stale or outside the admitted scope")
+        sources[row.binding_id] = row
+    _native_require(set(sources) == set(capture.source_binding_refs), "capture source references do not resolve exactly")
+    if native_qualified:
+        # The authenticated source owner already issued these exact receipts.
+        pairs = inputs.get("source_pairs")
+        _native_require(type(pairs) is tuple and pairs, "native source/right custody unavailable")
+        qualified = inputs.get("qualified_source_bindings")
+        _native_require(type(qualified) is tuple and len(qualified) == len(sources),
+                        "native accepted material source qualification unavailable")
+        for row in sources.values():
+            matched = tuple(item for item in qualified if type(item) is tuple and len(item) == 5 and item[0] is row)
+            _native_require(len(matched) == 1 and matched[0][4] is True,
+                            "native material source facts are unqualified or synthetic")
+            expected = tuple((item.source_id, item.source_contract_version, item.receipt_id,
+                              rights.receipt_id) for item, rights in pairs)
+            selected = tuple(zip(row.source_ids, row.source_contract_versions, row.source_receipt_refs, row.rights_receipt_refs))
+            _native_require(set(selected) <= set(expected), "source candidate is not joined to the accepted source/right receipts")
+        # Source/right acceptance is not quota or exclusive shared-counter
+        # custody. No native allocation issuer is available through this owner;
+        # caller-authored rate rows and matching reference strings cannot replace
+        # it. Keep synthetic quota arithmetic usable without granting transport.
+        raise SourcePolicyError(ReasonCode.OWNER_DATA_MISSING,
+                                "verified native provider quota and exclusive allocation custody unavailable")
+    for row in inputs["metadata"]:
+        _native_require(type(row) is PublicMetadataSnapshotV1, "untyped public metadata")
+        row.__post_init__()
+        _native_require(row.metadata_id not in metadata and row.profile_id is scope.profile_id
+                        and row.instrument_id in capture.requested_instrument_ids
+                        and row.known_at_ns <= evaluated_at_ns < row.expires_at_ns
+                        and row.effective_from_ns <= evaluated_at_ns
+                        and (row.effective_until_ns_or_none is None or evaluated_at_ns < row.effective_until_ns_or_none),
+                        "public metadata is conflicting, stale or outside selected instruments")
+        metadata[row.metadata_id] = row
+    for row in inputs["contracts"]:
+        _native_require(type(row) is SelectedPITPublicDataContractV2, "untyped public canonical contract")
+        row.__post_init__()
+        _native_require(row.contract_id not in contracts and row.profile_id is scope.profile_id,
+                        "conflicting/cross-profile public canonical contract")
+        contracts[row.contract_id] = row
+    applicability = inputs["account_applicability_or_none"]
+    if applicability is not None:
+        _native_require(type(applicability) is SelectedAccountApplicabilityV1, "untyped account applicability")
+        applicability.__post_init__()
+        _native_require(applicability.profile_id is scope.profile_id
+                        and applicability.account_scope_ref == scope.account_scope_ref_or_none
+                        and applicability.qualification_ref == capture.account_applicability_ref_or_none
+                        and applicability.available_at_ns <= evaluated_at_ns
+                        and applicability.effective_from_ns <= evaluated_at_ns < applicability.effective_until_ns,
+                        "public account applicability unavailable or mismatched")
+    rates = inputs["rate_bindings"]
+    rate_ids = set()
+    for rate in rates:
+        _native_require(type(rate) is PublicRequestRateBindingV1, "untyped public request allocation")
+        rate.__post_init__()
+        _native_require(rate.binding_id not in rate_ids and rate.profile_id is scope.profile_id
+                        and rate.allocation_ref in inputs["exclusive_allocation_refs"]
+                        and rate.effective_from_ns <= evaluated_at_ns < rate.expires_at_ns,
+                        "public allocation is conflicting, shared without custody or expired")
+        rate_ids.add(rate.binding_id)
+    plan, request_ids = [], set()
+    for request in inputs["requests"]:
+        _native_require(type(request) is PublicDataReadRequestV1, "untyped public read request")
+        request.__post_init__()
+        _native_require(request.request_id not in request_ids and request.profile_id is scope.profile_id
+                        and request.capture_request_ref == capture.request_id
+                        and request.operation_id in capture.requested_operation_ids
+                        and set(request.instrument_ids) <= set(capture.requested_instrument_ids)
+                        and request.source_binding_ref in sources
+                        and set(request.metadata_refs) <= set(metadata), "public request is unbound or outside capture")
+        request_ids.add(request.request_id)
+        source = sources[request.source_binding_ref]
+        selected_metadata = tuple(metadata[ref] for ref in request.metadata_refs)
+        admitted_contract_receipts = set(zip(source.source_contract_versions,
+            source.source_receipt_refs, source.rights_receipt_refs))
+        selected_contracts = [row for row in contracts.values()
+            if row.source_contract_version == request.native_contract_version
+            and (row.source_contract_version, row.source_currentization_receipt_ref,
+                 row.rights_receipt_ref) in admitted_contract_receipts]
+        _native_require(len(selected_contracts) == 1, "public request has no unique admitted canonical contract")
+        matching_rates = [row for row in rates if request.operation_id in row.operation_classes]
+        _native_require(len(matching_rates) == 1, "public operation has no unique active request allocation")
+        accepted_refs = set(source.source_ids + source.source_receipt_refs + source.original_evidence_refs)
+        _native_require(set(matching_rates[0].source_refs) <= accepted_refs,
+                        "public request allocation is not joined to admitted source evidence")
+        if request.operation_id in {"K_WS", "P_WS"}:
+            # Legacy same-product capture scope does not qualify fee facts.
+            # A distinct economic class requires its accepted source relation;
+            # credential product scope remains the configured legal product.
+            _native_require(applicability is not None and (applicability.product_scope_ref == source.legal_product_ref
+                or any(row is source for row in _public_accepted_account_sources_v1(inputs=inputs,
+                    applicability=applicability, native_only=native_qualified, known_as_of_ns=evaluated_at_ns))),
+                            "authenticated public stream account/product qualification unavailable")
+        descriptor = compile_public_read_request_v1(request=request, source_binding=source, metadata=selected_metadata)
+        _native_require(descriptor["receive_scope_class"] in scope.receive_scope_classes,
+                        "compiled receive scope was not explicitly admitted")
+        if descriptor["receive_scope_class"] == "GLOBAL_PUBLIC_LIFECYCLE":
+            _native_require(set(request.instrument_ids) == set(capture.requested_instrument_ids)
+                and {row.instrument_id for row in selected_metadata} == set(capture.requested_instrument_ids),
+                "global lifecycle request must cover every capture-selected instrument")
+        plan.append((request, source, selected_metadata, selected_contracts[0], descriptor))
+    _native_require(set(row[0].operation_id for row in plan) == set(capture.requested_operation_ids),
+                    "finite request plan does not cover the exact captured operation set")
+    return tuple(plan)
+
+
+def _require_public_credential_v1(*, credential, descriptor):
+    import os
+    import time
+
+    _native_require(type(credential) is PublicCredentialBindingV1
+                    and _PUBLIC_CREDENTIALS_V1.get(id(credential._binding)) is credential
+                    and credential._process_id == os.getpid(), "public credential has no original issuance custody")
+    binding, row = credential._binding, credential._row
+    facts = _public_binding_facts_v1(binding)
+    _native_require(binding._owner is not None and binding._resources is credential._resources
+                    and facts["native_qualified"] is credential._native_qualified,
+                    "public credential permission origin/resources changed")
+    _, wall, _ = binding._owner._guard_v1()
+    plan = _resolve_public_operational_inputs_v1(binding=binding, evaluated_at_ns=wall)
+    matches = [item for item in plan if item[4] == descriptor and item[0].operation_id in {"K_WS", "P_WS"}]
+    _native_require(len(matches) == 1 and descriptor["method"] == "WEBSOCKET"
+                    and descriptor["path"] in row["allowed_handshake_paths"] and not descriptor["query"]
+                    and row["alias_ref"] == facts["scope"].credential_alias_ref_or_none
+                    and row["profile_id"] == facts["scope"].profile_id.value
+                    and row["account_scope_ref"] == facts["scope"].account_scope_ref_or_none
+                    and row["product_scope_ref"] == matches[0][1].legal_product_ref
+                    and row["generation"] == credential._generation
+                    and row["valid_from_ns"] <= wall < credential._expiry <= row["expires_at_ns"],
+                    "public credential path/account/product/generation unavailable")
+    if credential._native_qualified:
+        from ...service.owner_source_use_windows import _check_public_credential_file_v1
+
+        _check_public_credential_file_v1(binding=binding, credential_row=row)
+    _native_require(time.time_ns() < credential._expiry, "public credential expired before signing/connect")
+    return wall
+
+
+def _load_public_credential_v1(*, binding, descriptor):
+    import os
+    from ...service.owner_source_use_windows import _read_public_credential_key_v1
+
+    facts = _public_binding_facts_v1(binding)
+    _native_require(binding._owner is not None, "public credential has no receiving owner")
+    _, wall, _ = binding._owner._guard_v1()
+    plan = _resolve_public_operational_inputs_v1(binding=binding, evaluated_at_ns=wall)
+    _native_require(len([item for item in plan if item[4] == descriptor
+                    and item[0].operation_id in {"K_WS", "P_WS"}]) == 1,
+                    "public credential requested for an unauthenticated or unbound route")
+    existing = _PUBLIC_CREDENTIALS_V1.get(id(binding))
+    if existing is not None:
+        _require_public_credential_v1(credential=existing, descriptor=descriptor)
+        return existing
+    row, key = _read_public_credential_key_v1(binding=binding)
+    _native_require(type(row) is MappingProxyType and set(row) == {"alias_ref", "profile_id", "account_scope_ref",
+        "product_scope_ref", "key_identifier", "algorithm", "relative_key_file", "valid_from_ns", "expires_at_ns",
+        "generation", "allowed_handshake_paths"}, "protected credential metadata closure differs")
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+
+    permitted = {
+        Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT: {
+            "KALSHI_ED25519": Ed25519PrivateKey, "KALSHI_RSA_PSS": RSAPrivateKey},
+        Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT: {"RETAIL_ED25519": Ed25519PrivateKey},
+    }
+    expected = permitted.get(facts["scope"].profile_id, {}).get(row["algorithm"])
+    _native_require(expected is not None and isinstance(key, expected), "parsed credential does not match the enrolled algorithm")
+    for name in ("alias_ref", "profile_id", "account_scope_ref", "product_scope_ref", "key_identifier", "relative_key_file"):
+        _native_ident(row[name])
+    for name in ("valid_from_ns", "expires_at_ns"):
+        _public_nanoseconds_v1(row[name])
+    _public_counter_v1(row["generation"], allow_zero=True)
+    _native_require(type(row["allowed_handshake_paths"]) is tuple and row["allowed_handshake_paths"] == (descriptor["path"],),
+                    "public credential has a broadened signing path")
+    result = object.__new__(PublicCredentialBindingV1)
+    result._binding, result._row, result._key, result._resources = binding, row, key, binding._resources
+    result._expiry = min(row["expires_at_ns"], binding._capture.operating_expires_at_ns)
+    result._generation, result._process_id, result._native_qualified = row["generation"], os.getpid(), facts["native_qualified"]
+    _PUBLIC_CREDENTIALS_V1[id(binding)] = result
+    try:
+        _require_public_credential_v1(credential=result, descriptor=descriptor)
+    except BaseException:
+        _PUBLIC_CREDENTIALS_V1.pop(id(binding), None)
+        raise
+    return result
+
+
+def _public_handshake_headers_v1(*, binding, descriptor):
+    import base64
+
+    facts = _public_binding_facts_v1(binding)
+    if facts["scope"].profile_id is Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT:
+        _native_require(descriptor["host"] == "ws.gemini.com" and descriptor["method"] == "WEBSOCKET",
+                        "unbound unauthenticated public stream")
+        return {}
+    credential = _load_public_credential_v1(binding=binding, descriptor=descriptor)
+    wall = _require_public_credential_v1(credential=credential, descriptor=descriptor)
+    row = credential._row
+    timestamp = str(wall // 1_000_000)
+    message = (timestamp + "GET" + descriptor["path"]).encode("utf-8")
+    if row["algorithm"] == "KALSHI_RSA_PSS":
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.asymmetric import padding
+
+        # Owner-accepted K-AUTH clarification: direct message signing, SHA-256,
+        # MGF1/SHA-256 and exactly the 32-byte SHA-256 digest-length salt.
+        signed = credential._key.sign(message,
+            padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.DIGEST_LENGTH), hashes.SHA256())
+    else:
+        signed = credential._key.sign(message)
+    signature = base64.b64encode(signed).decode("ascii")
+    _require_public_credential_v1(credential=credential, descriptor=descriptor)
+    if row["algorithm"] == "RETAIL_ED25519":
+        return {"X-PM-Access-Key": row["key_identifier"], "X-PM-Timestamp": timestamp, "X-PM-Signature": signature}
+    return {"KALSHI-ACCESS-KEY": row["key_identifier"], "KALSHI-ACCESS-TIMESTAMP": timestamp,
+            "KALSHI-ACCESS-SIGNATURE": signature}
+
+
+def _release_public_credential_v1(*, binding):
+    credential = _PUBLIC_CREDENTIALS_V1.get(id(binding))
+    if credential is not None and credential._binding is binding:
+        credential._key = None
+        _PUBLIC_CREDENTIALS_V1.pop(id(binding), None)
+
+
 class _VerifiedSourceUseActionV1:
     """One original verification; neither a value constructor nor serializable."""
 
@@ -142,6 +1791,8 @@ class _PendingSourceUseActionV1:
     deadline_monotonic_ns: int
     authentication: object
     preview: str
+    public_resources: object = None
+    public_inputs: object = None
 
 
 def _create_source_use_authority_v1(root):
@@ -164,6 +1815,8 @@ def _create_source_use_authority_v1(root):
     authority._completion_pending = None
     authority._valid_completion = None
     authority._selected_scope = None
+    authority._public_configuration = None
+    authority._public_input_view = None
     authority._head = authority._review = authority._use = None
     authority._last_use_event = None
     authority._bindings = {}
@@ -183,6 +1836,7 @@ def _create_source_use_authority_v1(root):
     adapter._original_control_scope = adapter._control_scope
     adapter._registered_batches = {}
     adapter._pending_batch = None
+    adapter._public_control_mode = False
     authority._adapter = adapter
     authority._uow = TrancheCUnitOfWorkV1(adapter, TransactionRetryPolicyV1(1))
     return authority
@@ -232,6 +1886,7 @@ class SourceUseAuthorityV1:
             self._use = None
             self._active_permit = None
             self._bindings.clear()
+            self._public_input_view = None
             self._last_disposition = "STOPPED"
 
     def cancel_pending_v1(self):
@@ -258,19 +1913,129 @@ class SourceUseAuthorityV1:
                     originals.append(row)
             return head, tuple(originals) if head is not None else (None, None)
 
+    def _public_source_pairs_v1(self, *, evaluated_at_utc):
+        from .receipts import _public_identity_v1
+
+        scope = self._selected_scope
+        facts = self._review.typed_payload.review_facts
+        pairs = []
+        for source_id in scope.source_ids:
+            # An anonymous public scope is a source-use identity, never evidence
+            # of an account, balance, membership or trading entitlement.
+            account = scope.account_scope_ref_or_none or _public_identity_v1(
+                "PUBLIC_UNAUTHENTICATED_SCOPE_V1", scope.profile_id.value, source_id)
+            source = PITSourceCurrentizationReceiptV1(
+                _public_identity_v1("PUBLIC_SOURCE_REVIEW_V1", self._review.record_id, source_id),
+                scope.profile_id, source_id, scope.source_contract_version, facts.factual_checked_at_utc,
+                facts.source_effective_at_utc, facts.source_expires_at_utc, self._root.enrollment.owner_ref,
+                facts.recheck_triggers, False, True)
+            rights = PITRightsAdmissionReceiptV1(
+                _public_identity_v1("PUBLIC_SOURCE_RIGHTS_V1", self._use.record_id, source_id),
+                scope.profile_id, account, source_id, facts.agreement_id, facts.agreement_version,
+                scope.internal_use_class, "ADMITTED_INTERNAL_USE", self._use.recorded_at,
+                self._use.typed_payload.expires_at_utc, facts.recheck_triggers, False,
+                scope.permitted_retention_class, scope.prohibited_redistribution_class)
+            validate_pit_source_rights_admission_v1(source, rights, admission_id=self._use.record_id,
+                profile_id=scope.profile_id, account_scope=account, internal_use_class=scope.internal_use_class,
+                permitted_retention_class=scope.permitted_retention_class, evaluated_at_utc=evaluated_at_utc)
+            pairs.append((source, rights))
+        return tuple(pairs)
+
+    def _bind_public_operational_inputs_v1(self, *, capture, inputs, accepted_source_evidence=()):
+        """Retain accepted owner views; this private join grants no capture effect."""
+        from ...service.owner_source_use_windows import _public_scope_resources_v1
+        from .sqlite_reference import _public_root_facts_v1
+        from .receipts import PublicCaptureRequestV1, _source_use_require_v1
+        from ..market_data_ingest.source_dependency import project_accepted_public_field_bindings_v1
+
+        _native_require(type(capture) is PublicCaptureRequestV1 and type(inputs) in (dict, MappingProxyType),
+                        "public input retention requires an exact capture and mapping")
+        capture.__post_init__()
+        required = {"requests", "contracts", "metadata", "source_bindings", "rate_bindings",
+            "exclusive_allocation_refs", "wall_clock_source_id", "clock_quality_ref", "wall_uncertainty_ns",
+            "account_applicability_or_none", "source_epoch_id", "input_version"}
+        _native_require(set(inputs) == required, "public retained inputs have missing or extra fields")
+        retained = MappingProxyType(dict(inputs))
+        for name in ("source_epoch_id", "input_version"):
+            _native_ident(retained[name])
+        # Protection/file inspection is outside the short authority lock.
+        resources = _public_scope_resources_v1(self._root, capture.scope)
+        root = _public_root_facts_v1(resources["storage_root"])
+        _native_require(type(accepted_source_evidence) is tuple and len(accepted_source_evidence) <= 4096,
+                        "invalid accepted source evidence selection")
+        with self._lock:
+            _source_use_require_v1(self._review is not None and self._use is not None)
+            selected_review, selected_use = self._review, self._use
+        qualified = []
+        for row in accepted_source_evidence:
+            _native_require(type(row) is tuple and len(row) == 3, "invalid accepted source evidence row")
+            matches = tuple(item for item in retained["source_bindings"] if item.binding_id == row[0])
+            _native_require(len(matches) == 1 and not any(item[0] is matches[0] for item in qualified),
+                            "accepted source evidence has no unique selected binding")
+            qualified.append(project_accepted_public_field_bindings_v1(source_binding=matches[0],
+                acceptance_results=row[1], originals=row[2], review_facts=selected_review.typed_payload.review_facts))
+        qualified = tuple(qualified)
+        with self._lock:
+            now, _mono = self._live_v1()
+            _source_use_require_v1(self._review is not None and self._use is not None
+                and self._head == self._use and self._pending is None and self._completion_pending is None
+                and self._active_permit is None and capture.scope == self._selected_scope
+                and capture.scope.scope_generation == self._head.typed_payload.generation_after
+                and self._review is selected_review and self._use is selected_use)
+            pairs = self._public_source_pairs_v1(evaluated_at_utc=now)
+            merged = MappingProxyType(dict(retained, source_pairs=pairs, qualified_source_bindings=qualified,
+                storage_root=resources["storage_root"], process_epoch_id=self._process_ref,
+                monotonic_clock_id=self._clock_ref))
+            _validate_public_operational_input_view_v1(inputs=merged, capture=capture, root=root,
+                native_qualified=resources["native_qualified"], evaluated_at_ns=self._last_clock[0])
+            self._public_input_view = (self._root, self._review, self._use, capture, retained, qualified)
+
+    def _public_retained_inputs_v1(self, *, capture):
+        from .receipts import _source_use_require_v1
+
+        view = self._public_input_view
+        if view is None:
+            return None
+        _source_use_require_v1(view[0] is self._root and view[1] is self._review and view[2] is self._use
+            and view[3] == capture and capture.scope == self._selected_scope
+            and capture.scope.scope_generation == self._head.typed_payload.generation_after)
+        return view
+
     def prepare_action_v1(self, raw_proposal: bytes):
         from dataclasses import replace
         from uuid import uuid4
         from ...service.owner_source_use import _source_use_proposal_v1, _begin_source_use_authentication_v1
-        from .receipts import _source_use_require_v1, SourceUseControlRecordV1
+        from .receipts import (_source_use_require_v1, SourceUseControlRecordV1,
+                              PublicSourceUseOriginalV1, PublicDataSourceUseScopeV1)
         from .serialization import deterministic_json
 
         proposal = _source_use_proposal_v1(raw_proposal)
         action, scope = proposal["action"], proposal["scope"]
+        public = type(scope) is PublicDataSourceUseScopeV1
+        resources = None
+        public_inputs = None
+        if public and action == "OBSERVE_ONCE":
+            # Protected metadata checks happen before A; no key or SQLite read.
+            from ...service.owner_source_use_windows import _public_scope_resources_v1
+
+            resources = _public_scope_resources_v1(self._root, scope)
+
+        def original_record(stream, kind, sequence, operation, predecessor, selected_scope, content, reason, input_class):
+            if public:
+                return PublicSourceUseOriginalV1("PUBLIC_SOURCE_ORIGINAL_V1", stream, sequence, kind,
+                    operation, predecessor, selected_scope, content, reason, input_class)
+            return SourceUseControlRecordV1(stream, kind, sequence, operation, predecessor,
+                                             selected_scope, content, reason, input_class)
+
         with self._lock:
             now, mono = self._live_v1()
             _source_use_require_v1(self._pending is None and self._completion_pending is None
                                    and (self._selected_scope is None or scope == self._selected_scope))
+            if self._head is None:
+                _source_use_require_v1(not self._adapter._tables["receipt_records"])
+                self._adapter._public_control_mode = public
+            else:
+                _source_use_require_v1(self._adapter._public_control_mode is public)
             head, originals = self._heads_v1()
             expected = (None if head is None else head.record_id,
                         *(None if row is None else row.record_id for row in originals))
@@ -285,6 +2050,9 @@ class SourceUseAuthorityV1:
             _source_use_require_v1(head is not None or action == "REVIEW_ACCEPT")
             if action == "OBSERVE_ONCE":
                 _source_use_require_v1(self._use is not None and self._active_permit is None)
+                if public:
+                    public_inputs = self._public_retained_inputs_v1(capture=proposal["capture"])
+                    _source_use_require_v1(public_inputs is not None or not resources["native_qualified"])
             if action == "USE_ADMIT":
                 _source_use_require_v1(self._review is not None)
             original = None
@@ -297,18 +2065,30 @@ class SourceUseAuthorityV1:
                     if old is None or old.typed_payload.content != content:
                         fresh = old is None or old.typed_payload.action == "WITHDRAW"
                         stream = ("review_" if review_action else "declaration_") + uuid4().hex if fresh else old.typed_payload.stream_id
-                        original = SourceUseControlRecordV1(stream, kind, 1 if fresh else old.sequence + 1,
+                        original = original_record(stream, kind, 1 if fresh else old.sequence + 1,
                             "RECORD" if fresh else "SUPERSEDE", None if fresh else old.record_id, scope, content,
                             None if fresh else ("OWNER_CONFIRMED_REVIEW_REPLACEMENT" if review_action else "OWNER_CONFIRMED_DECLARATION_REPLACEMENT"),
                             "UNVERIFIED_SUBMISSION")
                 else:
                     _source_use_require_v1(old is not None)
                     if old.typed_payload.action != "WITHDRAW":
-                        original = SourceUseControlRecordV1(old.typed_payload.stream_id, kind, old.sequence + 1,
+                        original = original_record(old.typed_payload.stream_id, kind, old.sequence + 1,
                             "WITHDRAW", old.record_id, scope, None, proposal["reason"], old.typed_payload.input_class)
             expiry = now
             if positive:
-                requested = proposal["observation"].expires_at_utc if action == "OBSERVE_ONCE" else proposal["requested_expires_at_utc"]
+                if public and action == "OBSERVE_ONCE":
+                    capture = proposal["capture"]
+                    seconds, nanos = divmod(capture.operating_expires_at_ns, 1_000_000_000)
+                    # The enclosing legacy-compatible action clock rounds up;
+                    # the private permit still enforces the exact exclusive ns.
+                    requested = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(
+                        seconds=seconds, microseconds=(nanos + 999) // 1000)
+                    _source_use_require_v1(self._last_clock[0] < capture.operating_expires_at_ns
+                        and scope.scope_generation == head.typed_payload.generation_after
+                        and mono < scope.budget.deadline_monotonic_ns
+                        and capture.operating_expires_at_ns <= resources["expires_at_ns"])
+                else:
+                    requested = proposal["observation"].expires_at_utc if action == "OBSERVE_ONCE" else proposal["requested_expires_at_utc"]
                 _source_use_require_v1(requested <= self._expires)
                 expiry = min(requested, self._expires)
                 if action == "REVIEW_ACCEPT":
@@ -329,7 +2109,7 @@ class SourceUseAuthorityV1:
                     _source_use_require_v1(requested <= declaration.content.claimed_expires_at_utc)
                     if action == "OBSERVE_ONCE":
                         expiry = min(expiry, self._use.typed_payload.expires_at_utc)
-                        _source_use_require_v1(proposal["observation"].expires_at_utc <= expiry)
+                        _source_use_require_v1(requested <= expiry)
                 _source_use_require_v1(now < expiry)
             request = uuid4().hex
             preview = deterministic_json({"request_ref": request, "proposal": dict(proposal),
@@ -339,7 +2119,7 @@ class SourceUseAuthorityV1:
                 "owner_ref": self._root.enrollment.owner_ref, "key_ref": self._root.enrollment.enrollment_ref,
                 "process_ref": self._process_ref, "generation": 0 if head is None else head.typed_payload.generation_after})
             pending = _PendingSourceUseActionV1(request, proposal, expected, originals, original, expiry,
-                min(mono + 120_000_000_000, self._deadline), None, preview)
+                min(mono + 120_000_000_000, self._deadline), None, preview, resources, public_inputs)
             self._pending = pending
         try:
             authentication = _begin_source_use_authentication_v1(self._root.enrollment, operation="GET")
@@ -355,7 +2135,22 @@ class SourceUseAuthorityV1:
             raise
 
     def _spine_v1(self, payload, now, request):
-        from .receipts import EconomicReceiptEventSpineV1, EconomicRecordTypeV1, SourceUseControlRecordV1
+        from .receipts import (EconomicReceiptEventSpineV1, EconomicRecordTypeV1, SourceUseControlRecordV1,
+                              PublicSourceUseOriginalV1, PublicDataSourceUseActionV1, _public_identity_v1)
+
+        if type(payload) in (PublicSourceUseOriginalV1, PublicDataSourceUseActionV1):
+            original = type(payload) is PublicSourceUseOriginalV1
+            prefix = "PUBLIC_SOURCE_ORIGINAL_V1" if original else "PUBLIC_SOURCE_ACTION_V1"
+            stream = payload.stream_id if original else payload.process_ref
+            return EconomicReceiptEventSpineV1(
+                record_id=_public_identity_v1(prefix, stream, payload.sequence),
+                record_type=EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL, schema_version=payload.schema_version,
+                semantic_owner="QTT_PUBLIC_DATA_SOURCE_USE", implementation_owner="QTT_PUBLIC_DATA_SOURCE_USE",
+                context_ref=self._process_ref, effective_at=now, recorded_at=now,
+                causation_id="ACTION::" + request, correlation_id="PROCESS::" + self._process_ref,
+                traceparent="TRACE::" + request, tracestate="LOCAL_OWNER_CONTROL", sequence=payload.sequence,
+                aggregate_id=_public_identity_v1(prefix, stream), aggregate_version=payload.sequence,
+                authority_class="PUBLIC_DATA_CANDIDATE_NO_OPERATING_AUTHORITY", typed_payload=payload)
 
         original = type(payload) is SourceUseControlRecordV1
         aggregate = ("SOURCE_USE::" + payload.stream_id) if original else ("SOURCE_ACTION::" + self._process_ref)
@@ -407,16 +2202,31 @@ class SourceUseAuthorityV1:
 
     def _commit_verified_action_v1(self, pending, proof, committed):
         from dataclasses import replace
-        from .receipts import _source_use_require_v1, SourceUseAttributedActionV1
+        from .receipts import (_source_use_require_v1, SourceUseAttributedActionV1,
+                              PublicDataSourceUseScopeV1, PublicDataSourceUseActionV1)
 
         pending_ref = pending.request_ref
+        public = type(pending.proposal["scope"]) is PublicDataSourceUseScopeV1
         with self._lock:
-            # Crypto succeeded: retain the observed high-water even if expiry,
-            # changed heads or another business condition now rejects the action.
+            # Cryptographic success consumes the observed counter even when a
+            # later protected-resource recheck fails outside this lock.
             if (self._counter != 0 or proof.counter != 0) and proof.counter <= self._counter:
                 self.stop_v1()
                 _source_use_require_v1(False)
             self._counter = proof.counter
+            _source_use_require_v1(self._valid_completion is pending)
+        public_root = None
+        if public and pending.proposal["action"] == "OBSERVE_ONCE":
+            from ...service.owner_source_use_windows import _public_scope_resources_v1
+            from .sqlite_reference import _public_root_facts_v1
+
+            # Reobserve outside A after authentication, before control commit.
+            refreshed = _public_scope_resources_v1(self._root, pending.proposal["scope"])
+            _source_use_require_v1(refreshed == pending.public_resources)
+            _source_use_require_v1(pending.public_inputs is not None or not refreshed["native_qualified"])
+            if pending.public_inputs is not None:
+                public_root = _public_root_facts_v1(refreshed["storage_root"])
+        with self._lock:
             _source_use_require_v1(self._valid_completion is pending)
             now, mono = self._live_v1()
             proof = replace(proof, verified_at_utc=now)
@@ -425,6 +2235,16 @@ class SourceUseAuthorityV1:
             _source_use_require_v1(originals_before == pending.original_heads
                                    and (None if head is None else head.record_id) == pending.expected[0])
             proposal, action = pending.proposal, pending.proposal["action"]
+            if public and action == "OBSERVE_ONCE":
+                _source_use_require_v1(self._public_retained_inputs_v1(capture=proposal["capture"]) is pending.public_inputs)
+                if pending.public_inputs is not None:
+                    current_inputs = MappingProxyType(dict(pending.public_inputs[4],
+                        source_pairs=self._public_source_pairs_v1(evaluated_at_utc=now),
+                        qualified_source_bindings=pending.public_inputs[5],
+                        storage_root=refreshed["storage_root"], process_epoch_id=self._process_ref,
+                        monotonic_clock_id=self._clock_ref))
+                    _validate_public_operational_input_view_v1(inputs=current_inputs, capture=proposal["capture"],
+                        root=public_root, native_qualified=refreshed["native_qualified"], evaluated_at_ns=self._last_clock[0])
             _source_use_require_v1((head is None and self._selected_scope is None)
                 or (head is not None and self._selected_scope == head.typed_payload.scope == proposal["scope"]))
             negative = action in {"WITHDRAW_USE", "INVALIDATE_REVIEW"}
@@ -434,7 +2254,7 @@ class SourceUseAuthorityV1:
             for row in originals:
                 resulting[1 if row.typed_payload.subject_kind == "SOURCE_REVIEW" else 0] = row.record_id
             generation = 0 if head is None else head.typed_payload.generation_after
-            payload = SourceUseAttributedActionV1(
+            arguments = (
                 self._process_ref, 1 if head is None else head.sequence + 1, pending.expected[0], action,
                 proposal["scope"], self._root.enrollment.owner_ref, self._root.enrollment.enrollment_ref,
                 pending_ref, proof, generation, generation + (action != "OBSERVE_ONCE"),
@@ -442,7 +2262,10 @@ class SourceUseAuthorityV1:
                 None if action == "REVIEW_ACCEPT" or self._review is None else self._review.record_id,
                 None if action in {"REVIEW_ACCEPT", "USE_ADMIT"} or self._use is None else self._use.record_id,
                 tuple(row.record_id for row in originals), proposal.get("review_facts"),
-                now, now if negative else pending.expires_at_utc, proposal.get("observation"), proposal.get("reason"))
+                now, now if negative else pending.expires_at_utc,
+                proposal.get("capture" if public else "observation"), proposal.get("reason"))
+            payload = (PublicDataSourceUseActionV1("PUBLIC_SOURCE_USE_ACTION_V1", *arguments)
+                       if public else SourceUseAttributedActionV1(*arguments))
             event = self._spine_v1(payload, now, pending_ref)
             verified = object.__new__(_VerifiedSourceUseActionV1)
             verified._authority, verified._root = self, self._root
@@ -459,6 +2282,7 @@ class SourceUseAuthorityV1:
                 self._head = result.current_event
                 self._selected_scope = proposal["scope"]
                 if action != "OBSERVE_ONCE":
+                    self._public_input_view = None
                     self._bindings.clear()
                     self._active_permit = None
                     self._use = None
@@ -469,10 +2293,14 @@ class SourceUseAuthorityV1:
                 elif action == "USE_ADMIT":
                     self._use = event
                     self._last_use_event = event
-                    self._issue_binding_v1(None, mono)
+                    if not public:
+                        self._issue_binding_v1(None, mono)
                 elif action == "OBSERVE_ONCE":
                     _source_use_require_v1(self._active_permit is None)
-                    self._issue_binding_v1(event, mono)
+                    if public:
+                        self._issue_public_binding_v1(self._head, mono, pending.public_resources, public_root)
+                    else:
+                        self._issue_binding_v1(event, mono)
                 self._last_disposition = "APPENDED"
                 return result
             except BaseException:
@@ -518,6 +2346,84 @@ class SourceUseAuthorityV1:
             self._last_operating_permit = permit
         self._bindings[id(binding)] = binding
         return binding
+
+    def _issue_public_binding_v1(self, event, mono, resources, root_facts):
+        import os
+        import threading
+        from .context import _native_utc_nanoseconds
+        from .receipts import PublicDataSourceUseActionV1, _source_use_require_v1, _public_identity_v1
+
+        _source_use_require_v1(type(event.typed_payload) is PublicDataSourceUseActionV1
+            and event is self._head and event.typed_payload.action == "OBSERVE_ONCE"
+            and self._review is not None and self._use is not None and resources is not None)
+        capture, scope = event.typed_payload.capture, self._selected_scope
+        now, mono = self._live_v1()
+        pairs = self._public_source_pairs_v1(evaluated_at_utc=now)
+        remaining = capture.operating_expires_at_ns - self._last_clock[0]
+        deadline = min(self._deadline, scope.budget.deadline_monotonic_ns,
+                       mono + scope.budget.duration_ns, mono + remaining)
+        _source_use_require_v1(remaining > 0 and mono < deadline <= 2**63 - 1
+            and scope.scope_generation == event.typed_payload.generation_after
+            and capture.operating_expires_at_ns <= min(resources["expires_at_ns"],
+                _native_utc_nanoseconds(self._use.typed_payload.expires_at_utc.isoformat()),
+                _native_utc_nanoseconds(self._review.typed_payload.expires_at_utc.isoformat())))
+        binding = object.__new__(PublicSourceUseBindingV1)
+        binding._authority, binding._root, binding._resources = self, self._root, resources
+        binding._generation, binding._event, binding._capture = scope.scope_generation, event, capture
+        binding._process_id, binding._thread_id = os.getpid(), threading.get_ident()
+        binding._deadline, binding._failed, binding._owner, binding._started = deadline, False, None, False
+        binding._native_qualified = resources["native_qualified"]
+        binding._publication_lock = threading.RLock()
+        binding._control_records = tuple(self._adapter._tables["receipt_records"].values())
+        retained = self._public_retained_inputs_v1(capture=capture)
+        binding._input_view = retained
+        _source_use_require_v1(retained is not None or not resources["native_qualified"])
+        binding._source_inputs = MappingProxyType(dict({} if retained is None else retained[4], source_pairs=pairs,
+            qualified_source_bindings=() if retained is None else retained[5],
+            storage_root=resources["storage_root"], process_epoch_id=self._process_ref,
+            monotonic_clock_id=self._clock_ref))
+        if retained is not None:
+            _validate_public_operational_input_view_v1(inputs=binding._source_inputs, capture=capture,
+                root=root_facts, native_qualified=resources["native_qualified"], evaluated_at_ns=self._last_clock[0])
+        self._public_configuration = resources["configuration"]
+        self._bindings[id(binding)] = binding
+        _PUBLIC_BINDINGS_V1[id(binding)] = binding
+        self._active_permit = self._last_operating_permit = binding
+        self._check_public_binding_v1(binding)
+        return binding
+
+    def _check_public_binding_v1(self, binding):
+        import os
+        import threading
+        from .receipts import _source_use_require_v1
+        from ...service.owner_source_use_windows import _public_resources_resident_v1
+
+        now, mono = self._live_v1()
+        _source_use_require_v1(type(binding) is PublicSourceUseBindingV1
+            and self._bindings.get(id(binding)) is binding and _PUBLIC_BINDINGS_V1.get(id(binding)) is binding
+            and binding._authority is self and binding._root is self._root
+            and binding._process_id == os.getpid() and binding._thread_id == threading.get_ident()
+            and binding is self._active_permit and not binding._failed
+            and self._review is not None and self._use is not None and self._head is binding._event
+            and self._head.typed_payload.scope == self._selected_scope == binding._capture.scope
+            and self._head.typed_payload.generation_after == binding._generation
+            and self._head.typed_payload.review_event_ref == self._review.record_id
+            and self._head.typed_payload.use_event_ref == self._use.record_id
+            and now < self._review.typed_payload.expires_at_utc and now < self._use.typed_payload.expires_at_utc
+            and self._last_clock[0] < min(binding._capture.operating_expires_at_ns,
+                binding._capture.scope.retention_expires_at_ns)
+            and mono < binding._deadline and self._public_configuration is binding._resources["configuration"])
+        _public_resources_resident_v1(self._root, binding._resources, self._last_clock[0])
+        if binding._native_qualified:
+            _source_use_require_v1(self._public_input_view is binding._input_view and binding._input_view is not None
+                and binding._source_inputs["qualified_source_bindings"] is binding._input_view[5]
+                and all(binding._source_inputs[name] is value for name,value in binding._input_view[4].items()))
+        for source, rights in binding._source_inputs["source_pairs"]:
+            validate_pit_source_rights_admission_v1(source, rights, admission_id=self._use.record_id,
+                profile_id=self._selected_scope.profile_id, account_scope=rights.account_scope,
+                internal_use_class=self._selected_scope.internal_use_class,
+                permitted_retention_class=self._selected_scope.permitted_retention_class, evaluated_at_utc=now)
+        return now, mono
 
     def _check_binding_v1(self, binding, owner=None, *, inputs=None, allow_published=False):
         from .receipts import _source_use_require_v1

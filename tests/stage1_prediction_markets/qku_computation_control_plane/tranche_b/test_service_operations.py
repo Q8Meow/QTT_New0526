@@ -152,6 +152,233 @@ class _ExplicitNoEffectTestAdmission:
 _EXPLICIT_NO_EFFECT_TEST_ADMISSION = _ExplicitNoEffectTestAdmission()
 
 
+def _assert_lp02_issued_public_service(handle, *, off_grid=False, failure_mode="withdraw"):
+    """Called by the existing PIT matrix after actual synthetic durable issuance."""
+    import copy
+    import time
+    from types import MappingProxyType
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as resolver
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import service as service_owner
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    publication = handoff._require_public_publication_handle_v1(publication=handle)
+    state, = publication[3].values()
+    now = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=(publication[8]+999)//1000)
+    context = replace(_context(component_ids=("MATH-36",)),
+        context_id="SYN::SERVICE::"+("OFF_GRID" if off_grid else failure_mode),
+        as_of=now, observed_at=now, source_epoch_id=publication[10], input_version=publication[11],
+        maximum_age=timedelta(seconds=2) if failure_mode == "expiry" else timedelta(days=1),
+        scope=ComputationScopeV1(state.market_id, state.profile_id.value, publication[4][0].event_id_or_none,
+            state.instrument_id, "MODE_CONTEXT::CONTRACT_ONLY", state.state_id))
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-36"]
+    registry = resolver.issue_public_owner_registry_v1(publication=handle, context=context,
+        binding_ids=tuple(row.binding_id for row in bindings), source_bindings=publication[5])
+    assert resolver.issue_public_owner_registry_v1(publication=handle, context=context,
+        binding_ids=tuple(row.binding_id for row in bindings), source_bindings=publication[5]) is registry
+    assert publication[12] is False
+    resolved = resolver.FormulaInputResolverV1.resolve("MATH-36", context=context, owner_registry=registry)
+    assert len(resolved.receipt_refs) == len(set(resolved.receipt_refs))
+    assert resolved.receipt_refs.count(publication[7].record_id) == 1
+    with pytest.raises(ComputationControlPlaneError, match="freshness budget changed"):
+        registry.packet_for(context=replace(context, maximum_age=context.maximum_age/2), binding_id=bindings[0].binding_id)
+    for forged in (copy.copy(registry), CanonicalOwnerPacketRegistryV1(registry.packets)):
+        with pytest.raises(ComputationControlPlaneError, match="custody"):
+            forged.packet_for(context=context, binding_id=bindings[0].binding_id)
+    with pytest.raises(ComputationControlPlaneError):
+        resolver.issue_public_owner_registry_v1(publication=object(), context=context,
+            binding_ids=tuple(row.binding_id for row in bindings), source_bindings=publication[5])
+    with pytest.raises(ComputationControlPlaneError, match="predates"):
+        resolver.issue_public_owner_registry_v1(publication=handle,
+            context=replace(context, as_of=now-timedelta(days=1), observed_at=now-timedelta(days=1)),
+            binding_ids=tuple(row.binding_id for row in bindings), source_bindings=publication[5])
+
+    class CountAdmission(_ExplicitNoEffectTestAdmission):
+        count = 0
+
+        def admit_operation(self, request):
+            self.count += 1
+            return super().admit_operation(request)
+
+    admission = CountAdmission()
+    service = QKUComputationControlPlaneV1(owner_registry=registry, agent_capability_resolver=admission)
+    request = ComputeComponentRequestV1(**dict(_common("compute_component", context=context), requested_at=now),
+        component_id="MATH-36", input_values=TypedValueRecordV1((TypedValueV1(
+            "book_sequence", TypedValueKindV1.INTEGER, 7, "sequence", "provider"),)),
+        expected_output_schema_ref="MATH-36::OUTPUT")
+    response = service.compute_component(request)
+    if off_grid:
+        assert admission.count == 1 and response.status is OperationStatusV1.REJECTED
+        assert response.component_result.formula_output is None
+        assert response.component_result.evidence_refs == (ReasonCode.OUT_OF_DOMAIN.value,)
+        return
+    assert admission.count == 1 and response.status is OperationStatusV1.SUCCEEDED
+    assert dict(response.component_result.formula_output.value) == {
+        "best_yes_bid": Decimal("0.49"), "best_no_bid": Decimal("0.49"),
+        "derived_yes_ask": Decimal("0.51"), "derived_no_ask": Decimal("0.51"), "book_sequence": 7}
+    if failure_mode == "withdraw":
+        _assert_lp02_operation_dispositions(registry,context,request,publication[7].record_id)
+        _assert_lp02_math39_service(handle,context)
+    original = service_owner.invoke_formula_v34
+    permission = publication[1]._binding
+    wall = time.time_ns()
+
+    def withdraw_after_value(*args, **kwargs):
+        value = original(*args, **kwargs)
+        if failure_mode == "expiry":
+            # Metadata was observed one second before this book; two seconds
+            # of economic TTL expire exactly one second after issuance here.
+            patch.setattr(time, "time_ns", lambda: wall+1_000_000_000)
+        elif failure_mode == "regression":
+            patch.setattr(time, "time_ns", lambda: wall+1000)
+            registry.packet_for(context=context, binding_id=bindings[0].binding_id)
+            patch.setattr(time, "time_ns", lambda: wall+500)
+        elif failure_mode == "owner_inputs":
+            permission._owner._inputs = MappingProxyType(dict(permission._owner._inputs))
+        else:
+            permission._failed = True
+        return value
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(service_owner, "invoke_formula_v34", withdraw_after_value)
+        with pytest.raises(ComputationControlPlaneError):
+            service.compute_component(request)
+    assert admission.count == 2
+    # Known public receipts cannot shed custody by selecting another context.
+    explanation = ExplainResolutionRequestV1(**dict(_common("explain_resolution", context=replace(
+        context, context_id=context.context_id+"::OTHER")), requested_at=now),
+        resolution_receipt_id=publication[7].record_id, explanation_scope="SUMMARY", max_evidence_items=20)
+    with pytest.raises(ComputationControlPlaneError):
+        service.explain_resolution(explanation)
+    assert admission.count == 3
+
+
+def _assert_lp02_operation_dispositions(registry,context,compute_request,publication_ref):
+    """Invoke the fifteen preserved operations with an actual public registry."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        CompileReplayPaperCohortRequestV1,RegisterReplayPaperResultRequestV1,BuildEvidenceBundleRequestV1)
+    class Admission(_ExplicitNoEffectTestAdmission):
+        def __init__(self):self.names=[]
+        def admit_operation(self,request):
+            self.names.append(request.operation_name)
+            return super().admit_operation(request)
+    admission=Admission()
+    service=QKUComputationControlPlaneV1(owner_registry=registry,agent_capability_resolver=admission)
+    def common(name):return dict(_common(name,context=context),requested_at=context.as_of)
+    requests=(
+        ResolveIdentityRequestV1(**common('resolve_identity'),identity_query=_text_record('math_spec_id','MATH-36')),
+        ResolveContextualComputabilityRequestV1(**common('resolve_contextual_computability'),component_id='MATH-36',
+            required_computability_classes=(ComputabilityClassV1.SPECIFICATION_COMPUTABLE,
+                ComputabilityClassV1.FIXTURE_COMPUTABLE,ComputabilityClassV1.CONTEXT_COMPUTABLE)),
+        ResolveApplicableStackRequestV1(**common('resolve_applicable_stack'),trade_plan_candidate_id='SYN::PLAN',required_launch_roles=('MATH-36',)),
+        ResolveRequiredInputsRequestV1(**common('resolve_required_inputs'),component_ids=('MATH-36',),include_optional=False),
+        compute_request,
+        ComputeStackRequestV1(**common('compute_stack'),stack_id=STACK_ID,component_ids=('MATH-36',),
+            input_values=TypedValueRecordV1((TypedValueV1('MATH-36.book_sequence',TypedValueKindV1.INTEGER,7,'sequence','provider'),))),
+        CompareWithNoTradeRequestV1(**common('compare_with_no_trade'),trade_plan_candidate_id='SYN::PLAN',
+            no_trade_candidate_id='SYN::NO_TRADE',comparison_basis='EXACT_NET_FRICTION_BASIS'),
+        EvaluateTradePlanRequestV1(**common('evaluate_trade_plan'),trade_plan_candidate_id='SYN::PLAN',stack_id=STACK_ID,
+            accounting_tca_view_ref='SYN::ACCOUNTING',risk_cash_state_ref='SYN::RISK',no_trade_candidate_id='SYN::NO_TRADE'),
+        GetSnapshotViewRequestV1(**common('get_snapshot_view'),snapshot_id=registry.packets[0].packet_id,
+            view_class='OWNER_PACKET_LINEAGE',include_value_lineage=True),
+        ExplainResolutionRequestV1(**common('explain_resolution'),resolution_receipt_id=publication_ref,
+            explanation_scope='EXACT_TYPED_RECEIPT',max_evidence_items=10),
+        SubmitCandidateProposalRequestV1(**common('submit_candidate_proposal'),candidate_kind='FORMULA_SUCCESSOR',
+            proposed_specification=_text_record('candidate_state','PROVISIONAL'),source_candidate_refs=(publication_ref,),requested_owner_review=True),
+        RequestMaterializationWorkOrderRequestV1(**common('request_materialization_work_order'),missing_contract_ids=('SYN::MISSING',),
+            reason_codes=(OperationBlockerCodeV1.INPUT_OWNER_MISSING,),priority='OWNER_REVIEW',requested_owner='CanonicalOwnerV1'),
+        CompileReplayPaperCohortRequestV1(**common('compile_replay_paper_cohort'),template_ids=('SYN::TEMPLATE',),
+            requested_lanes=('REPLAY',),input_lock_id='SYN::LOCK',campaign_execution_requested=False),
+        RegisterReplayPaperResultRequestV1(**common('register_replay_paper_result'),cohort_instance_id='SYN::COHORT',lane='REPLAY',
+            input_lock_id='SYN::LOCK',result_packet=_text_record('result','UNAVAILABLE')),
+        BuildEvidenceBundleRequestV1(**common('build_evidence_bundle'),component_id='MATH-36',input_lock_id='SYN::LOCK',
+            evidence_record_refs=(publication_ref,),required_lanes=('REPLAY',)),
+    )
+    expected=('SUCCEEDED','SUCCEEDED','BLOCKED','SUCCEEDED','SUCCEEDED','BLOCKED','BLOCKED','BLOCKED',
+        'SUCCEEDED','SUCCEEDED','SUCCEEDED','SUCCEEDED',None,None,None)
+    finalized=[]
+    original=service_module._finalize_public_response_v1
+    def finalize(**kwargs):
+        finalized.append(kwargs['response'])
+        return original(**kwargs)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(service_module,'_finalize_public_response_v1',finalize)
+        for index,(request,status) in enumerate(zip(requests,expected,strict=True)):
+            before=len(finalized)
+            if status is None:
+                with pytest.raises(ComputationControlPlaneError,match='requires the injected canonical'):
+                    getattr(service,request.operation_name)(request)
+            else:
+                response=getattr(service,request.operation_name)(request)
+                assert response.status.value==status
+                assert len(finalized)-before==int(index!=0)
+                if index in (10,11):
+                    record=response.proposal if index==10 else response.work_order
+                    assert record.no_authority_flag is True
+            assert admission.names==[row.operation_name for row in requests[:index+1]]
+    assert len(requests)==15 and len(finalized)==11
+
+
+def _assert_lp02_math39_service(handle, base_context):
+    """Real public history plus separately declared synthetic order-priority facts."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as owner
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.implementation_registry import ST12D_MATH_IMPLEMENTATION_REGISTRY
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.bindings import CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+
+    publication=handoff._require_public_publication_handle_v1(publication=handle)
+    context=replace(base_context,context_id=base_context.context_id+'::QUEUE',implementation_versions=(
+        ImplementationVersionPinV1('MATH-39',ST12D_MATH_IMPLEMENTATION_REGISTRY['MATH-39'].contract.implementation_id),))
+    bindings=CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID['MATH-39']
+    by_name={row.input_name:row for row in bindings}
+    history=handoff._public_committed_translations_v1(publication=handle)
+    assert len(history)==7
+    event_time=datetime(2026,8,30,12,0,tzinfo=UTC)
+    ack=owner.Math39OrderAcknowledgementV1('SYN::ORDER',context.scope.venue_scope_id,
+        context.scope.instrument_or_contract_scope_id,'YES_BID',Decimal('0.49'),event_time,event_time,
+        'PRICE_TIME_FIFO','SYN::SEPARATE_PRIORITY_EVIDENCE','units','ACKNOWLEDGED_INSERTION_POINT','SYN::ACK_RECEIPT')
+    events=tuple(owner.Math39SequencedBookEventV1(row.observation_ref,index+1,
+        owner.Math39BookEventKindV1.DISPLAYED_BEFORE_ORDER if index==0 else owner.Math39BookEventKindV1.PRIOR_ADDITION,
+        ack.venue_id,ack.instrument_id,ack.side,ack.price,Decimal('123456.78' if index==0 else '0.01'),
+        event_time,context.as_of,ack.order_id,ack.venue_evidence_ref,ack.unit,ack.basis,'SYN::PRIORITY_RECEIPT')
+        for index,row in enumerate(history))
+    clocks=PointInTimeClocksV1(event_time,event_time,context.as_of,context.as_of,context.as_of,context.as_of)
+    def packet(name,value,receipt):
+        row=by_name[name]
+        return OwnerValuePacketV1('SYN::QUEUE_PACKET::'+name,row.accepted_upstream_owner_id,row.accepted_packet_or_snapshot_type,
+            row.schema_id,row.schema_version,context.context_id,context.scope,context.source_epoch_id,context.input_version,
+            clocks,context.maximum_age,{row.exact_field_path:value},(row.binding_id,),receipt,row.producer_receipt_type,
+            row.source_state_and_claim_lineage,provider_sequence=7 if name=='sequenced_book_events' else None,
+            revision='SYN::ACK_REVISION::1' if name=='order_ack' else None)
+    book_packet=packet('sequenced_book_events',events,'SYN::PRIORITY_RECEIPT')
+    ack_packet=packet('order_ack',ack,'SYN::ACK_RECEIPT')
+    dependencies=CanonicalOwnerPacketRegistryV1((book_packet,ack_packet))
+    for absent in (None,CanonicalOwnerPacketRegistryV1((book_packet,)),CanonicalOwnerPacketRegistryV1((ack_packet,))):
+        with pytest.raises(ComputationControlPlaneError):
+            owner._issue_public_order_history_registry_v1(publication=handle,context=context,source_bindings=publication[5],dependencies=absent)
+    for changed in (replace(events[1],quantity=Decimal('0.02')),replace(events[1],sequence=3),
+                    replace(events[1],event_kind=owner.Math39BookEventKindV1.PRIOR_CANCELLATION),
+                    replace(events[1],event_id='SYN::UNRETAINED'),replace(events[1],event_time=event_time+timedelta(microseconds=1))):
+        altered=CanonicalOwnerPacketRegistryV1((replace(book_packet,values={by_name['sequenced_book_events'].exact_field_path:
+            (events[0],changed,*events[2:])}),ack_packet))
+        with pytest.raises(ComputationControlPlaneError):
+            owner._issue_public_order_history_registry_v1(publication=handle,context=context,source_bindings=publication[5],dependencies=altered)
+    registry=owner._issue_public_order_history_registry_v1(publication=handle,context=context,source_bindings=publication[5],dependencies=dependencies)
+    raw=registry.packet_for(context=context,binding_id=by_name['sequenced_book_events'].binding_id)
+    assert raw.producer_receipt_id==publication[7].record_id
+    assert tuple(row.sequence for row in raw.values['book.sequenced_book_events'])==(1,2,3,4,5,6,7)
+    service=QKUComputationControlPlaneV1(owner_registry=registry,agent_capability_resolver=_ExplicitNoEffectTestAdmission())
+    request=ComputeComponentRequestV1(**dict(_common('compute_component',context=context),requested_at=context.as_of),
+        component_id='MATH-39',input_values=TypedValueRecordV1((TypedValueV1('displayed_quantity_before_order',
+            TypedValueKindV1.DECIMAL,Decimal('123456.78'),'units','ACKNOWLEDGED_INSERTION_POINT'),)),
+        expected_output_schema_ref='MATH-39::OUTPUT')
+    response=service.compute_component(request)
+    assert response.status is OperationStatusV1.SUCCEEDED
+    assert response.component_result.formula_output.value==Decimal('123456.84')
+    with pytest.raises(ComputationControlPlaneError):
+        CanonicalOwnerPacketRegistryV1(registry.packets).packet_for(context=context,binding_id=by_name['sequenced_book_events'].binding_id)
+
+
 def _scope() -> ComputationScopeV1:
     return ComputationScopeV1(
         market_scope_id="MARKET::SERVICE",
@@ -360,6 +587,9 @@ def _service() -> QKUComputationControlPlaneV1:
 
 
 def test_service_exposes_exact_fifteen_operations_and_preserves_tranche_b_projection() -> None:
+    _assert_lp02_frozen_public_bindings()
+    _assert_lp02_public_owner_topology_guard()
+    _assert_lp02_selected_package_materialization()
     service = _service()
     exact_operation_names = (
         "resolve_identity",
@@ -404,6 +634,168 @@ def test_service_exposes_exact_fifteen_operations_and_preserves_tranche_b_projec
         is OperationCapabilityClass.CONTRACT_DEFINITION_ONLY
         for operation_id in exact_operation_ids[12:]
     )
+
+
+def _assert_lp02_selected_package_materialization():
+    """Invoke the canonical launch/package owners and preserve every held role."""
+    from copy import deepcopy
+    from src.qtt.plugins.registry import _validate_launch_projection
+    from src.qtt.plugins.contracts import PluginPackageContractError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import stage1_launch_graph as launch
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.plugin_adapter import SelectedComponentPackageAdapterV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import OwnerAdapterError
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import NO_EFFECTS_V1
+
+    graph = launch.build_stage1_launch_graph_v2()
+    assert launch.validate_stage1_launch_graph_v2(graph).terminal_state.value == 'VALIDATED_NO_EFFECT'
+    projection = launch.stage1_launch_graph_projection_v2()
+    assert projection['graph'] == json.loads(deterministic_json(graph))
+    first = SelectedComponentPackageAdapterV1.build_projection(deepcopy(projection))
+    second = SelectedComponentPackageAdapterV1.build_projection(deepcopy(projection))
+    view = SelectedComponentPackageAdapterV1.build_view(deepcopy(projection))
+    other_view = SelectedComponentPackageAdapterV1.build_view(deepcopy(projection))
+    assert view.canonical_projection_json.encode() == other_view.canonical_projection_json.encode()
+    manifest = first['manifest']
+    assert first == second
+    role_ids = tuple(f'ROLE-{index:02}' for index in range(1,29))
+    assert tuple(row.role_id for row in graph.roles) == role_ids
+    assert tuple(row.launch_role_id for row in manifest.entries) == role_ids
+    assert tuple(row.package_component_id for row in manifest.entries) == tuple('S1PKG::'+role for role in role_ids)
+    assert manifest.package_version.canonical == view.package_version == '1.0.0'
+    assert all(row.package_version.canonical == '1.0.0' for row in manifest.entries)
+    edges = {('S1PKG::'+dependency,'S1PKG::'+role.role_id)
+        for role in graph.roles for dependency in role.direct_prerequisite_role_ids}
+    assert len(edges) == 102 and set(manifest.dependency_edges) == edges
+    assert tuple(manifest.topological_order) == tuple('S1PKG::'+role for role in graph.topological_order)
+    assert (view.entry_count,view.edge_count,view.operation_count) == (28,102,5)
+    assert (view.admitted_count,view.evidence_held_count,view.implementation_held_count) == (11,5,12)
+    assert view.active_live_profile_ids == () and view.no_effects is NO_EFFECTS_V1
+    assert view.selected_profile_ids == ('GEMINI_TITAN_DIRECT','POLYMARKET_US_RETAIL_DIRECT','KALSHI_US_DCM_DIRECT')
+    assert view.excluded_profile_ids == ('FORECASTEX_IBKR','FORECASTEX_DIRECT_MEMBER')
+    families = (
+        '', '', '', 'ORDERBOOK_STATE_PLUGIN STALE_BOOK_DIAGNOSTIC_PLUGIN STALE_BOOK_REPAIR_PLUGIN',
+        'FEATURE_TRANSFORM_PLUGIN SIGNAL_SCORING_PLUGIN', 'FORMULA_PLUGIN',
+        'PROBABILITY_CALIBRATION_PLUGIN CALIBRATION_ERROR_PLUGIN',
+        'PARAMETER_STACK_PLUGIN HOLDOUT_CONFIDENCE_PLUGIN LOWER_CONFIDENCE_BOUND_PLUGIN',
+        'EXECUTION_COST_PLUGIN', 'SLIPPAGE_IMPACT_PLUGIN IMPL_SHORTFALL_PLUGIN',
+        'FILL_MODEL_PLUGIN PARTIAL_FILL_PLUGIN NO_FILL_PLUGIN', 'QUEUE_RISK_PLUGIN QUEUE_SURVIVAL_PLUGIN',
+        'ADVERSE_SELECTION_PLUGIN', 'LATENCY_DECAY_PLUGIN', 'EXPECTED_VALUE_PLUGIN EXECUTION_COST_PLUGIN',
+        'LOWER_CONFIDENCE_BOUND_PLUGIN NO_TRADE_REASON_PLUGIN DECISION_RULE_PLUGIN', '', 'RISK_BUDGET_PLUGIN',
+        'THRESHOLD_POLICY_PLUGIN DECISION_RULE_PLUGIN',
+        'PORTFOLIO_UTILITY_PLUGIN MARGINAL_UTILITY_PLUGIN DIVERSIFICATION_PLUGIN CORRELATION_CLUSTER_PLUGIN COMMON_DRIVER_EXPOSURE_PLUGIN RISK_BUDGET_PLUGIN',
+        'AGGRESSION_LADDER_PLUGIN CANCEL_REPLACE_PLUGIN DECISION_RULE_PLUGIN', 'DECISION_RULE_PLUGIN THRESHOLD_POLICY_PLUGIN',
+        'TCA_PLUGIN EDGE_ATTRIBUTION_PLUGIN IMPL_SHORTFALL_PLUGIN', '', '', 'CLASSICAL_FALLBACK_PLUGIN',
+        'QUANTUM_RECIPE_PLUGIN QUBO_ADAPTER_PLUGIN BQM_ADAPTER_PLUGIN ISING_ADAPTER_PLUGIN CQM_ADAPTER_PLUGIN DQM_ADAPTER_PLUGIN QUAD_PROGRAM_ADAPTER_PLUGIN HYBRID_ROUTE_PLUGIN INTERPRET_BACK_VALIDATOR_PLUGIN PROOF_VECTOR_VALIDATOR_PLUGIN FEASIBILITY_VALIDATOR_PLUGIN COEFFICIENT_SCALING_PLUGIN UNIT_NORMALIZATION_PLUGIN PRECISION_BINNING_PLUGIN PENALTY_TUNING_PLUGIN QUBIT_COST_ESTIMATOR_PLUGIN EMBEDDING_READINESS_PLUGIN QUANTUM_SHOT_BUDGET_STRUCTURAL_PLUGIN ANNEAL_SCHEDULE_STRUCTURAL_PLUGIN',
+        'AGENT_WORK_ORDER_ROUTE GOVERNANCE_REVIEW_ROUTE COMMANDER_DAG_ROUTE',
+    )
+    assert tuple(row.plugin_family_refs for row in view.entries) == tuple(tuple(row.split()) for row in families)
+    rollback_kinds = ('DISABLE_TO_NO_EFFECT','UNAVAILABLE_OWNER_REVIEW_REQUIRED','NO_TRADE','DETERMINISTIC_CLASSICAL_FALLBACK')
+    rollback_indices = (0,1,0,2,0,0,2,2,1,0,2,1,2,2,0,2,1,0,0,2,2,1,2,0,1,0,3,0)
+    assert tuple(row.rollback_target_kind for row in view.entries) == tuple(rollback_kinds[index] for index in rollback_indices)
+    assert {(row.package_component_id,row.fallback_component_id_or_none) for row in view.entries
+        if row.fallback_component_id_or_none is not None} == {('S1PKG::ROLE-27','S1PKG::ROLE-26')}
+    rollback = first['rollback_and_supersession']
+    assert rollback.predecessor_package_version_or_none is None
+    assert rollback.superseded_package_versions == rollback.retained_predecessor_versions == rollback.disabled_component_ids == ()
+    assert rollback.supersession_state.value == 'INITIAL_CURRENT_NO_PREDECESSOR'
+    assert first['reproducibility'].second_build_byte_equal is True
+    assert first['reproducibility'].pure_build_effect_count == 0
+    public_path = 'src/qtt/stage1_prediction_markets/selected_venues/market_data.py'
+    references = {(row.launch_role_id,path,'EXISTING_CANONICAL_OWNER') for row in manifest.entries for path in row.existing_owner_paths}
+    references |= {(row.launch_role_id,path,'FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED') for row in manifest.entries for path in row.future_owner_paths}
+    assert len(references) == 68 and len({row[1] for row in references}) == 34
+    assert {row for row in references if row[1] == public_path} == {
+        ('ROLE-02',public_path,'EXISTING_CANONICAL_OWNER'),('ROLE-04',public_path,'EXISTING_CANONICAL_OWNER')}
+    assert sum(row[2]=='EXISTING_CANONICAL_OWNER' for row in references) == 59
+    assert sum(row[2]=='FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED' for row in references) == 9
+    assert all(row.admission_state == 'HELD_IMPLEMENTATION_MISSING_NO_ADMISSION'
+        for row in view.entries if row.launch_role_id in {'ROLE-02','ROLE-04'})
+    assert _validate_launch_projection(deepcopy(projection))
+    mutations = []
+    wrong = deepcopy(projection)
+    wrong['graph']['roles'][1]['path_refs'][-1]['disposition'] = 'FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED'
+    wrong['graph']['roles'][8]['path_refs'][-1]['disposition'] = 'EXISTING_CANONICAL_OWNER'
+    assert sum(ref['disposition']=='EXISTING_CANONICAL_OWNER' for row in wrong['graph']['roles'] for ref in row['path_refs']) == 59
+    mutations.append(wrong)
+    wrong = deepcopy(projection)
+    wrong['graph']['roles'][3]['path_refs'][0]['path'] = 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/point_in_time.py'
+    mutations.append(wrong)
+    missing = deepcopy(projection)
+    missing['graph']['roles'][1]['path_refs'].pop()
+    mutations.append(missing)
+    duplicate = deepcopy(projection)
+    duplicate['graph']['roles'][3]['path_refs'].append(deepcopy(duplicate['graph']['roles'][3]['path_refs'][0]))
+    mutations.append(duplicate)
+    for changed in mutations:
+        with pytest.raises(PluginPackageContractError): _validate_launch_projection(changed)
+        with pytest.raises(OwnerAdapterError): SelectedComponentPackageAdapterV1.build_projection(changed)
+    for kind in ('readiness','live_profile','write_authority','scope_authority','exclusion'):
+        changed = deepcopy(projection)
+        if kind == 'readiness': changed['graph']['roles'][1]['disposition'] = 'BINDING_ONLY_GAP'
+        elif kind == 'live_profile': changed['graph']['scope']['active_live_profile_ids'] = ['KALSHI_US_DCM_DIRECT']
+        elif kind == 'write_authority': changed['graph']['no_effects'][next(iter(changed['graph']['no_effects']))] = True
+        elif kind == 'scope_authority': changed['graph']['scope']['authority_class'] = 'UNAUTHORIZED_LIVE_AUTHORITY'
+        else: changed['graph']['scope']['excluded_profile_ids'].pop()
+        with pytest.raises(OwnerAdapterError): SelectedComponentPackageAdapterV1.build_projection(changed)
+
+
+def _assert_lp02_public_owner_topology_guard():
+    """Exercise the actual guard; neighboring thread patterns remain denied."""
+    import ast
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import validation as owner
+    from tools.independent_validate_qku_computation_control_plane_operations import _runtime_topology_failures
+
+    trees=owner._package_ast()
+    relative='src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py'
+    path=owner.REPO_ROOT/relative
+    text=path.read_text(encoding='utf-8')
+    assert len(owner._public_owner_thread_imports_v1(relative,ast.parse(text)))==5
+    assert owner._no_runtime_topology()
+    assert not _runtime_topology_failures('source_policy.py',ast.parse(text))
+    assert not owner._public_owner_thread_imports_v1(relative.replace('source_policy.py','service.py'),ast.parse(text))
+    mutations=(
+        text.replace('import threading','import threading as threads',1),
+        text.replace('threading.RLock()','threading.Thread()',1),
+        text.replace('threading.get_ident()','threading.get_ident(1)',1),
+        text.replace('threading.get_ident()','threading.current_thread()',1),
+        text.replace('def _public_binding_facts_v1(','def _neighbor_public_binding_facts_v1(',1),
+        text+'\ndef neighboring_owner():\n    return threading.RLock()\n',
+        text+'\nthreading = object()\n',
+        text+'\nfrom threading import Thread\n',
+        text+'\nthread_factory = threading.RLock\n',
+        text+'\nimport math as threading\n',
+        text+'\nfrom math import pi as threading\n',
+        text.replace('def _public_binding_facts_v1(binding)', 'def _public_binding_facts_v1(binding, threading=None)',1),
+        text+'\ndef threading():\n    pass\n',
+        text+'\nclass threading:\n    pass\n',
+        text+'\ntry:\n    pass\nexcept Exception as threading:\n    pass\n',
+        text.replace('threading.RLock()', '(lambda: threading.RLock())()',1),
+        text.replace('threading.get_ident()', '(lambda: threading.get_ident())()',1),
+        text.replace('\nimport threading\n', '\nif True:\n    import threading\n',1),
+        text.replace('\nimport threading\n', '\ntry:\n    import threading\nexcept ImportError:\n    pass\n',1),
+        text+'\ndef _public_binding_facts_v1(binding):\n    pass\n',
+    )
+    for changed in mutations:
+        assert changed!=text
+        mutated=ast.parse(changed)
+        assert _runtime_topology_failures('source_policy.py',mutated)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(owner,'_package_ast',lambda:tuple((p,mutated if p==path else tree) for p,tree in trees))
+            assert not owner._no_runtime_topology()
+
+
+def _assert_lp02_frozen_public_bindings():
+    """Independent exact 20-row oracle from the approved LP02 binding map."""
+    expected = json.loads('''[{"binding_id":"FIVAB::MATH-01::contract_price","math_spec_id":"MATH-01","input_name":"contract_price","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.contract_price","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[0,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-01"},{"binding_id":"FIVAB::MATH-03::best_bid","math_spec_id":"MATH-03","input_name":"best_bid","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_bid","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[0,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-03"},{"binding_id":"FIVAB::MATH-03::best_ask","math_spec_id":"MATH-03","input_name":"best_ask","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_ask","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[bid,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-03"},{"binding_id":"FIVAB::MATH-03::same_instrument_snapshot","math_spec_id":"MATH-03","input_name":"same_instrument_snapshot","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.same_instrument_snapshot","input_type":"boolean","unit_or_basis":"identity invariant","domain":"true","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-03"},{"binding_id":"FIVAB::MATH-03::snapshot_state","math_spec_id":"MATH-03","input_name":"snapshot_state","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.snapshot_state","input_type":"enum","unit_or_basis":"book state","domain":"CURRENT_CONTIGUOUS_BOOK","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-03"},{"binding_id":"FIVAB::MATH-04::best_bid","math_spec_id":"MATH-04","input_name":"best_bid","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_bid","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[0,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-04"},{"binding_id":"FIVAB::MATH-04::best_ask","math_spec_id":"MATH-04","input_name":"best_ask","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_ask","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[bid,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-04"},{"binding_id":"FIVAB::MATH-04::same_instrument_snapshot","math_spec_id":"MATH-04","input_name":"same_instrument_snapshot","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.same_instrument_snapshot","input_type":"boolean","unit_or_basis":"identity invariant","domain":"true","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-04"},{"binding_id":"FIVAB::MATH-04::snapshot_state","math_spec_id":"MATH-04","input_name":"snapshot_state","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.snapshot_state","input_type":"enum","unit_or_basis":"book state","domain":"CURRENT_CONTIGUOUS_BOOK","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-04"},{"binding_id":"FIVAB::MATH-05::best_bid","math_spec_id":"MATH-05","input_name":"best_bid","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_bid","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[0,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-05"},{"binding_id":"FIVAB::MATH-05::best_ask","math_spec_id":"MATH-05","input_name":"best_ask","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.best_ask","input_type":"Decimal string","unit_or_basis":"currency per contract","domain":"[bid,payout]","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-05"},{"binding_id":"FIVAB::MATH-05::same_instrument_snapshot","math_spec_id":"MATH-05","input_name":"same_instrument_snapshot","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.same_instrument_snapshot","input_type":"boolean","unit_or_basis":"identity invariant","domain":"true","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-05"},{"binding_id":"FIVAB::MATH-05::snapshot_state","math_spec_id":"MATH-05","input_name":"snapshot_state","accepted_upstream_owner_id":"SelectedVenuePublicMarketDataOwnerV1","accepted_packet_or_snapshot_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1","schema_id":"PointInTimeExecutableMarketOrOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_state.snapshot_state","input_type":"enum","unit_or_basis":"book state","domain":"CURRENT_CONTIGUOUS_BOOK","producer_receipt_type":"PointInTimeExecutableMarketOrOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"provider-native sequence/revision required for order-book fields; immutable snapshot identity otherwise","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-05"},{"binding_id":"FIVAB::MATH-36::yes_bids","math_spec_id":"MATH-36","input_name":"yes_bids","accepted_upstream_owner_id":"KalshiAcceptedOrderBookStateOwnerV1","accepted_packet_or_snapshot_type":"KalshiPointInTimeOrderBookSnapshotV1","schema_id":"KalshiPointInTimeOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"orderbook.yes_bids","input_type":"list[Decimal string]","unit_or_basis":"currency per YES contract","domain":"nonempty ascending active grid","producer_receipt_type":"KalshiPointInTimeOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"Kalshi snapshot sequence and contiguous-delta receipt","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::no_bids","math_spec_id":"MATH-36","input_name":"no_bids","accepted_upstream_owner_id":"KalshiAcceptedOrderBookStateOwnerV1","accepted_packet_or_snapshot_type":"KalshiPointInTimeOrderBookSnapshotV1","schema_id":"KalshiPointInTimeOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"orderbook.no_bids","input_type":"list[Decimal string]","unit_or_basis":"currency per NO contract","domain":"nonempty ascending active grid","producer_receipt_type":"KalshiPointInTimeOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"Kalshi snapshot sequence and contiguous-delta receipt","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::payout","math_spec_id":"MATH-36","input_name":"payout","accepted_upstream_owner_id":"KalshiMarketMetadataOwnerV1","accepted_packet_or_snapshot_type":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1","schema_id":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_metadata.payout","input_type":"Decimal string","unit_or_basis":"currency per winning contract","domain":">0","producer_receipt_type":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"market metadata revision/effective version","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::book_sequence","math_spec_id":"MATH-36","input_name":"book_sequence","accepted_upstream_owner_id":"KalshiAcceptedOrderBookStateOwnerV1","accepted_packet_or_snapshot_type":"KalshiPointInTimeOrderBookSnapshotV1","schema_id":"KalshiPointInTimeOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"orderbook.book_sequence","input_type":"int","unit_or_basis":"provider sequence","domain":"exact current sequence","producer_receipt_type":"KalshiPointInTimeOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"Kalshi snapshot sequence and contiguous-delta receipt","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::expected_sequence","math_spec_id":"MATH-36","input_name":"expected_sequence","accepted_upstream_owner_id":"KalshiAcceptedOrderBookStateOwnerV1","accepted_packet_or_snapshot_type":"KalshiPointInTimeOrderBookSnapshotV1","schema_id":"KalshiPointInTimeOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"orderbook.expected_sequence","input_type":"int","unit_or_basis":"local expected sequence","domain":"must equal book_sequence","producer_receipt_type":"KalshiPointInTimeOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"Kalshi snapshot sequence and contiguous-delta receipt","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::book_state","math_spec_id":"MATH-36","input_name":"book_state","accepted_upstream_owner_id":"KalshiAcceptedOrderBookStateOwnerV1","accepted_packet_or_snapshot_type":"KalshiPointInTimeOrderBookSnapshotV1","schema_id":"KalshiPointInTimeOrderBookSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"orderbook.book_state","input_type":"enum","unit_or_basis":"book state","domain":"CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS","producer_receipt_type":"KalshiPointInTimeOrderBookSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"Kalshi snapshot sequence and contiguous-delta receipt","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"},{"binding_id":"FIVAB::MATH-36::price_ranges","math_spec_id":"MATH-36","input_name":"price_ranges","accepted_upstream_owner_id":"KalshiMarketMetadataOwnerV1","accepted_packet_or_snapshot_type":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1","schema_id":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1::SCHEMA","schema_version":"1.0.0","exact_field_path":"market_metadata.price_ranges","input_type":"list[record]","unit_or_basis":"market-specific fixed-point price grid","domain":"nonempty min/max/step records","producer_receipt_type":"KalshiVersionedMarketPriceRangeAndPayoutSnapshotV1ReceiptV1","required_clock_fields":["observed_time","effective_time","available_time","received_time","processed_time","as_of_time"],"provider_native_sequence_or_revision":"market metadata revision/effective version","current_admitted_mode":"CONTRACT_AND_INDEPENDENT_ORACLE_FIXTURE_ONLY; CONTEXT_COMPUTABLE_BLOCKED_UNTIL_ACCEPTED_OWNER_PACKET","consumer":"FormulaExecutionContractV1::MATH-36"}]''')
+    owners = {row['accepted_upstream_owner_id'] for row in expected}
+    selected = {row.binding_id:row for bindings in FORMULA_INPUT_AUTHORITY_BY_MATH_ID.values()
+        for row in bindings if row.accepted_upstream_owner_id in owners}
+    assert len(expected)==20 and set(selected)=={row['binding_id'] for row in expected}
+    for row in expected:
+        actual=selected[row['binding_id']]
+        assert {name:list(getattr(actual,name)) if type(getattr(actual,name)) is tuple else getattr(actual,name)
+            for name in row}==row
 
 
 def test_identity_computability_stack_and_required_input_resolution() -> None:
@@ -850,6 +1242,124 @@ def test_service_plan_and_stack_admission_matrix(
 
 
     _assert_kalshi_conditional_service(monkeypatch, invocations)
+
+
+def _assert_lp02_conditional_cash_services(terms,profile,count,expected_net,publication_fee=None,
+        expected_registry_denial=None,expected_expiry_ns=None,settlement_outcome=None):
+    """Feed the real MATH-06/07 owners with explicitly synthetic dependencies."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import service as service_owner
+
+    for math_id in ('MATH-06','MATH-07'):
+        context=replace(_context(component_ids=(math_id,)),context_id='SYN::LP02_CASH::'+math_id,
+            scope=ComputationScopeV1('SYN::MARKET',profile,'SYN::EVENT','SYN::CONTRACT','MODE_CONTEXT::CONTRACT_ONLY','SYN::SNAPSHOT'))
+        if publication_fee is not None:
+            from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+            from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as resolver
+            publication,account,fills=publication_fee
+            entry=handoff._require_public_publication_handle_v1(publication=publication)
+            metadata,=entry[4]
+            as_of=datetime(1970,1,1,tzinfo=UTC)+timedelta(microseconds=(entry[8]+999)//1000)
+            context=replace(context,context_id=json.dumps(('SYN::LP02_CASH',math_id,
+                    entry[7].typed_payload.source_use_action_ref),separators=(',',':')),
+                as_of=as_of,observed_at=as_of-timedelta(seconds=1),
+                source_epoch_id=entry[10],input_version=entry[11],scope=ComputationScopeV1(metadata.market_id,profile,
+                    metadata.event_id_or_none or 'SYN::NO_EVENT_RELATION',metadata.instrument_id,
+                    'MODE_CONTEXT::CONTRACT_ONLY',entry[7].record_id))
+        clocks=PointInTimeClocksV1(*(context.as_of-timedelta(seconds=1) for _ in range(5)),context.as_of)
+        values=dict(fill_probability=Decimal(1),entry_trade_cashflow_total=terms['entry_trade_cashflow_total'],
+            no_fill_cashflow_total=Decimal(0),platform_fee_total=terms['platform_fee_total'],builder_fee_total=Decimal(0),
+            other_fee_total=Decimal(0),expected_rebate_total=terms['expected_rebate_total'],exit_slippage_reserve_total=Decimal(0),
+            market_impact_reserve_total=Decimal(0),latency_adverse_selection_reserve_total=Decimal(0),capital_time_cost_reserve_total=Decimal(0),
+            cashflow_basis='SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE')
+        if math_id=='MATH-06':
+            values.update(p_win=Decimal('.6'),p_void=Decimal(0),win_terminal_cashflow_total=Decimal(count),
+                lose_terminal_cashflow_total=Decimal(0),void_terminal_cashflow_total=Decimal(0))
+        else:
+            values.update(outcome_ids=('WIN','LOSE'),outcome_probabilities=('0.6','0.4'),
+                outcome_terminal_cashflow_totals=(count,'0'),probability_simplex_tolerance=Decimal(0))
+        bindings=FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+        assert set(values)=={row.input_name for row in bindings}
+        packets=tuple(OwnerValuePacketV1(packet_id='SYN::LP02_CASH::'+row.binding_id,owner_id=row.accepted_upstream_owner_id,
+            packet_type=row.accepted_packet_or_snapshot_type,schema_id=row.schema_id,schema_version=row.schema_version,
+            context_id=context.context_id,scope=context.scope,source_epoch_id=context.source_epoch_id,input_version=context.input_version,
+            clocks=clocks,ttl=context.maximum_age,values={row.exact_field_path:values[row.input_name]},authorized_binding_ids=(row.binding_id,),
+            producer_receipt_id='SYN::LP02_CASH_RECEIPT::'+row.binding_id,producer_receipt_type=row.producer_receipt_type,
+            source_state_and_claim_lineage=row.source_state_and_claim_lineage,provider_sequence=1,revision=1) for row in bindings)
+        request=ComputeComponentRequestV1(**_common('compute_component',context=context),component_id=math_id,
+            expected_output_schema_ref=CURRENT_NAMED_OUTPUT_CONTRACTS[math_id].schema_id,
+            input_values=TypedValueRecordV1((TypedValueV1('platform_fee_total',TypedValueKindV1.DECIMAL,
+                terms['platform_fee_total'],next(row.unit_or_basis for row in bindings if row.input_name=='platform_fee_total'),
+                'SYNTHETIC_CONDITIONAL_FIXTURE'),)))
+        invoked=[]
+        original=service_owner.invoke_formula_v34
+        def invoke(component_id,inputs):
+            invoked.append(component_id)
+            return original(component_id,inputs)
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(service_owner,'invoke_formula_v34',invoke)
+            registry=CanonicalOwnerPacketRegistryV1(packets)
+            if publication_fee is not None:
+                fee_names={'entry_trade_cashflow_total','platform_fee_total','expected_rebate_total'}
+                if settlement_outcome is not None and math_id=='MATH-06':
+                    fee_names.add('win_terminal_cashflow_total' if settlement_outcome=='YES' else 'lose_terminal_cashflow_total')
+                fee_bindings=tuple(row.binding_id for row in bindings if row.input_name in fee_names)
+                kwargs=dict(publication=publication,context=context,binding_ids=fee_bindings,source_bindings=entry[5],
+                    applicability=account,fills=fills,order_ref='SYN::FRESH_HYPOTHETICAL_ORDER',prior_unrounded=Decimal(0),
+                    prior_collected=Decimal(0),prior_rounding_overpayment=Decimal(0),carry_evidence_refs=(),
+                    fresh_hypothetical_order=True,include_deferred_taker_rebate=False)
+                if expected_registry_denial is not None:
+                    with pytest.raises(ComputationControlPlaneError,match=expected_registry_denial):
+                        resolver._issue_public_fee_registry_v1(**kwargs)
+                    continue
+                fee_registry=resolver._issue_public_fee_registry_v1(**kwargs)
+                for source in entry[5]:
+                    remaining=tuple(row for row in entry[5] if row is not source)
+                    if remaining:
+                        with pytest.raises(ComputationControlPlaneError):
+                            resolver._issue_public_fee_registry_v1(**{**kwargs,'source_bindings':remaining})
+                if math_id=='MATH-06':
+                    unsupported=('lose_terminal_cashflow_total' if settlement_outcome=='YES' else 'win_terminal_cashflow_total')
+                    with pytest.raises(ComputationControlPlaneError):
+                        resolver._issue_public_fee_registry_v1(**{**kwargs,
+                            'binding_ids':('FIVAB::MATH-06::'+unsupported,)})
+                for row in bindings:
+                    if row.input_name in fee_names:
+                        actual=fee_registry.packet_for(context=context,binding_id=row.binding_id)
+                        assert actual.values[row.exact_field_path]==values[row.input_name]
+                        assert actual.owner_id=='PRETRADE1' and actual.provider_sequence is None
+                for changes in ({'applicability':replace(account)},
+                    {'binding_ids':(next(row.binding_id for row in bindings if row.input_name=='fill_probability'),)},
+                    {'source_bindings':tuple(replace(row) for row in entry[5])},
+                    {'context':replace(context,source_epoch_id='SYN::OTHER_EPOCH')},
+                    {'fresh_hypothetical_order':False,'carry_evidence_refs':()},
+                    {'fresh_hypothetical_order':True,'prior_collected':Decimal(1)}):
+                    with pytest.raises(ComputationControlPlaneError):resolver._issue_public_fee_registry_v1(**{**kwargs,**changes})
+                detached=CanonicalOwnerPacketRegistryV1(tuple(replace(packet) for packet in fee_registry.packets))
+                with pytest.raises(ComputationControlPlaneError):detached.packet_for(context=context,binding_id=fee_bindings[0])
+                dependencies=CanonicalOwnerPacketRegistryV1(tuple(packet for packet in packets
+                    if not set(packet.authorized_binding_ids)&set(fee_bindings)))
+                registry=resolver._join_public_owner_dependencies_v1(registry=fee_registry,dependencies=dependencies)
+            service=QKUComputationControlPlaneV1(registry,agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION)
+            response=service.compute_component(request)
+            assert response.status is OperationStatusV1.SUCCEEDED and invoked==[math_id]
+            assert response.component_result.formula_output.value['expected_net_cash']==Decimal(expected_net)
+            assert response.component_result.no_authority_flag is True
+            missing=next(packet for packet in packets if packet.owner_id=='CalibratedProbabilityModelOwnerV1')
+            missing_registry=(resolver._join_public_owner_dependencies_v1(registry=fee_registry,
+                dependencies=CanonicalOwnerPacketRegistryV1(tuple(packet for packet in dependencies.packets if packet is not missing)))
+                if publication_fee is not None else CanonicalOwnerPacketRegistryV1(tuple(packet for packet in packets if packet is not missing)))
+            denied=QKUComputationControlPlaneV1(missing_registry,
+                agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION).compute_component(request)
+            assert denied.status is not OperationStatusV1.SUCCEEDED and invoked==[math_id]
+            if expected_expiry_ns is not None:
+                import time
+                with pytest.MonkeyPatch.context() as expired:
+                    expired.setattr(time,'time_ns',lambda:expected_expiry_ns)
+                    with pytest.raises(ComputationControlPlaneError):
+                        fee_registry.packet_for(context=context,binding_id=fee_bindings[0])
+                    with pytest.raises(ComputationControlPlaneError,match='exclusive deadline changed'):
+                        service.compute_component(request)
+                    assert invoked==[math_id]
 
 
 def _assert_kalshi_conditional_service(monkeypatch, invocations):
@@ -1866,3 +2376,133 @@ def test_expected_failure_translates_without_fabricated_result() -> None:
     assert response.blocker_codes
     assert response.component_result.formula_output is None
     assert response.component_result.no_authority_flag is True
+
+
+def _assert_lp02_scalar_service(handle,*,expected_price):
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as resolver
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    entry=handoff._require_public_publication_handle_v1(publication=handle)
+    state,=entry[3].values()
+    now=datetime(1970,1,1,tzinfo=UTC)+timedelta(microseconds=(entry[8]+999)//1000)
+    scope=ComputationScopeV1(state.market_id,state.profile_id.value,
+        entry[4][0].event_id_or_none or 'SYN::LOCAL_UNAVAILABLE_EVENT',
+        state.instrument_id,'MODE_CONTEXT::CONTRACT_ONLY',state.state_id)
+    dependency_clocks=PointInTimeClocksV1(now-timedelta(seconds=1),now-timedelta(seconds=1),
+        now-timedelta(seconds=1),now-timedelta(seconds=1),now-timedelta(seconds=1),now)
+
+    def service_for(context):
+        registry=resolver.issue_public_owner_registry_v1(publication=handle,context=context,
+            binding_ids=('FIVAB::MATH-01::contract_price',),source_bindings=entry[5])
+        for source in entry[5]:
+            remaining=tuple(row for row in entry[5] if row is not source)
+            if remaining:
+                with pytest.raises(ComputationControlPlaneError):
+                    resolver.issue_public_owner_registry_v1(publication=handle,context=context,
+                        binding_ids=('FIVAB::MATH-01::contract_price',),source_bindings=remaining)
+        packet,=registry.packets
+        assert packet.provider_sequence is packet.revision is None
+        assert packet.values['market_state.contract_price']==expected_price
+        with pytest.raises(ComputationControlPlaneError):
+            resolver.FormulaInputResolverV1.resolve('MATH-01',context=context,owner_registry=registry)
+        dependencies=[]
+        for item in _packets(context):
+            if item.authorized_binding_ids==('FIVAB::MATH-01::contract_price',):continue
+            values=dict(item.values)
+            if 'contract_semantics.payout_per_winning_contract' in values:
+                values={'contract_semantics.payout_per_winning_contract':'1'}
+            if 'prediction.calibrated_probability' in values:
+                values={'prediction.calibrated_probability':0.6}
+            dependencies.append(replace(item,packet_id=context.context_id+'::'+item.packet_id,
+                clocks=dependency_clocks,values=values))
+        joined=resolver._join_public_owner_dependencies_v1(registry=registry,
+            dependencies=CanonicalOwnerPacketRegistryV1(tuple(dependencies)))
+        return QKUComputationControlPlaneV1(owner_registry=joined,agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION)
+
+    context=replace(_context(component_ids=('MATH-01',)),
+        context_id='SYN::SCALAR_COMPONENT::'+state.profile_id.value,as_of=now,observed_at=now,
+        source_epoch_id=entry[10],input_version=entry[11],scope=scope)
+    service=service_for(context)
+    request=ComputeComponentRequestV1(**dict(_common('compute_component',context=context),requested_at=now),
+        component_id='MATH-01',input_values=TypedValueRecordV1((_component_record().fields[1],)),
+        expected_output_schema_ref='MATH-01::OUTPUT')
+    result=service.compute_component(request)
+    assert result.status is OperationStatusV1.SUCCEEDED, result
+    assert result.component_result.formula_output.value==Decimal(expected_price)
+    stack_context=replace(_context(component_ids=('MATH-01','MATH-02'),dependency_graph_id=STACK_ID),
+        context_id='SYN::SCALAR_STACK::'+state.profile_id.value,as_of=now,observed_at=now,
+        source_epoch_id=entry[10],input_version=entry[11],scope=scope)
+    stack_service=service_for(stack_context)
+    stack=stack_service.compute_stack(ComputeStackRequestV1(**dict(_common('compute_stack',context=stack_context),requested_at=now),
+        stack_id=STACK_ID,component_ids=('MATH-01','MATH-02'),input_values=TypedValueRecordV1((_stack_record().fields[1],))))
+    assert stack.status is OperationStatusV1.SUCCEEDED, stack
+    assert stack.stack_result.component_outputs[0].value==Decimal(expected_price)
+    assert stack.stack_result.component_outputs[1].value==pytest.approx(0.11,abs=1e-15)
+    # Retail does not gain sequenced book capabilities from a scalar trade.
+    if state.profile_id.value=='POLYMARKET_US_RETAIL_DIRECT':
+        with pytest.raises(ComputationControlPlaneError):
+            resolver.issue_public_owner_registry_v1(publication=handle,context=context,
+                binding_ids=('FIVAB::MATH-03::snapshot_state',),source_bindings=entry[5])
+    permission=entry[1]._binding
+    original=service_module.invoke_formula_v34
+    def invalidate_after_computation(*args,**kwargs):
+        value=original(*args,**kwargs)
+        permission._failed=True
+        return value
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(service_module,'invoke_formula_v34',invalidate_after_computation)
+        with pytest.raises(ComputationControlPlaneError):service.compute_component(request)
+
+
+def _assert_lp02_book_services(handle,*,expected_book):
+    from fractions import Fraction
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import input_resolver as resolver
+    from src.qtt.stage1_prediction_markets.orderbook_event_state_snapshot import handoff
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    entry=handoff._require_public_publication_handle_v1(publication=handle)
+    state,=entry[3].values()
+    now=datetime(1970,1,1,tzinfo=UTC)+timedelta(microseconds=(entry[8]+999)//1000)
+    bid,ask,midpoint,spread,ratio=expected_book
+    for math_id in ('MATH-03','MATH-04','MATH-05'):
+        context=replace(_context(component_ids=(math_id,)),
+            context_id='SYN::BOOK_SERVICE::'+math_id+'::'+ask,as_of=now,observed_at=now,
+            source_epoch_id=entry[10],input_version=entry[11],
+            scope=ComputationScopeV1(state.market_id,state.profile_id.value,entry[4][0].event_id_or_none or 'SYN::NO_EVENT_RELATION',
+                state.instrument_id,'MODE_CONTEXT::CONTRACT_ONLY',state.state_id))
+        bindings=FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+        public=tuple(row for row in bindings if row.accepted_upstream_owner_id=='SelectedVenuePublicMarketDataOwnerV1')
+        registry=resolver.issue_public_owner_registry_v1(publication=handle,context=context,
+            binding_ids=tuple(row.binding_id for row in public),source_bindings=entry[5])
+        values={key:value for packet in registry.packets for key,value in packet.values.items()}
+        assert values['market_state.best_bid']==bid and values['market_state.best_ask']==ask
+        assert values['market_state.snapshot_state']=='CURRENT_CONTIGUOUS_BOOK'
+        assert all(packet.provider_sequence==state.last_provider_sequence_end_or_none for packet in registry.packets)
+        with pytest.raises(ComputationControlPlaneError):
+            resolver.FormulaInputResolverV1.resolve(math_id,context=context,owner_registry=registry)
+        payout,=tuple(row for row in bindings if row not in public)
+        assert payout.input_name=='payout'
+        clocks=PointInTimeClocksV1(now-timedelta(seconds=1),now-timedelta(seconds=1),
+            now-timedelta(seconds=1),now-timedelta(seconds=1),now-timedelta(seconds=1),now)
+        separately_owned=OwnerValuePacketV1(packet_id=context.context_id+'::PAYOUT',owner_id=payout.accepted_upstream_owner_id,
+            packet_type=payout.accepted_packet_or_snapshot_type,schema_id=payout.schema_id,schema_version=payout.schema_version,
+            context_id=context.context_id,scope=context.scope,source_epoch_id=context.source_epoch_id,input_version=context.input_version,
+            clocks=clocks,ttl=timedelta(days=1),values={payout.exact_field_path:'1'},authorized_binding_ids=(payout.binding_id,),
+            producer_receipt_id=context.context_id+'::PAYOUT_RECEIPT',producer_receipt_type=payout.producer_receipt_type,
+            source_state_and_claim_lineage=payout.source_state_and_claim_lineage,provider_sequence=None,revision=1)
+        joined=resolver._join_public_owner_dependencies_v1(registry=registry,
+            dependencies=CanonicalOwnerPacketRegistryV1((separately_owned,)))
+        service=QKUComputationControlPlaneV1(owner_registry=joined,agent_capability_resolver=_EXPLICIT_NO_EFFECT_TEST_ADMISSION)
+        request=ComputeComponentRequestV1(**dict(_common('compute_component',context=context),requested_at=now),
+            component_id=math_id,input_values=TypedValueRecordV1((TypedValueV1('payout',TypedValueKindV1.DECIMAL,
+                Decimal('1'),'currency per winning contract','separately owned contract semantics'),)),
+            expected_output_schema_ref=math_id+'::OUTPUT')
+        response=service.compute_component(request)
+        assert response.status is OperationStatusV1.SUCCEEDED, response
+        value=response.component_result.formula_output.value
+        if math_id=='MATH-03':assert value==Decimal(midpoint)
+        elif math_id=='MATH-04':assert value==Decimal(spread)
+        else:
+            assert abs(Fraction(value['relative_spread_ratio'])-Fraction(*ratio))<Fraction(1,10**24)
+            assert abs(Fraction(value['relative_spread_bps'])-Fraction(ratio[0]*10000,ratio[1]))<Fraction(1,10**20)

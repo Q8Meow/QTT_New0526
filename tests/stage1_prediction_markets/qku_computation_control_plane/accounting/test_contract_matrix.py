@@ -276,8 +276,153 @@ def test_source_use_admission_integration(monkeypatch, reference_directory, caps
     _assert_source_use_authority_boundaries(moment)
     _assert_source_use_observation_expiry()
     _assert_source_use_capacity(moment)
+    _assert_public_source_use_action_connection(moment, clock, monkeypatch)
     captured = capsys.readouterr()
     assert captured.out == captured.err == ""
+
+
+def _assert_public_source_use_action_connection(moment, clock, monkeypatch):
+    """Real control/FIDO/UOW path; declared synthetic OS/resource observations."""
+    import copy
+    from datetime import timedelta
+    from types import MappingProxyType
+    from src.qtt.service import owner_source_use_windows as native
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane import source_policy as source
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_utc_nanoseconds
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        PublicCaptureBudgetV1, PublicDataSourceUseScopeV1, PublicCaptureRequestV1,
+        PublicDataSourceUseActionV1, PublicSourceUseOriginalV1,
+    )
+    from src.qtt.stage1_prediction_markets.selected_venues import market_data as public_transport
+    from tests.stage1_prediction_markets.qku_computation_control_plane.security.test_deserialization_safety import _synthetic_source_use_root
+
+    legacy_scope, review, facts, declaration = _source_use_action_proposals(moment)
+    wall = _native_utc_nanoseconds(moment.isoformat())
+    budget = PublicCaptureBudgetV1(max_requests=3, max_application_messages=8,
+        max_application_bytes=65536, max_message_bytes=8192, max_selected_instruments=1,
+        max_retained_records=16, max_retained_bytes=262144, open_timeout_ns=1_000_000_000,
+        receive_timeout_ns=1_000_000_000, close_timeout_ns=1_000_000_000, duration_ns=30_000_000_000,
+        max_recovery_attempts=0, queue_high_water=4, storage_busy_timeout_ms=0,
+        maximum_wall_uncertainty_ns=1000, deadline_monotonic_ns=60_000_000_000)
+    scope = PublicDataSourceUseScopeV1("QTT_PUBLIC_DATA_SOURCE_USE_SCOPE_V1", legacy_scope.profile_id,
+        "SYNTHETIC_PUBLIC_V1", ("SYNTHETIC::SOURCE",), ("K_MARKET",), ("SYNTHETIC-MARKET",),
+        "PHASE_A_PUBLIC_DATA_INTERNAL", "BOUNDED_LOCAL_DURABLE",
+        "NO_REDISTRIBUTION_NO_EXTERNAL_AI_FORWARDING", None, None, "SYNTHETIC::STORAGE",
+        wall + 60_000_000_000, ("FormulaExecutionContractV1::MATH-36",), budget, 2,
+        ("SELECTED_INSTRUMENTS",))
+    tag = "PUBLIC_SOURCE_USE_ACTION_V1"
+    capture = PublicCaptureRequestV1("SYNTHETIC::CAPTURE_REQUEST", scope, ("SYNTHETIC::SOURCE_BINDING",),
+        None, wall + 45_000_000_000, ("K_MARKET",), ("SYNTHETIC-MARKET",),
+        "SYNTHETIC::CAPTURE_SESSION", "PHASE_A_PUBLIC_CAPTURE")
+
+    for dispatch in (False, True):
+        clock.update(wall=wall, mono=10_000_000_000)
+        with _synthetic_source_use_root() as h, monkeypatch.context() as patch:
+            # No native key, file, ACL or storage is accessed by this fixture.
+            configuration = object()
+            resources = MappingProxyType(dict(configuration=configuration, configuration_generation=1,
+                storage_root=object(), alias=None, expires_at_ns=wall + 90_000_000_000, native_qualified=False))
+            observations = []
+
+            def observed_resources(root, selected):
+                assert root is h.root and selected == scope
+                assert not h.authority._lock._is_owned()
+                observations.append("protected-metadata")
+                return resources
+
+            def resident(root, selected, now):
+                assert root is h.root and selected is resources
+                assert h.authority._lock._is_owned() and now < resources["expires_at_ns"]
+
+            patch.setattr(native, "_public_scope_resources_v1", observed_resources)
+            patch.setattr(native, "_public_resources_resident_v1", resident)
+            first = h.sign(dict(schema_version=tag, action="REVIEW_ACCEPT", scope=scope, original=review,
+                review_facts=facts, requested_expires_at_utc=moment + timedelta(seconds=60)))
+            assert type(first.event.typed_payload) is PublicDataSourceUseActionV1
+            assert type(first.review.typed_payload) is PublicSourceUseOriginalV1
+            assert first.event.record_type is EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL
+            assert first.event.record_id.startswith('["PUBLIC_SOURCE_ACTION_V1",')
+            assert first.review.record_id.startswith('["PUBLIC_SOURCE_ORIGINAL_V1",')
+            reference = InMemoryPersistenceAdapterV1()
+            transaction = reference.begin_transaction()
+            try:
+                for record in (first.event, first.review):
+                    with pytest.raises(ComputationControlPlaneError):
+                        reference.insert_receipt_record(transaction, record)
+                    with pytest.raises(ComputationControlPlaneError):
+                        reference.get_record(record.record_id)
+                for reader in (reference.load_committed_public_capture_v1,
+                               reference.load_committed_public_publication_v1):
+                    with pytest.raises(ComputationControlPlaneError):
+                        reader(None)
+            finally:
+                transaction.rollback()
+            second = h.sign(dict(schema_version=tag, action="USE_ADMIT", scope=scope, original=declaration,
+                expected_review_ref=first.review.record_id, requested_expires_at_utc=moment + timedelta(seconds=55)))
+            assert not h.authority._bindings and h.controller.read_status_v1()["state"] == "ACTIVE"
+            proposal = dict(schema_version=tag, action="OBSERVE_ONCE", scope=scope,
+                expected_declaration_ref=second.declaration.record_id, expected_review_ref=second.review.record_id,
+                capture=capture)
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.prepare_action_v1(deterministic_json({**proposal, "observation": capture}).encode())
+            with pytest.raises(ComputationControlPlaneError):
+                h.controller.prepare_action_v1(deterministic_json({**proposal, "scope": legacy_scope}).encode())
+            if dispatch:
+                class SyntheticDispatchReached(Exception):
+                    pass
+
+                def selected_factory(*, binding):
+                    assert type(binding) is source.PublicSourceUseBindingV1
+                    assert binding._capture == capture and binding._native_qualified is False
+                    assert not h.authority._lock._is_owned()
+                    raise SyntheticDispatchReached()
+
+                patch.setattr(public_transport, "_create_public_market_data_session_v1", selected_factory)
+                with pytest.raises(SyntheticDispatchReached):
+                    h.sign(proposal, via_controller=True)
+                assert h.authority._active_permit._failed
+                assert observations == ["protected-metadata", "protected-metadata"]
+                continue
+            third = h.sign(proposal)
+            binding = h.authority._active_permit
+            assert type(binding) is source.PublicSourceUseBindingV1 and not binding._native_qualified
+            assert binding._event == third.event and third.event.typed_payload.capture == capture
+            assert third.event.typed_payload.generation_before == third.event.typed_payload.generation_after == 2
+            assert h.authority._counter == 3 and len(h.authority._adapter._tables["receipt_records"]) == 5
+            assert observations == ["protected-metadata", "protected-metadata"]
+            assert source._public_binding_facts_v1(binding)["action_ref"] == third.event.record_id
+            for clone in (copy.copy, copy.deepcopy):
+                with pytest.raises(TypeError):
+                    clone(binding)
+            session = public_transport._create_public_market_data_session_v1(binding=binding)
+            with pytest.raises(ComputationControlPlaneError):
+                public_transport._create_public_market_data_session_v1(binding=binding)
+            session.close_v1()
+            session.close_v1()
+            fourth = h.sign(dict(schema_version=tag, action="WITHDRAW_USE", scope=scope,
+                expected_declaration_ref=second.declaration.record_id, expected_review_ref=second.review.record_id,
+                reason="SYNTHETIC_WITHDRAWAL"))
+            assert fourth.event.typed_payload.generation_after == 3
+            with pytest.raises(ComputationControlPlaneError):
+                source._public_binding_facts_v1(binding)
+            assert not h.authority._bindings and h.authority._active_permit is None
+    clock.update(wall=wall, mono=10_000_000_000)
+    import ast
+    from tools import independent_validate_qku_computation_control_plane_execution as independent
+
+    trees = {name: independent._tree(name) for name in ('receipts.py', 'persistence.py', 'sqlite_reference.py')}
+    assert independent._lp02_public_execution_contract_failures_v1(trees) == []
+    for filename, old, replacement in (
+        ('persistence.py', 'if _source_action_reserved_v1(record) or _public_record_reserved_v1(record):',
+         'if _source_action_reserved_v1(record):'),
+        ('sqlite_reference.py', 'self.completion_witness = witness', 'self.unissued_candidate = witness'),
+        ('receipts.py', 'EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE: (PublicNativeObservationV1,)',
+         'EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE: (PublicPublicationRecordV1,)'),
+    ):
+        text = (independent.PACKAGE / filename).read_text(encoding='utf-8')
+        assert text.count(old) == 1
+        changed = dict(trees, **{filename: ast.parse(text.replace(old, replacement, 1))})
+        assert independent._lp02_public_execution_contract_failures_v1(changed)
 
 
 def _assert_source_use_cancel_and_thread_binding(moment):
@@ -1228,6 +1373,7 @@ def test_accounting_contract_matrix(case) -> None:
         with pytest.raises(ComputationControlPlaneError):
             ExposureProjectionV1("bad", (("VENUE_A", "10"), ("VENUE_A", "10")), ("10", "-10"), ("p1",), NOW, NOW)
     elif slug == "fee-rebate-treatment":
+        _assert_lp02_public_fee_selection_and_amounts()
         _assert_kalshi_rounding_values()
         _assert_kalshi_quadratic_taker_values()
         _assert_kalshi_scheduled_values()
@@ -1300,6 +1446,164 @@ def test_accounting_contract_matrix(case) -> None:
             AccountingAndTCAServiceV1.validate_journal(journal, postings, _accounts(second_basis="PROJECTED"))
     else:  # pragma: no cover - the meta-test makes this unreachable
         raise AssertionError(f"unhandled control case {slug}")
+
+
+def _assert_lp02_public_fee_selection_and_amounts():
+    """Independent contract vectors; every schedule/account is declared synthetic."""
+    from decimal import Inexact, Rounded, ROUND_UP, localcontext
+    from dataclasses import replace
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.source_policy import (
+        PublicFeeEpochV1,SelectedAccountApplicabilityV1,resolve_public_fee_epoch_v1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.economic_math import (
+        public_fee_amount_v1,public_deferred_taker_rebate_v1)
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+
+    retail=Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+    gemini=Stage1VenueProfileIdV1.GEMINI_TITAN_DIRECT
+    account=SelectedAccountApplicabilityV1(retail,'SYN::ACCOUNT','SYN::STANDARD',0,1000,0,('SYN::SOURCE',),
+        'SYN::QUALIFICATION',1,'SYN::FEE_PROFILE','0.01',4,6,False,())
+    standard=PublicFeeEpochV1('SYN::STANDARD_EPOCH',retail,'SYN::STANDARD',('SYN::MARKET',),'SYN::ACCOUNT','TAKER',
+        'QUADRATIC',(('rate','0.0695'),('multiplier','1')),'HALF_EVEN_CENT',0,None,0,1000,('SYN::ORIGINAL',),
+        'SYN::QUALIFICATION',None,1,())
+
+    def select(epochs, *, qualified=account, known=10, effective=20, profile=retail, role='TAKER'):
+        return resolve_public_fee_epoch_v1(epochs=epochs,profile_id=profile,market_scope=('SYN::MARKET',),
+            applicability=qualified,known_as_of_ns=known,effective_at_ns=effective,liquidity_role=role)
+
+    assert select((standard,)) is standard
+    for kwargs in ({'qualified':None},{'known':1000},{'qualified':replace(account,product_scope_ref='OTHER')},
+                   {'qualified':replace(account,available_at_ns=11)},{'qualified':replace(account,effective_until_ns=20)}):
+        with pytest.raises(ComputationControlPlaneError):select((standard,),**kwargs)
+    for changed in (replace(standard,known_at_ns=11),replace(standard,effective_from_ns=21),
+                    replace(standard,effective_until_ns_or_none=20),replace(standard,rounding_rule='UNAVAILABLE')):
+        with pytest.raises(ComputationControlPlaneError):select((changed,))
+    with pytest.raises(ComputationControlPlaneError):select((standard,replace(standard,epoch_id='SYN::CONFLICT')))
+    with pytest.raises(ComputationControlPlaneError):
+        replace(standard,coefficients=(('rate','0.0695'),('multiplier','0')))
+    other=replace(standard,epoch_id='SYN::OTHER_ACCOUNT',account_scope_ref_or_none='OTHER_ACCOUNT')
+    assert select((other,standard)) is standard
+    second=replace(standard,epoch_id='SYN::SECOND',generation=2,known_at_ns=1,
+        supersedes_epoch_ref_or_none=standard.epoch_id,effective_until_ns_or_none=15)
+    third=replace(standard,epoch_id='SYN::THIRD',generation=3,known_at_ns=2,supersedes_epoch_ref_or_none=second.epoch_id)
+    assert select((standard,second,third)) is third
+    for changed in (replace(third,supersedes_epoch_ref_or_none='MISSING'),replace(third,generation=1)):
+        with pytest.raises(ComputationControlPlaneError):select((standard,second,changed))
+    future=replace(third,known_at_ns=11)
+    assert select((standard,future)) is standard
+    combo=replace(standard,epoch_id='SYN::COMBO',product_class='SYN::COMBO',formula_family='RETAIL_COMBO',
+        coefficients=(('quadratic_rate','0.0695'),('quartic_rate','0.06')))
+    combo_account=replace(account,product_scope_ref='SYN::COMBO')
+    assert select((combo,),qualified=combo_account) is combo
+    with pytest.raises(ComputationControlPlaneError):select((combo,))
+    maker=replace(standard,epoch_id='SYN::MAKER',liquidity_role='MAKER',coefficients=(('rate','0.0104'),('multiplier','1')))
+    assert select((maker,),role='MAKER') is maker
+    for tier in (None,1,2,3):
+        with pytest.raises(ComputationControlPlaneError):
+            select((maker,),role='MAKER',qualified=replace(account,maker_tier_or_none=tier,limitations=('SYN::TIER_MISSING',)))
+    g_account=replace(account,profile_id=gemini,promotion_eligibility_or_none=True)
+    g_taker=replace(standard,epoch_id='SYN::G_TAKER',profile_id=gemini,rounding_rule='CEILING_CENT',
+        coefficients=(('rate','0.07'),('multiplier','1')))
+    g_maker=replace(g_taker,epoch_id='SYN::G_MAKER',liquidity_role='MAKER',coefficients=(('rate','0.0175'),('multiplier','1')))
+    waiver=replace(g_maker,epoch_id='SYN::G_WAIVER',formula_family='EXPLICIT_ZERO',coefficients=(),rounding_rule='EXACT_ZERO')
+    assert select((waiver,),qualified=g_account,profile=gemini,role='MAKER') is waiver
+    with pytest.raises(ComputationControlPlaneError):
+        select((waiver,),qualified=replace(g_account,promotion_eligibility_or_none=False),profile=gemini,role='MAKER')
+    legacy=replace(g_maker,epoch_id='SYN::LEGACY',formula_family='GEMINI_LEGACY_MIN_SIDE',coefficients=(('rate','0.01'),),
+        rounding_rule='UNAVAILABLE')
+    with pytest.raises(ComputationControlPlaneError):select((legacy,),qualified=g_account,profile=gemini,role='MAKER')
+    vectors=((standard,'800','0.40','13.344','13.34'),(standard,'1000','0.50','17.375','17.38'),
+        (combo,'1000','0.50','19.25','19.25'),(maker,'1000','0.50','2.6','-2.6'),
+        (g_taker,'100','0.50','1.75','1.75'),(g_maker,'100','0.50','0.4375','0.44'),(waiver,'100','0.50','0','0'))
+    for precision in (6,28,34):
+        with localcontext() as ctx:
+            ctx.prec=precision;ctx.rounding=ROUND_UP;ctx.traps[Inexact]=True;ctx.traps[Rounded]=True
+            for epoch,count,price,raw,charged in vectors:
+                amount=public_fee_amount_v1(epoch=epoch,contracts=Decimal(count),price=Decimal(price),
+                    prior_unrounded=Decimal('0'),prior_collected=Decimal('0'))
+                assert Decimal(amount['unrounded'])==Decimal(raw) and Decimal(amount['charged'])==Decimal(charged)
+            for rate,expected in (('0.024',('0.01','0')),('0.016',('0','0'))):
+                epoch=replace(standard,coefficients=(('rate',rate),('multiplier','1')))
+                prior_raw=prior_cash=Decimal('0')
+                for charge in expected:
+                    amount=public_fee_amount_v1(epoch=epoch,contracts=Decimal('1'),price=Decimal('0.5'),
+                        prior_unrounded=prior_raw,prior_collected=prior_cash)
+                    assert Decimal(amount['charged'])==Decimal(charge)
+                    prior_raw,prior_cash=Decimal(amount['cumulative_unrounded']),Decimal(amount['cumulative_collected'])
+            deferred=public_deferred_taker_rebate_v1(qualifying_collected_fee=Decimal('13.34'),proven_tier=6)
+            assert deferred['amount']=='4.002' and deferred['economic_class']=='CONTINGENT_WEEKLY_REBATE_NOT_AVAILABLE_BALANCE'
+    for tier in (None,True,0,7):
+        with pytest.raises(ComputationControlPlaneError):
+            public_deferred_taker_rebate_v1(qualifying_collected_fee=Decimal('13.34'),proven_tier=tier)
+    _assert_lp02_conditional_fee_consumers(account,standard,combo,combo_account,maker,g_account,g_taker,g_maker,waiver)
+
+
+def _assert_lp02_conditional_fee_consumers(account,standard,combo,combo_account,maker,g_account,g_taker,g_maker,waiver):
+    from dataclasses import replace
+    from decimal import localcontext, Inexact, Rounded, ROUND_UP
+    from src.qtt.pretrade.pr169_pretrade1_resolvers import PublicConditionalFillV1, compose_public_fee_cashflows_v1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.stage1_launch_graph import Stage1VenueProfileIdV1
+    from tests.stage1_prediction_markets.qku_computation_control_plane.tranche_b.test_service_operations import _assert_lp02_conditional_cash_services
+
+    def inputs(epoch,qualified,count,price):
+        return dict(profile_id=epoch.profile_id,market_scope=('SYN::MARKET',),epochs=(epoch,),applicability=qualified,
+            known_as_of_ns=10,fills=(PublicConditionalFillV1(Decimal(count),Decimal(price),'BUY',epoch.liquidity_role,20),),
+            order_ref='SYN::HYPOTHETICAL_ORDER',cap_domain_epoch_refs=(epoch.epoch_id,),prior_unrounded=Decimal(0),
+            prior_collected=Decimal(0),prior_rounding_overpayment=Decimal(0),carry_evidence_refs=(),
+            fresh_hypothetical_order=True,include_deferred_taker_rebate=False)
+    cases=((standard,account,'800','.40','13.34','0','146.66'),
+           (standard,account,'1000','.50','17.38','0','82.62'),
+           (combo,combo_account,'1000','.50','19.25','0','80.75'),
+           (maker,account,'1000','.50','0','2.6','102.6'),
+           (g_taker,g_account,'100','.50','1.75','0','8.25'),
+           (g_maker,g_account,'100','.50','0.44','0','9.56'),
+           (waiver,g_account,'100','.50','0','0','10'))
+    for epoch,qualified,count,price,fee,rebate,net in cases:
+        selected=inputs(epoch,qualified,count,price)
+        for precision in (6,28,34):
+            with localcontext() as ambient:
+                ambient.prec=precision;ambient.rounding=ROUND_UP;ambient.traps[Inexact]=ambient.traps[Rounded]=True
+                terms=compose_public_fee_cashflows_v1(**selected)
+                assert terms['platform_fee_total']==Decimal(fee) and terms['expected_rebate_total']==Decimal(rebate)
+                assert terms['contingent_deferred_rebate_total']==0 and terms['no_order_authority'] is True
+        _assert_lp02_conditional_cash_services(terms,epoch.profile_id.value,count,net)
+    selected=inputs(standard,account,'800','.40')
+    deferred=compose_public_fee_cashflows_v1(**{**selected,'include_deferred_taker_rebate':True})
+    assert deferred['expected_rebate_total']==Decimal('4.002') and deferred['immediate_rebate_total']==0
+    assert deferred['contingent_deferred_rebate_total']==Decimal('4.002')
+    _assert_lp02_conditional_cash_services(deferred,standard.profile_id.value,'800','150.662')
+    for changes in ({'applicability':None},{'fresh_hypothetical_order':False},
+                    {'prior_collected':Decimal('.01')},{'cap_domain_epoch_refs':('UNBOUND',)},
+                    {'include_deferred_taker_rebate':True,'applicability':replace(account,taker_tier_or_none=None,limitations=('SYN::MISSING_TIER',))},
+                    {'fills':(replace(selected['fills'][0],fill_at_ns=9),)},
+                    {'epochs':(replace(standard,known_at_ns=11),)},
+                    {'epochs':(standard,replace(standard,epoch_id='SYN::CONFLICT'))}):
+        with pytest.raises(ComputationControlPlaneError):compose_public_fee_cashflows_v1(**{**selected,**changes})
+    # Reduction-only carry survives each fill and a separately bound epoch change.
+    for rate,fee in (('0.024','.01'),('0.016','0')):
+        first=replace(standard,coefficients=(('rate',rate),('multiplier','1')),effective_until_ns_or_none=25)
+        second=replace(first,epoch_id='SYN::NEXT_CAP_EPOCH',effective_from_ns=25,effective_until_ns_or_none=None,generation=2)
+        two={**inputs(first,account,'1','.5'),'epochs':(first,second),'cap_domain_epoch_refs':(first.epoch_id,second.epoch_id),
+             'fills':(PublicConditionalFillV1(Decimal(1),Decimal('.5'),'BUY','TAKER',20),
+                      PublicConditionalFillV1(Decimal(1),Decimal('.5'),'BUY','TAKER',30))}
+        terms=compose_public_fee_cashflows_v1(**two)
+        assert terms['platform_fee_total']==Decimal(fee) and terms['entry_trade_cashflow_total']==Decimal('-1')
+        with pytest.raises(ComputationControlPlaneError):
+            compose_public_fee_cashflows_v1(**{**two,'cap_domain_epoch_refs':(first.epoch_id,)})
+    kalshi=Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+    k_account=replace(account,profile_id=kalshi)
+    k_taker=replace(standard,profile_id=kalshi,rounding_rule='KALSHI_ACCOUNT_GRID',coefficients=(('rate','0.07'),('multiplier','1')))
+    k_maker=replace(k_taker,epoch_id='SYN::K_MAKER',liquidity_role='MAKER',coefficients=(('rate','0.0175'),('multiplier','1')))
+    k_inputs={**inputs(k_taker,k_account,'100','.5'),'epochs':(k_taker,k_maker),
+        'cap_domain_epoch_refs':(k_taker.epoch_id,k_maker.epoch_id),
+        'fills':(PublicConditionalFillV1(Decimal(100),Decimal('.5'),'BUY','TAKER',20),
+                 PublicConditionalFillV1(Decimal(100),Decimal('.5'),'BUY','MAKER',30))}
+    terms=compose_public_fee_cashflows_v1(**k_inputs)
+    assert terms['platform_fee_total']==Decimal('2.19') and terms['rounding_overpayment_after']==Decimal('.0025')
+    assert terms['expected_rebate_total']==0
+    _assert_lp02_conditional_cash_services(terms,kalshi.value,'200','17.81')
+    for missing in ('fee_profile_id_or_none','balance_increment_text_or_none'):
+        with pytest.raises(ComputationControlPlaneError):
+            compose_public_fee_cashflows_v1(**{**k_inputs,'applicability':replace(k_account,**{missing:None},limitations=('SYN::KAL045_UNAVAILABLE',))})
 
 
 def _scheduled_kalshi_fixture(second_series_multiplier="3", *, moment=None):

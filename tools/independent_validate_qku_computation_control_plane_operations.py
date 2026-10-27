@@ -1424,6 +1424,7 @@ def _runtime_topology_failures(
     permitted_import_count = 0
     permitted_call_count = 0
     source_thread_imports: set[ast.ImportFrom] = set()
+    public_thread_imports: set[ast.Import] = set()
     if file_name == "source_policy.py":
         owners = [node for node in tree.body if isinstance(node, ast.ClassDef)
                   and node.name == "KalshiFeeObservationOwnerV1"]
@@ -1441,11 +1442,78 @@ def _runtime_topology_failures(
                     exact_nodes.append(imports[0])
             if len(exact_nodes) == 2:
                 source_thread_imports.update(exact_nodes)
+        # Phase-A custody uses resident locks and current thread identities;
+        # it creates no worker. Admit only the complete literal import/call census.
+        import_owners = []
+        call_owners = []
+        bad_use = False
+        located = []
+        parents = {}
+        definition_counts = {}
+
+        def locate(node, owner=()):
+            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+                owner = (*owner, node.name)
+                definition_name = ".".join(owner)
+                definition_counts[definition_name] = definition_counts.get(definition_name, 0) + 1
+            elif isinstance(node, ast.Lambda):
+                owner = (*owner, "<lambda>")
+            located.append((node, ".".join(owner)))
+            for child in ast.iter_child_nodes(node):
+                parents[id(child)] = node
+                locate(child, owner)
+
+        locate(tree)
+        for node, owner in located:
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:
+                    binds_threading = (alias.asname or alias.name.split(".", 1)[0]) == "threading"
+                    if binds_threading and not (isinstance(node, ast.Import) and alias.name == "threading" and alias.asname is None):
+                        bad_use = True
+            if (isinstance(node, ast.arg) and node.arg == "threading"
+                or isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "threading"
+                or isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)) and node.name == "threading"
+                or isinstance(node, ast.MatchMapping) and node.rest == "threading"
+                or isinstance(node, (ast.Global, ast.Nonlocal)) and "threading" in node.names):
+                bad_use = True
+            if isinstance(node, ast.Import) and any(a.name == "threading" for a in node.names):
+                enclosing = parents.get(id(node))
+                if (len(node.names) != 1 or node.names[0].asname is not None
+                        or not isinstance(enclosing, (ast.Module, ast.FunctionDef))
+                        or node not in enclosing.body):
+                    bad_use = True
+                import_owners.append((owner, node))
+            if isinstance(node, ast.Name) and node.id == "threading":
+                parent = parents[id(node)]
+                caller = parents.get(id(parent))
+                if not (isinstance(node.ctx, ast.Load) and isinstance(parent, ast.Attribute) and parent.value is node
+                        and isinstance(caller, ast.Call) and caller.func is parent
+                        and parent.attr in {"RLock", "get_ident"} and not caller.args and not caller.keywords):
+                    bad_use = True
+                else:
+                    call_owners.append((owner, parent.attr))
+        expected_imports = ["", "_public_binding_facts_v1", "_create_synthetic_public_binding_v1",
+                            "SourceUseAuthorityV1._issue_public_binding_v1", "SourceUseAuthorityV1._check_public_binding_v1"]
+        expected_calls = [
+            ("_public_binding_facts_v1", "get_ident"),
+            ("_create_synthetic_public_binding_v1", "get_ident"),
+            ("_create_synthetic_public_binding_v1", "RLock"),
+            ("_check_public_response_fence_v1", "get_ident"),
+            ("SourceUseAuthorityV1._issue_public_binding_v1", "get_ident"),
+            ("SourceUseAuthorityV1._issue_public_binding_v1", "RLock"),
+            ("SourceUseAuthorityV1._check_public_binding_v1", "get_ident"),
+        ]
+        if (not bad_use and sorted(owner for owner, _ in import_owners) == sorted(expected_imports)
+                and sorted(call_owners) == sorted(expected_calls)
+                and all(definition_counts.get(owner) == 1 for owner, _ in expected_calls)):
+            public_thread_imports.update(node for _, node in import_owners)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 root = alias.name.split(".", 1)[0]
                 if root not in FORBIDDEN_IMPORT_ROOTS:
+                    continue
+                if node in public_thread_imports:
                     continue
                 is_exact_exception = (
                     policy is not None

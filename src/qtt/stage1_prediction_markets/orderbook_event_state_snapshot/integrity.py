@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import Mapping
 
 from src.qtt.stage1_prediction_markets.market_data_ingest.adapter import (
@@ -16,6 +17,7 @@ from src.qtt.stage1_prediction_markets.qku_computation_control_plane.point_in_ti
     PITDataContractErrorV1,
     PITReasonCodeV1,
     validate_pit_clock_set_v3,
+    PublicStreamContinuityWitnessV1,
 )
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import (
     PITCommitCompletionV1,
@@ -259,13 +261,13 @@ def validate_pit_book_integrity_v2(
                 PITReasonCodeV1.PIT_TICK_GRID_INVALID,
                 "prediction-market book price is outside the unit payout range",
             )
-        if (level.price - level.price_origin) % level.price_increment != 0:
+        if ((Fraction(level.price) - Fraction(level.price_origin)) / Fraction(level.price_increment)).denominator != 1:
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_TICK_GRID_INVALID,
                 "book state contains an off-grid price",
             )
         if level.quantity_increment is not None and (
-            level.quantity % level.quantity_increment != 0
+            (Fraction(level.quantity) / Fraction(level.quantity_increment)).denominator != 1
         ):
             raise PITDataContractErrorV1(
                 PITReasonCodeV1.PIT_QUANTITY_GRID_INVALID,
@@ -284,7 +286,7 @@ def validate_pit_book_integrity_v2(
             PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
             "book state is crossed",
         )
-    if yes_bids and no_bids and max(yes_bids) + max(no_bids) > 1:
+    if yes_bids and no_bids and Fraction(max(yes_bids)) + Fraction(max(no_bids)) > 1:
         raise PITDataContractErrorV1(
             PITReasonCodeV1.PIT_BOOK_CROSSED_INVALID,
             "complement-derived binary-outcome book is crossed",
@@ -361,8 +363,17 @@ def reconstruct_pit_state_v2(
     commit_completions: tuple[PITCommitCompletionV1, ...],
     *,
     initial_state_or_none: PITOrderBookStateV2 | None = None,
+    continuity_witnesses: tuple[PublicStreamContinuityWitnessV1, ...] = (),
 ) -> PITOrderBookStateV2:
     """Replay only exact final events with matching completion receipts."""
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.receipts import _public_canonical_frame_ref_v1
+
+    if type(continuity_witnesses) is not tuple or any(type(row) is not PublicStreamContinuityWitnessV1 for row in continuity_witnesses):
+        raise PITDataContractErrorV1(PITReasonCodeV1.PIT_RECONSTRUCTION_DIVERGENCE, "invalid continuity reconstruction inputs")
+    witness_by_event = {_public_canonical_frame_ref_v1(row.observation_ref)
+                        + "::CANONICAL-EVENT-V2": row for row in continuity_witnesses}
+    if len(witness_by_event) != len(continuity_witnesses):
+        raise PITDataContractErrorV1(PITReasonCodeV1.PIT_CONFLICTING_DUPLICATE, "duplicate continuity reconstruction association")
 
     if type(completed_events) is not tuple or not completed_events or any(
         type(value) is not PITCanonicalEventV2 for value in completed_events
@@ -380,6 +391,8 @@ def reconstruct_pit_state_v2(
         )
     if initial_state_or_none is not None:
         validate_pit_book_integrity_v2(initial_state_or_none)
+    if not set(witness_by_event) <= {row.event_record_id for row in completed_events}:
+        raise PITDataContractErrorV1(PITReasonCodeV1.PIT_RECONSTRUCTION_DIVERGENCE, "continuity witness has no selected completed event")
     completion_by_id = {value.completion_id: value for value in commit_completions}
     if len(completion_by_id) != len(commit_completions):
         raise PITDataContractErrorV1(
@@ -428,6 +441,7 @@ def reconstruct_pit_state_v2(
             _pit_candidate_from_final_event(event),
             candidate_event_ordinal=event.committed_event_ordinal,
             lifecycle_state="ADMISSIBLE",
+            continuity_witness=witness_by_event.get(event.event_record_id),
         )
         if transition.event_disposition.value != "COMMITTED":
             raise PITDataContractErrorV1(

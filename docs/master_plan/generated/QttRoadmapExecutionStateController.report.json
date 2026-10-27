@@ -4,6 +4,2016 @@
   "controller_id": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0",
   "final_readiness_derives_from_pr116a_active_non_sha_registry": true,
   "final_readiness_state": "FINAL_READINESS_CONTROLLED_BY_ACTIVE_NON_SHA_GATES",
+  "finite_launch_delivery_plan": {
+    "delivery_slots": [
+      {
+        "delivery_id": "LP01",
+        "direct_prerequisites": [],
+        "gate": "EXISTING_EXACT_APPROVAL",
+        "phase": "PRE_LAUNCH",
+        "title": "Approved offline scheduled-fee scenario composition"
+      },
+      {
+        "delivery_id": "LP02",
+        "direct_prerequisites": [
+          "LP01"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Selected data, venue semantics and existing-owner integration"
+      },
+      {
+        "delivery_id": "LP03",
+        "direct_prerequisites": [
+          "LP02"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Evidence engine, metrics and independent-validation tooling"
+      },
+      {
+        "delivery_id": "LP04",
+        "direct_prerequisites": [
+          "LP02",
+          "LP03"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Probability, fair-value and quantitative-model lifecycle"
+      },
+      {
+        "delivery_id": "LP05",
+        "direct_prerequisites": [
+          "LP02",
+          "LP03"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Execution science and complete venue-realism models"
+      },
+      {
+        "delivery_id": "LP06",
+        "direct_prerequisites": [
+          "LP04",
+          "LP05"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Portfolio decision kernel and full campaign economics"
+      },
+      {
+        "delivery_id": "LP07",
+        "direct_prerequisites": [
+          "LP02",
+          "LP03"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Grounded LLM gateway and model-intelligence services"
+      },
+      {
+        "delivery_id": "LP08",
+        "direct_prerequisites": [
+          "LP02",
+          "LP06",
+          "LP07"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "Bounded research agents, formula intake and market scouting"
+      },
+      {
+        "delivery_id": "LP09",
+        "direct_prerequisites": [
+          "LP03",
+          "LP07"
+        ],
+        "gate": "G1",
+        "phase": "PRE_LAUNCH",
+        "title": "Owner-selected LLM champion integration"
+      },
+      {
+        "delivery_id": "LP10",
+        "direct_prerequisites": [
+          "LP03",
+          "LP06"
+        ],
+        "gate": "G0",
+        "phase": "PRE_LAUNCH",
+        "title": "True-quantum compiler, benchmark adapter and owner controls"
+      },
+      {
+        "delivery_id": "LP11",
+        "direct_prerequisites": [
+          "LP02",
+          "LP03",
+          "LP04",
+          "LP05",
+          "LP06",
+          "LP08",
+          "LP09",
+          "LP10"
+        ],
+        "gate": "G1_AND_G2",
+        "phase": "PRE_LAUNCH",
+        "title": "End-to-end edge tournament and immutable launch bundle"
+      },
+      {
+        "delivery_id": "LP12",
+        "direct_prerequisites": [
+          "LP11"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Production runtime and security deployment architecture"
+      },
+      {
+        "delivery_id": "LP13",
+        "direct_prerequisites": [
+          "LP02",
+          "LP05",
+          "LP12"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Common connector and all selected production adapters"
+      },
+      {
+        "delivery_id": "LP14",
+        "direct_prerequisites": [
+          "LP06",
+          "LP12",
+          "LP13"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Private cash, custody, risk and market-integrity integration"
+      },
+      {
+        "delivery_id": "LP15",
+        "direct_prerequisites": [
+          "LP08",
+          "LP09",
+          "LP11",
+          "LP12"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Production agents and grounded LLM runtime"
+      },
+      {
+        "delivery_id": "LP16",
+        "direct_prerequisites": [
+          "LP11",
+          "LP12",
+          "LP14",
+          "LP15"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Immutable hot-path snapshots and latency convergence"
+      },
+      {
+        "delivery_id": "LP17",
+        "direct_prerequisites": [
+          "LP13",
+          "LP14",
+          "LP16"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Sole Execution Router, mode controls and emergency release"
+      },
+      {
+        "delivery_id": "LP18",
+        "direct_prerequisites": [
+          "LP14",
+          "LP15",
+          "LP16",
+          "LP17"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Owner dashboard, Telegram and exact approval workflows"
+      },
+      {
+        "delivery_id": "LP19",
+        "direct_prerequisites": [
+          "LP14",
+          "LP15",
+          "LP17",
+          "LP18"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Day-1 post-trade feedback and safe operating loop"
+      },
+      {
+        "delivery_id": "LP20",
+        "direct_prerequisites": [
+          "LP12",
+          "LP13",
+          "LP14",
+          "LP15",
+          "LP16",
+          "LP17",
+          "LP18",
+          "LP19"
+        ],
+        "gate": "G3",
+        "phase": "PRE_LAUNCH",
+        "title": "Real-path qualification and bounded launch orchestration"
+      },
+      {
+        "delivery_id": "LP21",
+        "direct_prerequisites": [
+          "LP19",
+          "LP20"
+        ],
+        "gate": "POST_STABILIZATION",
+        "phase": "POST_LAUNCH",
+        "title": "Evidence-backed sizing and regime-adaptation enhancement"
+      },
+      {
+        "delivery_id": "LP22",
+        "direct_prerequisites": [
+          "LP19",
+          "LP20"
+        ],
+        "gate": "POST_STABILIZATION",
+        "phase": "POST_LAUNCH",
+        "title": "Grounded-LLM and true-QPU challenger refresh"
+      },
+      {
+        "delivery_id": "LP23",
+        "direct_prerequisites": [
+          "LP19",
+          "LP20"
+        ],
+        "gate": "POST_STABILIZATION",
+        "phase": "POST_LAUNCH",
+        "title": "One bounded strategy or venue-capability expansion cohort"
+      },
+      {
+        "delivery_id": "LP24",
+        "direct_prerequisites": [
+          "LP21",
+          "LP22",
+          "LP23"
+        ],
+        "gate": "POST_STABILIZATION",
+        "phase": "POST_LAUNCH",
+        "title": "Operational maturity and finite-program closeout"
+      }
+    ],
+    "execution_associations": [
+      {
+        "branch_name": null,
+        "campaign_run_references": [],
+        "delivery_id": "LP01",
+        "evidence_qualification": "Owner-recorded external completion; pre/post-merge campaign identifiers are not reproduced in this projection.",
+        "evidence_references": [
+          "Owner-approved LP02 v1.0: PR307/LP01 delivered and closed."
+        ],
+        "github_audit_url": "https://github.com/Q8Meow/QTT_New0526/pull/307",
+        "implementation_id": "APPROVED_OFFLINE_SCHEDULED_FEE_SCENARIO_COMPOSITION",
+        "state": "EXTERNAL_COMPLETION_RECORDED"
+      },
+      {
+        "branch_name": "s1-lp02-selected-data-integration",
+        "campaign_run_references": [],
+        "delivery_id": "LP02",
+        "evidence_qualification": "Software implementation approved; local/final-campaign acceptance and merge are not recorded.",
+        "evidence_references": [
+          "Owner-approved S1_LP02_SELECTED_DATA_INTEGRATION v1.0 implementation contract and one-time writer handoff."
+        ],
+        "github_audit_url": null,
+        "implementation_id": "S1_LP02_SELECTED_DATA_INTEGRATION",
+        "state": "IMPLEMENTATION_IN_PROGRESS"
+      }
+    ],
+    "gate_reference_policy": "ROADMAP_REFERENCES_ONLY_EXISTING_OWNERS_RETAIN_AUTHORITY",
+    "identity_roster_entry_id": "PR118_REPO_CANONICAL_SELF_ENTRY",
+    "prelaunch_delivery_budget": 20,
+    "semantic_dependency_edges": [
+      {
+        "consumer": "RM11-REPO-SETTINGS-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "RM11-OWNER-FREEZE-01"
+      },
+      {
+        "consumer": "RM11-CONTROL-CURRENTIZE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "RM11-REPO-SETTINGS-01"
+      },
+      {
+        "consumer": "ENG-VALIDATION-RELIABILITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "RM11-CONTROL-CURRENTIZE-01"
+      },
+      {
+        "consumer": "S1-HOST-CAPABILITY-DISCOVERY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "RM11-CONTROL-CURRENTIZE-01"
+      },
+      {
+        "consumer": "S1-VENUE-UNIVERSE-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "RM11-OWNER-FREEZE-01"
+      },
+      {
+        "consumer": "S1-LEGAL-ACCOUNT-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-VENUE-UNIVERSE-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-DATA-PROVIDER-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-VENUE-UNIVERSE-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-ECONOMIC-VIABILITY-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LEGAL-ACCOUNT-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-ECONOMIC-VIABILITY-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-DATA-PROVIDER-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-LATENCY-CAPACITY-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-HOST-CAPABILITY-DISCOVERY-01"
+      },
+      {
+        "consumer": "S1-LATENCY-CAPACITY-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-DATA-PROVIDER-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-LATENCY-CAPACITY-PREFLIGHT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-ECONOMIC-VIABILITY-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-SCOPE-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-ECONOMIC-VIABILITY-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-SCOPE-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LATENCY-CAPACITY-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-CAPABILITY-RECONCILIATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SCOPE-DECISION-01"
+      },
+      {
+        "consumer": "S1-GAP-ADJUDICATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CAPABILITY-RECONCILIATION-01"
+      },
+      {
+        "consumer": "S1-RESEARCH-GOVERNANCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-GAP-ADJUDICATION-01"
+      },
+      {
+        "consumer": "S1-SOURCE-FREEZE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LEGAL-ACCOUNT-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-SOURCE-FREEZE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-GAP-ADJUDICATION-01"
+      },
+      {
+        "consumer": "S1-METRICS-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RESEARCH-GOVERNANCE-01"
+      },
+      {
+        "consumer": "S1-MVAL-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RESEARCH-GOVERNANCE-01"
+      },
+      {
+        "consumer": "S1-MVAL-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-METRICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-SECURITY-CONDUCT-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LEGAL-ACCOUNT-PREFLIGHT-01"
+      },
+      {
+        "consumer": "S1-SECURITY-CONDUCT-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SCOPE-DECISION-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "RM11-CONTROL-CURRENTIZE-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-RESEARCH-GOVERNANCE-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-SOURCE-FREEZE-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-METRICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-MVAL-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PROTOCOL-FREEZE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-SECURITY-CONDUCT-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "ENG-VALIDATION-RELIABILITY-01"
+      },
+      {
+        "consumer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROTOCOL-FREEZE-01"
+      },
+      {
+        "consumer": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+      },
+      {
+        "consumer": "S1-PIT-DATA-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROTOCOL-FREEZE-01"
+      },
+      {
+        "consumer": "S1-PROBABILITY-MODEL-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-MVAL-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PROBABILITY-MODEL-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+      },
+      {
+        "consumer": "S1-PROBABILITY-MODEL-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PIT-DATA-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-VENUE-SEMANTICS-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SOURCE-FREEZE-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-SCIENCE-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-MVAL-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-SCIENCE-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PIT-DATA-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-SCIENCE-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-VENUE-SEMANTICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+      },
+      {
+        "consumer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROBABILITY-MODEL-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EXECUTION-SCIENCE-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-AGENT-POLICY-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROTOCOL-FREEZE-01"
+      },
+      {
+        "consumer": "S1-AGENT-POLICY-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+      },
+      {
+        "consumer": "S1-LLM-GATEWAY-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-CONDUCT-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-GATEWAY-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROTOCOL-FREEZE-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-HOST-CAPABILITY-DISCOVERY-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SOURCE-FREEZE-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-CONDUCT-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-GATEWAY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-PROVIDER-MODEL-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-SOURCE-FREEZE-01"
+      },
+      {
+        "consumer": "S1-LLM-PROVIDER-MODEL-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LLM-GATEWAY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-PROVIDER-MODEL-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-EVALUATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-HOST-CAPABILITY-DISCOVERY-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-EVALUATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-PROVIDER-MODEL-DECISION-01"
+      },
+      {
+        "consumer": "S1-LLM-MODEL-EVALUATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-PLATFORM-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-OWNER-PROMOTION-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LLM-MODEL-EVALUATION-01"
+      },
+      {
+        "consumer": "S1-LLM-CODEX-INTEGRATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "ENG-VALIDATION-RELIABILITY-01"
+      },
+      {
+        "consumer": "S1-LLM-CODEX-INTEGRATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-GATEWAY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-CODEX-INTEGRATION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LLM-OWNER-PROMOTION-DECISION-01"
+      },
+      {
+        "consumer": "S1-QUANTUM-IR-MAPPER-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-GRAPH-MATERIALIZATION-01"
+      },
+      {
+        "consumer": "S1-QUANTUM-IR-MAPPER-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EVIDENCE-PLATFORM-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "ENG-VALIDATION-RELIABILITY-01"
+      },
+      {
+        "consumer": "S1-EVIDENCE-PLATFORM-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-METRICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EVIDENCE-PLATFORM-PHASE-A-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PIT-DATA-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-MARKET-ALPHA-INTELLIGENCE-CONTROL-PLANE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROTOCOL-FREEZE-01"
+      },
+      {
+        "consumer": "S1-MARKET-ALPHA-INTELLIGENCE-CONTROL-PLANE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PIT-DATA-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-MARKET-ALPHA-INTELLIGENCE-CONTROL-PLANE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AGENT-POLICY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PREDICTION-MARKET-EDGE-SCOUT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-VENUE-SEMANTICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PREDICTION-MARKET-EDGE-SCOUT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-GATEWAY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-PREDICTION-MARKET-EDGE-SCOUT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-MARKET-ALPHA-INTELLIGENCE-CONTROL-PLANE-01"
+      },
+      {
+        "consumer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-PLATFORM-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PREDICTION-MARKET-EDGE-SCOUT-01"
+      },
+      {
+        "consumer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-QUANTUM-ARTIFACT-VALIDATION-01"
+      },
+      {
+        "consumer": "S1-QPU-PROVIDER-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-SOURCE-FREEZE-01"
+      },
+      {
+        "consumer": "S1-QPU-PROVIDER-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-QUANTUM-IR-MAPPER-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-QPU-BENCHMARK-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-PLATFORM-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-QPU-BENCHMARK-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-QPU-PROVIDER-DECISION-01"
+      },
+      {
+        "consumer": "S1-QUANTUM-ARTIFACT-VALIDATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-QPU-BENCHMARK-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROBABILITY-MODEL-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EXECUTION-SCIENCE-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AGENT-POLICY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-MODEL-EVALUATION-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-CODEX-INTEGRATION-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-PLATFORM-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01"
+      },
+      {
+        "consumer": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-QUANTUM-ARTIFACT-VALIDATION-01"
+      },
+      {
+        "consumer": "S1-CLOSED-BUNDLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-FINAL-BUNDLE-CLOSURE-01"
+      },
+      {
+        "consumer": "S1-REPLAY-CAMPAIGN-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CLOSED-BUNDLE-01"
+      },
+      {
+        "consumer": "S1-PAPER-CAMPAIGN-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CLOSED-BUNDLE-01"
+      },
+      {
+        "consumer": "S1-DUAL-RESULT-REVIEW-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-REPLAY-CAMPAIGN-01"
+      },
+      {
+        "consumer": "S1-DUAL-RESULT-REVIEW-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PAPER-CAMPAIGN-01"
+      },
+      {
+        "consumer": "S1-METRICS-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-DUAL-RESULT-REVIEW-01"
+      },
+      {
+        "consumer": "S1-MVAL-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-METRICS-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-EVIDENCE-ACCEPTANCE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-MVAL-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-RUNTIME-PLATFORM-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-ACCEPTANCE-01"
+      },
+      {
+        "consumer": "S1-SECURITY-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-CONDUCT-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-SECURITY-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RUNTIME-PLATFORM-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-CONNECTOR-RUNTIME-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RUNTIME-PLATFORM-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-CONNECTOR-RUNTIME-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-VENUE-SEMANTICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CONNECTOR-RUNTIME-01"
+      },
+      {
+        "consumer": "S1-RISK-CASH-INTEGRATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-RISK-CASH-INTEGRATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CONNECTOR-RUNTIME-01"
+      },
+      {
+        "consumer": "S1-RISK-CASH-INTEGRATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-MARKET-SURVEILLANCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-MARKET-SURVEILLANCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-AGENT-RUNTIME-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AGENT-POLICY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-AGENT-RUNTIME-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01"
+      },
+      {
+        "consumer": "S1-AGENT-RUNTIME-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RUNTIME-PLATFORM-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-LLM-PRODUCTION-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-GATEWAY-PHASE-A-01"
+      },
+      {
+        "consumer": "S1-LLM-PRODUCTION-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-CODEX-INTEGRATION-01"
+      },
+      {
+        "consumer": "S1-LLM-PRODUCTION-PHASE-B-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RUNTIME-PLATFORM-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-HOTPATH-SNAPSHOT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01"
+      },
+      {
+        "consumer": "S1-HOTPATH-SNAPSHOT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EVIDENCE-ACCEPTANCE-01"
+      },
+      {
+        "consumer": "S1-HOTPATH-SNAPSHOT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RUNTIME-PLATFORM-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-ROUTER-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-ROUTER-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RISK-CASH-INTEGRATION-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-ROUTER-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-MARKET-SURVEILLANCE-01"
+      },
+      {
+        "consumer": "S1-EXECUTION-ROUTER-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-HOTPATH-SNAPSHOT-01"
+      },
+      {
+        "consumer": "S1-MODE-ALLOW-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-HOTPATH-SNAPSHOT-01"
+      },
+      {
+        "consumer": "S1-MODE-ALLOW-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-EXECUTION-ROUTER-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-RISK-CASH-INTEGRATION-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-MARKET-SURVEILLANCE-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-AGENT-RUNTIME-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-LLM-PRODUCTION-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-HOTPATH-SNAPSHOT-01"
+      },
+      {
+        "consumer": "S1-DASHBOARD-PROJECTION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AGENT-RUNTIME-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-DASHBOARD-PROJECTION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-PRODUCTION-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-DASHBOARD-PROJECTION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-MODE-ALLOW-01"
+      },
+      {
+        "consumer": "S1-DASHBOARD-PROJECTION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01"
+      },
+      {
+        "consumer": "S1-PRODUCTION-CONVERGENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SECURITY-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-PRODUCTION-CONVERGENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RISK-CASH-INTEGRATION-01"
+      },
+      {
+        "consumer": "S1-PRODUCTION-CONVERGENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AGENT-RUNTIME-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-PRODUCTION-CONVERGENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LLM-PRODUCTION-PHASE-B-01"
+      },
+      {
+        "consumer": "S1-PRODUCTION-CONVERGENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-DASHBOARD-PROJECTION-01"
+      },
+      {
+        "consumer": "S1-PROVIDER-PRIVATE-STATE-AUTH-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-PRODUCTION-CONVERGENCE-01"
+      },
+      {
+        "consumer": "S1-LIVE-DRYRUN-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-PROVIDER-PRIVATE-STATE-AUTH-01"
+      },
+      {
+        "consumer": "S1-RESILIENCE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LIVE-DRYRUN-01"
+      },
+      {
+        "consumer": "S1-SHADOW-OBSERVE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LIVE-DRYRUN-01"
+      },
+      {
+        "consumer": "S1-SHADOW-OBSERVE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-RESILIENCE-01"
+      },
+      {
+        "consumer": "S1-INSTITUTIONAL-READINESS-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-SHADOW-OBSERVE-01"
+      },
+      {
+        "consumer": "S1-CANARY-ELIGIBILITY-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-INSTITUTIONAL-READINESS-01"
+      },
+      {
+        "consumer": "S1-CANARY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CANARY-ELIGIBILITY-01"
+      },
+      {
+        "consumer": "S1-POST-CANARY-REVIEW-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-CANARY-01"
+      },
+      {
+        "consumer": "S1-LAUNCH-AUTHORIZATION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "S1-POST-CANARY-REVIEW-01"
+      },
+      {
+        "consumer": "S1-AUTOMATIC-OPERATIONS-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01"
+      },
+      {
+        "consumer": "S1-AUTOMATIC-OPERATIONS-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-LAUNCH-AUTHORIZATION-01"
+      },
+      {
+        "consumer": "PL-STABILIZATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AUTOMATIC-OPERATIONS-01"
+      },
+      {
+        "consumer": "PL-REALIZED-ATTRIBUTION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-STABILIZATION-01"
+      },
+      {
+        "consumer": "PL-MEMORY-UPDATE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-MODEL-EXECUTION-DRIFT-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-LLM-EVALUATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-LLM-CONTINUOUS-SCOUT-AND-REFRESH-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-LLM-CONTINUOUS-SCOUT-AND-REFRESH-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-LLM-EVALUATION-01"
+      },
+      {
+        "consumer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "S1-AUTOMATIC-OPERATIONS-01"
+      },
+      {
+        "consumer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MEMORY-UPDATE-01"
+      },
+      {
+        "consumer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-QUANTUM-EVALUATION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L0-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L1-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L1-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-ADAPTIVE-L0-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L2-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L2-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MEMORY-UPDATE-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L3-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L3-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-ADAPTIVE-L4-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-CAPITAL-SCALE-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-CAPITAL-SCALE-DECISION-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-STRATEGY-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-STABILIZATION-01"
+      },
+      {
+        "consumer": "PL-STRATEGY-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MEMORY-UPDATE-01"
+      },
+      {
+        "consumer": "PL-STRATEGY-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01"
+      },
+      {
+        "consumer": "PL-VENUE-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-STABILIZATION-01"
+      },
+      {
+        "consumer": "PL-VENUE-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-VENUE-EXPANSION-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01"
+      },
+      {
+        "consumer": "PL-OPERATIONS-MATURITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-STABILIZATION-01"
+      },
+      {
+        "consumer": "PL-OPERATIONS-MATURITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-OPERATIONS-MATURITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-LLM-EVALUATION-01"
+      },
+      {
+        "consumer": "PL-OPERATIONS-MATURITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-LLM-CONTINUOUS-SCOUT-AND-REFRESH-01"
+      },
+      {
+        "consumer": "PL-OPERATIONS-MATURITY-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-STABILIZATION-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-REALIZED-ATTRIBUTION-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MEMORY-UPDATE-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-MODEL-EXECUTION-DRIFT-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-LLM-EVALUATION-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-LLM-CONTINUOUS-SCOUT-AND-REFRESH-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "AUTHORIZATION_GATE",
+        "producer": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-QUANTUM-EVALUATION-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-CAPITAL-SCALE-DECISION-01"
+      },
+      {
+        "consumer": "PL-STAGE1-STABLE-01",
+        "edge_class": "SEMANTIC_DEPENDENCY",
+        "producer": "PL-OPERATIONS-MATURITY-01"
+      }
+    ],
+    "semantic_package_mapping": [
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 1,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "RM11-OWNER-FREEZE-01",
+        "software_support": "G0",
+        "title": "Exact Roadmap v12.0 planning freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 2,
+        "original_class": "SETTINGS_ONLY_OWNER_ACTION",
+        "semantic_package_id": "RM11-REPO-SETTINGS-01",
+        "software_support": "G0",
+        "title": "Repository protection and merge-policy hardening"
+      },
+      {
+        "delivery_or_gate": "LP02",
+        "ordinal": 3,
+        "original_class": "DOCUMENT_AND_CONTROL_PLANE_CURRENTIZATION",
+        "semantic_package_id": "RM11-CONTROL-CURRENTIZE-01",
+        "software_support": "LP02",
+        "title": "Existing roadmap-controller currentization"
+      },
+      {
+        "delivery_or_gate": "EXISTING_CENTRAL_RUNNER_REUSE",
+        "ordinal": 4,
+        "original_class": "CENTRAL_RUNNER_HARDENING",
+        "semantic_package_id": "ENG-VALIDATION-RELIABILITY-01",
+        "software_support": "LP02 only if a demonstrated new functional dependency needs an in-scope integration correction; no generic runner campaign",
+        "title": "Central Windows validation path-budget and process supervision"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 5,
+        "original_class": "READ_ONLY_HOST_DISCOVERY",
+        "semantic_package_id": "S1-HOST-CAPABILITY-DISCOVERY-01",
+        "software_support": "G0",
+        "title": "Verified current-host capability discovery and resource-envelope freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 6,
+        "original_class": "READ_ONLY_RESEARCH",
+        "semantic_package_id": "S1-VENUE-UNIVERSE-PREFLIGHT-01",
+        "software_support": "G0",
+        "title": "Current prediction-market venue universe preflight"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 7,
+        "original_class": "READ_ONLY_RESEARCH",
+        "semantic_package_id": "S1-LEGAL-ACCOUNT-PREFLIGHT-01",
+        "software_support": "G0",
+        "title": "Jurisdiction, account, conduct, and rights preflight"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 8,
+        "original_class": "READ_ONLY_RESEARCH",
+        "semantic_package_id": "S1-DATA-PROVIDER-PREFLIGHT-01",
+        "software_support": "G0",
+        "title": "Point-in-time data and provider feasibility preflight"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 9,
+        "original_class": "READ_ONLY_RESEARCH",
+        "semantic_package_id": "S1-ECONOMIC-VIABILITY-PREFLIGHT-01",
+        "software_support": "G0",
+        "title": "Execution-adjusted economic viability preflight"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 10,
+        "original_class": "READ_ONLY_RESEARCH",
+        "semantic_package_id": "S1-LATENCY-CAPACITY-PREFLIGHT-01",
+        "software_support": "G0",
+        "title": "Latency, capacity, and operational-complexity preflight"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 11,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "S1-SCOPE-DECISION-01",
+        "software_support": "G0",
+        "title": "Exact Stage-1 launch-scope decision"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 12,
+        "original_class": "READ_ONLY_REPOSITORY_AUDIT",
+        "semantic_package_id": "S1-CAPABILITY-RECONCILIATION-01",
+        "software_support": "G0",
+        "title": "Current-main launch-role capability reconciliation"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 13,
+        "original_class": "READ_ONLY_REPOSITORY_AUDIT",
+        "semantic_package_id": "S1-GAP-ADJUDICATION-01",
+        "software_support": "G0",
+        "title": "Selected-component gap and disposition adjudication"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 14,
+        "original_class": "RESEARCH_FREEZE",
+        "semantic_package_id": "S1-RESEARCH-GOVERNANCE-01",
+        "software_support": "G0",
+        "title": "Hypothesis, candidate-universe, and experiment governance"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 15,
+        "original_class": "RESEARCH_FREEZE",
+        "semantic_package_id": "S1-SOURCE-FREEZE-01",
+        "software_support": "G0",
+        "title": "Current source, venue, provider, and model-fact freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 16,
+        "original_class": "RESEARCH_FREEZE",
+        "semantic_package_id": "S1-METRICS-PHASE-A-01",
+        "software_support": "G0",
+        "title": "Metrics definitions and event-time schema freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 17,
+        "original_class": "SECOND_LINE_RESEARCH_FREEZE",
+        "semantic_package_id": "S1-MVAL-PHASE-A-01",
+        "software_support": "G0",
+        "title": "Independent model-risk protocol and use-limit freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 18,
+        "original_class": "SECOND_LINE_RESEARCH_FREEZE",
+        "semantic_package_id": "S1-SECURITY-CONDUCT-PHASE-A-01",
+        "software_support": "G0",
+        "title": "Security, AI-risk, conduct, and incident protocol freeze"
+      },
+      {
+        "delivery_or_gate": "G0",
+        "ordinal": 19,
+        "original_class": "OWNER_RESEARCH_FREEZE_DECISION",
+        "semantic_package_id": "S1-PROTOCOL-FREEZE-01",
+        "software_support": "G0",
+        "title": "Complete Stage-1 implementation and evidence protocol freeze"
+      },
+      {
+        "delivery_or_gate": "LP02",
+        "ordinal": 20,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+        "software_support": "LP02",
+        "title": "Selected launch graph materialization through existing computation owners"
+      },
+      {
+        "delivery_or_gate": "LP02",
+        "ordinal": 21,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-PLUGIN-PACKAGE-CURRENTIZATION-01",
+        "software_support": "LP02",
+        "title": "Selected component package/version currentization"
+      },
+      {
+        "delivery_or_gate": "LP02",
+        "ordinal": 22,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-PIT-DATA-PHASE-A-01",
+        "software_support": "LP02",
+        "title": "Selected point-in-time public-data capture and reconstruction"
+      },
+      {
+        "delivery_or_gate": "LP04",
+        "ordinal": 23,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-PROBABILITY-MODEL-PHASE-A-01",
+        "software_support": "LP04",
+        "title": "Selected probability, fair-value, calibration, and uncertainty model pack"
+      },
+      {
+        "delivery_or_gate": "LP02",
+        "ordinal": 24,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-VENUE-SEMANTICS-PHASE-A-01",
+        "software_support": "LP02",
+        "title": "Submit-disabled venue economics and lifecycle semantics"
+      },
+      {
+        "delivery_or_gate": "LP05",
+        "ordinal": 25,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-EXECUTION-SCIENCE-PHASE-A-01",
+        "software_support": "LP05",
+        "title": "Execution, fill, queue, TCA, and capacity model implementation"
+      },
+      {
+        "delivery_or_gate": "LP06",
+        "ordinal": 26,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-PORTFOLIO-ECONOMICS-PHASE-A-01",
+        "software_support": "LP06",
+        "title": "Execution-adjusted economics, portfolio, risk, and no-trade implementation"
+      },
+      {
+        "delivery_or_gate": "LP08",
+        "ordinal": 27,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-AGENT-POLICY-PHASE-A-01",
+        "software_support": "LP08",
+        "title": "Launch-specific bounded-agent task and fusion policy"
+      },
+      {
+        "delivery_or_gate": "LP07",
+        "ordinal": 28,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-LLM-GATEWAY-PHASE-A-01",
+        "software_support": "LP07",
+        "title": "Grounded LLM gateway and evaluation policy"
+      },
+      {
+        "delivery_or_gate": "LP07",
+        "ordinal": 29,
+        "original_class": "IMPLEMENTATION_AND_CONTROLLED_RESEARCH",
+        "semantic_package_id": "S1-LLM-MODEL-INTELLIGENCE-AND-ACQUISITION-01",
+        "software_support": "LP07",
+        "title": "Central LLM model intelligence, source verification, quarantine, and acquisition control plane"
+      },
+      {
+        "delivery_or_gate": "G1",
+        "ordinal": 30,
+        "original_class": "OWNER_PROVIDER_DECISION",
+        "semantic_package_id": "S1-LLM-PROVIDER-MODEL-DECISION-01",
+        "software_support": "G1",
+        "title": "Exact LLM provider/local-model, data-class, and budget decision"
+      },
+      {
+        "delivery_or_gate": "LP10",
+        "ordinal": 31,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-QUANTUM-IR-MAPPER-PHASE-A-01",
+        "software_support": "LP10",
+        "title": "Selected quantum IR and mapper currentization"
+      },
+      {
+        "delivery_or_gate": "LP03",
+        "ordinal": 32,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-EVIDENCE-PLATFORM-PHASE-A-01",
+        "software_support": "LP03",
+        "title": "Reproducible replay/PAPER evidence platform"
+      },
+      {
+        "delivery_or_gate": "G1",
+        "ordinal": 33,
+        "original_class": "MODEL_INFERENCE_AND_EVIDENCE",
+        "semantic_package_id": "S1-LLM-MODEL-EVALUATION-01",
+        "software_support": "G1",
+        "title": "Bounded LLM model/prompt/tool benchmark and champion selection"
+      },
+      {
+        "delivery_or_gate": "G1",
+        "ordinal": 34,
+        "original_class": "OWNER_MODEL_PROMOTION_DECISION",
+        "semantic_package_id": "S1-LLM-OWNER-PROMOTION-DECISION-01",
+        "software_support": "G1",
+        "title": "Exact owner LLM champion, slot, profile, and change-class decision"
+      },
+      {
+        "delivery_or_gate": "LP09",
+        "ordinal": 35,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-LLM-CODEX-INTEGRATION-01",
+        "software_support": "LP09",
+        "title": "Owner-approved LLM repository integration and deterministic deployment preparation"
+      },
+      {
+        "delivery_or_gate": "LP08",
+        "ordinal": 36,
+        "original_class": "IMPLEMENTATION_AND_CONTROLLED_RESEARCH",
+        "semantic_package_id": "S1-MARKET-ALPHA-INTELLIGENCE-CONTROL-PLANE-01",
+        "software_support": "LP08",
+        "title": "One centralized stage-scoped market-alpha workflow owner"
+      },
+      {
+        "delivery_or_gate": "LP08",
+        "ordinal": 37,
+        "original_class": "IMPLEMENTATION_AND_CONTROLLED_RESEARCH",
+        "semantic_package_id": "S1-PREDICTION-MARKET-EDGE-SCOUT-01",
+        "software_support": "LP08",
+        "title": "Proactive Stage-1 venue, event, public-source, and owner-directed edge scouting"
+      },
+      {
+        "delivery_or_gate": "G2",
+        "ordinal": 38,
+        "original_class": "OWNER_PROVIDER_DECISION",
+        "semantic_package_id": "S1-QPU-PROVIDER-DECISION-01",
+        "software_support": "G2",
+        "title": "True-QPU provider/backend and budget decision"
+      },
+      {
+        "delivery_or_gate": "G2",
+        "ordinal": 39,
+        "original_class": "PROVIDER_EXECUTION_AND_EVIDENCE",
+        "semantic_package_id": "S1-QPU-BENCHMARK-01",
+        "software_support": "G2",
+        "title": "Bounded true-QPU and hybrid benchmark"
+      },
+      {
+        "delivery_or_gate": "G2",
+        "ordinal": 40,
+        "original_class": "SECOND_LINE_VALIDATION",
+        "semantic_package_id": "S1-QUANTUM-ARTIFACT-VALIDATION-01",
+        "software_support": "G2",
+        "title": "Independent TTL-bounded quantum artifact validation"
+      },
+      {
+        "delivery_or_gate": "LP11",
+        "ordinal": 41,
+        "original_class": "IMPLEMENTATION_AND_EVIDENCE_DESIGN",
+        "semantic_package_id": "S1-EDGE-VALUATION-AND-EVIDENCE-TOURNAMENT-01",
+        "software_support": "LP11",
+        "title": "Execution-adjusted edge valuation, portfolio selection, and owner-review eligibility"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 42,
+        "original_class": "CLOSURE_GATE",
+        "semantic_package_id": "S1-FINAL-BUNDLE-CLOSURE-01",
+        "software_support": "G3",
+        "title": "Final launch-affecting bundle closure gate"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 43,
+        "original_class": "IMMUTABLE_ARTIFACT",
+        "semantic_package_id": "S1-CLOSED-BUNDLE-01",
+        "software_support": "G3",
+        "title": "Immutable closed computation bundle"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 44,
+        "original_class": "EVIDENCE_EXECUTION",
+        "semantic_package_id": "S1-REPLAY-CAMPAIGN-01",
+        "software_support": "G3",
+        "title": "Final historical replay campaign"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 45,
+        "original_class": "EVIDENCE_EXECUTION",
+        "semantic_package_id": "S1-PAPER-CAMPAIGN-01",
+        "software_support": "G3",
+        "title": "Final live/current PAPER campaign"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 46,
+        "original_class": "INDEPENDENT_REVIEW",
+        "semantic_package_id": "S1-DUAL-RESULT-REVIEW-01",
+        "software_support": "G3",
+        "title": "Replay/PAPER divergence and dual-result review"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 47,
+        "original_class": "METRICS_EXECUTION",
+        "semantic_package_id": "S1-METRICS-PHASE-B-01",
+        "software_support": "G3",
+        "title": "Final evidence metric computation and attribution"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 48,
+        "original_class": "SECOND_LINE_VALIDATION",
+        "semantic_package_id": "S1-MVAL-PHASE-B-01",
+        "software_support": "G3",
+        "title": "Independent model and bundle validation"
+      },
+      {
+        "delivery_or_gate": "G3",
+        "ordinal": 49,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "S1-EVIDENCE-ACCEPTANCE-01",
+        "software_support": "G3",
+        "title": "Owner evidence-acceptance decision"
+      },
+      {
+        "delivery_or_gate": "LP12",
+        "ordinal": 50,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-RUNTIME-PLATFORM-PHASE-B-01",
+        "software_support": "LP12",
+        "title": "Production runtime platform"
+      },
+      {
+        "delivery_or_gate": "LP12",
+        "ordinal": 51,
+        "original_class": "IMPLEMENTATION_AND_SECOND_LINE_REVIEW",
+        "semantic_package_id": "S1-SECURITY-PHASE-B-01",
+        "software_support": "LP12",
+        "title": "Production security, supply-chain, and incident controls"
+      },
+      {
+        "delivery_or_gate": "LP13",
+        "ordinal": 52,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-CONNECTOR-RUNTIME-01",
+        "software_support": "LP13",
+        "title": "Common secure connector runtime"
+      },
+      {
+        "delivery_or_gate": "LP13",
+        "ordinal": 53,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-SELECTED-VENUE-ADAPTER-PHASE-B-01",
+        "software_support": "LP13",
+        "title": "Selected launch-venue production adapters"
+      },
+      {
+        "delivery_or_gate": "LP14",
+        "ordinal": 54,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-RISK-CASH-INTEGRATION-01",
+        "software_support": "LP14",
+        "title": "Private risk/cash/state integration over the ST12 economic spine"
+      },
+      {
+        "delivery_or_gate": "LP14",
+        "ordinal": 55,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-MARKET-SURVEILLANCE-01",
+        "software_support": "LP14",
+        "title": "Prediction-market conduct surveillance and preventive controls"
+      },
+      {
+        "delivery_or_gate": "LP15",
+        "ordinal": 56,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-AGENT-RUNTIME-PHASE-B-01",
+        "software_support": "LP15",
+        "title": "Bounded production agent runtime"
+      },
+      {
+        "delivery_or_gate": "LP15",
+        "ordinal": 57,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-LLM-PRODUCTION-PHASE-B-01",
+        "software_support": "LP15",
+        "title": "Production grounded LLM support services"
+      },
+      {
+        "delivery_or_gate": "LP16",
+        "ordinal": 58,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-HOTPATH-SNAPSHOT-01",
+        "software_support": "LP16",
+        "title": "Immutable low-latency runtime snapshot"
+      },
+      {
+        "delivery_or_gate": "LP17",
+        "ordinal": 59,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-EXECUTION-ROUTER-01",
+        "software_support": "LP17",
+        "title": "Sole final order-release service"
+      },
+      {
+        "delivery_or_gate": "LP17",
+        "ordinal": 60,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-MODE-ALLOW-01",
+        "software_support": "LP17",
+        "title": "Version-pinned mode and ALLOW integration"
+      },
+      {
+        "delivery_or_gate": "LP18",
+        "ordinal": 61,
+        "original_class": "IMPLEMENTATION_AND_OWNER_DECISION_WORKFLOW",
+        "semantic_package_id": "S1-OWNER-TRADE-PROPOSAL-AND-APPROVAL-01",
+        "software_support": "LP18",
+        "title": "Compact owner-ready proposals, attention budgeting, and exact trade-intent decisions"
+      },
+      {
+        "delivery_or_gate": "LP18",
+        "ordinal": 62,
+        "original_class": "IMPLEMENTATION",
+        "semantic_package_id": "S1-DASHBOARD-PROJECTION-01",
+        "software_support": "LP18",
+        "title": "Owner/SVC/dashboard one-way production projections"
+      },
+      {
+        "delivery_or_gate": "G4",
+        "ordinal": 63,
+        "original_class": "CLOSURE_GATE",
+        "semantic_package_id": "S1-PRODUCTION-CONVERGENCE-01",
+        "software_support": "LP20",
+        "title": "Production dependency and authority convergence gate"
+      },
+      {
+        "delivery_or_gate": "G4",
+        "ordinal": 64,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "S1-PROVIDER-PRIVATE-STATE-AUTH-01",
+        "software_support": "LP20",
+        "title": "Provider and private-state activation authorization"
+      },
+      {
+        "delivery_or_gate": "G5",
+        "ordinal": 65,
+        "original_class": "OPERATIONAL_EVIDENCE",
+        "semantic_package_id": "S1-LIVE-DRYRUN-01",
+        "software_support": "LP20",
+        "title": "Real end-to-end submit-disabled live dry run"
+      },
+      {
+        "delivery_or_gate": "G5",
+        "ordinal": 66,
+        "original_class": "OPERATIONAL_EVIDENCE",
+        "semantic_package_id": "S1-RESILIENCE-01",
+        "software_support": "LP20",
+        "title": "Failure injection, load, soak, failover, kill, and recovery"
+      },
+      {
+        "delivery_or_gate": "G5",
+        "ordinal": 67,
+        "original_class": "OPERATIONAL_EVIDENCE",
+        "semantic_package_id": "S1-SHADOW-OBSERVE-01",
+        "software_support": "LP20",
+        "title": "Same-input real-time shadow-observe evidence"
+      },
+      {
+        "delivery_or_gate": "G5",
+        "ordinal": 68,
+        "original_class": "INDEPENDENT_AUDIT",
+        "semantic_package_id": "S1-INSTITUTIONAL-READINESS-01",
+        "software_support": "LP20",
+        "title": "Institutional-capability hard-dimension readiness audit"
+      },
+      {
+        "delivery_or_gate": "G6",
+        "ordinal": 69,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "S1-CANARY-ELIGIBILITY-01",
+        "software_support": "LP20",
+        "title": "Exact canary eligibility and owner envelope decision"
+      },
+      {
+        "delivery_or_gate": "G6",
+        "ordinal": 70,
+        "original_class": "LIMITED_LIVE_OPERATION",
+        "semantic_package_id": "S1-CANARY-01",
+        "software_support": "LP20",
+        "title": "Tiny real-order canary"
+      },
+      {
+        "delivery_or_gate": "G7",
+        "ordinal": 71,
+        "original_class": "INDEPENDENT_REVIEW",
+        "semantic_package_id": "S1-POST-CANARY-REVIEW-01",
+        "software_support": "LP20",
+        "title": "Independent realized canary review"
+      },
+      {
+        "delivery_or_gate": "G7",
+        "ordinal": 72,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "S1-LAUNCH-AUTHORIZATION-01",
+        "software_support": "LP20",
+        "title": "Exact Stage-1 launch authorization"
+      },
+      {
+        "delivery_or_gate": "G7",
+        "ordinal": 73,
+        "original_class": "LIVE_OPERATION",
+        "semantic_package_id": "S1-AUTOMATIC-OPERATIONS-01",
+        "software_support": "LP20",
+        "title": "Bounded automatic Stage-1 operations"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 74,
+        "original_class": "LIVE_MONITORING",
+        "semantic_package_id": "PL-STABILIZATION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Post-launch stabilization hold"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 75,
+        "original_class": "POST_LAUNCH_ANALYSIS",
+        "semantic_package_id": "PL-REALIZED-ATTRIBUTION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Realized performance, TCA, capacity, and component attribution"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 76,
+        "original_class": "POST_LAUNCH_ANALYSIS",
+        "semantic_package_id": "PL-MEMORY-UPDATE-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Condition-scoped memory and retest updates"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 77,
+        "original_class": "POST_LAUNCH_MONITORING",
+        "semantic_package_id": "PL-MODEL-EXECUTION-DRIFT-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Model, data, venue, execution, and economic drift monitoring"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 78,
+        "original_class": "POST_LAUNCH_MONITORING",
+        "semantic_package_id": "PL-LLM-EVALUATION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Production LLM quality, cost, safety, and rollback evaluation"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 79,
+        "original_class": "CONTINUOUS_RESEARCH_AND_RECOMMENDATION",
+        "semantic_package_id": "PL-LLM-CONTINUOUS-SCOUT-AND-REFRESH-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Continuous LLM scouting, hardware-aware challenger evaluation, and owner-gated refresh loop"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 80,
+        "original_class": "CONTINUOUS_RESEARCH_AND_POST_LAUNCH_LEARNING",
+        "semantic_package_id": "PL-CONTINUOUS-EDGE-SCOUT-LEARN-AND-RETIRE-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Continuous market-edge discovery, realized feedback, research reallocation, and retirement"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 81,
+        "original_class": "POST_LAUNCH_MONITORING",
+        "semantic_package_id": "PL-QUANTUM-EVALUATION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Quantum artifact realized utility and backend drift evaluation"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 82,
+        "original_class": "BOUNDED_ADAPTATION",
+        "semantic_package_id": "PL-ADAPTIVE-L0-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Layer 0 fast anomaly and regime-break containment"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 83,
+        "original_class": "BOUNDED_ADAPTATION",
+        "semantic_package_id": "PL-ADAPTIVE-L1-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Layer 1 bounded live calibration and micro-control adaptation"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 84,
+        "original_class": "CONDITIONAL_RESEARCH_AND_PROMOTION",
+        "semantic_package_id": "PL-ADAPTIVE-L2-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Layer 2 contextual-bandit and formal off-policy evaluation"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 85,
+        "original_class": "CONDITIONAL_RESEARCH_AND_PROMOTION",
+        "semantic_package_id": "PL-ADAPTIVE-L3-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Layer 3 champion/challenger self-evolution under rollback"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 86,
+        "original_class": "RESEARCH_ONLY",
+        "semantic_package_id": "PL-ADAPTIVE-L4-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Layer 4 research-only advanced AI/RL/quantum/tensor challengers"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 87,
+        "original_class": "OWNER_DECISION",
+        "semantic_package_id": "PL-CAPITAL-SCALE-DECISION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Evidence-backed capital and risk scale decision"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 88,
+        "original_class": "CONDITIONAL_EXPANSION",
+        "semantic_package_id": "PL-STRATEGY-EXPANSION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Controlled strategy/component expansion"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 89,
+        "original_class": "CONDITIONAL_EXPANSION",
+        "semantic_package_id": "PL-VENUE-EXPANSION-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Controlled venue and future-market expansion"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 90,
+        "original_class": "POST_LAUNCH_MATURITY",
+        "semantic_package_id": "PL-OPERATIONS-MATURITY-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Operational maturity and owner-workload reduction"
+      },
+      {
+        "delivery_or_gate": "POST_LAUNCH_OPERATIONS",
+        "ordinal": 91,
+        "original_class": "OWNER_AND_INDEPENDENT_DECISION",
+        "semantic_package_id": "PL-STAGE1-STABLE-01",
+        "software_support": "LP19; LP21\u2013LP24 only for the named enhancements",
+        "title": "Stage-1 post-launch stable-state determination"
+      }
+    ],
+    "version": "12.0"
+  },
   "identity_translation_authority": "docs/roadmap/QTT_PR_Identity_Roster_v1_0.json",
   "materialized_capability_this_pr": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_V1_0",
   "pr117_blueprint_pr_label": null,
@@ -16,6 +2026,7 @@
   "pr118_roadmap_pr_label": null,
   "quantum_backend_state": "QUANTUM_BACKEND_STATE_CONTROLLED_BY_ACTIVE_NON_SHA_GATE",
   "quantum_forward_optimization_state": "QUANTUM_FORWARD_OPTIMIZATION_STATE_REFERENCED_BY_CONTROLLER",
+  "remaining_prelaunch_deliveries": 19,
   "report_id": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_REPORT",
   "result_marker": "QTT_ROADMAP_EXECUTION_STATE_CONTROLLER_OK",
   "roadmap_range_mapping_count": 26,

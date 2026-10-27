@@ -128,10 +128,19 @@ def _read_public_enrollment_v1(raw: bytes) -> PublicSourceUseEnrollmentV1:
 
 
 def _source_use_proposal_v1(raw: bytes):
-    from ..stage1_prediction_markets.qku_computation_control_plane.serialization import safe_json_loads
+    from ..stage1_prediction_markets.qku_computation_control_plane.serialization import safe_json_loads, _native_strict_json
+    from ..stage1_prediction_markets.qku_computation_control_plane.errors import SerializationSafetyError
 
     _source_use_require_v1(type(raw) is bytes and 0 < len(raw) <= 262144)
-    row = safe_json_loads(raw.decode("utf-8", errors="strict"))
+    try:
+        row = safe_json_loads(raw.decode("utf-8", errors="strict"))
+    except SerializationSafetyError:
+        candidate = _native_strict_json(raw, max_bytes=262144)
+        if type(candidate) is not dict or candidate.get("schema_version") != "PUBLIC_SOURCE_USE_ACTION_V1":
+            raise
+        return _public_source_use_proposal_v1(candidate)
+    if type(row) is dict and row.get("schema_version") == "PUBLIC_SOURCE_USE_ACTION_V1":
+        return _public_source_use_proposal_v1(_native_strict_json(raw, max_bytes=262144))
     _source_use_require_v1(type(row) is dict and type(row.get("action")) is str)
     action = row["action"]
     keys = {
@@ -182,6 +191,66 @@ def _source_use_proposal_v1(raw: bytes):
             _source_use_require_v1(type(request[name]) is str and len(request[name]) <= 256)
             request[name] = Decimal(request[name])
         row["observation"] = SourceUseObservationRequestV1(**request)
+    if "reason" in row:
+        _source_use_text_v1(row["reason"])
+    return MappingProxyType(row)
+
+
+def _public_source_use_proposal_v1(row):
+    from ..stage1_prediction_markets.qku_computation_control_plane.receipts import (
+        PublicDataSourceUseScopeV1, PublicCaptureBudgetV1, PublicCaptureRequestV1, _public_control_ref_v1,
+    )
+
+    _source_use_require_v1(type(row) is dict and type(row.get("action")) is str)
+    row = dict(row)
+    keys = {
+        "REVIEW_ACCEPT": {"schema_version", "action", "scope", "original", "review_facts", "requested_expires_at_utc"},
+        "USE_ADMIT": {"schema_version", "action", "scope", "original", "expected_review_ref", "requested_expires_at_utc"},
+        "OBSERVE_ONCE": {"schema_version", "action", "scope", "expected_declaration_ref", "expected_review_ref", "capture"},
+        "WITHDRAW_USE": {"schema_version", "action", "scope", "expected_declaration_ref", "expected_review_ref", "reason"},
+        "INVALIDATE_REVIEW": {"schema_version", "action", "scope", "expected_declaration_ref", "expected_review_ref", "reason"},
+    }
+    _source_use_require_v1(row["schema_version"] == "PUBLIC_SOURCE_USE_ACTION_V1"
+                           and row["action"] in keys and set(row) == keys[row["action"]])
+
+    def make_scope(value):
+        scope = _source_use_mapping_v1(value, PublicDataSourceUseScopeV1)
+        _source_use_require_v1(type(scope["profile_id"]) is str)
+        scope["profile_id"] = Stage1VenueProfileIdV1(scope["profile_id"])
+        scope["budget"] = PublicCaptureBudgetV1(**_source_use_mapping_v1(scope["budget"], PublicCaptureBudgetV1))
+        for key in ("source_ids", "native_operation_ids", "instrument_ids", "permitted_consumer_ids", "receive_scope_classes"):
+            _source_use_require_v1(type(scope[key]) is list)
+            scope[key] = tuple(scope[key])
+        return PublicDataSourceUseScopeV1(**scope)
+
+    row["scope"] = make_scope(row["scope"])
+    for name in ("expected_declaration_ref", "expected_review_ref"):
+        if name in row and row[name] is not None:
+            _public_control_ref_v1(row[name], kind="PUBLIC_SOURCE_ORIGINAL_V1")
+    if "original" in row:
+        original = _source_use_mapping_v1(row["original"], SourceUseOriginalContentV1)
+        for key in ("claimed_effective_at_utc", "claimed_expires_at_utc"):
+            if original[key] is not None:
+                original[key] = _source_use_stored_utc_v1(original[key])
+        row["original"] = SourceUseOriginalContentV1(**original)
+    if "review_facts" in row:
+        facts = _source_use_mapping_v1(row["review_facts"], SourceUseReviewFactsV1)
+        for key in ("factual_checked_at_utc", "available_at_utc", "source_effective_at_utc", "source_expires_at_utc"):
+            facts[key] = _source_use_stored_utc_v1(facts[key])
+        for key in ("recheck_triggers", "reviewed_claims", "limitations"):
+            _source_use_require_v1(type(facts[key]) is list)
+            facts[key] = tuple(facts[key])
+        row["review_facts"] = SourceUseReviewFactsV1(**facts)
+    if "requested_expires_at_utc" in row:
+        row["requested_expires_at_utc"] = _source_use_stored_utc_v1(row["requested_expires_at_utc"])
+    if "capture" in row:
+        capture = _source_use_mapping_v1(row["capture"], PublicCaptureRequestV1)
+        capture["scope"] = make_scope(capture["scope"])
+        for key in ("source_binding_refs", "requested_operation_ids", "requested_instrument_ids"):
+            _source_use_require_v1(type(capture[key]) is list)
+            capture[key] = tuple(capture[key])
+        row["capture"] = PublicCaptureRequestV1(**capture)
+        _source_use_require_v1(row["capture"].scope == row["scope"])
     if "reason" in row:
         _source_use_text_v1(row["reason"])
     return MappingProxyType(row)
@@ -409,6 +478,9 @@ class OwnerSourceUseControllerV1:
 
     def complete_action_v1(self, pending_ref, raw_response):
         from ..pretrade.pr169_pretrade1_resolvers import KalshiFeeScenarioSessionV1
+        from ..stage1_prediction_markets.qku_computation_control_plane.receipts import (
+            PublicDataSourceUseActionV1, PublicDataSourceUseScopeV1, SourceUseAttributedActionV1,
+        )
 
         try:
             _source_use_require_v1(not self._closed and self._authority is not None)
@@ -422,7 +494,15 @@ class OwnerSourceUseControllerV1:
                     retained = self._root.completed.get(pending_ref)
                     if retained is not None and retained[0] is raw_response:
                         self._root.completed.pop(pending_ref)
-        if result.event.typed_payload.action == "OBSERVE_ONCE":
+        payload = result.event.typed_payload
+        if type(payload) is PublicDataSourceUseActionV1:
+            _source_use_require_v1(payload.schema_version == "PUBLIC_SOURCE_USE_ACTION_V1"
+                                   and type(payload.scope) is PublicDataSourceUseScopeV1)
+            if payload.action == "OBSERVE_ONCE":
+                self._complete_public_capture_v1(result.event)
+            return self.read_status_v1()
+        _source_use_require_v1(type(payload) is SourceUseAttributedActionV1)
+        if payload.action == "OBSERVE_ONCE":
             authority = self._authority
             with authority._lock:
                 binding = next((value for value in authority._bindings.values()
@@ -458,6 +538,39 @@ class OwnerSourceUseControllerV1:
                 raise
         return self.read_status_v1()
 
+    def _complete_public_capture_v1(self, event):
+        from ..stage1_prediction_markets.selected_venues.market_data import _create_public_market_data_session_v1
+        from ..stage1_prediction_markets.qku_computation_control_plane.point_in_time import PITEventDispositionV1
+        from ..stage1_prediction_markets.orderbook_event_state_snapshot.handoff import _require_public_publication_handle_v1
+
+        authority = self._authority
+        with authority._lock:
+            binding = authority._active_permit
+            authority._check_public_binding_v1(binding)
+            _source_use_require_v1(binding._event == event and not binding._started)
+        session = None
+        try:
+            # No public network/storage effect executes under the control lock.
+            session = _create_public_market_data_session_v1(binding=binding)
+            disposition, publications = session.run_bounded_v1()
+            _source_use_require_v1(disposition is PITEventDispositionV1.COMMITTED
+                                   and type(publications) is tuple and publications)
+            for publication in publications:
+                _require_public_publication_handle_v1(publication=publication)
+            session.close_v1()
+            with authority._lock:
+                authority._check_public_binding_v1(binding)
+                self._result = (publications, binding, binding._generation, event.record_id)
+        except BaseException as primary:
+            with authority._lock:
+                binding._failed = True
+            if session is not None:
+                try:
+                    session.close_v1()
+                except BaseException:
+                    primary.add_note("public capture owned cleanup failed; permission remains invalid")
+            raise
+
     def cancel_v1(self):
         from .owner_source_use_windows import _cancel_native_operation_v1
 
@@ -476,6 +589,8 @@ class OwnerSourceUseControllerV1:
         _cancel_native_operation_v1(self._root)
 
     def read_status_v1(self):
+        from ..stage1_prediction_markets.qku_computation_control_plane.receipts import PublicDataSourceUseScopeV1
+
         if self._authority is None:
             return MappingProxyType({"action": "ENROLLMENT", "disposition": "STOPPED" if self._closed else "ENROLLMENT_ONLY",
                                      "request_ref": self._pending_ref, "generation": 0, "state": "DENIED", "expiry": None,
@@ -492,8 +607,16 @@ class OwnerSourceUseControllerV1:
             state = "STOPPED" if authority._stopped else "DENIED"
             if not authority._stopped and authority._use is not None:
                 try:
-                    binding = next(iter(authority._bindings.values()))
-                    authority._check_binding_v1(binding)
+                    if type(authority._selected_scope) is PublicDataSourceUseScopeV1:
+                        now, _ = authority._live_v1()
+                        _source_use_require_v1(authority._review is not None
+                            and now < authority._review.typed_payload.expires_at_utc
+                            and now < authority._use.typed_payload.expires_at_utc)
+                        if authority._active_permit is not None:
+                            authority._check_public_binding_v1(authority._active_permit)
+                    else:
+                        binding = next(iter(authority._bindings.values()))
+                        authority._check_binding_v1(binding)
                     state = "ACTIVE"
                 except Exception:
                     state = "STOPPED" if authority._stopped else "EXPIRED_OR_NOT_CURRENT"
@@ -507,10 +630,21 @@ class OwnerSourceUseControllerV1:
 
     def _display_result_v1(self):
         """Assign only the closed local model while A still protects publication."""
+        from ..stage1_prediction_markets.qku_computation_control_plane.source_policy import PublicSourceUseBindingV1
+
         _source_use_require_v1(self._authority is not None)
         with self._authority._lock:
             _source_use_require_v1(self._result is not None)
             result, binding, generation, permit_ref = self._result
+            if type(binding) is PublicSourceUseBindingV1:
+                self._authority._check_public_binding_v1(binding)
+                _source_use_require_v1(binding._generation == generation and binding._event.record_id == permit_ref
+                                       and type(result) is tuple)
+                self._display_model = MappingProxyType({"label": "PHASE_A_PUBLIC_DATA_INTERNAL",
+                    "profile": binding._capture.scope.profile_id.value,
+                    "capture_session": binding._capture.capture_session_id,
+                    "publication_count": len(result), "no_order_authority": True})
+                return self._display_model
             self._authority._check_binding_v1(binding, binding._permit._owner, allow_published=True)
             _source_use_require_v1(binding._generation == generation and binding._permit._published
                                    and binding._permit._event.record_id == permit_ref)

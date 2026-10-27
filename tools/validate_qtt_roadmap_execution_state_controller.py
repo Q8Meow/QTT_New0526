@@ -513,6 +513,106 @@ def _validate_gate_sequence(repo_root: pathlib.Path) -> list[str]:
     return []
 
 
+def _validate_finite_launch_plan(
+    controller: Mapping[str, Any], roster: Mapping[str, Any]
+) -> list[str]:
+    """Validate the controller's static grouping and separate observed associations."""
+    plan = controller.get("finite_launch_delivery_plan")
+    if not isinstance(plan, dict):
+        return ["finite_launch_delivery_plan must be an object"]
+    slots = plan.get("delivery_slots")
+    packages = plan.get("semantic_package_mapping")
+    edges = plan.get("semantic_dependency_edges")
+    associations = plan.get("execution_associations")
+    if any(not isinstance(value, list) or any(not isinstance(row, dict) for row in value)
+           for value in (slots, packages, edges, associations)):
+        return ["finite launch plan rows must be object arrays"]
+    failures: list[str] = []
+    slot_ids = [row.get("delivery_id") for row in slots]
+    package_ids = [row.get("semantic_package_id") for row in packages]
+    if slot_ids != [f"LP{i:02d}" for i in range(1, 25)]:
+        failures.append("finite launch delivery identities must be LP01 through LP24 in order")
+    if (len(package_ids) != 91 or any(type(value) is not str for value in package_ids)
+            or len(set(value for value in package_ids if type(value) is str)) != 91):
+        failures.append("finite launch plan must preserve 91 distinct semantic identities")
+    if (any(type(row.get("ordinal")) is not int for row in packages)
+            or [row.get("ordinal") for row in packages] != list(range(1, 92))):
+        failures.append("finite launch semantic package order must remain 1 through 91")
+    if len(edges) != 197:
+        failures.append("finite launch plan must preserve 197 typed semantic edges")
+    lp02_packages = {row.get("semantic_package_id") for row in packages
+                     if row.get("delivery_or_gate") == "LP02"
+                     and type(row.get("semantic_package_id")) is str}
+    if lp02_packages != {
+        "RM11-CONTROL-CURRENTIZE-01", "S1-LAUNCH-GRAPH-MATERIALIZATION-01",
+        "S1-PLUGIN-PACKAGE-CURRENTIZATION-01", "S1-PIT-DATA-PHASE-A-01",
+        "S1-VENUE-SEMANTICS-PHASE-A-01",
+    }:
+        failures.append("LP02 must map exactly its five approved semantic packages")
+
+    def acyclic(nodes: list[Any], dependencies: list[tuple[Any, Any]], label: str) -> None:
+        if any(type(node) is not str for node in nodes):
+            failures.append(f"{label} identities must be strings")
+            return
+        pending = {node: set() for node in nodes}
+        for producer, consumer in dependencies:
+            if (type(producer) is not str or type(consumer) is not str
+                    or producer not in pending or consumer not in pending):
+                failures.append(f"{label} has an unknown dependency identity")
+                continue
+            pending[consumer].add(producer)
+        while pending:
+            roots = {node for node, prerequisites in pending.items() if not prerequisites}
+            if not roots:
+                failures.append(f"{label} must be acyclic")
+                return
+            pending = {node: prerequisites - roots for node, prerequisites in pending.items()
+                       if node not in roots}
+
+    slot_dependencies = []
+    for row in slots:
+        prerequisites = row.get("direct_prerequisites")
+        if not isinstance(prerequisites, list):
+            failures.append("delivery direct_prerequisites must be an array")
+            continue
+        slot_dependencies.extend((prior, row.get("delivery_id")) for prior in prerequisites)
+    acyclic(slot_ids, slot_dependencies, "finite delivery prerequisites")
+    acyclic(package_ids, [(row.get("producer"), row.get("consumer")) for row in edges],
+            "semantic dependency edges")
+    seen: set[str] = set()
+    for row in associations:
+        delivery = row.get("delivery_id")
+        if type(delivery) is not str or delivery not in slot_ids or delivery in seen:
+            failures.append("execution associations require unique known delivery identities")
+            continue
+        seen.add(delivery)
+        for field in ("implementation_id", "evidence_qualification"):
+            if type(row.get(field)) is not str or not row[field].strip():
+                failures.append(f"{delivery} requires a nonempty {field}")
+        evidence = row.get("evidence_references")
+        if not isinstance(evidence, list) or not evidence or any(
+            type(value) is not str or not value.strip() for value in evidence
+        ):
+            failures.append(f"{delivery} requires external execution evidence references")
+        url = row.get("github_audit_url")
+        if row.get("state") == "EXTERNAL_COMPLETION_RECORDED":
+            prefix = "https://github.com/Q8Meow/QTT_New0526/pull/"
+            if (type(url) is not str or not url.startswith(prefix)
+                    or not url[len(prefix):].isascii() or not url[len(prefix):].isdigit()
+                    or int(url[len(prefix):]) < 1):
+                failures.append(f"{delivery} completion requires an external GitHub audit reference")
+        elif row.get("state") == "IMPLEMENTATION_IN_PROGRESS":
+            if type(row.get("branch_name")) is not str or not row["branch_name"].strip():
+                failures.append(f"{delivery} implementation association requires an exact branch")
+        else:
+            failures.append(f"{delivery} has an unsupported execution association state")
+    entry = _entry_by_id(_entries(roster), plan.get("identity_roster_entry_id"))
+    reference = DEFAULT_CONTROLLER.as_posix() + "#/finite_launch_delivery_plan"
+    if entry is None or type(entry.get("notes")) is not str or reference not in entry["notes"]:
+        failures.append("identity roster must reference the sole finite launch delivery projection")
+    return failures
+
+
 def _build_report(
     controller: Mapping[str, Any],
     roster: Mapping[str, Any],
@@ -522,6 +622,15 @@ def _build_report(
     pr117 = _entry_by_id(entries, "PR117_REPO_CANONICAL_SELF_ENTRY") or {}
     pr118 = _entry_by_id(entries, "PR118_REPO_CANONICAL_SELF_ENTRY") or {}
     result_ok = not failures
+    plan = controller.get("finite_launch_delivery_plan")
+    plan_fields = plan if isinstance(plan, dict) else {}
+    associations = plan_fields.get("execution_associations")
+    associations = associations if isinstance(associations, list) else []
+    completed = {row["delivery_id"] for row in associations if isinstance(row, dict)
+                 and type(row.get("delivery_id")) is str
+                 and row.get("state") == "EXTERNAL_COMPLETION_RECORDED"}
+    slots = plan_fields.get("delivery_slots")
+    slots = slots if isinstance(slots, list) else []
     return {
         "report_id": REPORT_ID,
         "controller_id": controller.get("controller_id"),
@@ -536,6 +645,11 @@ def _build_report(
         ),
         "roadmap_range_mapping_count": len(
             controller.get("roadmap_range_currentization", [])
+        ),
+        "finite_launch_delivery_plan": plan,
+        "remaining_prelaunch_deliveries": sum(
+            row.get("phase") == "PRE_LAUNCH" and row["delivery_id"] not in completed
+            for row in slots if isinstance(row, dict) and type(row.get("delivery_id")) is str
         ),
         "identity_translation_authority": ROSTER_PATH,
         "pr117_github_pr_number": pr117.get("github_pr_number"),
@@ -589,6 +703,7 @@ def validate(
     failures.extend(_validate_taxonomy(controller))
     failures.extend(_validate_active_bindings(controller))
     failures.extend(_validate_roster_currentization(roster))
+    failures.extend(_validate_finite_launch_plan(controller, roster))
     failures.extend(_validate_roadmap_currentization(controller))
     failures.extend(_validate_capability_and_discipline(controller))
     failures.extend(_validate_invariants(controller))

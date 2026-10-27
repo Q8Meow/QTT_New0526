@@ -680,7 +680,7 @@ _STAGE1_LAUNCH_ROLE_ROWS_JSON = r"""[
       },
       {
         "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
-        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        "disposition": "EXISTING_CANONICAL_OWNER"
       }
     ],
     "frozen_output": "Current contract inventory with lifecycle and resolution binding",
@@ -731,7 +731,7 @@ _STAGE1_LAUNCH_ROLE_ROWS_JSON = r"""[
     "path_refs": [
       {
         "path": "src/qtt/stage1_prediction_markets/selected_venues/market_data.py",
-        "disposition": "FUTURE_AUTHORIZED_OWNER_NOT_YET_IMPLEMENTED"
+        "disposition": "EXISTING_CANONICAL_OWNER"
       }
     ],
     "frozen_output": "Snapshot + contiguous deltas + gap/reconnect receipt",

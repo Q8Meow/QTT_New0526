@@ -19,6 +19,7 @@ from .context import (
     _native_scalar,
     _native_utc_nanoseconds,
     _native_utc_receipt_pair,
+    _public_counter_v1, _public_refs_v1,
 )
 from .errors import ContractValidationError, PointInTimeError, ReasonCode
 from .models import ComputationExecutionContextV1
@@ -373,6 +374,286 @@ class PITDataContractErrorV1(PointInTimeError):
             self.coarse_reason_code,
             f"{pit_reason_code.value}: {message}",
         )
+
+
+@dataclass(frozen=True, slots=True)
+class PublicStreamContinuityWitnessV1:
+    profile_id: object
+    capture_session_id: str
+    connection_epoch: int
+    subscription_id_or_none: int | None
+    observation_ref: str
+    previous_stream_observation_ref_or_none: str | None
+    sequence_start_or_none: int | None
+    sequence_end_or_none: int | None
+    covered_from_or_none: int | None
+    covered_through_or_none: int | None
+    generation: int
+    disposition: str
+    affected_instrument_ids: tuple[str, ...]
+    original_observation_refs: tuple[str, ...]
+
+    def __post_init__(self):
+        from .receipts import _public_profile_v1
+
+        _public_profile_v1(self.profile_id)
+        for value in (self.capture_session_id, self.observation_ref):
+            _native_ident(value)
+        if self.previous_stream_observation_ref_or_none is not None:
+            _native_ident(self.previous_stream_observation_ref_or_none)
+        _public_counter_v1(self.connection_epoch, allow_zero=True)
+        _public_counter_v1(self.generation, allow_zero=True)
+        if self.subscription_id_or_none is not None:
+            _public_counter_v1(self.subscription_id_or_none)
+        _public_refs_v1(self.affected_instrument_ids, allow_empty=True)
+        _public_refs_v1(self.original_observation_refs)
+        _native_require(self.observation_ref in self.original_observation_refs
+                        and (self.previous_stream_observation_ref_or_none is None
+                             or self.previous_stream_observation_ref_or_none in self.original_observation_refs),
+                        "continuity witness references an absent original")
+        _native_require(type(self.disposition) is str and self.disposition in {
+            "ANCHOR", "CONTIGUOUS", "DUPLICATE", "CONTROL", "SEQUENCE_UNAVAILABLE"},
+            "invalid stream disposition")
+        values = (self.sequence_start_or_none, self.sequence_end_or_none,
+                  self.covered_from_or_none, self.covered_through_or_none)
+        if self.disposition == "SEQUENCE_UNAVAILABLE" or (self.disposition == "CONTROL" and self.sequence_start_or_none is None):
+            _native_require(all(value is None for value in values), "unavailable sequence cannot be invented")
+        else:
+            for value in values:
+                _public_counter_v1(value, allow_zero=True)
+            _native_require(self.covered_from_or_none <= self.sequence_start_or_none
+                            <= self.sequence_end_or_none <= self.covered_through_or_none,
+                            "invalid covered stream interval")
+
+
+_PUBLIC_STREAM_WITNESSES_V1 = {}
+
+
+def _build_public_stream_continuity_v1(*, session) -> PublicStreamContinuityWitnessV1:
+    """Receiving-session issuance from its retained original prefix, never a flag."""
+    import base64
+    from dataclasses import replace
+    from ..selected_venues.market_data import PublicMarketDataSessionV1, _PUBLIC_SESSIONS_V1
+    from ..market_data_ingest.adapter import _public_native_tree_v1, translate_public_observation_v1, PublicDataReadRequestV1
+    from ..market_data_ingest.binding import PublicMetadataSnapshotV1, SelectedPITPublicDataContractV2
+    from .source_policy import PublicDataSourceBindingV1
+    from .stage1_launch_graph import Stage1VenueProfileIdV1
+
+    _native_require(type(session) is PublicMarketDataSessionV1
+                    and _PUBLIC_SESSIONS_V1.get(id(session)) is session and session._observations,
+                    "continuity requires its receiving session")
+    facts, _, _ = session._guard_v1()
+    for name, cls in (("requests", PublicDataReadRequestV1), ("metadata", PublicMetadataSnapshotV1),
+                      ("contracts", SelectedPITPublicDataContractV2), ("source_bindings", PublicDataSourceBindingV1)):
+        rows = session._inputs.get(name)
+        _native_require(type(rows) is tuple and rows and all(type(row) is cls for row in rows),
+                        "missing exact stream input selection: " + name)
+    _native_ident(session._inputs.get("wall_clock_source_id"))
+    current = session._observations[-1]
+    _native_require(current.profile_id is Stage1VenueProfileIdV1.KALSHI_US_DCM_DIRECT
+                    and current.operation_id == "K_WS", "selected continuity algorithm unavailable")
+
+    def original_tree(observation):
+        encoded = observation.raw_body_b64
+        return _public_native_tree_v1(base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)),
+                                     maximum_bytes=session._budget.max_message_bytes)
+
+    def stream_number(tree, name):
+        message = tree.get("msg")
+        _native_require(type(message) is dict, "native stream msg required")
+        if name in tree and name in message:
+            _native_require(type(tree[name]) is type(message[name]) and tree[name] == message[name],
+                            "conflicting native stream aliases")
+        value = tree.get(name, message.get(name))
+        if value is not None:
+            _public_counter_v1(value, allow_zero=name == "seq")
+        return value
+
+    sid = stream_number(original_tree(current), "sid")
+    _native_require(sid is not None, "native stream member has no subscription identity")
+    last_sequence = first_sequence = None
+    previous_ref = last_ref = None
+    seen, instruments, originals = {}, set(), []
+    subscribed = False
+    acknowledgement_ordinal = None
+    subscription_request = None
+    clocks = {}
+    disposition = "CONTROL"
+    sequence = None
+    for observation in session._observations:
+        if observation.operation_id != "K_WS" or observation.connection_epoch != current.connection_epoch:
+            continue
+        _native_require(observation.profile_id is current.profile_id
+                        and observation.capture_session_id == current.capture_session_id
+                        and observation.scope_generation == facts["scope_generation"], "mixed original stream custody")
+        tree = original_tree(observation)
+        if stream_number(tree, "sid") != sid:
+            continue
+        requests = [row for row in session._inputs["requests"] if row.request_id == observation.request_ref]
+        _native_require(len(requests) == 1, "original stream member has no unique admitted request")
+        request = requests[0]
+        sources = [row for row in session._inputs["source_bindings"] if row.binding_id == request.source_binding_ref]
+        _native_require(len(sources) == 1, "stream source association is ambiguous")
+        contracts = [row for row in session._inputs["contracts"] if row.profile_id is current.profile_id
+                     and row.source_contract_version == request.native_contract_version
+                     and (row.source_contract_version, row.source_currentization_receipt_ref, row.rights_receipt_ref)
+                     in set(zip(sources[0].source_contract_versions, sources[0].source_receipt_refs,
+                                sources[0].rights_receipt_refs))]
+        _native_require(len(contracts) == 1, "stream contract association is ambiguous")
+        selected_metadata = []
+        for ref in request.metadata_refs:
+            matches = [row for row in session._inputs["metadata"] if row.metadata_id == ref]
+            _native_require(len(matches) == 1, "stream metadata association is missing or ambiguous")
+            selected_metadata.append(matches[0])
+        retained = session._observation_plans.get(observation.observation_id)
+        if retained is not None:
+            _native_require(type(retained) is tuple and len(retained) == 4
+                and retained[1] is sources[0] and retained[3] is contracts[0]
+                and type(retained[2]) is tuple and all(type(row) is PublicMetadataSnapshotV1 for row in retained[2])
+                and retained[0] == replace(request,metadata_refs=tuple(row.metadata_id for row in retained[2]))
+                and {row.instrument_id for row in retained[2]} == set(request.instrument_ids),
+                "stream observation metadata plan differs from its admitted request")
+            request, _, selected_metadata, _ = retained
+        else:
+            _native_require(not facts["native_qualified"], "native stream observation has no received metadata plan")
+        translated = translate_public_observation_v1(observation=observation, metadata=tuple(selected_metadata),
+            source_binding=sources[0], translation_context=dict(request=request, contract=contracts[0],
+                wall_clock_source_id=session._inputs["wall_clock_source_id"]))
+        originals.append(observation)
+        kind = tree.get("type")
+        _native_require(kind in {"subscribed", "ok", "unsubscribed", "orderbook_snapshot", "orderbook_delta",
+                                 "trade", "market_lifecycle_v2", "event_lifecycle", "event_fee_update"},
+                        "invalid member of retained stream prefix")
+        sequence = stream_number(tree, "seq")
+        if kind == "subscribed":
+            if acknowledgement_ordinal is not None:
+                _native_require(subscribed and observation.request_ref == subscription_request
+                                and sequence is not None and sequence in seen
+                                and seen[sequence] == observation.raw_body_b64,
+                                "subscription identity reused without an identical original sequenced acknowledgement")
+            else:
+                subscribed, subscription_request = True, observation.request_ref
+                acknowledgement_ordinal = observation.receive_ordinal
+        else:
+            _native_require(subscribed and observation.request_ref == subscription_request,
+                            "stream member has no matching acknowledged subscription")
+        if sequence is None:
+            _native_require(kind == "subscribed", "sequenced stream member has no native seq")
+            continue
+        previous_ref = last_ref
+        if sequence in seen:
+            _native_require(seen[sequence] == observation.raw_body_b64, "conflicting original stream sequence reuse")
+            disposition = "DUPLICATE"
+        else:
+            if last_sequence is not None and sequence != last_sequence + 1:
+                raise PITDataContractErrorV1(PITReasonCodeV1.PIT_SEQUENCE_GAP, "missing original subscription stream member")
+            seen[sequence] = observation.raw_body_b64
+            disposition = "ANCHOR" if last_sequence is None else "CONTIGUOUS"
+            first_sequence = sequence if first_sequence is None else first_sequence
+            last_sequence, last_ref = sequence, observation.observation_id
+        if kind in {"orderbook_snapshot", "orderbook_delta", "trade", "market_lifecycle_v2"}:
+            instrument = tree["msg"].get("market_ticker")
+            _native_require(type(instrument) is str and (instrument in session._scope.instrument_ids
+                            or kind == "market_lifecycle_v2" and "GLOBAL_PUBLIC_LIFECYCLE" in session._scope.receive_scope_classes),
+                            "stream event is outside the selected instruments")
+            if instrument in session._scope.instrument_ids:
+                instruments.add(instrument)
+            if "clock" in tree["msg"]:
+                clock = tree["msg"]["clock"]
+                _public_counter_v1(clock, allow_zero=True)
+                _native_require(instrument not in clocks or clock >= clocks[instrument], "market clock regressed")
+                clocks[instrument] = clock
+        elif kind in {"event_lifecycle","event_fee_update"}:
+            _native_require("GLOBAL_PUBLIC_LIFECYCLE" in session._scope.receive_scope_classes,
+                            "global Event notification is outside the received-data scope")
+            instruments.update(translated.stream_disposition["instrument_ids"])
+        if kind == "unsubscribed":
+            subscribed = False
+    _native_require((sequence is not None and first_sequence is not None)
+                    or (kind == "subscribed" and first_sequence is last_sequence is None and len(originals) == 1),
+                    "current member has no covered sequence or isolated subscription acknowledgement")
+    witness = PublicStreamContinuityWitnessV1(current.profile_id, current.capture_session_id, current.connection_epoch,
+        sid, current.observation_id, previous_ref, sequence, sequence, first_sequence, last_sequence,
+        acknowledgement_ordinal, disposition, tuple(sorted(instruments)), tuple(row.observation_id for row in originals))
+    _PUBLIC_STREAM_WITNESSES_V1[id(witness)] = (witness, session, tuple(originals),
+        tuple(row.raw_body_b64 for row in originals), facts["scope_generation"], acknowledgement_ordinal)
+    return witness
+
+
+def _issue_public_stream_continuity_v1(*, session) -> PublicStreamContinuityWitnessV1:
+    try:
+        return _build_public_stream_continuity_v1(session=session)
+    except BaseException:
+        from ..selected_venues.market_data import PublicMarketDataSessionV1, _PUBLIC_SESSIONS_V1
+
+        if type(session) is PublicMarketDataSessionV1 and _PUBLIC_SESSIONS_V1.get(id(session)) is session:
+            authority = session._binding._authority
+            if authority is None:
+                session._binding._failed = True
+            else:
+                with authority._lock:
+                    session._binding._failed = True
+        raise
+
+
+def _require_public_stream_witness_custody_v1(witness):
+    """Verify the original private witness before interpreting any disposition."""
+    issued = _PUBLIC_STREAM_WITNESSES_V1.get(id(witness))
+    _native_require(type(witness) is PublicStreamContinuityWitnessV1 and issued is not None and issued[0] is witness,
+                    "manufactured continuity witness cannot promote a stream")
+    from .source_policy import _public_binding_facts_v1
+    from ..selected_venues.market_data import _PUBLIC_SESSIONS_V1
+
+    _, session, originals, raw, source_generation, stream_generation = issued
+    facts = _public_binding_facts_v1(session._binding)
+    _native_require(_PUBLIC_SESSIONS_V1.get(id(session)) is session and session._binding._owner is session,
+                    "continuity receiving-session custody changed")
+    _native_require(tuple(row.raw_body_b64 for row in originals) == raw
+                    and all(any(saved is row for saved in session._observations) for row in originals),
+                    "original stream prefix custody changed")
+    _native_require(originals and witness.observation_ref == originals[-1].observation_id
+        and witness.profile_id is originals[-1].profile_id
+        and witness.capture_session_id == originals[-1].capture_session_id
+        and witness.connection_epoch == originals[-1].connection_epoch
+        and source_generation == facts["scope_generation"] and witness.generation == stream_generation,
+        "continuity witness differs from its original stream generation")
+    return issued
+
+
+def _require_public_stream_continuity_v1(witness, *, candidate, previous_sequence: int | None) -> None:
+    """Validate private issuance and original prefix custody at the reducer seam."""
+    from .receipts import _public_canonical_frame_ref_v1
+    from .source_policy import _public_binding_facts_v1
+
+    _, session, originals, raw, source_generation, stream_generation = _require_public_stream_witness_custody_v1(witness)
+    facts = _public_binding_facts_v1(session._binding)
+    frame_ref = _public_canonical_frame_ref_v1(witness.observation_ref)
+    book_event = candidate.event_kind in {PITEventKindV2.BOOK_SNAPSHOT, PITEventKindV2.BOOK_DELTA}
+    if not book_event:
+        import base64
+        from ..market_data_ingest.adapter import _public_native_tree_v1
+
+        current = originals[-1]
+        tree = _public_native_tree_v1(base64.urlsafe_b64decode(current.raw_body_b64 + "=" * (-len(current.raw_body_b64) % 4)),
+                                     maximum_bytes=session._budget.max_message_bytes)
+        _native_require((candidate.event_kind, tree.get("type")) in {
+            (PITEventKindV2.TRADE, "trade"), (PITEventKindV2.LIFECYCLE, "market_lifecycle_v2")}
+            and candidate.provider_sequence_start_or_none is candidate.provider_sequence_end_or_none is None,
+            "non-book stream evidence cannot claim provider book-sequence identity")
+    _native_require(witness.disposition in {"ANCHOR", "CONTIGUOUS"}
+                    and witness.profile_id is candidate.profile_id
+                    and witness.capture_session_id == candidate.capture_session_id
+                    and str(witness.connection_epoch) == candidate.connection_epoch
+                    and str(witness.subscription_id_or_none) == candidate.provider_subscription_id_or_none
+                    and source_generation == facts["scope_generation"] and witness.generation == stream_generation
+                    and candidate.event_record_id == frame_ref + "::CANONICAL-EVENT-V2"
+                    and candidate.instrument_id in witness.affected_instrument_ids
+                    and witness.sequence_start_or_none == witness.sequence_end_or_none
+                    and (not book_event or (witness.sequence_end_or_none == candidate.provider_sequence_start_or_none
+                         == candidate.provider_sequence_end_or_none and (previous_sequence is None
+                         or witness.covered_from_or_none <= previous_sequence + 1 <= witness.sequence_end_or_none)))
+                    and witness.sequence_end_or_none <= witness.covered_through_or_none,
+                    "continuity witness does not cover this market transition")
 
 
 def _pit_text(value: object, name: str) -> str:

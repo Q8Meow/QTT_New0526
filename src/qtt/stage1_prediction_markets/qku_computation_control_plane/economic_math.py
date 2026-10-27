@@ -13,6 +13,8 @@ from .context import (
     QuantizationPolicyV1,
     QuantizationReceiptV1,
     _native_retail_finite_decimal_text_v1,
+    _native_retail_decimal_string_v1,
+    _native_require,
     decimal_context_v1,
     exact_decimal,
     quantize_decimal_v1,
@@ -782,6 +784,83 @@ def us_prediction_market_fee_or_rebate_v1(
     receipt = quantize_decimal_v1(raw, policy=quantization_policy, receipt_id=receipt_id)
     component = "EXPLICIT_MAKER_REBATE" if raw < 0 else "EXPLICIT_TAKER_FEE"
     return QuantizedEconomicAmountV1(raw, receipt.post_value, receipt, component, schedule_binding.binding_ref)
+
+
+def _public_half_even_cent_v1(value: Fraction) -> Fraction:
+    """Integer quotient/remainder rounding, independent of ambient Decimal precision."""
+    _native_require(type(value) is Fraction and value >= 0, "cent rounding requires a nonnegative rational")
+    cents = value * 100
+    units, remainder = divmod(cents.numerator, cents.denominator)
+    if 2 * remainder > cents.denominator or (2 * remainder == cents.denominator and units % 2):
+        units += 1
+    return Fraction(units, 100)
+
+
+def _public_unrounded_fee_v1(*, epoch, contracts: Decimal, price: Decimal) -> Fraction:
+    """Shared model basis; cash quantization belongs to the selected fee owner."""
+    from .source_policy import PublicFeeEpochV1
+
+    _native_require(type(epoch) is PublicFeeEpochV1, "exact fee epoch required")
+    epoch.__post_init__()
+    count = _kalshi_bounded_fraction(contracts, "contracts", nonnegative=True)
+    probability = _kalshi_bounded_fraction(price, "price", nonnegative=True)
+    _native_require(count > 0 and probability <= 1, "fee quantity/price domain")
+    coefficients = {name: Fraction(_native_retail_decimal_string_v1(value)) for name, value in epoch.coefficients}
+    if epoch.formula_family == "EXPLICIT_ZERO":
+        raw = Fraction(0)
+    elif epoch.formula_family == "QUADRATIC":
+        raw = coefficients["rate"] * coefficients["multiplier"] * count * probability * (1 - probability)
+    elif epoch.formula_family == "RETAIL_COMBO":
+        raw = count * probability * (coefficients["quadratic_rate"] * (1 - probability)
+                                     + coefficients["quartic_rate"] * (1 - probability) ** 4)
+    else:
+        _native_require(epoch.formula_family == "GEMINI_LEGACY_MIN_SIDE", "unselected fee family")
+        raw = coefficients["rate"] * count * min(probability, 1 - probability)
+    return raw
+
+
+def public_fee_amount_v1(*, epoch, contracts: Decimal, price: Decimal,
+                         prior_unrounded: Decimal, prior_collected: Decimal) -> Mapping[str, str]:
+    """Exact fee arithmetic for a selected epoch; selection and account admission are upstream."""
+    from .stage1_launch_graph import Stage1VenueProfileIdV1
+
+    raw = _public_unrounded_fee_v1(epoch=epoch, contracts=contracts, price=price)
+    prior_raw = _kalshi_bounded_fraction(prior_unrounded, "prior_unrounded", nonnegative=True)
+    collected = _kalshi_bounded_fraction(prior_collected, "prior_collected", nonnegative=True)
+    _native_require((collected * 100).denominator == 1, "prior fee cash domain")
+    if epoch.rounding_rule == "EXACT_ZERO":
+        _native_require(raw == 0, "nonzero exact-zero fee")
+        charged = Fraction(0)
+    elif epoch.rounding_rule == "HALF_EVEN_CENT":
+        charged = _public_half_even_cent_v1(raw)
+    elif epoch.rounding_rule == "CEILING_CENT":
+        cents = raw * 100
+        charged = Fraction(-(-cents.numerator // cents.denominator), 100)
+    else:
+        # Kalshi retains its existing cash-grid/carry composer, never borrowed cent rounding.
+        raise NumericDomainError(ReasonCode.QUANTIZATION_POLICY_MISSING, "fee requires its separately bound native rounding owner")
+    retail = epoch.profile_id is Stage1VenueProfileIdV1.POLYMARKET_US_RETAIL_DIRECT
+    if retail and epoch.liquidity_role == "TAKER":
+        _native_require(collected <= _public_half_even_cent_v1(prior_raw), "prior collected cap exceeds prior formula")
+        charged = min(charged, max(Fraction(0), _public_half_even_cent_v1(prior_raw + raw) - collected))
+    elif retail and epoch.liquidity_role == "MAKER":
+        _native_require(prior_raw == collected == 0 and epoch.formula_family in {"QUADRATIC", "EXPLICIT_ZERO"},
+                        "maker rebate has no taker cap carry")
+        charged = -charged
+    else:
+        _native_require(prior_raw == collected == 0, "unbound fee carry domain")
+    render = _native_retail_finite_decimal_text_v1
+    return MappingProxyType(dict(epoch_ref=epoch.epoch_id, unrounded=render(raw), charged=render(charged),
+                                 cumulative_unrounded=render(prior_raw + raw),
+                                 cumulative_collected=render(collected + max(charged, Fraction(0)))))
+
+
+def public_deferred_taker_rebate_v1(*, qualifying_collected_fee: Decimal, proven_tier: int) -> Mapping[str, str]:
+    _native_require(type(proven_tier) is int and 1 <= proven_tier <= 6, "independent taker tier unavailable")
+    amount = _kalshi_bounded_fraction(qualifying_collected_fee, "qualifying_collected_fee", nonnegative=True)
+    fraction = (Fraction(0), Fraction(3, 100), Fraction(5, 100), Fraction(1, 10), Fraction(15, 100), Fraction(3, 10))[proven_tier - 1]
+    return MappingProxyType(dict(amount=_native_retail_finite_decimal_text_v1(amount * fraction),
+                                 economic_class="CONTINGENT_WEEKLY_REBATE_NOT_AVAILABLE_BALANCE"))
 
 
 def binary_book_implied_asks_v1(*, snapshot: BinaryBookSnapshotV1) -> BinaryBookTouchesV1:

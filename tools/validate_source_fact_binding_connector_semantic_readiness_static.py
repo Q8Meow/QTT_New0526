@@ -13,7 +13,10 @@ _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from tools.validate_no_runtime_artifacts import f14_native_admission_v1, kalshi_fee_native_admission_v1, source_use_native_contract_v1
+from tools.validate_no_runtime_artifacts import (
+    f14_native_admission_v1, kalshi_fee_native_admission_v1, public_data_native_admission_v1,
+    source_use_native_contract_v1,
+)
 
 from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     validate_current_atomicrows_bundle_state,
@@ -575,8 +578,9 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
             continue
         admitted, admission_failures = f14_native_admission_v1(rel.as_posix(), tree)
         kalshi_admitted, kalshi_failures = kalshi_fee_native_admission_v1(rel.as_posix(), tree)
-        admitted = admitted | kalshi_admitted
-        admission_failures = admission_failures + kalshi_failures
+        public_admitted, public_failures = public_data_native_admission_v1(rel.as_posix(), tree)
+        admitted = admitted | kalshi_admitted | public_admitted
+        admission_failures = admission_failures + kalshi_failures + public_failures
         admission_failures += source_use_native_contract_v1(rel.as_posix(), tree)
         failures.extend(admission_failures)
         for node in ast.walk(tree):
