@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import math
 import os
 import pathlib
 import sys
@@ -21,10 +22,12 @@ from tools.validation_reliability import (  # noqa: E402
     ValidationCompletionReceiptV1,
     ValidationReliabilityError,
     attest_inherited_validation_run,
+    bind_inherited_command_owner,
     atomic_write_json,
     build_command_evidence_plan,
     cleanup_validation_run,
     command_attempt_accounting,
+    command_terminal_custody_proven,
     resolve_validation_run_paths,
     supervise_command,
     validate_complete_run_evidence,
@@ -182,6 +185,7 @@ def _run_inherited_nested(
         _print_typed_error_once(error)
         return 1
     invocation = build_pytest_invocation(forwarded)
+    command_owner = None
     try:
         attestation = attest_inherited_validation_run(
             REPO_ROOT,
@@ -189,9 +193,11 @@ def _run_inherited_nested(
             inherited_evidence_root=pathlib.Path(inherited_evidence),
             explicit_basetemp=pathlib.Path(invocation.basetemp),
         )
+        command_owner = bind_inherited_command_owner(attestation)
         nested_evidence = _allocate_nested_evidence_root(
             attestation.evidence_root
         )
+        command_owner.register(nested_evidence)
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
         receipt = supervise_command(
             invocation.command,
@@ -201,7 +207,9 @@ def _run_inherited_nested(
             command_index=1,
             evidence_root=nested_evidence,
             environment=os.environ,
+            delegated_owner=command_owner,
         )
+        command_owner.complete()
     except Exception as exc:
         _print_typed_error_once(
             _as_typed_error(
@@ -211,6 +219,9 @@ def _run_inherited_nested(
             )
         )
         return 1
+    finally:
+        if command_owner is not None:
+            command_owner.channel.close()
     receipt_error = _receipt_infrastructure_error(receipt)
     _print_typed_error_once(receipt_error)
     if receipt_error is not None:
@@ -226,12 +237,15 @@ def _run_inherited_nested(
     return int(receipt.native_exit_code)
 
 
-def _run_standalone_owned(forwarded: Sequence[str]) -> int:
+def _run_standalone_owned(
+    forwarded: Sequence[str], *, timeout_seconds: float | None = None
+) -> int:
     owned_paths = None
     probe = None
     receipt = None
     cleanup_state = "NOT_RUN"
     first_error: ValidationReliabilityError | None = None
+    supervision_entered = False
     try:
         owned_paths, probe = resolve_validation_run_paths(
             REPO_ROOT,
@@ -264,6 +278,7 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
             text_integrity_preflight_state="NOT_APPLICABLE",
         )
         print(f"pytest basetemp: {invocation.basetemp}", flush=True)
+        supervision_entered = True
         receipt = supervise_command(
             invocation.command,
             cwd=REPO_ROOT,
@@ -272,6 +287,7 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
             command_index=1,
             evidence_root=owned_paths.evidence_root,
             environment=os.environ,
+            timeout_seconds=timeout_seconds,
         )
         receipt_error = _receipt_infrastructure_error(receipt)
         if receipt_error is not None:
@@ -283,11 +299,13 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
             operation="standalone pytest supervision failed",
         )
     finally:
-        if (
-            receipt is not None
-            and receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
-        ):
+        if supervision_entered and not command_terminal_custody_proven(receipt):
             cleanup_state = "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+            if first_error is None:
+                first_error = ValidationReliabilityError(
+                    "ENGVR_PROCESS_TERMINATION_FAILED",
+                    "standalone command has no affirmative terminal custody",
+                )
             try:
                 atomic_write_json(
                     owned_paths.evidence_root / "cleanup.json",
@@ -415,8 +433,43 @@ def _run_standalone_owned(forwarded: Sequence[str]) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     forwarded = list(sys.argv[1:] if argv is None else argv)
+    timeout_seconds = None
+    timeout_option = "--standalone-timeout-seconds"
+    selected: list[str] = []
+    index = 0
+    try:
+        while index < len(forwarded):
+            argument = forwarded[index]
+            if argument == timeout_option or argument.startswith(timeout_option + "="):
+                if timeout_seconds is not None:
+                    raise ValueError("standalone timeout must be supplied once")
+                if argument == timeout_option:
+                    index += 1
+                    if index == len(forwarded):
+                        raise ValueError("standalone timeout needs a value")
+                    value = forwarded[index]
+                else:
+                    value = argument.split("=", 1)[1]
+                timeout_seconds = float(value)
+                if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
+                    raise ValueError("standalone timeout must be finite and positive")
+            else:
+                selected.append(argument)
+            index += 1
+    except (TypeError, ValueError) as exc:
+        _print_typed_error_once(ValidationReliabilityError(
+            "ENGVR_PROCESS_START_FAILED", str(exc)
+        ))
+        return 1
+    forwarded = selected
     inherited_evidence = os.environ.get(EVIDENCE_ROOT_ENV, "").strip()
     inherited_run_id = os.environ.get(RUN_ID_ENV, "").strip()
+    if timeout_seconds is not None and (inherited_evidence or inherited_run_id):
+        _print_typed_error_once(ValidationReliabilityError(
+            "ENGVR_PROCESS_START_FAILED",
+            "standalone timeout is forbidden with inherited run identities",
+        ))
+        return 1
     if bool(inherited_evidence) != bool(inherited_run_id):
         _print_typed_error_once(
             ValidationReliabilityError(
@@ -431,7 +484,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             inherited_run_id=inherited_run_id,
             inherited_evidence=inherited_evidence,
         )
-    return _run_standalone_owned(forwarded)
+    return _run_standalone_owned(forwarded, timeout_seconds=timeout_seconds)
 
 
 if __name__ == "__main__":

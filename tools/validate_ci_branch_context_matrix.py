@@ -283,6 +283,13 @@ def validate(repo_root: Path) -> tuple[str, ...]:
     _check_exact_repair_branch_matrix(failures)
     _check_unrelated_repairs_fail(failures)
     _check_local_named_branches(failures)
+    lp03 = context.S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH
+    _expect(lp03 == "s1-lp03-evidence-platform-restart", failures, "LP03 restart branch identity differs")
+    _expect(context.is_owner_authorized_validation_branch(lp03), failures, "LP03 validation branch missing")
+    _expect(not context.is_pr_or_later_branch(lp03, 152), failures, "LP03 inherited generic PR authority")
+    for nearby in (lp03.upper(), lp03 + "-copy", "s1-lp03-evidence-platform"):
+        _expect(not context.is_owner_authorized_validation_branch(nearby), failures,
+                f"LP03 near branch passed: {nearby}")
     _check_main_push_and_pull_request_are_separate(failures)
     _check_pull_request_detached_simulation(repo_root, failures)
     return tuple(failures)

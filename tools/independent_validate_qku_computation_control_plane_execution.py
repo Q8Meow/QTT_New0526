@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import base64
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -20,6 +21,7 @@ from decimal import (
 import json
 from pathlib import Path
 import sys
+from types import MappingProxyType
 import zlib
 
 
@@ -56,6 +58,58 @@ NEW_MODULES = (
     "cohort_compiler.py", "input_lock.py", "evidence.py", "model_risk.py",
     "quantum_benchmark.py", "llm_gateway.py",
 )
+
+
+def _qualified_callable_name(node: ast.expr) -> str:
+    """Return the complete statically qualified name for a call target."""
+
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        prefix = _qualified_callable_name(node.value)
+        return f"{prefix}.{node.attr}" if prefix else node.attr
+    return ""
+
+
+LP03_SQLITE_TOPOLOGY_V1 = MappingProxyType({
+    'input_resolver.py': (
+        ('_EvidencePublishedSourceReadV1', '_read_v1', '41628190cc4e285b46c7abdf8e8349b0fb9813cef7397f0db48b526eea86d8df'),
+    ),
+    'persistence.py': (
+        ('_EvidenceBoundStoreV1', '_open_independent_readback_v1', '8e99931816a80a963f6a6a94d0b0b0d83aab86ade22d453c70ae895c4f878bd8'),
+        ('_EvidenceBoundStoreV1', '_require_original_objects_v1', 'a29e18aecd1020b760ceecafaee579bcad6b1079fe0d8960b59434a5e2e2f069'),
+        ('_EvidenceBoundStoreV1', '_attach_original_adapter_v1', '5e7b29ef7e3f44e099379c1d874d6f8d4ce20f7f5208a322d7232ee722964fb4'),
+        ('_EvidenceBoundStoreV1', '_assert_opened_database_v1', '785a835f5281891bf0c2192d9123477df9338dc3fd63efde414f54cad8e0e563'),
+        ('_EvidenceBoundStoreV1', '_close_original_database_v1', '187d1f1dca6edbf4fed47afdd93f5e156a0c0e3cda7d7f81446bb3907448e8d1'),
+    ),
+    'sqlite_reference.py': (
+        ('SQLiteReferenceAdapterV1', '__init__', 'f07ec6ebe7d13b3547636d9183ca4667174aa0d7a75737d4f8b709fdd7858e1f'),
+    ),
+})
+
+def _lp03_sqlite_topology_nodes_v1(file_name: str, tree: ast.Module):
+    """Match the selected original SQLite owners, including their guarded reads."""
+    profiles = LP03_SQLITE_TOPOLOGY_V1.get(file_name)
+    imports, calls = set(), set()
+    if profiles is None:
+        return imports, calls
+    for owner_name, method_name, expected in profiles:
+        owners = [node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == owner_name]
+        methods = [] if len(owners) != 1 else [node for node in owners[0].body
+            if isinstance(node, ast.FunctionDef) and node.name == method_name]
+        if len(methods) != 1:
+            continue
+        method = methods[0]
+        actual = hashlib.sha256(ast.dump(method, include_attributes=False).encode("utf-8")).hexdigest()
+        if actual != expected:
+            continue
+        for node in ast.walk(method):
+            if (isinstance(node, ast.Import) and len(node.names) == 1
+                    and node.names[0].name in ("sqlite3", "_sqlite3") and node.names[0].asname is None):
+                imports.add(node)
+            if isinstance(node, ast.Call) and _qualified_callable_name(node.func) in ("_sqlite3.connect", "connect"):
+                calls.add(node)
+    return imports, calls
 
 
 class _IndependentArtifactRejection(ValueError):
@@ -1812,6 +1866,36 @@ _F14_EXPECTED_METHODS = _F14_EXPECTED_METHODS | frozenset((
     'load_committed_public_capture_v1', 'load_committed_public_publication_v1'))
 
 
+# LP03 adds one typed discriminator to the existing storage owner.
+_F14_EXPECTED_DISCRIMINATORS = _F14_EXPECTED_DISCRIMINATORS | {"LP03_EVIDENCE_CONTROL_V1"}
+
+_REFERENCE_INSERT_PREFIXES = {
+    "SQLiteReferenceAdapterV1": """
+_evidence_deny_legacy_store_access_v1(self)
+if record.record_type is EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1:
+    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                                   "LP03_CONTROL_REQUIRES_ORIGINAL_ROLE_STORE")
+if _source_action_reserved_v1(record) or _public_record_reserved_v1(record):
+    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions are ephemeral only")
+""",
+    "InMemoryPersistenceAdapterV1": """
+if _source_action_reserved_v1(record) or _public_record_reserved_v1(record):
+    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE, "attributed actions require original owner composition")
+if record.record_type is EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1:
+    raise PersistenceContractError(ReasonCode.PERSISTENCE_UNAVAILABLE,
+                                   "LP03_CONTROL_REQUIRES_ORIGINAL_ROLE_STORE")
+""",
+}
+
+
+def _reference_insert_denials_v1(insert: ast.FunctionDef, owner: str) -> bool:
+    expected = ast.parse(_REFERENCE_INSERT_PREFIXES[owner]).body
+    actual = insert.body[:len(expected)]
+    return tuple(ast.dump(statement) for statement in actual) == tuple(
+        ast.dump(statement) for statement in expected
+    )
+
+
 def _source_use_execution_contract_failures_v1(trees):
     """Joint census for the new discriminator, storage denies and atomic UOW."""
     failures = []
@@ -1834,9 +1918,7 @@ def _source_use_execution_contract_failures_v1(trees):
         for file, owner in (("persistence.py", "InMemoryPersistenceAdapterV1"),
                             ("sqlite_reference.py", "SQLiteReferenceAdapterV1")):
             insert = method(file, owner, "insert_receipt_record")
-            if not insert.body or not isinstance(insert.body[0], ast.If) or not (
-                    "_source_action_reserved_v1" in named_calls(insert.body[0])
-                    and any(isinstance(n, ast.Raise) for n in ast.walk(insert.body[0]))):
+            if not _reference_insert_denials_v1(insert, owner):
                 failures.append("reference attributed-action insert denial missing: " + owner)
             getter = method(file, owner, "get_record")
             if not any(isinstance(n, ast.Constant) and n.value == "SOURCE_ACTION::" for n in ast.walk(getter)):
@@ -1917,7 +1999,7 @@ def _lp02_public_execution_contract_failures_v1(trees):
         for file, owner in (('persistence.py', 'InMemoryPersistenceAdapterV1'),
                             ('sqlite_reference.py', 'SQLiteReferenceAdapterV1')):
             insert = member(file, owner, 'insert_receipt_record')
-            if not isinstance(insert.body[0], ast.If) or '_public_record_reserved_v1' not in calls(insert.body[0]):
+            if not _reference_insert_denials_v1(insert, owner):
                 failures.append('LP02 reference public insert denial missing: ' + owner)
             for name in ('get_record', 'reconstruct_as_of'):
                 body = member(file, owner, name)
@@ -1999,21 +2081,22 @@ def main() -> int:
     if defined & FORBIDDEN_METHODS:
         failures.append(f"provider-write method implemented: {sorted(defined & FORBIDDEN_METHODS)}")
     forbidden_imports = {"requests", "httpx", "socket", "subprocess", "asyncio", "multiprocessing"}
+    sqlite_roots = {"sqlite3", "_sqlite3"}
     for name, tree in trees.items():
-        roots = {
-            alias.name.split(".", 1)[0]
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Import)
-            for alias in node.names
-        } | {
-            node.module.split(".", 1)[0]
-            for node in ast.walk(tree)
-            if isinstance(node, ast.ImportFrom) and node.module
-        }
+        imports = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imports[node] = {alias.name.split(".", 1)[0] for alias in node.names}
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imports[node] = {node.module.split(".", 1)[0]}
+        roots = set().union(*imports.values())
         if roots & forbidden_imports:
             failures.append(f"forbidden operational import in {name}: {sorted(roots & forbidden_imports)}")
-        if "sqlite3" in roots and name != "sqlite_reference.py":
-            failures.append(f"SQLite ownership leaked into {name}")
+        if name != "sqlite_reference.py" and roots & sqlite_roots:
+            actual = {node for node, imported in imports.items() if imported & sqlite_roots}
+            approved, _ = _lp03_sqlite_topology_nodes_v1(name, tree)
+            if actual != approved:
+                failures.append(f"SQLite ownership leaked into {name}")
     lifecycle_text = (PACKAGE / "lifecycle.py").read_text(encoding="utf-8")
     outbox_text = (PACKAGE / "outbox.py").read_text(encoding="utf-8")
     persistence_text = (PACKAGE / "persistence.py").read_text(encoding="utf-8")

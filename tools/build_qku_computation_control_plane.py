@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 from pathlib import Path
+import stat
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -1889,6 +1890,11 @@ def _st12f_static_partition(component_or_template_ref: str) -> dict[str, object]
 def build_st12f_projections() -> dict[str, str]:
     """Build static, non-empirical ST12-F contract projections."""
 
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ReasonCode
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.models import (
+        EvidenceDeliveryRecordV1, EvidenceKeyPurposeV1, EvidenceReceiverAckRecordV1, EvidenceStoreRoleV1,
+    )
+
     replay_fields = tuple(field.name for field in fields(ReplayResultContractV1))
     paper_fields = tuple(field.name for field in fields(PaperResultContractV1))
     lock_fields = tuple(field.name for field in fields(ImmutableReplayPaperInputLockV1))
@@ -2013,6 +2019,27 @@ def build_st12f_projections() -> dict[str, str]:
     manifest = {
         "schema": "QTT_ST12F_EVIDENCE_PROJECTION_MANIFEST_V1_4",
         "generated_projection_paths": full_paths,
+        "lp03_private_receiver_acceptance": {
+            "schema": "QTT_LP03_PRIVATE_RECEIVER_ACCEPTANCE_CONTRACT_V1",
+            "method": "receive_evidence_delivery_v1",
+            "purpose": "EVIDENCE_RECEIVER_ACCEPTANCE_V1",
+            "delivery_record_type": EvidenceDeliveryRecordV1.__name__,
+            "ack_record_type": EvidenceReceiverAckRecordV1.__name__,
+            "ack_signing_key_purpose": EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE.value,
+            "receiver_role_stores": {
+                "READINESS1": EvidenceStoreRoleV1.READINESS_ACK.value,
+                "PRETRADE1": EvidenceStoreRoleV1.PRETRADE_ACK.value,
+                "AGENT_ORCH1": EvidenceStoreRoleV1.AGENT_ACK.value,
+                "SVC1": EvidenceStoreRoleV1.SVC_ACK.value,
+            },
+            "receiver_commit_and_original_readback_required": True,
+            "exact_retransmission": "RETURN_IDENTICAL_ACK",
+            "conflicting_delivery": ReasonCode.EVIDENCE_RECEIVER_CONFLICT.value,
+            "missing_ack": "RECEIVER_ACKNOWLEDGEMENTS_PENDING",
+            "dashboard_source": "SVC1",
+            "runtime_effect_authorized": False,
+            "ack_record_instance_count": 0,
+        },
         "projection_count": 13,
         "template_count": 52,
         "replay_slot_count": 52,
@@ -2110,6 +2137,70 @@ def materialize_st12f_projections(projections: dict[str, str]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name in ST12F_GENERATED_PATHS:
         _write_generated_if_changed(output_dir / name, projections[name])
+
+
+def _require_isolated_output_file(path: Path) -> bool:
+    """Validate a lexical repository destination without following aliases."""
+    relative = path.relative_to(REPO_ROOT)
+    current = REPO_ROOT
+    exists = False
+    for index, part in enumerate(relative.parts):
+        current /= part
+        final = index == len(relative.parts) - 1
+        try:
+            info = current.lstat()
+        except FileNotFoundError:
+            continue
+        alias = (stat.S_ISLNK(info.st_mode)
+                 or getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
+        correct_kind = (stat.S_ISREG(info.st_mode) and info.st_nlink == 1) if final else stat.S_ISDIR(info.st_mode)
+        if alias or not correct_kind:
+            raise ValueError(f"invalid isolated F output destination: {current.relative_to(REPO_ROOT).as_posix()}")
+        exists = final
+    return exists
+
+
+def _materialize_isolated_st12f(
+    projections: dict[str, str], *, optional_export: tuple[Path, bytes] | None,
+) -> None:
+    if tuple(projections) != ST12F_GENERATED_PATHS:
+        raise ValueError("ST12-F projection roster differs from the exact 13 paths")
+    output_dir = REPO_ROOT / ST12F_GENERATED_PREFIX
+    writes = []
+    for name in ST12F_GENERATED_PATHS:
+        text = projections[name]
+        if not text.endswith("\n") or text.endswith("\n\n") or "\r" in text:
+            raise ValueError(f"ST12-F projection must contain LF-terminated records: {name}")
+        documents = text[:-1].split("\n") if name.endswith(".jsonl") else (text[:-1],)
+        for document in documents:
+            if type(safe_json_loads(document)) is not dict:
+                raise ValueError(f"ST12-F projection requires JSON objects: {name}")
+        raw = text.encode("utf-8", "strict")
+        path = output_dir / name
+        if _require_isolated_output_file(path):
+            before = path.read_bytes()
+            before.decode("utf-8", "strict")
+            if before == raw:
+                continue
+        writes.append((path, raw))
+
+    if optional_export is not None:
+        export_path, _ = optional_export
+        _require_isolated_output_file(export_path)
+        writes.append(optional_export)
+    completed = []
+    for path, raw in writes:
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.write_bytes(raw) != len(raw):
+                raise OSError("short isolated F output write")
+        except OSError as error:
+            print("ST12F_GENERATION_WRITE_INCOMPLETE=" + deterministic_json({
+                "completed_write_paths": completed, "failed_path": relative, "native_error": type(error).__name__,
+            }), file=sys.stderr)
+            raise
+        completed.append(relative)
 
 
 def materialize_st12g_projection_contract_manifest() -> None:
@@ -2591,23 +2682,61 @@ def _materialize_st12h_reports() -> None:
         )
 
 
+def _encode_build_payload(payload: dict[str, object]) -> str:
+    serializable = dict(payload)
+    serializable["selected_component_package_v1"] = _qku_projection_serialization_value(
+        payload["selected_component_package_v1"]
+    )
+    return deterministic_json(serializable) + "\n"
+
+
+def _print_selected_component_package_markers() -> None:
+    print("S1_SELECTED_COMPONENT_PACKAGE_V1_VALIDATED")
+    print("S1_SELECTED_COMPONENT_PACKAGE_V1_REPRODUCIBLE")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output",
         help="Optional JSON path below the repository .tmp directory.",
     )
-    parser.add_argument(
+    narrow = parser.add_mutually_exclusive_group()
+    narrow.add_argument(
         "--st12g-only",
         action="store_true",
         help="Materialize only the ST12-G static owner-projection contract manifest.",
     )
-    parser.add_argument(
+    narrow.add_argument(
         "--st12f-only",
         action="store_true",
         help="Materialize only the ST12-F evidence projections.",
     )
     args = parser.parse_args()
+    if args.st12f_only:
+        output = None
+        if args.output is not None:
+            try:
+                relative = validate_relative_path(args.output)
+                output = REPO_ROOT / relative
+                if resolve_output_path(args.output) != output:
+                    raise ValueError("isolated F scratch output must retain its original repository path")
+                _require_isolated_output_file(output)
+            except ValueError as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        st12f_projections = build_st12f_projections()
+        optional_export = None
+        if output is not None:
+            text = _encode_build_payload(build_payload(st12f_projections=st12f_projections))
+            safe_json_loads(text)
+            optional_export = (output, text.encode("utf-8", "strict"))
+        _materialize_isolated_st12f(st12f_projections, optional_export=optional_export)
+        if optional_export is not None:
+            _print_selected_component_package_markers()
+        print(SUCCESS_MARKER)
+        return 0
+
     materialize_st12g_projection_contract_manifest()
     if args.st12g_only:
         print(
@@ -2624,15 +2753,8 @@ def main() -> int:
         st12d_projections,
         st12f_projections,
     )
-    serializable_payload = dict(payload)
-    serializable_payload["selected_component_package_v1"] = (
-        _qku_projection_serialization_value(
-            payload["selected_component_package_v1"]
-        )
-    )
-    encoded_payload = deterministic_json(serializable_payload)
-    safe_json_loads(encoded_payload)
-    text = encoded_payload + "\n"
+    text = _encode_build_payload(payload)
+    safe_json_loads(text)
     if args.output:
         try:
             output = resolve_output_path(args.output)
@@ -2641,14 +2763,12 @@ def main() -> int:
             return 2
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(text, encoding="utf-8", newline="\n")
-        if not args.st12f_only:
-            materialize_st12e_projections(*st12e_projections)
-            materialize_st12d_projections(st12d_projections)
+        materialize_st12e_projections(*st12e_projections)
+        materialize_st12d_projections(st12d_projections)
         materialize_st12f_projections(st12f_projections)
     else:
         print(text, end="")
-    print("S1_SELECTED_COMPONENT_PACKAGE_V1_VALIDATED")
-    print("S1_SELECTED_COMPONENT_PACKAGE_V1_REPRODUCIBLE")
+    _print_selected_component_package_markers()
     print(SUCCESS_MARKER)
     return 0
 

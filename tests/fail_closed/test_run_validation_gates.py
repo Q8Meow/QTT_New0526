@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -195,8 +196,33 @@ def _clear_branch_context_env(monkeypatch):
         monkeypatch.delenv(env_name, raising=False)
 
 
+def _unit_supervision_receipt(command, *, run_id, phase, command_index,
+                              cwd, evidence_root, native_exit_code,
+                              failure_class, stdout_marker_state,
+                              elapsed_monotonic_seconds=0.0,
+                              timeout_seconds=None, required_markers=()):
+    """Typed synthetic receipt for existing command-planning unit tests only."""
+    return reliability.CommandExecutionReceiptV1(
+        schema_version=1, run_id=run_id, phase=phase, command_index=command_index,
+        argv=tuple(command), cwd=str(Path(cwd).resolve()), pid=4321, platform=os.name,
+        start_time_utc="2026-11-09T00:00:00Z", end_time_utc="2026-11-09T00:00:01Z",
+        elapsed_monotonic_seconds=elapsed_monotonic_seconds,
+        native_exit_code=native_exit_code, start_failure_class=None,
+        timeout_seconds_or_null=timeout_seconds,
+        timeout_state=("NOT_CONFIGURED" if timeout_seconds is None else
+                       "TRIGGERED" if failure_class == "ENGVR_PROCESS_TIMEOUT" else "NOT_TRIGGERED"),
+        termination_state="TERMINAL:PROVEN;PIPES:EOF",
+        stdout_path=str((Path(evidence_root) / f"command-{command_index}.stdout.bin").resolve()),
+        stderr_path=str((Path(evidence_root) / f"command-{command_index}.stderr.bin").resolve()),
+        stdout_byte_count=0, stderr_byte_count=0,
+        stdout_required_markers=tuple(required_markers), stdout_marker_state=stdout_marker_state,
+        stderr_was_nonempty=False, failure_class=failure_class,
+    )
+
+
 @pytest.fixture(autouse=True)
 def _central_supervision_test_adapter(monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "_LAST_SUPERVISION_UNSETTLED", False)
     def make_paths(label: str):
         process_root = tmp_path / f"process-root-{label}"
         validation_root = process_root / reliability.VALIDATION_OUTPUT_DIR_NAME
@@ -240,13 +266,15 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
                     timeout=timeout_seconds,
                 )
         except subprocess.TimeoutExpired:
-            return SimpleNamespace(
+            return _unit_supervision_receipt(
+                command, run_id=kwargs["run_id"], phase=kwargs["phase"],
+                cwd=kwargs["cwd"], evidence_root=kwargs["evidence_root"],
                 command_index=kwargs["command_index"],
                 elapsed_monotonic_seconds=runner.time.perf_counter() - started,
                 native_exit_code=124,
                 failure_class="ENGVR_PROCESS_TIMEOUT",
                 stdout_marker_state="NOT_EVALUATED_TIMEOUT",
-                pid=4321,
+                timeout_seconds=timeout_seconds, required_markers=required_markers,
             )
         stdout = str(getattr(completed, "stdout", "") or "")
         stderr = str(getattr(completed, "stderr", "") or "")
@@ -266,7 +294,9 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
             if missing
             else None
         )
-        return SimpleNamespace(
+        return _unit_supervision_receipt(
+            command, run_id=kwargs["run_id"], phase=kwargs["phase"],
+            cwd=kwargs["cwd"], evidence_root=kwargs["evidence_root"],
             command_index=kwargs["command_index"],
             elapsed_monotonic_seconds=runner.time.perf_counter() - started,
             native_exit_code=native_exit,
@@ -278,7 +308,7 @@ def _central_supervision_test_adapter(monkeypatch, tmp_path):
                 if not missing
                 else "MISSING:" + ",".join(missing)
             ),
-            pid=4321,
+            timeout_seconds=timeout_seconds, required_markers=required_markers,
         )
 
     monkeypatch.setattr(runner, "resolve_validation_run_paths", fake_resolve)
@@ -321,14 +351,15 @@ def _st12h_mock_terminal_output(command: list[str]) -> str:
 def _record_fake_aggregate_success_receipts(commands) -> None:
     runner._LAST_PLANNED_COMMAND_COUNT = len(commands)
     runner._LAST_COMMAND_RECEIPTS = tuple(
-        SimpleNamespace(
+        _unit_supervision_receipt(
+            command, run_id="run_test_aggregate", phase="all",
+            cwd=REPO_ROOT, evidence_root=REPO_ROOT,
             command_index=index,
-            pid=4321,
             native_exit_code=0,
             failure_class=None,
             stdout_marker_state="PASS",
         )
-        for index, _command in enumerate(commands, start=1)
+        for index, command in enumerate(commands, start=1)
     )
 
 
@@ -12905,7 +12936,23 @@ def test_github_workflow_splits_validation_into_parallel_phase_jobs():
     workflow = _workflow_text()
     shard_block = _workflow_job_block(workflow, "validation_shards")
 
-    assert "    timeout-minutes: 90\n" in shard_block
+    assert (
+        "    timeout-minutes: ${{ matrix.phase == 'pytest-shard-8' && 300 || 90 }}\n"
+        in shard_block
+    )
+    assert shard_block.count("timeout-minutes:") == 2
+    assert (
+        "      - name: Run validation shard\n"
+        "        if: ${{ matrix.phase != 'pytest-shard-8' }}\n"
+        "        run: &validation_shard_command >\n"
+    ) in shard_block
+    assert (
+        "      - name: Run validation shard 8\n"
+        "        if: ${{ matrix.phase == 'pytest-shard-8' }}\n"
+        "        timeout-minutes: 270\n"
+        "        run: *validation_shard_command\n"
+    ) in shard_block
+    assert "    timeout-minutes: 90\n" in _workflow_job_block(workflow, "validation")
     assert "    strategy:\n" in shard_block
     assert "      fail-fast: false\n" in shard_block
     assert "          python-version: '3.14.6'\n" in shard_block
@@ -13087,6 +13134,38 @@ def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
     assert len(contracts) == 15
     assert sum(timeout == 1200 for timeout, _markers in contracts) == 14
     assert sum(timeout == 1800 for timeout, _markers in contracts) == 1
+    owned_basetemp = (tmp_path / "owned-qku" / "p").resolve()
+    exact_qku = [
+        sys.executable, "tools/run_pytest_fresh_basetemp.py",
+        runner.ST12A_TEST_ROOT, "-q", "--durations=50",
+        "--import-mode=importlib", "--basetemp", str(owned_basetemp),
+    ]
+    for exact in (exact_qku, [part.replace("/", "\\") for part in exact_qku]):
+        assert runner._st12h_command_contract(
+            exact, owned_pytest_basetemp=owned_basetemp,
+        ) == (14400, ())
+    # A mere pathname in argv does not grant the larger capacity.
+    assert runner._st12h_command_contract(exact_qku) == (1200, ())
+    near_misses = [
+        ["another-python", *exact_qku[1:]],
+        [exact_qku[0], "elsewhere/run_pytest_fresh_basetemp.py", *exact_qku[2:]],
+        [*exact_qku, "tests/another_test.py"],
+        [*exact_qku, "--ignore=tests/subtree"],
+        [*exact_qku, "-k", "selected"],
+        [*exact_qku, "--deselect=selected"],
+        [*exact_qku, "--maxfail=1"],
+        [*exact_qku[:4], "--durations=49", *exact_qku[5:]],
+        [*exact_qku[:5], "--import-mode=prepend", *exact_qku[6:]],
+        [*exact_qku[:-1], str(owned_basetemp.parent / "unowned")],
+        [*exact_qku[:-2], "--basetemp=" + str(owned_basetemp)],
+    ]
+    for near_miss in near_misses:
+        assert runner._st12h_command_contract(
+            near_miss, owned_pytest_basetemp=owned_basetemp,
+        ) != (14400, ())
+    assert runner._st12h_command_contract(
+        exact_qku, owned_pytest_basetemp=Path("relative/p"),
+    ) == (1200, ())
     assert runner.ST12H_MAX_CONCURRENT_VALIDATION_PROCESSES == 1
     assert runner.ST12H_AUTOMATIC_FULL_CAMPAIGN_RETRIES == 0
     assert runner.ST12H_MAX_FULL_LOCAL_CAMPAIGNS_PER_TRACKED_STATE == 1
@@ -13373,6 +13452,41 @@ def _assert_path_projection_contract(monkeypatch, tmp_path: Path) -> None:
 
 
 def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
+    refused = reliability.supervise_command(
+        (sys.executable, "-c", "raise AssertionError('unsupported child must not launch')"),
+        cwd=REPO_ROOT, run_id="run_unqualified_posix_containment",
+        phase="platform-refusal", command_index=1,
+        evidence_root=tmp_path / "unqualified-posix", platform_name="posix",
+        mirror_stdout=False, mirror_stderr=False,
+    )
+    assert refused.pid is None and refused.native_exit_code is None
+    assert refused.failure_class == "ENGVR_PROCESS_START_FAILED"
+    assert refused.start_failure_class == "ValidationReliabilityError:ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE"
+    assert refused.termination_state == "NOT_REQUIRED"
+    assert reliability.command_terminal_custody_proven(refused)  # proven no child
+    attempted_launches = []
+
+    class PosixHostFacts:
+        name = "posix"
+
+        def __getattr__(self, name):
+            return getattr(os, name)
+
+    with monkeypatch.context() as platform_patch:
+        platform_patch.setattr(reliability, "os", PosixHostFacts())
+        platform_patch.setattr(reliability.subprocess, "Popen", lambda *_args, **_kwargs: attempted_launches.append("process"))
+        platform_patch.setattr(reliability._InvocationChannel, "__init__", lambda *_args, **_kwargs: attempted_launches.append("channel"))
+        mismatch = reliability.supervise_command(
+            (sys.executable, "tools/run_pytest_fresh_basetemp.py", "--version"),
+            cwd=REPO_ROOT, run_id="run_platform_override_denied", phase="platform-refusal",
+            command_index=1, evidence_root=tmp_path / "platform-override", platform_name="nt",
+            mirror_stdout=False, mirror_stderr=False,
+        )
+    assert attempted_launches == []
+    assert mismatch.pid is None and mismatch.native_exit_code is None
+    assert mismatch.start_failure_class == "ValidationReliabilityError:ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE"
+    assert reliability.command_terminal_custody_proven(mismatch)
+
     class WindowsStartupInfo:
         def __init__(self):
             self.dwFlags = 0
@@ -13820,7 +13934,8 @@ def _assert_output_drain_terminality_contract(monkeypatch, tmp_path: Path) -> No
     assert failed_writes
     assert raw_intended_bytes > 64 * 1024
     assert raw_failure_receipt.pid is not None
-    assert raw_failure_receipt.native_exit_code == 0
+    assert raw_failure_receipt.native_exit_code is not None
+    assert reliability.command_terminal_custody_proven(raw_failure_receipt)
     raw_stdout_path = Path(raw_failure_receipt.stdout_path)
     raw_stderr_path = Path(raw_failure_receipt.stderr_path)
     raw_command_path = raw_failure_evidence / "command-1.json"
@@ -14151,14 +14266,20 @@ def _assert_write_once_command_evidence_contract(monkeypatch, tmp_path: Path) ->
     )
     first_bytes = {path: path.read_bytes() for path in evidence_paths}
     real_popen = reliability.subprocess.Popen
+    real_native_start = reliability._WindowsContainedProcess.start
     second_starts = []
 
     def track_second_start(*args, **kwargs):
         second_starts.append((args, kwargs))
         return real_popen(*args, **kwargs)
 
+    def track_second_native_start(process, *args, **kwargs):
+        second_starts.append((args, kwargs))
+        return real_native_start(process, *args, **kwargs)
+
     with monkeypatch.context() as duplicate_patch:
         duplicate_patch.setattr(reliability.subprocess, "Popen", track_second_start)
+        duplicate_patch.setattr(reliability._WindowsContainedProcess, "start", track_second_native_start)
         with pytest.raises(
             reliability.ValidationReliabilityError,
             match="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
@@ -14527,6 +14648,7 @@ def _assert_receipt_publication_failure_accounting(
     )
     real_atomic_write = reliability.atomic_write_json
     real_popen = reliability.subprocess.Popen
+    real_native_start = reliability._WindowsContainedProcess.start
     child_starts = []
 
     def fail_command_receipt(path, payload):
@@ -14540,6 +14662,10 @@ def _assert_receipt_publication_failure_accounting(
     def track_child_start(*args, **kwargs):
         child_starts.append((args, kwargs))
         return real_popen(*args, **kwargs)
+
+    def track_native_start(process, *args, **kwargs):
+        child_starts.append((args, kwargs))
+        return real_native_start(process, *args, **kwargs)
 
     with monkeypatch.context() as production_patch:
         production_patch.setattr(
@@ -14579,6 +14705,7 @@ def _assert_receipt_publication_failure_accounting(
                 "Popen",
                 track_child_start,
             )
+            publication_patch.setattr(reliability._WindowsContainedProcess, "start", track_native_start)
             run_result = runner.run_commands(
                 commands,
                 phase=runner.FAST_PREFLIGHT_PHASE,
@@ -14887,11 +15014,382 @@ def _assert_exact_cleanup_contract(monkeypatch) -> None:
         assert historical.is_dir()
 
 
+def _assert_unsettled_custody_blocks_mutation(monkeypatch, tmp_path: Path) -> None:
+    for index, mode in enumerate(("missing", "exception", "unknown-tree", "unknown-pipes", "no-proof")):
+        repo = tmp_path / f"unsettled-repo-{index}"
+        repo.mkdir()
+        paths, probe = reliability.resolve_validation_run_paths(
+            repo, explicit_process_root=(tmp_path / f"unsettled-parent-{index}").resolve(),
+            run_id=f"run_unsettled_{index}", projected_relative_paths=("command-1.stdout.bin",),
+        )
+        commands = ((sys.executable, "-c", "print('FIRST')"),
+                    (sys.executable, "-c", "print('MUST_NOT_START')"))
+        reliability.write_run_provenance(paths, probe, phase=runner.FAST_PREFLIGHT_PHASE,
+                                         command_count=2, text_integrity_preflight_state="PASS")
+        attempts, mutation_calls = [], []
+
+        def unresolved_supervision(command, **kwargs):
+            attempts.append(tuple(command))
+            if mode == "missing":
+                return None
+            if mode == "exception":
+                raise RuntimeError("synthetic missing started-command result")
+            receipt = _unit_supervision_receipt(
+                command, run_id=kwargs["run_id"], phase=kwargs["phase"],
+                command_index=kwargs["command_index"], cwd=kwargs["cwd"],
+                evidence_root=kwargs["evidence_root"], native_exit_code=0,
+                failure_class=None if mode == "no-proof" else "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED", stdout_marker_state="NOT_REQUIRED",
+            )
+            return replace(receipt, termination_state={
+                "unknown-tree": "TERMINAL:UNPROVEN;PIPES:EOF",
+                "unknown-pipes": "TERMINAL:PROVEN;PIPES:UNPROVEN",
+                "no-proof": "NOT_REQUIRED",
+            }[mode])
+
+        with monkeypatch.context() as patch:
+            patch.setattr(runner, "_LAST_SUPERVISION_UNSETTLED", False)
+            patch.setattr(runner, "_LAST_COMMAND_RECEIPTS", ())
+            patch.setattr(runner, "_LAST_EXPECTED_COMMAND_PLAN", ())
+            patch.setattr(runner, "_execute_supervised_command", unresolved_supervision)
+            patch.setattr(runner, "_tracked_modified_paths", lambda *_args: {"retained.txt"})
+            patch.setattr(runner, "_modified_file_snapshots", lambda *_args: {"retained.txt": b"original"})
+            patch.setattr(runner, "_untracked_paths", lambda *_args: set())
+            for name in ("_restore_tracked_gate_side_effects", "_restore_modified_file_snapshots",
+                         "_restore_untracked_gate_side_effects", "cleanup_validation_run"):
+                patch.setattr(runner, name, lambda *_args, _name=name, **_kwargs: mutation_calls.append(_name))
+            patch.setattr(runner, "atomic_write_json", reliability.atomic_write_json)
+            patch.setattr(runner, "validate_complete_run_evidence", reliability.validate_complete_run_evidence)
+            patch.setattr(runner, "validate_published_completion_receipt", reliability.validate_published_completion_receipt)
+            result = runner.run_commands(
+                commands, phase=runner.FAST_PREFLIGHT_PHASE, run_paths=paths,
+                repo_root=repo, defer_success_markers=True,
+                execution_plan=runner._prepare_execution_plan(commands),
+            )
+            assert result == 1
+            assert runner._LAST_SUPERVISION_UNSETTLED
+            assert attempts == [commands[0]]
+            with pytest.raises(RuntimeError, match="earlier command custody remains unsettled"):
+                runner.run_commands(commands, phase=runner.FAST_PREFLIGHT_PHASE, run_paths=paths)
+            result, cleanup, completion = runner._finalize_validation_run(
+                run_paths=paths, probe=probe, phase=runner.FAST_PREFLIGHT_PHASE,
+                planned_count=2, expected_plan=runner._LAST_EXPECTED_COMMAND_PLAN,
+                receipts=runner._LAST_COMMAND_RECEIPTS, result=result, text_state="PASS",
+            )
+            assert result == 1
+            assert cleanup == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+            assert completion.final_state == "FAIL"
+            assert paths.process_root.is_dir()
+            assert mutation_calls == []
+            assert attempts == [commands[0]]
+
+
+def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
+    # Reenter this existing collected group only for its short native fixture.
+    # No new test file, collected function, process owner, or termination loop.
+    node = "tests/fail_closed/test_run_validation_gates.py::test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry"
+    if os.name == "nt":
+        # Native NOWAIT qualification: no client, empty reads, message-buffer
+        # pressure, full-frame delivery, truncation refusal and finite close.
+        listening = reliability._InvocationChannel()
+        started = time.monotonic()
+        assert listening.poll() is None
+        listening.close()
+        assert time.monotonic() - started < 1
+        server = reliability._InvocationChannel()
+        client = reliability._InvocationChannel(server.locator)
+        try:
+            assert server.poll() is None
+            assert client.poll() is None
+            sent = []
+            for index in range(16):
+                packet = {"index": index, "payload": "x" * 60000}
+                client.send(packet)
+                started = time.monotonic()
+                assert client.poll() is None
+                assert time.monotonic() - started < 1
+                sent.append(packet)
+                if client._pending_send is not None:
+                    break
+            assert client._pending_send is not None, "native message-buffer pressure was not exercised"
+            received = []
+            limit = time.monotonic() + 2
+            while len(received) < len(sent) and time.monotonic() < limit:
+                packet = server.poll()
+                if packet is not None:
+                    received.append(packet)
+                    assert server.last_sender_pid == os.getpid()
+                assert client.poll() is None
+            assert received == sent
+            assert client._pending_send is None
+        finally:
+            started = time.monotonic()
+            client.close()
+            server.close()
+            assert time.monotonic() - started < 1
+        server = reliability._InvocationChannel()
+        client = reliability._InvocationChannel(server.locator)
+        try:
+            assert server.poll() is None
+            with pytest.raises(reliability.ValidationReliabilityError, match="exceeds its bound"):
+                client.send({"payload": "x" * 65537})
+            client.send({"payload": "x" * 64})
+            assert client.poll() is None
+            native_read = server._api.ReadFile
+            with monkeypatch.context() as short_read_patch:
+                short_read_patch.setattr(server._api, "ReadFile", lambda handle, _size, **kwargs: native_read(handle, 8, **kwargs))
+                with pytest.raises(OSError, match="partial or failed read"):
+                    server.poll()
+        finally:
+            client.close()
+            server.close()
+
+    qualification_override = os.environ.get("QTT_TEST_QUALIFICATION_ROOT")
+    if qualification_override is None:
+        qualification_root = (tmp_path / "nested").resolve()
+        if qualification_root.is_relative_to(REPO_ROOT.resolve()):
+            temp_parent = Path(tempfile.gettempdir()).resolve()
+            assert not temp_parent.is_relative_to(REPO_ROOT.resolve())
+            # These cases retain evidence when custody is unproven. Keep the
+            # fixture-owned runs outside the repository's campaign inventory.
+            qualification_root = Path(tempfile.mkdtemp(prefix="qttn-", dir=temp_parent))
+    else:
+        qualification_root = Path(qualification_override).resolve()
+
+    native_denials = ("peer-parent-mismatch", "peer-image-mismatch", "peer-outside-job", "launcher-exited") if os.name == "nt" else ()
+    for case_index, case in enumerate((
+        "normal", "nonzero", "survivor", "timeout", "blocked-mirror",
+        "blocked-write", "capture-failure", "abort", "publication-failure",
+        "launch-abort", *native_denials,
+    ), start=1):
+        paths, probe = reliability.resolve_validation_run_paths(
+            REPO_ROOT, explicit_process_root=qualification_root,
+            run_id=f"run_native_nested_{case_index}",
+            projected_relative_paths=("nested-pytest/command-1.stdout.bin",),
+        )
+        reliability.write_run_provenance(
+            paths, probe, phase="native-nested-qualification", command_count=1,
+            text_integrity_preflight_state="NOT_APPLICABLE",
+        )
+        environment = dict(os.environ)
+        environment.pop(reliability.COMMAND_OWNER_CHANNEL_ENV, None)
+        environment.update({
+            reliability.RUN_ID_ENV: paths.run_id,
+            reliability.EVIDENCE_ROOT_ENV: str(paths.evidence_root),
+            "QTT_TEST_NESTED_SUPERVISION_CASE": case,
+        })
+        command = (sys.executable, "-B", "tools/run_pytest_fresh_basetemp.py",
+                   node, "-q", "-s", "--import-mode=importlib",
+                   "--basetemp", str(paths.pytest_basetemp_root))
+        stopped = threading.Event()
+        stop_calls: list[tuple[int, int]] = []
+        blocked: list[str] = []
+        descendant_handles: list[int] = []
+        real_stop = reliability._terminate_owned_process_tree
+        real_write = reliability._write_evidence_chunk
+        real_mirror = reliability._mirror_bytes
+        real_publish = reliability.atomic_write_json
+
+        def observed_stop(process, **kwargs):
+            stop_calls.append((process.pid, threading.get_ident()))
+            try:
+                return real_stop(process, **kwargs)
+            finally:
+                stopped.set()
+
+        def intercept_output(data: bytes, operation: str) -> None:
+            if b"NESTED_DESCENDANT_READY" not in data or blocked:
+                return
+            if not descendant_handles and case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"}:
+                fixture = json.loads((paths.evidence_root / "native-topology.json").read_text(encoding="utf-8"))
+                if os.name == "nt":
+                    import _winapi
+                    handle = _winapi.OpenProcess(0x00100400, False, fixture["descendant_pid"])
+                    identity = reliability._windows_native_process_identity(handle)
+                    assert identity[0] == fixture["descendant_pid"]
+                    assert _winapi.WaitForSingleObject(handle, 0) == _winapi.WAIT_TIMEOUT
+                else:
+                    handle = os.pidfd_open(fixture["descendant_pid"])
+                descendant_handles.append(handle)
+                (paths.evidence_root / "descendant-handle-bound").write_text("original handle retained\n", encoding="ascii")
+            if case == "blocked-" + operation:
+                blocked.append(operation)
+                assert stopped.wait(20), "deadline owner was blocked by output I/O"
+            elif case == "capture-failure" and operation == "write":
+                blocked.append(operation)
+                raise OSError("injected retained-stream write failure")
+            elif case == "abort" and operation == "mirror":
+                blocked.append(operation)
+                raise KeyboardInterrupt("injected owner-output abort")
+
+        def intercepted_write(stream, data):
+            intercept_output(data, "write")
+            return real_write(stream, data)
+
+        def intercepted_mirror(data, target):
+            intercept_output(data, "mirror")
+            # Do not print nested pytest's deliberately failing fixture report.
+            if case in {"blocked-mirror", "abort"}:
+                return None
+            return real_mirror(data, target)
+
+        def intercepted_publish(path, payload):
+            if case == "publication-failure" and Path(path) == paths.evidence_root / "command-1.json":
+                raise OSError("injected outer receipt publication failure")
+            return real_publish(path, payload)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(reliability, "_terminate_owned_process_tree", observed_stop)
+            patch.setattr(reliability, "_write_evidence_chunk", intercepted_write)
+            patch.setattr(reliability, "_mirror_bytes", intercepted_mirror)
+            patch.setattr(reliability, "atomic_write_json", intercepted_publish)
+            if case in native_denials:
+                real_binding = reliability._WindowsContainedProcess.bind_helper_peer
+                real_identity = reliability._windows_native_process_identity
+
+                def refused_native_binding(process, peer_pid):
+                    def changed_identity(handle):
+                        identity = real_identity(handle)
+                        if identity[0] == peer_pid:
+                            if case == "peer-parent-mismatch":
+                                return (identity[0], 0, identity[2], identity[3])
+                            if case == "peer-image-mismatch":
+                                return (*identity[:3], REPO_ROOT / "unapproved-peer.exe")
+                        return identity
+
+                    with monkeypatch.context() as native_patch:
+                        native_patch.setattr(reliability, "_windows_native_process_identity", changed_identity)
+                        if case == "peer-outside-job":
+                            native_patch.setattr(process._kernel, "IsProcessInJob", lambda *_args: 0)
+                        if case == "launcher-exited":
+                            native_patch.setattr(process, "poll", lambda: 0)
+                        return real_binding(process, peer_pid)
+
+                patch.setattr(reliability._WindowsContainedProcess, "bind_helper_peer", refused_native_binding)
+            if case == "launch-abort":
+                if os.name == "nt":
+                    real_start = reliability._WindowsContainedProcess.start
+
+                    def interrupted_start(process, *args, **kwargs):
+                        real_start(process, *args, **kwargs)
+                        raise KeyboardInterrupt("injected post-native-launch abort")
+
+                    patch.setattr(reliability._WindowsContainedProcess, "start", interrupted_start)
+                else:
+                    def interrupted_handoff(channel):
+                        raise KeyboardInterrupt("injected post-Popen channel handoff abort")
+
+                    patch.setattr(reliability._InvocationChannel, "child_started", interrupted_handoff)
+            receipt = reliability.supervise_command(
+                command, cwd=REPO_ROOT, run_id=paths.run_id,
+                phase="native-nested-qualification", command_index=1,
+                evidence_root=paths.evidence_root, environment=environment,
+                timeout_seconds=12 if case in {"timeout", "blocked-mirror", "blocked-write"} else 45,
+                termination_grace_seconds=3,
+                mirror_stdout=case in {"blocked-mirror", "abort"}, mirror_stderr=False,
+            )
+        for handle in descendant_handles:
+            if os.name == "nt":
+                import _winapi
+                try:
+                    assert _winapi.WaitForSingleObject(handle, 0) == _winapi.WAIT_OBJECT_0
+                finally:
+                    _winapi.CloseHandle(handle)
+            else:
+                import select
+                try:
+                    assert select.select([handle], [], [], 0)[0] == [handle]
+                finally:
+                    os.close(handle)
+        if case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"}:
+            assert len(descendant_handles) == 1
+        assert receipt.pid is not None, receipt
+        assert receipt.native_exit_code is not None, receipt
+        assert "TERMINAL:PROVEN" in receipt.termination_state, receipt
+        assert not any(t.name == "qtt-command-termination" and t.is_alive() for t in threading.enumerate())
+        assert len(stop_calls) <= 1, stop_calls
+        if case in {"normal", "nonzero", "survivor", "publication-failure"}:
+            assert reliability.command_terminal_custody_proven(receipt), receipt
+            expected = {"normal": None, "nonzero": "ENGVR_NATIVE_EXIT_NONZERO",
+                        "survivor": "ENGVR_PROCESS_TERMINATION_FAILED",
+                        "publication-failure": "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"}[case]
+            assert receipt.failure_class == expected, receipt
+            roots = tuple(paths.evidence_root.glob("nested-pytest-*"))
+            assert len(roots) == 1
+            nested = json.loads((roots[0] / "command-1.json").read_text(encoding="utf-8"))
+            assert nested["termination_state"] == "DELEGATED_TO_AUTHENTICATED_OUTER;PIPES:EOF"
+            assert b"\x00\xffNESTED_BINARY\r\n" in (roots[0] / "command-1.stdout.bin").read_bytes()
+            assert b"\xfe\x00NESTED_STDERR\r\n" in (roots[0] / "command-1.stderr.bin").read_bytes()
+            assert (nested["native_exit_code"] == 0) == (case != "nonzero")
+            reliability.cleanup_validation_run(paths)
+        else:
+            assert receipt.failure_class is not None, receipt
+            assert not reliability.command_terminal_custody_proven(receipt), receipt
+            assert paths.process_root.exists()  # unresolved nested evidence is preserved
+        if case in {"timeout", "blocked-mirror", "blocked-write"}:
+            assert receipt.timeout_state == "TRIGGERED", receipt
+        if case.startswith("blocked-"):
+            assert blocked and len(stop_calls) == 1
+        if case == "launch-abort":
+            assert receipt.start_failure_class is None
+            assert "STARTED_LAUNCH_FAILED:KeyboardInterrupt" in receipt.termination_state
+        if case in native_denials:
+            assert not (paths.evidence_root / "native-topology.json").exists()
+            assert not tuple(paths.evidence_root.glob("nested-pytest-*"))
+        elif case != "launch-abort":
+            fixture = json.loads((paths.evidence_root / "native-topology.json").read_text(encoding="utf-8"))
+            assert len({fixture["pytest_pid"], fixture["descendant_pid"], receipt.pid}) == 3
+
+    registered = tmp_path / "registered-nested"
+    registered.mkdir()
+    observed = registered.stat()
+    owner = object.__new__(reliability._NestedCommandOwner)
+    owner.failure, owner.stage, owner.nested_root = None, "COMPLETE", registered
+    owner.nested_identity = (observed.st_dev, observed.st_ino)
+    registered.rename(tmp_path / "original-registered-nested")
+    registered.mkdir()
+    with pytest.raises(reliability.ValidationReliabilityError, match="differs from its original registration"):
+        owner.verify_terminal()
+
+
 def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
     monkeypatch,
     tmp_path,
     capsys,
 ) -> None:
+    fixture_case = os.environ.get("QTT_TEST_NESTED_SUPERVISION_CASE")
+    if fixture_case is not None:
+        assert fixture_case in {"normal", "nonzero", "survivor", "timeout", "blocked-mirror",
+                                "blocked-write", "capture-failure", "abort", "publication-failure", "launch-abort"}
+        retained = Path(os.environ[reliability.EVIDENCE_ROOT_ENV])
+        descendant_script = (
+            "import os,time;print(os.getpid(),flush=True);os.close(1);"
+            + ("time.sleep(60)" if fixture_case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"} else "")
+        )
+        descendant = subprocess.Popen(
+            (sys.executable, "-c", descendant_script), stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            **reliability.hidden_subprocess_kwargs(new_process_group=False),
+        )
+        assert descendant.stdout is not None
+        descendant_pid = int(descendant.stdout.readline())
+        descendant.stdout.close()
+        (retained / "native-topology.json").write_text(json.dumps({
+            "pytest_pid": os.getpid(), "descendant_pid": descendant_pid,
+        }), encoding="utf-8")
+        os.write(1, b"NESTED_DESCENDANT_READY\n\x00\xffNESTED_BINARY\r\n")
+        os.write(2, b"\xfe\x00NESTED_STDERR\r\n")
+        if fixture_case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"}:
+            admission_deadline = time.monotonic() + 5
+            while not (retained / "descendant-handle-bound").exists() and time.monotonic() < admission_deadline:
+                time.sleep(0.01)
+            assert (retained / "descendant-handle-bound").exists()
+        if fixture_case in {"timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"}:
+            time.sleep(60)
+        if fixture_case != "survivor":
+            assert descendant.wait(timeout=5) == 0
+        assert fixture_case != "nonzero", "intentional native nonzero fixture"
+        return
+    _assert_nested_process_supervision_contract(monkeypatch, tmp_path)
     _assert_path_projection_contract(monkeypatch, tmp_path)
     _assert_process_supervision_contract(monkeypatch, tmp_path)
     _assert_mirror_isolation_contract(monkeypatch, tmp_path)
@@ -14904,6 +15402,7 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
     _assert_complete_terminal_evidence_contract(monkeypatch, tmp_path)
     _assert_receipt_publication_failure_accounting(monkeypatch, tmp_path, capsys)
     _assert_exact_cleanup_contract(monkeypatch)
+    _assert_unsettled_custody_blocks_mutation(monkeypatch, tmp_path)
 
 
 def test_st12h_pr152_guidance_follows_stable_outputs_before_one_full_route() -> None:

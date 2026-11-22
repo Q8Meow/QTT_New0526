@@ -116,6 +116,36 @@ def test_clock_decomposition_distribution_and_telemetry_semantics() -> None:
         distribution.p95_ns,
         distribution.p99_ns,
     ) == (10, 1, 10, 5, 10, 10)
+    _assert_lp03_exact_latency_ranks()
+
+
+def _assert_lp03_exact_latency_ranks() -> None:
+    from dataclasses import fields
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.latency_policy import (
+        LatencyDistributionV1, LatencyDistributionV2,
+        aggregate_evidence_latency_samples_v1, evidence_nearest_rank_v1,
+    )
+    assert tuple(field.name for field in fields(LatencyDistributionV1)) == (
+        "count", "minimum_ns", "maximum_ns", "p50_ns", "p95_ns", "p99_ns")
+    single = aggregate_evidence_latency_samples_v1((123,))
+    assert single == LatencyDistributionV2(1, 123, 123, 123, 123, 123, 123)
+    result = aggregate_evidence_latency_samples_v1(tuple(reversed(range(1, 1002))))
+    assert result == LatencyDistributionV2(1001, 1, 1001, 501, 951, 991, 1000)
+    assert evidence_nearest_rank_v1(2**53 + 1, 1, 2) == 4503599627370497
+    assert evidence_nearest_rank_v1(2**63 - 1, 1, 1) == 2**63 - 1
+    # Distinct characterization of ceil(n*p), without copying its formula.
+    for count in (1, 2, 3, 99, 100, 1000, 1001, 2**53 + 1):
+        for numerator, denominator in ((1, 2), (19, 20), (99, 100), (999, 1000)):
+            rank = evidence_nearest_rank_v1(count, numerator, denominator)
+            assert (rank - 1) * denominator < count * numerator <= rank * denominator
+    for bad in ((), [1], (True,), (-1,), (1.0,), (2**63,)):
+        with pytest.raises(ContractValidationError):
+            aggregate_evidence_latency_samples_v1(bad)
+    for arguments in ((0, 1, 2), (True, 1, 2), (1, 0, 2), (1, 3, 2), (1, 1, 0), (1, 1.0, 2), (2**63, 1, 2)):
+        with pytest.raises(ContractValidationError):
+            evidence_nearest_rank_v1(*arguments)
+    with pytest.raises(ContractValidationError, match="QUANTILE_ORDER"):
+        LatencyDistributionV2(2, 1, 10, 5, 9, 8, 10)
 
 
 def test_owner_profiles_observer_effect_staleness_and_resource_bounds() -> None:
@@ -184,6 +214,7 @@ def test_owner_profiles_observer_effect_staleness_and_resource_bounds() -> None:
 
 
 def test_hotpath_dependency_trace_and_input_adversaries_fail_closed() -> None:
+    _assert_lp03_exact_key_normalization()
     assert validate_hotpath_dependency_classes(tuple(ALLOWED_HOTPATH_DEPENDENCIES)) == ()
     for forbidden in FORBIDDEN_HOTPATH_DEPENDENCIES:
         assert validate_hotpath_dependency_classes((forbidden,)) == (
@@ -311,6 +342,120 @@ def test_hotpath_dependency_trace_and_input_adversaries_fail_closed() -> None:
         )
     with pytest.raises(ContractValidationError):
         replace(graph.no_effects, provider_connection_allowed=True)
+
+
+def _assert_lp03_exact_key_normalization() -> None:
+    """Independent original Unicode rule and exhaustive finite ASCII domain."""
+    import json
+    import unicodedata
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import (
+        SecretKeyPolicyV1, SECRET_KEY_POLICY, deterministic_json,
+    )
+    def reference(text):
+        return "".join(char for char in unicodedata.normalize("NFKC", text).casefold() if char.isalnum())
+    alphabet = tuple(chr(value) for value in range(128))
+    ascii_rows = []
+    for code, text in enumerate(alphabet):
+        actual = SecretKeyPolicyV1.normalize(text)
+        assert actual == reference(text)
+        ascii_rows.append((code, actual))
+    for left in alphabet:
+        for right in alphabet:
+            assert SecretKeyPolicyV1.normalize(left + right) == reference(left + right)
+    for text in ("".join(alphabet), "".join(reversed(alphabet)), "A_z-09" * 4096):
+        assert SecretKeyPolicyV1.normalize(text) == reference(text)
+    unicode_cases = (
+        ("ＡＰＩ＿ＫＥＹ", "apikey", True), ("paſſword", "password", True),
+        ("api\u00adkey", "apikey", True), ("pass\u200dword", "password", True),
+        ("🔑api_key", "apikey", True), ("Key", "key", False),
+        ("Straße", "strasse", False), ("ﬃeld", "ffield", False),
+        ("e\u0301", "é", False), ("İ", "i", False),
+        ("Pa\u0301ssword", "pássword", False), ("pаssword", "pаssword", False),
+        ("Ｔｏｋｅｎ＿Ｃｏｕｎｔ", "tokencount", False), ("credential_state", "credentialstate", False),
+    )
+    observed_unicode = []
+    for text, expected, rejected in unicode_cases:
+        assert reference(text) == expected and SecretKeyPolicyV1.normalize(text) == expected
+        assert SECRET_KEY_POLICY.is_secret_key(text) is rejected
+        observed_unicode.append((text, expected, rejected))
+    class OriginalStringSubclass(str):
+        def isascii(self):
+            raise AssertionError("native ASCII path accepted a subclass")
+        def translate(self, table):
+            raise AssertionError("native ASCII translation accepted a subclass")
+    for text in ("API_KEY", "ＡＰＩ＿ＫＥＹ", "Straße", ""):
+        assert SecretKeyPolicyV1.normalize(OriginalStringSubclass(text)) == reference(text)
+    for value in (None, False, 0, b"api_key", [], {}):
+        assert SecretKeyPolicyV1.normalize(value) == ""
+    denials = ("API_KEY", "api-secret", "Authorization", "Bearer", "Password", "pass_phrase",
+               "ACCESS_TOKEN", "refresh-token", "session_token", "Cookie", "credential", "private_key",
+               "secret", "seed_phrase", "wallet_secret", "token", "next_token")
+    for text in denials:
+        assert SECRET_KEY_POLICY.is_secret_key(text) is True
+        with pytest.raises(SerializationSafetyError):
+            deterministic_json({text: "BLOCKED_TEST_VALUE"})
+    assert deterministic_json(dict(token_count=1, token_budget=2, credential_state="ABSENT", metric_id="MATH-03")) \
+        == '{"credential_state":"ABSENT","metric_id":"MATH-03","token_budget":2,"token_count":1}'
+    print("LP03_ASCII_KEY_NORMALIZATION_QUALIFICATION=" + json.dumps(dict(
+        profile="EXACT_NORMALIZATION_EQUIVALENCE_ONLY", ascii_characters=ascii_rows, ascii_pairs_checked=16384,
+        composite_ascii_cases=3, unicode_cases=observed_unicode, subclasses_checked=4, nonstrings_checked=6,
+        refused_keys=denials, source_or_runtime_authority=False, cached_input_strings=0), sort_keys=True))
+    _assert_lp03_key_policy_membership()
+
+
+def _assert_lp03_key_policy_membership() -> None:
+    import json
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import SecretKeyPolicyV1, SECRET_KEY_POLICY
+
+    cases = (
+        (frozenset(), frozenset(), 'public_field', False),
+        (frozenset(('', 'x')), frozenset(), 'abc', True),
+        (frozenset(('', 'x')), frozenset(), '', False),
+        (frozenset(('a', 'abc')), frozenset(), 'abc', True),
+        (frozenset(('a', 'abc')), frozenset(('abc',)), 'ABC', False),
+        (frozenset(('a.b', '+')), frozenset(), 'axb', False),
+        (frozenset(), frozenset(), 'next_token', True),
+        (frozenset(), frozenset(('nexttoken',)), 'next_token', False),
+    )
+    for terms, allowed, text, expected in cases:
+        policy = SecretKeyPolicyV1(terms, allowed)
+        assert policy.is_secret_key(text) is expected
+    malformed = SecretKeyPolicyV1(('a', None), frozenset())
+    assert malformed.is_secret_key('a') is True
+    with pytest.raises(TypeError):
+        malformed.is_secret_key('b')
+    contains = []
+    class NormalizedSubclass(str):
+        def __getattribute__(self, name):
+            if name == '__contains__':
+                raise AssertionError('native membership path used a subclass')
+            return super().__getattribute__(name)
+        def __contains__(self, term):
+            contains.append(term)
+            return super().__contains__(term)
+    class CustomPolicy(SecretKeyPolicyV1):
+        @staticmethod
+        def normalize(text):
+            return NormalizedSubclass('publicfield')
+    custom = CustomPolicy(('missing', 'field', None), frozenset())
+    assert custom.is_secret_key('ignored') is True and contains == ['missing', 'field']
+    corpus = ('record_id', 'owner_id', 'record_kind', 'schema_id', 'schema_version', 'values',
+              'original_native_clock_companions', 'access_wall_ns', 'source_epoch_id', 'input_version',
+              'source_state_and_claim_lineage', 'source_conflict', 'original_record_refs', 'rights_refs',
+              'context_id', 'revision', 'native_clocks', 'valid_from_wall_ns', 'producer_receipt_id',
+              'field_path', 'horizon_ref', 'Password', 'Authorization', 'API_KEY')
+    normalized = tuple(SecretKeyPolicyV1.normalize(text) for text in corpus)
+    terms = SECRET_KEY_POLICY.forbidden_normalized_terms
+    def original(value):
+        return any(term in value for term in terms)
+    def native(value):
+        return any(map(value.__contains__, terms))
+    matched = tuple(map(native, normalized))
+    assert tuple(map(original, normalized)) == matched == (False,) * 21 + (True,) * 3
+    print('LP03_KEY_POLICY_MEMBERSHIP_QUALIFICATION=' + json.dumps(dict(
+        profile='PURE_POLICY_EQUIVALENCE_ONLY', literal_cases=len(cases),
+        malformed_term_short_circuit=True, malformed_term_refused=True, custom_contains=contains,
+        corpus=corpus, matched=matched, source_or_runtime_authority=False), sort_keys=True))
 
 
 def test_bounded_concurrency_is_deterministic_and_never_mutates_a_pointer() -> None:

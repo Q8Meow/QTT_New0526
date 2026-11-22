@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 from tools import build_pr169_agent_orch1 as builder
@@ -58,10 +59,29 @@ def test_no_orphan_raw_scan_and_quality_reports_pass():
 def test_resolver_source_does_not_scan_raw_upstream_generated_files():
     text = (REPO_ROOT / "src/qtt/agents/pr169_agent_orch1_resolvers.py").read_text(encoding="utf-8")
     assert ".rglob(" not in text
-    assert "pr169_svc1" not in text
     assert "pr169_pretrade1" not in text
     assert "pr169_readiness1" not in text
     assert "pr168_mem1" not in text
+
+    supervisor = "EvidenceProcessSupervisorV1"
+    expected_imports = {
+        ("AgentOrchService", "resolve_evidence_attempt_v1"): supervisor,
+        ("AgentOrchService", "_append_evidence_process_observation_v1"): supervisor,
+        ("AgentOrchService", "_audit_evidence_attempt_failure_v1"): f"{supervisor}, _WindowsEvidenceProcessV1",
+        ("_EvidenceIssuerStateV1", "_registration_current_v1"): supervisor,
+    }
+    module = ast.parse(text)
+    for (owner_name, method_name), names in expected_imports.items():
+        owner, = (node for node in module.body if isinstance(node, ast.ClassDef) and node.name == owner_name)
+        method, = (
+            node for node in owner.body if isinstance(node, ast.FunctionDef) and node.name == method_name
+        )
+        found = [
+            ast.get_source_segment(text, node) for node in method.body
+            if isinstance(node, ast.ImportFrom) and node.module == "service.pr169_svc1_resolvers"
+        ]
+        assert found == [f"from ..service.pr169_svc1_resolvers import {names}"]
+    assert text.count("pr169_svc1") == len(expected_imports)
 
 
 def _jsonl_from(path: Path) -> list[dict]:

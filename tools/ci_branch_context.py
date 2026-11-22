@@ -223,6 +223,7 @@ S1_SOURCE_USE_CUSTODY_BRANCH = "s1-source-use-custody"
 S1_KALSHI_SOURCE_USE_ADMISSION_BRANCH = "s1-kalshi-source-use-admission"
 S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH = "s1-kalshi-scheduled-fee-scenario"
 S1_LP02_SELECTED_DATA_INTEGRATION_BRANCH = "s1-lp02-selected-data-integration"
+S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH = "s1-lp03-evidence-platform-restart"
 S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH = (
     "s1-plugin-package-currentization-01"
 )
@@ -284,6 +285,7 @@ OWNER_AUTHORIZED_VALIDATION_BRANCHES = frozenset(
         S1_KALSHI_SOURCE_USE_ADMISSION_BRANCH,
         S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH,
         S1_LP02_SELECTED_DATA_INTEGRATION_BRANCH,
+        S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH,
         S1_PLUGIN_PACKAGE_CURRENTIZATION_BRANCH,
         F12_EXACT_TIME_COMPOSITION_BRANCH,
         F13_PRIVATE_CLOCK_STORAGE_REPLAY_BRANCH,
@@ -3519,6 +3521,9 @@ def is_pr_or_later_branch(
     allow_main: bool = True,
     allow_repair: bool = True,
 ) -> bool:
+    if normalize_branch_context(branch) == S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH:
+        # LP03 validation authority is limited to its explicit changed-path scope.
+        return False
     if (
         is_idempotence_runtime_containment_hardening_branch(branch)
         or is_owner_authorized_validation_branch(branch)

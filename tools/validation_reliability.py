@@ -15,6 +15,7 @@ import errno
 import io
 import itertools
 import json
+import math
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -35,6 +36,7 @@ DEFAULT_SCAN_CHUNK_BYTES = 1024 * 1024
 PROCESS_ROOT_ENV = "QTT_VALIDATION_PROCESS_ROOT"
 RUN_ID_ENV = "QTT_VALIDATION_RUN_ID"
 EVIDENCE_ROOT_ENV = "QTT_VALIDATION_EVIDENCE_ROOT"
+COMMAND_OWNER_CHANNEL_ENV = "QTT_VALIDATION_COMMAND_OWNER_CHANNEL"
 TERMINATION_GRACE_SECONDS = 5.0
 OUTPUT_DRAIN_INITIAL_WAIT_SECONDS = 0.5
 OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS = 10.0
@@ -4098,6 +4100,702 @@ def validate_published_completion_receipt(
         )
 
 
+def _windows_native_process_identity(handle: int) -> tuple[int, int, int, Path]:
+    """Read one already-open process, without a PID census or ancestor search."""
+    import ctypes
+    from ctypes import wintypes
+
+    class BasicInformation(ctypes.Structure):
+        _fields_ = [("ExitStatus", wintypes.LONG), ("PebBaseAddress", ctypes.c_void_p),
+                    ("AffinityMask", ctypes.c_size_t), ("BasePriority", wintypes.LONG),
+                    ("UniqueProcessId", ctypes.c_size_t), ("InheritedFromUniqueProcessId", ctypes.c_size_t)]
+
+    native = ctypes.WinDLL("ntdll")
+    query = native.NtQueryInformationProcess
+    query.argtypes = [wintypes.HANDLE, wintypes.ULONG, ctypes.c_void_p, wintypes.ULONG, ctypes.POINTER(wintypes.ULONG)]
+    query.restype = wintypes.LONG
+    basic = BasicInformation()
+    returned = wintypes.ULONG()
+    if query(handle, 0, ctypes.byref(basic), ctypes.sizeof(basic), ctypes.byref(returned)) != 0 or returned.value != ctypes.sizeof(basic):
+        raise OSError("exact native process ancestry is unavailable")
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    times = kernel.GetProcessTimes
+    times.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
+    times.restype = wintypes.BOOL
+    creation, end, system, user = (wintypes.FILETIME() for _ in range(4))
+    if not times(handle, ctypes.byref(creation), ctypes.byref(end), ctypes.byref(system), ctypes.byref(user)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    query_image = kernel.QueryFullProcessImageNameW
+    query_image.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    query_image.restype = wintypes.BOOL
+    image = ctypes.create_unicode_buffer(32768)
+    length = wintypes.DWORD(len(image))
+    if not query_image(handle, 0, image, ctypes.byref(length)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    return (int(basic.UniqueProcessId), int(basic.InheritedFromUniqueProcessId),
+            (creation.dwHighDateTime << 32) | creation.dwLowDateTime, Path(image.value).resolve())
+
+
+class _InvocationChannel:
+    """One invocation's local native-peer channel, never a persisted authority."""
+
+    def __init__(self, locator: str | None = None) -> None:
+        self.server = locator is None
+        self._connected = not self.server
+        self._pending_send: bytes | None = None
+        self._child_socket = None
+        self._peer_handle = None
+        self._launcher_handle = None
+        self.owner_pid: int | None = None
+        self.launch_pid: int | None = None
+        self.last_sender_pid: int | None = None
+        self._closed = False
+        if os.name == "nt":
+            import _winapi
+            import ctypes
+            from ctypes import wintypes
+
+            self._api = _winapi
+            self._ctypes = ctypes
+            self._kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            for name in ("GetNamedPipeClientProcessId", "GetNamedPipeServerProcessId"):
+                function = getattr(self._kernel, name)
+                function.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.ULONG)]
+                function.restype = wintypes.BOOL
+            self._peer_id_type = wintypes.ULONG
+            self._kernel.ConnectNamedPipe.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+            self._kernel.ConnectNamedPipe.restype = wintypes.BOOL
+            if self.server:
+                self.locator = "\\\\.\\pipe\\qtt-validation-" + secrets.token_hex(24)
+                self._handle = _winapi.CreateNamedPipe(
+                    self.locator,
+                    _winapi.PIPE_ACCESS_DUPLEX | _winapi.FILE_FLAG_FIRST_PIPE_INSTANCE,
+                    _winapi.PIPE_TYPE_MESSAGE | _winapi.PIPE_READMODE_MESSAGE | 8 | 1,  # REJECT_REMOTE_CLIENTS, NOWAIT
+                    1, 65536, 65536, 0, _winapi.NULL,
+                )
+            else:
+                if not isinstance(locator, str) or not re.fullmatch(r"\\\\\.\\pipe\\qtt-validation-[0-9a-f]{48}", locator):
+                    raise _evidence_failure("invalid command owner channel locator")
+                self.locator = locator
+                self._handle = _winapi.CreateFile(
+                    locator, _winapi.GENERIC_READ | _winapi.GENERIC_WRITE,
+                    0, _winapi.NULL, _winapi.OPEN_EXISTING,
+                    0, _winapi.NULL,
+                )
+                try:
+                    _winapi.SetNamedPipeHandleState(self._handle, _winapi.PIPE_READMODE_MESSAGE | 1, None, None)
+                except BaseException:
+                    _winapi.CloseHandle(self._handle)
+                    raise
+        elif sys.platform == "linux":
+            import socket
+            self._socket_module = socket
+            if self.server:
+                self._socket, self._child_socket = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+                self.locator = str(self._child_socket.fileno())
+            else:
+                if not isinstance(locator, str) or not locator.isdecimal():
+                    raise _evidence_failure("invalid command owner descriptor")
+                self.locator = locator
+                self._socket = socket.socket(fileno=int(locator))
+            self._socket.set_inheritable(False)
+            self._socket.setblocking(False)
+            self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_PASSCRED, 1)
+            if self._child_socket is not None:
+                self._child_socket.setsockopt(socket.SOL_SOCKET, socket.SO_PASSCRED, 1)
+        else:
+            raise _evidence_failure("native command owner channel unavailable on this platform")
+
+    def launch_kwargs(self) -> dict[str, object]:
+        return {} if self._child_socket is None else {"pass_fds": (self._child_socket.fileno(),)}
+
+    def child_started(self) -> None:
+        if self._child_socket is not None:
+            self._child_socket.close()
+            self._child_socket = None
+
+    def peer_pid(self) -> int:
+        if os.name == "nt":
+            value = self._peer_id_type()
+            function = (self._kernel.GetNamedPipeClientProcessId if self.server
+                        else self._kernel.GetNamedPipeServerProcessId)
+            if not function(self._handle, self._ctypes.byref(value)):
+                raise self._ctypes.WinError(self._ctypes.get_last_error())
+            return int(value.value)
+        import struct
+        credentials = self._socket.getsockopt(
+            self._socket_module.SOL_SOCKET, self._socket_module.SO_PEERCRED,
+            struct.calcsize("3i"),
+        )
+        return int(struct.unpack("3i", credentials)[0])
+
+    def bind_live_parent(self, expected_pid: int) -> None:
+        if self.server or expected_pid <= 0 or os.getppid() != expected_pid:
+            raise _evidence_failure("command channel is not the actual original parent")
+        if os.name == "nt":
+            own = _windows_native_process_identity(self._api.GetCurrentProcess())
+            if own[:2] != (os.getpid(), expected_pid):
+                raise _evidence_failure("helper native parent differs from its launch parent")
+            server_pid = self.peer_pid()
+            self._peer_handle = self._api.OpenProcess(0x00100400, False, server_pid)
+            server = _windows_native_process_identity(self._peer_handle)
+            if server[0] != server_pid or server[2] > own[2] or not self.parent_alive():
+                raise _evidence_failure("original owner native handle is not current")
+            self.launch_pid = own[0]
+            if server_pid != expected_pid:
+                # Exactly one native venv launcher is allowed. Its original live
+                # handle, ancestry, creation order and executable must all agree.
+                self._launcher_handle = self._api.OpenProcess(0x00100400, False, expected_pid)
+                launcher = _windows_native_process_identity(self._launcher_handle)
+                if (launcher[:2] != (expected_pid, server_pid)
+                        or not server[2] <= launcher[2] <= own[2]
+                        or launcher[3] != Path(sys.executable).resolve()
+                        or own[3] != Path(sys._base_executable).resolve()
+                        or own[3] != server[3]
+                        or self._api.WaitForSingleObject(self._launcher_handle, 0) != self._api.WAIT_TIMEOUT):
+                    raise _evidence_failure("command channel lacks the exact original venv launcher")
+                self.launch_pid = expected_pid
+            self.owner_pid = server_pid
+        else:
+            if self.peer_pid() != expected_pid:
+                raise _evidence_failure("command channel is not the actual original parent")
+            if not hasattr(os, "pidfd_open"):
+                raise _evidence_failure("original-parent handle unavailable")
+            self._peer_handle = os.pidfd_open(expected_pid)
+            self.owner_pid = expected_pid
+            self.launch_pid = os.getpid()
+
+    def parent_alive(self) -> bool:
+        if self._peer_handle is None:
+            return False
+        if os.name == "nt":
+            return (self._api.WaitForSingleObject(self._peer_handle, 0) == self._api.WAIT_TIMEOUT
+                    and (self._launcher_handle is None
+                         or self._api.WaitForSingleObject(self._launcher_handle, 0) == self._api.WAIT_TIMEOUT))
+        import select
+        return not select.select([self._peer_handle], [], [], 0)[0]
+
+    def send(self, payload: Mapping[str, object]) -> None:
+        if self._pending_send is not None:
+            raise _evidence_failure("command channel has an unfinished write")
+        body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+        if not body or len(body) > 65536:
+            raise _evidence_failure("command channel frame exceeds its bound")
+        self._pending_send = body
+
+    def poll(self) -> dict[str, object] | None:
+        if os.name == "nt":
+            # Deliberately synchronous NOWAIT messages: no operation or buffer
+            # remains pending in the kernel when this bounded poll returns.
+            if not self._connected:
+                if self._kernel.ConnectNamedPipe(self._handle, None):
+                    # In NOWAIT mode this only makes a disconnected instance available.
+                    return None
+                error = self._ctypes.get_last_error()
+                if error == 536:  # PIPE_LISTENING
+                    return None
+                if error != 535:  # PIPE_CONNECTED is the only positive connection.
+                    raise self._ctypes.WinError(error)
+                self._connected = True
+            if self._pending_send is not None:
+                count, error = self._api.WriteFile(self._handle, self._pending_send, overlapped=False)
+                if error == 0 and count == 0:
+                    return None  # full message buffer: no partial write or pending I/O
+                if error or count != len(self._pending_send):
+                    raise OSError(error, "command channel incomplete write")
+                self._pending_send = None
+            try:
+                body, error = self._api.ReadFile(self._handle, 65536, overlapped=False)
+            except OSError as exc:
+                if exc.winerror == 232:  # NO_DATA on an empty NOWAIT pipe
+                    return None
+                raise
+            if error:
+                raise OSError(error, "command channel partial or failed read")
+            self.last_sender_pid = self.peer_pid()
+        else:
+            import struct
+            socket = self._socket_module
+            if self._pending_send is not None:
+                try:
+                    sent = self._socket.send(self._pending_send)
+                except BlockingIOError:
+                    return None
+                if sent != len(self._pending_send):
+                    raise _evidence_failure("command channel partial packet write")
+                self._pending_send = None
+            try:
+                body, auxiliary, flags, _address = self._socket.recvmsg(65536, socket.CMSG_SPACE(struct.calcsize("3i")))
+            except BlockingIOError:
+                return None
+            if flags & (socket.MSG_TRUNC | socket.MSG_CTRUNC):
+                raise _evidence_failure("command channel truncated native packet")
+            credentials = [data for level, kind, data in auxiliary
+                           if level == socket.SOL_SOCKET and kind == socket.SCM_CREDENTIALS]
+            if len(credentials) != 1 or len(auxiliary) != 1 or len(credentials[0]) != struct.calcsize("3i"):
+                raise _evidence_failure("command channel lacks exact native sender credentials")
+            self.last_sender_pid = struct.unpack("3i", credentials[0])[0]
+        if not body:
+            raise EOFError("original command channel closed")
+        value = json.loads(body)
+        if not isinstance(value, dict) or body != json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii"):
+            raise _evidence_failure("noncanonical command channel frame")
+        return value
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        if os.name == "nt":
+            errors: list[BaseException] = []
+            for handle in (self._handle, self._peer_handle, self._launcher_handle):
+                if handle is not None:
+                    try:
+                        self._api.CloseHandle(handle)
+                    except OSError as exc:
+                        errors.append(exc)
+            if errors:
+                raise errors[0]
+        else:
+            self._socket.close()
+            if self._child_socket is not None:
+                self._child_socket.close()
+            if self._peer_handle is not None:
+                os.close(self._peer_handle)
+
+
+def _nested_pytest_command(argv: Sequence[str], cwd: Path) -> tuple[str, ...] | None:
+    offset = 2 if len(argv) > 1 and argv[1] == "-B" else 1
+    if len(argv) <= offset or Path(argv[0]).resolve() != Path(sys.executable).resolve():
+        return None
+    script = Path(argv[offset])
+    if not script.is_absolute():
+        script = cwd / script
+    if script.resolve() != (cwd / "tools" / "run_pytest_fresh_basetemp.py").resolve():
+        return None
+    return (argv[0], "-m", "pytest", *argv[offset + 1:])
+
+
+class _NestedCommandOwner:
+    def __init__(self, *, argv: tuple[str, ...], cwd: Path, run_id: str,
+                 phase: str, command_index: int, evidence_root: Path,
+                 pytest_argv: tuple[str, ...]) -> None:
+        self.channel = _InvocationChannel()
+        self.challenge = secrets.token_hex(32)
+        self.context = {
+            "version": 1, "argv": list(argv), "cwd": str(cwd), "run_id": run_id,
+            "phase": phase, "command_index": command_index, "evidence_root": str(evidence_root),
+        }
+        self.pytest_argv = pytest_argv
+        self.child_pid: int | None = None
+        self.process: _WindowsContainedProcess | subprocess.Popen[bytes] | None = None
+        self.helper_pid: int | None = None
+        self.helper_parent_pid: int | None = None
+        self.stage = "HELLO"
+        self.nested_root: Path | None = None
+        self.nested_identity: tuple[int, int] | None = None
+        self.failure: str | None = None
+
+    def advance(self) -> None:
+        if self.stage == "COMPLETE":
+            # Flush the final ACK without accepting another message.
+            if self.channel._pending_send is not None:
+                try:
+                    extra = self.channel.poll()
+                except (EOFError, OSError):
+                    if self.channel._pending_send is not None:
+                        raise
+                else:
+                    if extra is not None:
+                        raise _evidence_failure("extra packet after nested terminal handoff")
+            return
+        packet = self.channel.poll()
+        if packet is None:
+            return
+        if self.stage == "HELLO":
+            if isinstance(self.process, _WindowsContainedProcess):
+                self.helper_pid, self.helper_parent_pid = self.process.bind_helper_peer(self.channel.last_sender_pid)
+            else:
+                self.helper_pid, self.helper_parent_pid = self.child_pid, os.getpid()
+        if self.helper_pid is None or self.channel.last_sender_pid != self.helper_pid:
+            raise _evidence_failure("command channel sender is not the originally launched helper")
+        if self.stage == "HELLO":
+            expected = {
+                "kind": "HELLO", "pid": self.helper_pid, "parent_pid": self.helper_parent_pid,
+                "argv": self.context["argv"], "cwd": self.context["cwd"],
+                "run_id": self.context["run_id"], "nonce": packet.get("nonce"),
+            }
+            if packet != expected or not isinstance(packet["nonce"], str) or not re.fullmatch("[0-9a-f]{64}", packet["nonce"]):
+                raise _evidence_failure("nested helper launch identity mismatch")
+            self.channel.send({**self.context, "kind": "ADMIT", "echo": packet["nonce"],
+                               "challenge": self.challenge, "parent_pid": os.getpid(), "pid": self.helper_pid,
+                               "launch_pid": self.child_pid})
+            self.stage = "REGISTER"
+            return
+        if packet.get("challenge") != self.challenge:
+            raise _evidence_failure("nested command challenge mismatch")
+        if packet.get("kind") == "FAILED":
+            if set(packet) != {"kind", "challenge"}:
+                raise _evidence_failure("invalid nested failure packet")
+            self.failure = "nested helper reported incomplete capture or custody"
+            return
+        if self.stage == "REGISTER":
+            if set(packet) != {"kind", "challenge", "nested_evidence"} or packet["kind"] != "REGISTER":
+                raise _evidence_failure("nested registration packet mismatch")
+            root = Path(packet["nested_evidence"])
+            if (not root.is_absolute() or root.parent != Path(self.context["evidence_root"])
+                    or not re.fullmatch(r"nested-pytest-" + str(self.helper_pid) + r"-\d+", root.name)):
+                raise _evidence_failure("nested evidence is not the exact original helper allocation")
+            observed = os.lstat(root)
+            if not stat.S_ISDIR(observed.st_mode) or stat.S_ISLNK(observed.st_mode) or _stat_is_reparse_point(observed):
+                raise _evidence_failure("nested evidence root is not an original directory")
+            self.nested_root = root
+            self.nested_identity = (observed.st_dev, observed.st_ino)
+            self.channel.send({"kind": "REGISTERED", "challenge": self.challenge, "nested_evidence": str(root)})
+            self.stage = "TERMINAL"
+            return
+        if packet != {"kind": "TERMINAL", "challenge": self.challenge,
+                      "nested_evidence": str(self.nested_root), "receipt": "command-1.json"}:
+            raise _evidence_failure("nested terminal handoff does not match its registration")
+        self.channel.send({"kind": "TERMINAL_ACK", "challenge": self.challenge})
+        self.stage = "COMPLETE"
+
+    def verify_terminal(self) -> CommandExecutionReceiptV1:
+        if self.failure is not None or self.stage != "COMPLETE" or self.nested_root is None:
+            raise _evidence_failure("original nested terminal handoff is absent")
+        def verify_root() -> None:
+            observed = os.lstat(self.nested_root)
+            if (not stat.S_ISDIR(observed.st_mode) or stat.S_ISLNK(observed.st_mode)
+                    or _stat_is_reparse_point(observed)
+                    or (observed.st_dev, observed.st_ino) != self.nested_identity):
+                raise _evidence_failure("nested evidence directory differs from its original registration")
+
+        verify_root()
+        receipt_path, receipt_stat = _require_direct_regular_evidence_file(self.nested_root, "command-1.json")
+        with receipt_path.open("rb") as stream:
+            opened = os.fstat(stream.fileno())
+            if (opened.st_dev, opened.st_ino) != (receipt_stat.st_dev, receipt_stat.st_ino):
+                raise _evidence_failure("nested receipt changed during reopening")
+            payload = json.load(stream)
+        if not isinstance(payload, dict):
+            raise _evidence_failure("nested command receipt is not an object")
+        receipt = CommandExecutionReceiptV1(**payload)
+        if (receipt.run_id != self.context["run_id"] or receipt.phase != "nested-pytest"
+                or receipt.command_index != 1 or tuple(receipt.argv) != self.pytest_argv
+                or receipt.cwd != self.context["cwd"] or receipt.pid is None
+                or receipt.native_exit_code is None or receipt.start_failure_class is not None
+                or receipt.termination_state != "DELEGATED_TO_AUTHENTICATED_OUTER;PIPES:EOF"):
+            raise _evidence_failure("nested command receipt does not match its original launch")
+        for label in ("stdout", "stderr"):
+            path, observed = _require_direct_regular_evidence_file(self.nested_root, f"command-1.{label}.bin")
+            if str(path) != getattr(receipt, label + "_path") or observed.st_size != getattr(receipt, label + "_byte_count"):
+                raise _evidence_failure("nested retained stream differs from its receipt")
+            count = 0
+            with path.open("rb") as stream:
+                opened = os.fstat(stream.fileno())
+                if (opened.st_dev, opened.st_ino) != (observed.st_dev, observed.st_ino):
+                    raise _evidence_failure("nested retained stream changed during reopening")
+                while chunk := stream.read(64 * 1024):
+                    count += len(chunk)
+            if count != observed.st_size:
+                raise _evidence_failure("nested retained stream could not be read in full")
+        verify_root()
+        return receipt
+
+
+class _DelegatedCommandOwner:
+    def __init__(self, attestation: InheritedRunAttestation) -> None:
+        locator = os.environ.get(COMMAND_OWNER_CHANNEL_ENV)
+        if not locator:
+            raise _evidence_failure("inherited run has no original command owner channel")
+        self.channel = _InvocationChannel(locator)
+        self.context: dict[str, object] = {}
+        self.nested_root: Path | None = None
+        self.challenge: str | None = None
+        try:
+            parent = os.getppid()
+            self.channel.bind_live_parent(parent)
+            if os.name != "nt" and (os.getsid(0) != os.getpid() or os.getpgid(0) != os.getpid()):
+                raise _evidence_failure("nested helper is not the original outer session/group leader")
+            nonce = secrets.token_hex(32)
+            self.channel.send({"kind": "HELLO", "pid": os.getpid(), "parent_pid": parent,
+                               "argv": list(sys.orig_argv), "cwd": str(Path.cwd().resolve()),
+                               "run_id": attestation.run_id, "nonce": nonce})
+            packet = self._receive()
+            expected_keys = {"version", "argv", "cwd", "run_id", "phase", "command_index",
+                             "evidence_root", "kind", "echo", "challenge", "parent_pid", "pid", "launch_pid"}
+            if (set(packet) != expected_keys or packet["kind"] != "ADMIT" or packet["version"] != 1
+                    or packet["echo"] != nonce or packet["parent_pid"] != self.channel.owner_pid or packet["pid"] != os.getpid()
+                    or packet["launch_pid"] != self.channel.launch_pid
+                    or packet["argv"] != list(sys.orig_argv) or packet["cwd"] != str(Path.cwd().resolve())
+                    or packet["run_id"] != attestation.run_id or packet["evidence_root"] != str(attestation.evidence_root)
+                    or type(packet["command_index"]) is not int or packet["command_index"] < 1
+                    or not isinstance(packet["challenge"], str) or not re.fullmatch("[0-9a-f]{64}", packet["challenge"])):
+                raise _evidence_failure("original command owner admission mismatch")
+            self.context = packet
+            self.challenge = packet["challenge"]
+        except BaseException:
+            self.channel.close()
+            raise
+
+    def _receive(self) -> dict[str, object]:
+        while self.channel.parent_alive():
+            packet = self.channel.poll()
+            if packet is not None:
+                if self.channel.last_sender_pid != self.channel.owner_pid:
+                    raise _evidence_failure("command admission is not from the actual parent")
+                return packet
+            time.sleep(OUTPUT_POLL_INTERVAL_SECONDS)
+        raise _evidence_failure("original command owner is no longer present")
+
+    def register(self, nested_root: Path) -> None:
+        self.channel.send({"kind": "REGISTER", "challenge": self.challenge, "nested_evidence": str(nested_root)})
+        if self._receive() != {"kind": "REGISTERED", "challenge": self.challenge, "nested_evidence": str(nested_root)}:
+            raise _evidence_failure("original outer did not register the nested evidence")
+        self.nested_root = nested_root
+
+    def failed(self) -> None:
+        self.channel.send({"kind": "FAILED", "challenge": self.challenge})
+        self.channel.poll()
+
+    def complete(self) -> None:
+        self.channel.send({"kind": "TERMINAL", "challenge": self.challenge,
+                           "nested_evidence": str(self.nested_root), "receipt": "command-1.json"})
+        if self._receive() != {"kind": "TERMINAL_ACK", "challenge": self.challenge}:
+            raise _evidence_failure("original outer did not receive the nested terminal reference")
+
+
+def bind_inherited_command_owner(attestation: InheritedRunAttestation) -> _DelegatedCommandOwner:
+    return _DelegatedCommandOwner(attestation)
+
+
+class _WindowsContainedProcess:
+    """Native launch adapter for the existing command supervisor, created lazily.
+
+    Popen closes the primary thread handle before returning on Windows. Keep
+    that original handle here so assignment precedes the first instruction;
+    no PID search, late assignment, breakaway, or global Popen patch is used.
+    """
+
+    def __init__(self) -> None:
+        import ctypes
+        from ctypes import wintypes
+        import _winapi
+
+        self._ctypes = ctypes
+        self._winapi = _winapi
+        self._kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.pid: int | None = None
+        self.returncode: int | None = None
+        self.stdout: BinaryIO | None = None
+        self.stderr: BinaryIO | None = None
+        self._handle: int | None = None
+        self._thread_handle: int | None = None
+        self._helper_handle: int | None = None
+        self._job: int | None = None
+        self.args: list[str] = []
+
+        class BasicLimits(ctypes.Structure):
+            _fields_ = [
+                ("PerProcessUserTimeLimit", ctypes.c_longlong),
+                ("PerJobUserTimeLimit", ctypes.c_longlong),
+                ("LimitFlags", wintypes.DWORD),
+                ("MinimumWorkingSetSize", ctypes.c_size_t),
+                ("MaximumWorkingSetSize", ctypes.c_size_t),
+                ("ActiveProcessLimit", wintypes.DWORD),
+                ("Affinity", ctypes.c_size_t),
+                ("PriorityClass", wintypes.DWORD),
+                ("SchedulingClass", wintypes.DWORD),
+            ]
+
+        class IoCounters(ctypes.Structure):
+            _fields_ = [(name, ctypes.c_ulonglong) for name in (
+                "ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
+                "ReadTransferCount", "WriteTransferCount", "OtherTransferCount",
+            )]
+
+        class ExtendedLimits(ctypes.Structure):
+            _fields_ = [
+                ("BasicLimitInformation", BasicLimits), ("IoInfo", IoCounters),
+                ("ProcessMemoryLimit", ctypes.c_size_t),
+                ("JobMemoryLimit", ctypes.c_size_t),
+                ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                ("PeakJobMemoryUsed", ctypes.c_size_t),
+            ]
+
+        class Accounting(ctypes.Structure):
+            _fields_ = [
+                ("TotalUserTime", ctypes.c_longlong),
+                ("TotalKernelTime", ctypes.c_longlong),
+                ("ThisPeriodTotalUserTime", ctypes.c_longlong),
+                ("ThisPeriodTotalKernelTime", ctypes.c_longlong),
+                ("TotalPageFaultCount", wintypes.DWORD),
+                ("TotalProcesses", wintypes.DWORD),
+                ("ActiveProcesses", wintypes.DWORD),
+                ("TotalTerminatedProcesses", wintypes.DWORD),
+            ]
+
+        self._accounting_type = Accounting
+        signatures = {
+            "CreateJobObjectW": ([ctypes.c_void_p, wintypes.LPCWSTR], wintypes.HANDLE),
+            "SetInformationJobObject": (
+                [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD],
+                wintypes.BOOL,
+            ),
+            "AssignProcessToJobObject": ([wintypes.HANDLE, wintypes.HANDLE], wintypes.BOOL),
+            "QueryInformationJobObject": (
+                [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD,
+                 ctypes.POINTER(wintypes.DWORD)], wintypes.BOOL,
+            ),
+            "TerminateJobObject": ([wintypes.HANDLE, wintypes.UINT], wintypes.BOOL),
+            "ResumeThread": ([wintypes.HANDLE], wintypes.DWORD),
+            "IsProcessInJob": ([wintypes.HANDLE, wintypes.HANDLE, ctypes.POINTER(wintypes.BOOL)], wintypes.BOOL),
+        }
+        for name, (arguments, result) in signatures.items():
+            function = getattr(self._kernel, name)
+            function.argtypes = arguments
+            function.restype = result
+        self._job = self._kernel.CreateJobObjectW(None, None)
+        if not self._job:
+            raise ctypes.WinError(ctypes.get_last_error())
+        limits = ExtendedLimits()
+        limits.BasicLimitInformation.LimitFlags = 0x00002000  # KILL_ON_JOB_CLOSE
+        if not self._kernel.SetInformationJobObject(
+            self._job, 9, ctypes.byref(limits), ctypes.sizeof(limits),
+        ):
+            error = ctypes.WinError(ctypes.get_last_error())
+            _winapi.CloseHandle(self._job)
+            self._job = None
+            raise error
+
+    def start(self, argv: Sequence[str], cwd: Path, environment: dict[str, str] | None) -> None:
+        import msvcrt
+
+        self.args = list(argv)
+        child_fds: list[int] = []
+        try:
+            stdin_fd = os.open(os.devnull, os.O_RDONLY)
+            child_fds.append(stdin_fd)
+            stdout_read, stdout_write = os.pipe()
+            child_fds.append(stdout_write)
+            try:
+                self.stdout = os.fdopen(stdout_read, "rb", buffering=0)
+            except BaseException:
+                os.close(stdout_read)
+                raise
+            stderr_read, stderr_write = os.pipe()
+            child_fds.append(stderr_write)
+            try:
+                self.stderr = os.fdopen(stderr_read, "rb", buffering=0)
+            except BaseException:
+                os.close(stderr_read)
+                raise
+            inherited = [msvcrt.get_osfhandle(fd) for fd in child_fds]
+            for handle in inherited:
+                os.set_handle_inheritable(handle, True)
+            startup = subprocess.STARTUPINFO()
+            startup.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+            startup.wShowWindow = subprocess.SW_HIDE
+            startup.hStdInput, startup.hStdOutput, startup.hStdError = inherited
+            startup.lpAttributeList = {"handle_list": inherited}
+            # CPython's existing CreateProcess adapter retains the documented
+            # STARTUPINFO handle allowlist and exact Windows argument quoting.
+            hp, ht, pid, _tid = self._winapi.CreateProcess(
+                None, subprocess.list2cmdline(self.args), None, None, True,
+                subprocess.CREATE_NO_WINDOW | 0x00000004,  # CREATE_SUSPENDED
+                environment, str(cwd), startup,
+            )
+            self._handle, self._thread_handle, self.pid = hp, ht, pid
+            if not self._kernel.AssignProcessToJobObject(self._job, self._handle):
+                raise self._ctypes.WinError(self._ctypes.get_last_error())
+            if self._kernel.ResumeThread(self._thread_handle) != 1:
+                raise OSError("original suspended primary thread could not be resumed exactly once")
+            self._winapi.CloseHandle(self._thread_handle)
+            self._thread_handle = None
+        finally:
+            for fd in child_fds:
+                os.close(fd)
+
+    def poll(self) -> int | None:
+        if self._handle is not None and self.returncode is None:
+            outcome = self._winapi.WaitForSingleObject(self._handle, 0)
+            if outcome == self._winapi.WAIT_OBJECT_0:
+                self.returncode = int(self._winapi.GetExitCodeProcess(self._handle))
+            elif outcome != self._winapi.WAIT_TIMEOUT:
+                raise OSError("original process polling returned an unknown wait state")
+        return self.returncode
+
+    def bind_helper_peer(self, peer_pid: int) -> tuple[int, int]:
+        from ctypes import wintypes
+        if self._helper_handle is not None or self.poll() is not None:
+            raise _evidence_failure("original helper peer cannot be rebound or adopted after exit")
+        handle = self._winapi.OpenProcess(0x00100400, False, peer_pid)
+        try:
+            peer = _windows_native_process_identity(handle)
+            original = _windows_native_process_identity(self._handle)
+            member = wintypes.BOOL()
+            if (not self._kernel.IsProcessInJob(handle, self._job, self._ctypes.byref(member))
+                    or not member.value or peer[0] != peer_pid
+                    or self._winapi.WaitForSingleObject(handle, 0) != self._winapi.WAIT_TIMEOUT):
+                raise _evidence_failure("native channel peer is outside the original containment")
+            if peer_pid == self.pid:
+                if peer[1] != os.getpid():
+                    raise _evidence_failure("original helper parent differs")
+            elif (peer[1] != self.pid or original[:2] != (self.pid, os.getpid())
+                  or peer[2] < original[2] or original[3] != Path(self.args[0]).resolve()
+                  or peer[3] != Path(sys._base_executable).resolve()
+                  or peer[3] != _windows_native_process_identity(self._winapi.GetCurrentProcess())[3]):
+                raise _evidence_failure("native channel peer is not the exact venv launch child")
+            if self.poll() is not None:
+                raise _evidence_failure("original helper launcher exited during admission")
+            self._helper_handle = handle
+            return peer[:2]
+        except BaseException:
+            self._winapi.CloseHandle(handle)
+            raise
+
+    def wait(self, timeout: float | None = None) -> int:
+        if self._handle is None:
+            raise RuntimeError("no original process handle")
+        milliseconds = self._winapi.INFINITE if timeout is None else max(0, math.ceil(timeout * 1000))
+        outcome = self._winapi.WaitForSingleObject(self._handle, milliseconds)
+        if outcome == self._winapi.WAIT_TIMEOUT:
+            raise subprocess.TimeoutExpired(self.args, timeout)
+        if outcome != self._winapi.WAIT_OBJECT_0:
+            raise OSError("original process wait was not signalled")
+        self.returncode = int(self._winapi.GetExitCodeProcess(self._handle))
+        return self.returncode
+
+    def tree_empty(self) -> bool:
+        if self._job is None:
+            raise RuntimeError("original job handle is absent")
+        accounting = self._accounting_type()
+        if not self._kernel.QueryInformationJobObject(
+            self._job, 1, self._ctypes.byref(accounting), self._ctypes.sizeof(accounting), None,
+        ):
+            raise self._ctypes.WinError(self._ctypes.get_last_error())
+        return accounting.ActiveProcesses == 0
+
+    def stop_tree(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        if self._job is None or not self._kernel.TerminateJobObject(self._job, 1):
+            errors.append("JOB_STOP_ERROR:" + str(self._ctypes.get_last_error()))
+        # Assignment may have failed while the original child was suspended.
+        if self._handle is not None:
+            try:
+                self._winapi.TerminateProcess(self._handle, 1)
+            except OSError as exc:
+                errors.append("ORIGINAL_PROCESS_STOP_ERROR:" + str(getattr(exc, "winerror", exc.errno)))
+        return tuple(errors)
+
+    def close_settled_handles(self) -> None:
+        for field in ("_thread_handle", "_helper_handle", "_handle", "_job"):
+            handle = getattr(self, field)
+            if handle is not None:
+                self._winapi.CloseHandle(handle)
+                setattr(self, field, None)
+
+
 def hidden_subprocess_kwargs(
     *,
     platform_name: str | None = None,
@@ -4224,10 +4922,12 @@ def _consume_available_pipe(
         if native_terminal and (
             exc.errno == errno.EPIPE or getattr(exc, "winerror", None) in {109, 232}
         ):
+            outcome["pipe_eof_observed"] = True
             return False, True
         outcome.setdefault("evidence_error", exc)
         return False, True
     if not chunk:
+        outcome["pipe_eof_observed"] = True
         return False, True
     outcome["drained_byte_count"] = int(
         outcome.get("drained_byte_count", 0)
@@ -4242,7 +4942,7 @@ def _consume_available_pipe(
     if active_mirror is not None:
         try:
             _mirror_bytes(chunk, active_mirror)
-        except BaseException as exc:
+        except Exception as exc:
             outcome.setdefault("mirror_error", type(exc).__name__)
             outcome["mirror"] = None
     return True, False
@@ -4269,11 +4969,13 @@ def _finalize_owned_output_resources(
         pipe.close()
     except (OSError, ValueError):
         pass
-    outcome["evidence_complete"] = "evidence_error" not in outcome
+    outcome["evidence_complete"] = (
+        "evidence_error" not in outcome and outcome.get("pipe_eof_observed") is True
+    )
 
 
 def _supervise_native_output(
-    process: subprocess.Popen[bytes],
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess,
     *,
     stdout_stream: BinaryIO,
     stderr_stream: BinaryIO,
@@ -4283,53 +4985,144 @@ def _supervise_native_output(
     timeout_seconds: float | None,
     termination_grace_seconds: float,
     platform_name: str,
+    start_failure: str | None = None,
+    nested_owner: _NestedCommandOwner | None = None,
+    delegated_owner: _DelegatedCommandOwner | None = None,
 ) -> tuple[int | None, str, str, str | None]:
-    """Multiplex both child pipes without cross-thread descriptor ownership."""
+    """One termination controller; only this calling thread owns stream I/O."""
 
     assert process.stdout is not None
     assert process.stderr is not None
     pipes = (process.stdout, process.stderr)
     destinations = (stdout_stream, stderr_stream)
     outcomes = (stdout_outcome, stderr_outcome)
-    receipt_timeout_seconds = (
-        float(timeout_seconds)
-        if isinstance(timeout_seconds, (int, float)) and timeout_seconds > 0
-        else None
-    )
     timeout_state = (
-        "NOT_CONFIGURED" if receipt_timeout_seconds is None else "NOT_TRIGGERED"
+        "NOT_CONFIGURED" if timeout_seconds is None else "NOT_TRIGGERED"
     )
-    termination_state = "NOT_REQUIRED"
-    failure_class: str | None = None
-    native_exit: int | None = None
+    state: dict[str, object] = {
+        "native_exit": None,
+        "timeout_state": timeout_state,
+        "termination_state": "TERMINAL:UNPROVEN",
+        "failure_class": None,
+    }
+    abort = threading.Event()
+    settled = threading.Event()
+    claim_lock = threading.Lock()
+    termination_owner_claimed = False
+    if start_failure is not None:
+        abort.set()
+
+    def control_termination() -> None:
+        nonlocal termination_owner_claimed
+        with claim_lock:
+            if termination_owner_claimed:
+                return
+            termination_owner_claimed = True
+        root_exit_observed_at: float | None = None
+        try:
+            while True:
+                if nested_owner is not None:
+                    try:
+                        nested_owner.advance()
+                    except Exception as exc:
+                        nested_owner.failure = type(exc).__name__ + ": " + str(exc)
+                    if nested_owner.failure is not None:
+                        abort.set()
+                polled = process.poll()
+                if polled is not None:
+                    state["native_exit"] = int(polled)
+                    if root_exit_observed_at is None:
+                        root_exit_observed_at = time.monotonic()
+                now = time.monotonic()
+                expired = timeout_seconds is not None and now - started_monotonic >= timeout_seconds
+                capture_failed = any("evidence_error" in outcome for outcome in outcomes)
+                if expired:
+                    state["timeout_state"] = "TRIGGERED"
+                if abort.is_set() or expired or capture_failed:
+                    reason = (
+                        "ENGVR_PROCESS_START_FAILED" if start_failure is not None else
+                        "ENGVR_PROCESS_TIMEOUT" if expired else
+                        "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+                    )
+                    terminal, proven = _terminate_owned_process_tree(
+                        process, platform_name=platform_name,
+                        grace_seconds=termination_grace_seconds,
+                    )
+                    state["native_exit"] = process.poll()
+                    state["termination_state"] = terminal
+                    state["failure_class"] = reason if proven else "ENGVR_PROCESS_TERMINATION_FAILED"
+                    return
+                if polled is not None:
+                    empty = (
+                        process.tree_empty() if isinstance(process, _WindowsContainedProcess)
+                        else not _posix_process_group_exists(process.pid)
+                        if platform_name != "nt" else False
+                    )
+                    if empty:
+                        state["termination_state"] = "TERMINAL:PROVEN"
+                    elif now - root_exit_observed_at < termination_grace_seconds:
+                        # Process signalling and Job/group accounting need not
+                        # become terminal in the same observation. Keep the
+                        # deadline/abort/capture checks active during settlement.
+                        abort.wait(OUTPUT_POLL_INTERVAL_SECONDS)
+                        continue
+                    else:
+                        terminal, _proven = _terminate_owned_process_tree(
+                            process, platform_name=platform_name,
+                            grace_seconds=termination_grace_seconds,
+                        )
+                        state["termination_state"] = "EXIT_WITH_SURVIVORS;" + terminal
+                        state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+                    return
+                abort.wait(OUTPUT_POLL_INTERVAL_SECONDS)
+        except BaseException as exc:
+            # An unexpected controller error does not abandon its original child.
+            # This same, already-claimed owner performs the final stop/query.
+            try:
+                terminal, _proven = _terminate_owned_process_tree(
+                    process, platform_name=platform_name,
+                    grace_seconds=termination_grace_seconds,
+                )
+                state["native_exit"] = process.poll()
+            except BaseException as settlement_error:
+                terminal = "SETTLEMENT_FAILED:" + type(settlement_error).__name__ + ";TERMINAL:UNPROVEN"
+            state["termination_state"] = "CONTROLLER_FAILED:" + type(exc).__name__ + ";" + terminal
+            state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+        finally:
+            settled.set()
+
+    controller = None
+    controller_start_error = None
+    if delegated_owner is None:
+        controller = threading.Thread(target=control_termination, name="qtt-command-termination", daemon=False)
+        try:
+            controller.start()
+        except BaseException as exc:
+            controller_start_error = exc
+            # A start-then-raise/interruption must not create two termination owners.
+            # The one-use claim is retained even after its winning owner completes.
+            abort.set()
+            for outcome in outcomes:
+                outcome.setdefault("evidence_error", exc)
+            control_termination()
     pipe_terminal = [False, False]
     native_terminal_observed_at: float | None = None
     try:
-        try:
-            for pipe in pipes:
-                os.set_blocking(pipe.fileno(), False)
-        except (OSError, ValueError) as exc:
-            for outcome in outcomes:
-                outcome.setdefault("evidence_error", exc)
-            termination_state, tree_terminal = _terminate_owned_process_tree(
-                process,
-                platform_name=platform_name,
-                grace_seconds=termination_grace_seconds,
-            )
-            native_exit = process.poll()
-            failure_class = (
-                "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
-                if tree_terminal
-                else "ENGVR_PROCESS_TERMINATION_FAILED"
-            )
-            return native_exit, timeout_state, termination_state, failure_class
-
+        for pipe in pipes:
+            os.set_blocking(pipe.fileno(), False)
         while True:
-            polled = process.poll()
-            if polled is not None and native_exit is None:
-                native_exit = int(polled)
+            if delegated_owner is not None:
+                if not delegated_owner.channel.parent_alive():
+                    state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+                    state["termination_state"] = "ORIGINAL_OUTER_LOST;TERMINAL:UNPROVEN"
+                    break
+                state["native_exit"] = process.poll()
+                if state["native_exit"] is not None:
+                    state["termination_state"] = "DELEGATED_TO_AUTHENTICATED_OUTER"
+                    settled.set()
+            native_exit = state["native_exit"]
+            if native_exit is not None and native_terminal_observed_at is None:
                 native_terminal_observed_at = time.monotonic()
-
             progress = False
             for index, (pipe, destination, outcome) in enumerate(
                 zip(pipes, destinations, outcomes, strict=True)
@@ -4345,41 +5138,44 @@ def _supervise_native_output(
                 progress = progress or consumed
                 pipe_terminal[index] = reached_eof
 
-            if native_exit is not None and all(pipe_terminal):
+            if settled.is_set() and native_exit is not None and all(pipe_terminal):
                 break
-
             now = time.monotonic()
-            if (
-                native_exit is None
-                and timeout_seconds is not None
-                and now - started_monotonic >= timeout_seconds
-            ):
-                timeout_state = "TRIGGERED"
-                termination_state, tree_terminal = _terminate_owned_process_tree(
-                    process,
-                    platform_name=platform_name,
-                    grace_seconds=termination_grace_seconds,
-                )
-                native_exit = process.poll()
-                if not tree_terminal:
-                    failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
-                    break
-                failure_class = "ENGVR_PROCESS_TIMEOUT"
-                native_terminal_observed_at = time.monotonic()
-                continue
-
+            if settled.is_set() and "TERMINAL:UNPROVEN" in str(state["termination_state"]):
+                break
             if (
                 native_exit is not None
                 and native_terminal_observed_at is not None
                 and now - native_terminal_observed_at
                 >= OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS
             ):
-                failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
-                termination_state += ";NATIVE_TREE_UNPROVEN_OUTPUT_PIPE_OPEN"
+                state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+                state["termination_state"] = str(state["termination_state"]) + ";OUTPUT_PIPE_UNPROVEN"
                 break
             if not progress:
                 time.sleep(OUTPUT_POLL_INTERVAL_SECONDS)
+            if delegated_owner is not None and any("evidence_error" in outcome for outcome in outcomes):
+                delegated_owner.failed()
+                state["failure_class"] = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+                break
+    except BaseException as exc:
+        for outcome in outcomes:
+            outcome.setdefault("evidence_error", exc)
+        abort.set()
     finally:
+        if delegated_owner is not None and (abort.is_set() or not settled.is_set()):
+            try:
+                delegated_owner.failed()
+            except (OSError, RuntimeError, ValueError, EOFError):
+                pass
+            state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+        elif not settled.is_set():
+            abort.set()
+        if controller is not None and controller.ident is not None:
+            controller.join()
+        elif controller_start_error is not None:
+            state["failure_class"] = "ENGVR_PROCESS_TERMINATION_FAILED"
+            state["termination_state"] = str(state["termination_state"]) + ";CONTROLLER_START_UNPROVEN"
         for pipe, destination, outcome in zip(
             pipes,
             destinations,
@@ -4391,7 +5187,17 @@ def _supervise_native_output(
                 destination,
                 outcome=outcome,
             )
-    return native_exit, timeout_state, termination_state, failure_class
+    if all(outcome.get("pipe_eof_observed") is True for outcome in outcomes):
+        state["termination_state"] = str(state["termination_state"]) + ";PIPES:EOF"
+    else:
+        state["termination_state"] = str(state["termination_state"]) + ";PIPES:UNPROVEN"
+    for label, outcome in zip(("STDOUT", "STDERR"), outcomes, strict=True):
+        if "mirror_error" in outcome:
+            state["termination_state"] = str(state["termination_state"]) + ";" + label + "_MIRROR_FAILED:" + str(outcome["mirror_error"])
+    return (
+        state["native_exit"], state["timeout_state"],
+        state["termination_state"], state["failure_class"],
+    )
 
 
 def _file_marker_states(paths: Sequence[Path], markers: Sequence[str]) -> tuple[str, ...]:
@@ -4489,13 +5295,29 @@ def _posix_process_group_exists(process_group_id: int) -> bool:
 
 
 def _terminate_owned_process_tree(
-    process: subprocess.Popen[bytes],
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess,
     *,
     platform_name: str,
     grace_seconds: float,
 ) -> tuple[str, bool]:
     pid = process.pid
     actions: list[str] = []
+    if isinstance(process, _WindowsContainedProcess):
+        actions.append("JOB_TERMINATE")
+        try:
+            actions.extend(process.stop_tree())
+        except OSError as exc:
+            actions.append("STOP_ERROR:" + type(exc).__name__)
+        try:
+            process.wait(timeout=grace_seconds)
+            deadline = time.monotonic() + grace_seconds
+            while not process.tree_empty() and time.monotonic() < deadline:
+                time.sleep(OUTPUT_POLL_INTERVAL_SECONDS)
+            if not process.tree_empty():
+                return ";".join(actions) + ";TERMINAL:UNPROVEN", False
+            return ";".join(actions) + ";TERMINAL:PROVEN", True
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+            return ";".join(actions) + ";" + type(exc).__name__ + ";TERMINAL:UNPROVEN", False
     if platform_name == "nt":
         result = _hidden_taskkill(("taskkill.exe", "/PID", str(pid), "/T"))
         actions.append(f"TASKKILL_T:{result}")
@@ -4559,10 +5381,14 @@ def _validate_process_invocation(
         for marker in required_markers
     ):
         raise ValueError("required markers must be nonempty NUL-free strings")
-    if timeout_seconds is not None and timeout_seconds <= 0:
-        raise ValueError("timeout_seconds must be positive")
-    if termination_grace_seconds <= 0:
-        raise ValueError("termination_grace_seconds must be positive")
+    if timeout_seconds is not None and (
+        type(timeout_seconds) not in {int, float}
+        or not math.isfinite(timeout_seconds) or timeout_seconds <= 0
+    ):
+        raise ValueError("timeout_seconds must be finite and positive")
+    if (type(termination_grace_seconds) not in {int, float}
+            or not math.isfinite(termination_grace_seconds) or termination_grace_seconds <= 0):
+        raise ValueError("termination_grace_seconds must be finite and positive")
     if "\0" in str(cwd):
         raise ValueError("cwd cannot contain an embedded NUL byte")
     if not cwd.exists():
@@ -4624,6 +5450,7 @@ def supervise_command(
     mirror_stdout: bool = True,
     mirror_stderr: bool = True,
     platform_name: str | None = None,
+    delegated_owner: _DelegatedCommandOwner | None = None,
 ) -> CommandExecutionReceiptV1:
     """Launch one shell-free child and retain PID, output, and native exit custody."""
 
@@ -4676,11 +5503,12 @@ def supervise_command(
     pid: int | None = None
     native_exit: int | None = None
     start_failure: str | None = None
-    receipt_timeout_seconds = (
-        float(timeout_seconds)
-        if isinstance(timeout_seconds, (int, float)) and timeout_seconds > 0
-        else None
-    )
+    try:
+        receipt_timeout_seconds = float(timeout_seconds) if type(timeout_seconds) in {int, float} else None
+        if receipt_timeout_seconds is not None and (not math.isfinite(receipt_timeout_seconds) or receipt_timeout_seconds <= 0):
+            receipt_timeout_seconds = None
+    except (ValueError, OverflowError):
+        receipt_timeout_seconds = None
     timeout_state = (
         "NOT_CONFIGURED" if receipt_timeout_seconds is None else "NOT_TRIGGERED"
     )
@@ -4696,10 +5524,11 @@ def supervise_command(
         "evidence_write_enabled": True,
         "mirror": sys.stderr if mirror_stderr else None,
     }
-    process: subprocess.Popen[bytes] | None = None
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess | None = None
     selected_argv: tuple[str, ...] | None = None
     selected_markers: tuple[str, ...] | None = None
     selected_environment: dict[str, str] | None = None
+    nested_owner: _NestedCommandOwner | None = None
     try:
         if tuple_error is not None:
             raise tuple_error
@@ -4717,25 +5546,80 @@ def supervise_command(
                 environment=environment,
             )
         )
-        process = subprocess.Popen(
-            list(selected_argv),
-            cwd=receipt_cwd,
-            env=selected_environment,
-            shell=False,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            **hidden_subprocess_kwargs(
-                platform_name=selected_platform,
-                new_process_group=True,
-            ),
-        )
+        if selected_platform != "nt" or os.name != "nt":
+            # A process group does not contain nested supervisors that create
+            # their own sessions. Do not launch while whole-descendant native
+            # containment is unqualified; Windows evidence cannot authorize it.
+            raise ValidationReliabilityError(
+                "ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE",
+                "all-descendant supervision is not qualified on this platform",
+            )
+        selected_environment = dict(os.environ if selected_environment is None else selected_environment)
+        launch_kwargs: dict[str, object] = {}
+        if delegated_owner is not None:
+            if (not isinstance(delegated_owner, _DelegatedCommandOwner)
+                    or delegated_owner.nested_root != evidence_root
+                    or delegated_owner.context.get("run_id") != run_id
+                    or delegated_owner.context.get("cwd") != str(receipt_cwd)
+                    or selected_argv != _nested_pytest_command(delegated_owner.context["argv"], receipt_cwd)
+                    or not delegated_owner.channel.parent_alive()
+                    or timeout_seconds is not None
+                    or phase != "nested-pytest" or command_index != 1):
+                raise _evidence_failure("nested launch is outside its bound original command owner")
+            selected_environment.pop(COMMAND_OWNER_CHANNEL_ENV, None)
+        else:
+            if COMMAND_OWNER_CHANNEL_ENV in selected_environment:
+                raise _evidence_failure("unbound inherited command owner channel")
+            pytest_argv = _nested_pytest_command(selected_argv, receipt_cwd)
+            if pytest_argv is not None:
+                if selected_environment.get(RUN_ID_ENV) != run_id or selected_environment.get(EVIDENCE_ROOT_ENV) != str(evidence_root):
+                    raise _evidence_failure("nested helper requires the actual outer run binding")
+                nested_owner = _NestedCommandOwner(
+                    argv=selected_argv, cwd=receipt_cwd, run_id=run_id, phase=phase,
+                    command_index=command_index, evidence_root=evidence_root, pytest_argv=pytest_argv,
+                )
+                selected_environment[COMMAND_OWNER_CHANNEL_ENV] = nested_owner.channel.locator
+                launch_kwargs = nested_owner.channel.launch_kwargs()
+        if selected_platform == "nt" and os.name == "nt" and delegated_owner is None:
+            process = _WindowsContainedProcess()
+            process.start(selected_argv, receipt_cwd, selected_environment)
+        else:
+            process = subprocess.Popen(
+                list(selected_argv),
+                cwd=receipt_cwd,
+                env=selected_environment,
+                shell=False,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                **hidden_subprocess_kwargs(
+                    platform_name=selected_platform,
+                    new_process_group=delegated_owner is None,
+                ),
+                **launch_kwargs,
+            )
         pid = process.pid
-    except Exception as exc:
+        if nested_owner is not None:
+            nested_owner.child_pid = pid
+            nested_owner.process = process
+            nested_owner.channel.child_started()
+    except BaseException as exc:
         start_failure = type(exc).__name__
+        if isinstance(exc, ValidationReliabilityError):
+            start_failure += ":" + exc.code
         failure_class = "ENGVR_PROCESS_START_FAILED"
-        _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
-        _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
+        if process is not None and process.pid is not None:
+            # Retain every original started child, including a post-Popen abort.
+            pid = process.pid
+        else:
+            if isinstance(process, _WindowsContainedProcess):
+                for pipe in (process.stdout, process.stderr):
+                    if pipe is not None:
+                        pipe.close()
+                process.close_settled_handles()
+            process = None
+            _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
+            _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
 
     if process is not None:
         native_exit, timeout_state, termination_state, failure_class = (
@@ -4749,8 +5633,19 @@ def supervise_command(
                 timeout_seconds=timeout_seconds,
                 termination_grace_seconds=termination_grace_seconds,
                 platform_name=selected_platform,
+                start_failure=start_failure,
+                nested_owner=nested_owner,
+                delegated_owner=delegated_owner,
             )
         )
+        if start_failure is not None:
+            termination_state = "STARTED_LAUNCH_FAILED:" + start_failure + ";" + termination_state
+            start_failure = None
+        if isinstance(process, _WindowsContainedProcess) and "TERMINAL:PROVEN" in termination_state:
+            try:
+                process.close_settled_handles()
+            except OSError as exc:
+                stdout_outcome.setdefault("evidence_error", exc)
         if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
             "evidence_error" in outcome
             for outcome in (stdout_outcome, stderr_outcome)
@@ -4758,6 +5653,20 @@ def supervise_command(
             failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
         if failure_class is None and native_exit != 0:
             failure_class = "ENGVR_NATIVE_EXIT_NONZERO"
+
+    if nested_owner is not None:
+        try:
+            nested_owner.verify_terminal()
+        except (OSError, RuntimeError, ValueError, TypeError) as exc:
+            termination_state += ";NESTED_EVIDENCE_UNPROVEN:" + type(exc).__name__
+            if failure_class is None:
+                failure_class = "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+        finally:
+            try:
+                nested_owner.channel.close()
+            except (OSError, RuntimeError) as exc:
+                termination_state += ";OWNER_CHANNEL_CLOSE_UNPROVEN:" + type(exc).__name__
+                failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
 
     try:
         reservation_path.unlink()
@@ -4847,11 +5756,33 @@ def supervise_command(
         if receipt.pid is not None:
             receipt = replace(
                 receipt,
-                failure_class="ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                failure_class=(
+                    "ENGVR_PROCESS_TERMINATION_FAILED"
+                    if "UNPROVEN" in receipt.termination_state else
+                    "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
+                ),
             )
         else:
             raise
     return receipt
+
+
+def command_terminal_custody_proven(receipt: CommandExecutionReceiptV1 | None) -> bool:
+    """Cleanup admission is independent of the command's final error label."""
+    if not isinstance(receipt, CommandExecutionReceiptV1):
+        return False
+    if receipt.pid is None:
+        return (
+            receipt.start_failure_class is not None
+            and receipt.native_exit_code is None
+            and receipt.termination_state == "NOT_REQUIRED"
+        )
+    return (
+        receipt.native_exit_code is not None
+        and "TERMINAL:PROVEN" in receipt.termination_state
+        and "PIPES:EOF" in receipt.termination_state
+        and "UNPROVEN" not in receipt.termination_state
+    )
 
 
 def _lexical_absolute_path(path: Path | str, *, field_name: str) -> Path:

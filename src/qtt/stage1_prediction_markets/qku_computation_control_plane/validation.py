@@ -1337,6 +1337,31 @@ def _public_owner_thread_imports_v1(relative: str, tree: ast.Module) -> frozense
     return frozenset(admitted)
 
 
+def _lp03_published_source_readback_import_v1(relative: str, tree: ast.Module) -> ast.Import | None:
+    """Admit SQLite use only inside the existing bounded producer readback."""
+    if relative != "src/qtt/stage1_prediction_markets/qku_computation_control_plane/input_resolver.py":
+        return None
+    owners = [node for node in tree.body if isinstance(node, ast.ClassDef)
+              and node.name == "_EvidencePublishedSourceReadV1"]
+    methods = [] if len(owners) != 1 else [node for node in owners[0].body
+        if isinstance(node, ast.FunctionDef) and node.name == "_read_v1"]
+    if len(methods) != 1:
+        return None
+    method = methods[0]
+    first = method.body[0]
+    if not isinstance(first, ast.Import) or tuple((item.name, item.asname) for item in first.names) != (("sqlite3", None),):
+        return None
+
+    from hashlib import sha256
+
+    # This versioned structural witness covers the actual guarded reader,
+    # query and accounting tail. Formatting and line positions are excluded.
+    canonical = ast.dump(method, include_attributes=False).encode("utf-8")
+    if sha256(canonical).hexdigest() != "41628190cc4e285b46c7abdf8e8349b0fb9813cef7397f0db48b526eea86d8df":
+        return None
+    return first
+
+
 def _no_runtime_topology() -> bool:
     from tools.validate_no_runtime_artifacts import kalshi_fee_native_admission_v1, source_use_native_contract_v1
 
@@ -1372,6 +1397,7 @@ def _no_runtime_topology() -> bool:
         if source_use_native_contract_v1(relative, tree):
             return False
         public_thread_imports = _public_owner_thread_imports_v1(relative, tree)
+        published_source_import = _lp03_published_source_readback_import_v1(relative, tree)
         source_use_thread_imports = set()
         if relative == 'src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py':
             for cls in tree.body:
@@ -1409,7 +1435,8 @@ def _no_runtime_topology() -> bool:
                     type(node).__name__, node.lineno, node.col_offset,
                     node.end_lineno, node.end_col_offset,
                 )
-                if position not in kalshi_admitted and id(node) not in public_thread_imports:
+                if (position not in kalshi_admitted and id(node) not in public_thread_imports
+                        and node is not published_source_import):
                     return False
             if (
                 isinstance(node, ast.ImportFrom)

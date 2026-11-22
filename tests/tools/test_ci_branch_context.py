@@ -274,7 +274,7 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
     branch: str,
     adversarial_branches: tuple[str, ...],
 ):
-    def assert_selected_branch(branch, adversarial_branches):
+    def assert_selected_branch(branch, adversarial_branches, *, generic_pr_authority=True):
         assert context.is_owner_authorized_validation_branch(branch)
         assert context.roadmap_pr_number(branch) is None
         for gate in ("PR159R", "PR160"):
@@ -294,7 +294,7 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
         for minimum in (1, 99):
             assert context.is_pr_or_later_branch(
                 branch, minimum_pr=minimum, allow_main=False, allow_repair=False,
-            )
+            ) is generic_pr_authority
         for prefix in ("refs/heads/", "refs/remotes/origin/", "origin/"):
             assert context.normalize_branch_context(prefix + branch) == branch
             assert context.is_owner_authorized_validation_branch(prefix + branch)
@@ -517,6 +517,15 @@ def test_st12_owner_authorized_branches_are_exactly_validation_only(
         lp02 = "s1-lp02-selected-data-integration"
         assert context.S1_LP02_SELECTED_DATA_INTEGRATION_BRANCH == lp02
         assert_selected_branch(lp02, (lp02.upper(), lp02[:-1], lp02+"-copy", lp02+"/", "prefix-"+lp02))
+        lp03 = "s1-lp03-evidence-platform-restart"
+        assert context.S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH == lp03
+        assert_selected_branch(
+            lp03, (lp03.upper(), lp03 + "-copy", lp03 + "/", "s1-lp03-evidence-platform"),
+            generic_pr_authority=False,
+        )
+        assert context.is_owner_authorized_validation_branch("refs/heads/" + lp03)
+        assert not context.is_pr_or_later_branch(lp03, 152)
+        assert not context.is_pr_or_later_branch("refs/heads/" + lp03, 1)
         scheduled = "s1-kalshi-scheduled-fee-scenario"
         assert context.S1_KALSHI_SCHEDULED_FEE_SCENARIO_BRANCH == scheduled
         assert_selected_branch(scheduled, (

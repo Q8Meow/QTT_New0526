@@ -15,6 +15,7 @@ import inspect
 import json
 import ntpath
 import os
+import re
 import time
 from typing import Sequence
 
@@ -23,6 +24,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.validation_scope_registry import (  # noqa: E402
+    S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH,
     ST12G_ARCHITECTURE_ADDITIVE_MODULES,
     ST12G_INDEPENDENT_ARCHITECTURE_SCRIPT_NAME,
     ST12H_READ_ONLY_PREDECESSOR_PATHS,
@@ -49,6 +51,7 @@ from tools.validation_reliability import (  # noqa: E402
     classify_repository_changes,
     cleanup_validation_run,
     command_attempt_accounting,
+    command_terminal_custody_proven,
     refresh_exact_stat_cache_paths,
     resolve_validation_run_paths,
     semantic_candidate_paths,
@@ -85,6 +88,7 @@ PR152_BUILD_REPORT_CACHE_KIND = "qtt_pr152_build_report"
 PR152_BUILD_REPORT_CACHE_SCHEMA_VERSION = 1
 _RUN_COMMANDS_ACTIVE_PATHS: ValidationRunPathsV1 | None = None
 _LAST_COMMAND_RECEIPTS: tuple[CommandExecutionReceiptV1, ...] = ()
+_LAST_SUPERVISION_UNSETTLED = False
 _LAST_PLANNED_COMMAND_COUNT: int | None = None
 _LAST_EXPECTED_COMMAND_PLAN: tuple[CommandEvidencePlanEntry, ...] = ()
 _ACTIVE_SEMANTIC_CHANGED_PATHS: tuple[str, ...] | None = None
@@ -1613,7 +1617,13 @@ def _command_script_name(command: Sequence[str]) -> str:
 
 def _st12h_command_contract(
     command: Sequence[str],
+    *,
+    owned_pytest_basetemp: pathlib.Path | None = None,
 ) -> tuple[int, tuple[str, ...]] | None:
+    if _is_exact_complete_qku_deadline_command(
+        command, owned_pytest_basetemp=owned_pytest_basetemp
+    ):
+        return 14400, ()
     script_name = _command_script_name(command)
     if script_name == "validate_qku_computation_control_plane.py":
         try:
@@ -1970,6 +1980,28 @@ def _execution_command_with_st12g_architecture_roster(
     ):
         return list(command)
     return list(build_st12g_architecture_validation_command(command[0]))
+
+
+def _is_exact_complete_qku_deadline_command(
+    command: Sequence[str], *, owned_pytest_basetemp: pathlib.Path | None
+) -> bool:
+    """Match only the final central command and its allocated exact basetemp."""
+    if owned_pytest_basetemp is None or not owned_pytest_basetemp.is_absolute():
+        return False
+    if len(command) != 8 or any(not isinstance(part, str) for part in command):
+        return False
+    normalized = tuple(part.replace("\\", "/") for part in command)
+    expected = (
+        sys.executable.replace("\\", "/"),
+        f"tools/{PYTEST_FRESH_BASETEMP_SCRIPT}",
+        ST12A_TEST_ROOT,
+        "-q",
+        PYTEST_DURATIONS_ARG,
+        _QKU_ROOT_PYTEST_IMPORT_MODE_ARG,
+        "--basetemp",
+        str(owned_pytest_basetemp).replace("\\", "/"),
+    )
+    return normalized == expected
 
 
 def _is_exact_qku_root_pytest_command(command: Sequence[str]) -> bool:
@@ -6449,6 +6481,8 @@ def _write_timing_report(
 
 def _prepare_execution_plan(
     commands: Sequence[Sequence[str]],
+    *,
+    windows_compileall_root: pathlib.Path | None = None,
 ) -> tuple[ExecutionPlanEntry, ...]:
     plan: list[ExecutionPlanEntry] = []
     for command in commands:
@@ -6456,16 +6490,29 @@ def _prepare_execution_plan(
         st12g_adapted = tuple(
             _execution_command_with_st12g_architecture_roster(list(registered))
         )
-        execution = tuple(
+        qku_adapted = tuple(
             _execution_command_with_qku_root_importlib(list(st12g_adapted))
         )
+        execution = qku_adapted
+        if (
+            windows_compileall_root is not None
+            and os.name == "nt"
+            and registered == (sys.executable, "-m", "compileall", "-q", "tools", "tests", "src")
+        ):
+            native_root = windows_compileall_root.resolve(strict=True)
+            if not native_root.is_absolute() or re.fullmatch(r"[A-Za-z]:", native_root.drive) is None:
+                raise ValueError("LP03 compileall requires a canonical Windows drive path")
+            # Keep code filenames relative while letting the native cache writer use long paths.
+            extended_root = f"\\\\?\\{native_root}"
+            compile_roots = tuple(f"{extended_root}\\{name}" for name in registered[4:])
+            execution = (*registered[:4], "-s", extended_root, *compile_roots)
         plan.append(
             ExecutionPlanEntry(
                 registered_argv=registered,
                 timing_identity_argv=st12g_adapted,
                 execution_argv=execution,
                 st12g_adapter_applied=st12g_adapted != registered,
-                qku_root_import_adapter_applied=execution != st12g_adapted,
+                qku_root_import_adapter_applied=qku_adapted != st12g_adapted,
             )
         )
     return tuple(plan)
@@ -6494,6 +6541,9 @@ def run_commands(
         raise ValueError("execution plan does not match the registered command plan")
     global _LAST_PLANNED_COMMAND_COUNT
     global _LAST_EXPECTED_COMMAND_PLAN
+    global _LAST_SUPERVISION_UNSETTLED
+    if _LAST_SUPERVISION_UNSETTLED:
+        raise RuntimeError("ENGVR_PROCESS_TERMINATION_FAILED: earlier command custody remains unsettled")
     _LAST_PLANNED_COMMAND_COUNT = len(prepared_plan)
     active_run_paths = run_paths or _RUN_COMMANDS_ACTIVE_PATHS
     if active_run_paths is None:
@@ -6565,6 +6615,10 @@ def run_commands(
         initially_untracked_paths = _untracked_paths(cleanup_repo_root)
 
     def restore_gate_side_effects() -> None:
+        if _LAST_SUPERVISION_UNSETTLED or any(
+            not command_terminal_custody_proven(receipt) for receipt in command_receipts
+        ):
+            raise RuntimeError("ENGVR_PROCESS_TERMINATION_FAILED: restoration withheld without terminal custody")
         if cleanup_repo_root is None:
             return
         _restore_tracked_gate_side_effects(
@@ -6609,7 +6663,10 @@ def run_commands(
         timing_identity_command = list(plan_entry.timing_identity_argv)
         execution_command = list(plan_entry.execution_argv)
         print(subprocess.list2cmdline(execution_command), flush=True)
-        st12h_contract = _st12h_command_contract(execution_command)
+        st12h_contract = _st12h_command_contract(
+            execution_command,
+            owned_pytest_basetemp=active_run_paths.pytest_basetemp_root,
+        )
         process_failures = _st12h_execution_budget_failures(
             concurrent_validation_processes=active_validation_processes + 1,
         )
@@ -6626,6 +6683,7 @@ def run_commands(
             command_environment = os.environ.copy()
             command_environment[RUN_ID_ENV] = active_run_paths.run_id
             command_environment[EVIDENCE_ROOT_ENV] = str(active_run_paths.evidence_root)
+            _LAST_SUPERVISION_UNSETTLED = True
             receipt = _execute_supervised_command(
                 execution_command,
                 cwd=execution_cwd,
@@ -6637,7 +6695,16 @@ def run_commands(
                 timeout_seconds=timeout_seconds,
                 environment=command_environment,
             )
+            if not isinstance(receipt, CommandExecutionReceiptV1):
+                raise ValidationReliabilityError(
+                    "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                    "command supervision returned no complete typed receipt",
+                )
             command_receipts.append(receipt)
+            _LAST_SUPERVISION_UNSETTLED = not command_terminal_custody_proven(receipt)
+            if _LAST_SUPERVISION_UNSETTLED:
+                print("ENGVR_PROCESS_TERMINATION_FAILED: no subsequent command without terminal custody", file=sys.stderr, flush=True)
+                return finish(1)
         except ValidationReliabilityError as exc:
             print(str(exc), file=sys.stderr, flush=True)
             return finish(1)
@@ -7842,7 +7909,18 @@ def _main_impl(argv: Sequence[str] | None = None) -> int:
                         for failure in selected_command_failures:
                             print(failure, file=sys.stderr, flush=True)
                         return 2
-                execution_plan = _prepare_execution_plan(commands)
+                windows_compileall_root = (
+                    repo_root
+                    if os.name == "nt"
+                    and active_run_paths is not None
+                    and branch_context.branch == S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH
+                    and args.phase == "all"
+                    and args.validation_mode == "full"
+                    else None
+                )
+                execution_plan = _prepare_execution_plan(
+                    commands, windows_compileall_root=windows_compileall_root
+                )
                 if active_run_paths is not None:
                     _publish_active_plan_provenance(args.phase, execution_plan)
                 if _run_commands_accepts_repo_root():
@@ -7882,8 +7960,8 @@ def _finalize_validation_run(
     """Publish cleanup and terminal custody for one already-planned run."""
 
     cleanup_state = "NOT_RUN"
-    termination_unproven = any(
-        receipt.failure_class == "ENGVR_PROCESS_TERMINATION_FAILED"
+    termination_unproven = _LAST_SUPERVISION_UNSETTLED or any(
+        not command_terminal_custody_proven(receipt)
         for receipt in receipts
     )
     if termination_unproven:

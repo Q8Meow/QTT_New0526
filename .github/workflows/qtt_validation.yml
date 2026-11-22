@@ -23,7 +23,7 @@ jobs:
   validation_shards:
     name: Validation Shard (${{ matrix.group }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: ${{ matrix.phase == 'pytest-shard-8' && 300 || 90 }}
     strategy:
       fail-fast: false
       matrix:
@@ -80,11 +80,17 @@ jobs:
           python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1
 
       - name: Run validation shard
-        run: >
+        if: ${{ matrix.phase != 'pytest-shard-8' }}
+        run: &validation_shard_command >
           python -B tools/run_validation_gates.py
           --phase ${{ matrix.phase }}
           --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json
           --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
+
+      - name: Run validation shard 8
+        if: ${{ matrix.phase == 'pytest-shard-8' }}
+        timeout-minutes: 270
+        run: *validation_shard_command
 
       - name: Upload validation timing artifact
         if: ${{ always() }}

@@ -5890,6 +5890,370 @@ ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1: Mapping[str, Callable[..., object]] = 
     {**_ST12F_REUSED_EVIDENCE_CALLABLES_V1, **_ST12F_NEW_EVIDENCE_CALLABLES_V1}
 )
 
+# Private identity metadata extends the original central owner. These records
+# do not dispatch a callable or change public service membership/raw semantics.
+_LP03_F_IMPLEMENTATION_CONTRACTS_V1 = MappingProxyType({
+    math_id: ComputationImplementationV1(
+        implementation_id=f"qku/implementation_registry.py::{math_id}::ST12F-1.4::LP03-INVOCATION-1.0",
+        math_spec_id=math_id, callable_name=function.__name__, specification_version="1.4",
+        deterministic=True, seed_required=False)
+    for math_id, function in _ST12F_NEW_EVIDENCE_CALLABLES_V1.items()
+})
+_LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1 = MappingProxyType({
+    **{math_id: record.contract for math_id, record in ST12D_CUMULATIVE_IMPLEMENTATION_REGISTRY.items()},
+    # LP03 selects the original public B adapter for 36. The C cumulative
+    # registry's overlapping 36 entry is not that evidence invocation identity.
+    "MATH-36": IMPLEMENTATION_REGISTRY["MATH-36"].contract,
+    **_LP03_F_IMPLEMENTATION_CONTRACTS_V1,
+})
+
+
+def _evidence_snapshot_version_pins_v1():
+    """Original identity inventory only; availability requires selected inputs."""
+    roster = tuple(f"MATH-{number:02d}" for number in range(1, 53))
+    if set(_LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1) != set(roster):
+        raise ContractValidationError(ReasonCode.IDENTITY_OR_VERSION_UNRESOLVED, "LP03_IMPLEMENTATION_INVENTORY")
+    return (
+        MappingProxyType({name: _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[name].specification_version for name in roster}),
+        MappingProxyType({name: _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[name].implementation_id for name in roster}),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePrivateInvocationContractV1:
+    math_id: str
+    raw_implementation_id: str
+    actual_adapter_ref: str
+    input_schema_ref: str
+    raw_output_schema_ref: str
+    mathematical_semantic_version: str
+    raw_contract_version: str
+    evidence_projection_version: str
+    owner_bindings: tuple[str, ...]
+    callable_ref: str
+    resource_policy_ref: str
+    origin_policy: str
+    oracle_ref: str
+
+
+LP03_DECIMAL_CONTEXT_POLICY_REF_V1 = "qku/context.py::decimal_context_v1"
+_LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1 = (*tuple(f"MATH-{number:02d}" for number in range(1, 26)), "MATH-36", "MATH-39")
+
+
+def resolve_evidence_invocation_v1(math_id, *, implementation_pin, specification_pin, resource_policy_ref, origin):
+    """Private data invocation profile; original grant admission remains external."""
+    from .context import _native_ident, _native_require
+    from .models import EvidenceOriginV1
+    from .specification import (CURRENT_FORMULA_INPUT_CONTRACTS, CURRENT_NAMED_OUTPUT_CONTRACTS,
+                               EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1, ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1)
+    from .bindings import CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID, EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    _native_require(type(math_id) is str and (math_id in _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1
+                                            or math_id in EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1),
+                    "LP03_PRIVATE_INVOCATION_NOT_IMPLEMENTED")
+    _native_require(type(origin) is EvidenceOriginV1, "LP03_PRIVATE_INVOCATION_ORIGIN")
+    _native_ident(resource_policy_ref)
+    if math_id in EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1:
+        input_contract = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id]
+        output = EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1[math_id]
+        implementation = _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[math_id]
+        _native_require((implementation_pin, specification_pin) == (implementation.implementation_id, implementation.specification_version),
+                        "LP03_PRIVATE_INVOCATION_PIN_MISMATCH")
+        oracle = (TRANCHE_C_IMPLEMENTATION_REGISTRY[math_id].oracle_id if math_id in TRANCHE_C_IMPLEMENTATION_REGISTRY
+                  else ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1[math_id].independent_oracle_ref)
+        return EvidencePrivateInvocationContractV1(math_id, implementation.implementation_id,
+            input_contract.callable_ref, input_contract.schema_id, output.schema_id,
+            implementation.specification_version, output.raw_contract_version, "1.5",
+            tuple(binding.binding_id for binding in input_contract.bindings), output.parent_callable_ref,
+            resource_policy_ref, origin.value, oracle)
+    entry = CURRENT_IMPLEMENTATION_REGISTRY[math_id]
+    _native_require((implementation_pin, specification_pin) == (entry.contract.implementation_id, entry.contract.specification_version),
+                    "LP03_PRIVATE_INVOCATION_PIN_MISMATCH")
+    output = CURRENT_NAMED_OUTPUT_CONTRACTS[math_id]
+    current_d = math_id == "MATH-39"
+    return EvidencePrivateInvocationContractV1(math_id, entry.contract.implementation_id,
+        "implementation_registry.py::" + ("invoke_current_formula" if current_d else "invoke_formula_v34"),
+        CURRENT_FORMULA_INPUT_CONTRACTS[math_id].schema_version,
+        output.schema_id, entry.contract.specification_version, output.schema_version if current_d else "3.4", "1.5",
+        tuple(binding.binding_id for binding in CURRENT_FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]),
+        "implementation_registry.py::" + (entry.callable.__name__ if current_d else _V34_INVOCATION_ADAPTERS[math_id].__name__), resource_policy_ref,
+        origin.value, entry.oracle_id)
+
+
+def invoke_evidence_formula_v1(contract, inputs):
+    """Delegate the selected raw formula once; no authorization or projection here."""
+    from .context import _native_require
+    from .models import EvidenceOriginV1
+    _native_require(type(contract) is EvidencePrivateInvocationContractV1, "LP03_PRIVATE_INVOCATION_CONTRACT")
+    _native_require(contract.math_id in _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1, "LP03_PRIVATE_WIRE_INPUT_REQUIRED")
+    expected = resolve_evidence_invocation_v1(contract.math_id, implementation_pin=contract.raw_implementation_id,
+        specification_pin=contract.mathematical_semantic_version, resource_policy_ref=contract.resource_policy_ref,
+        origin=EvidenceOriginV1(contract.origin_policy))
+    _native_require(contract == expected, "LP03_PRIVATE_INVOCATION_CONTRACT_CHANGED")
+    with localcontext(decimal_context_v1()):
+        return invoke_current_formula(contract.math_id, inputs)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePrivateWireInvocationResultV1:
+    """Actual pure-call outcome, without source or execution authority."""
+
+    contract: EvidencePrivateInvocationContractV1
+    input_json: bytes
+    decoded_inputs: Mapping[str, object]
+    raw_result: object
+    constructor_receipt_or_none: object
+    output_json: bytes
+    decoded_output: object
+    actual_callable: object
+    actual_adapter: object
+    invocation_input_schema_ref: str
+
+
+def _bind_evidence_private_wire_invocation_v1(*, public_routes=False):
+    """Retain the original targets inside their existing dispatch owner."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .context import _native_require, QuantizationReceiptV1, QuantizationRoundingV1
+    from .economic_math import KellyFractionV1, TailRiskV1, QuantizedEconomicAmountV1
+    from .specification import (EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1, CURRENT_NAMED_OUTPUT_CONTRACTS,
+        EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1, EVIDENCE_PUBLIC_RAW_NESTED_FIELDS_V1,
+        EVIDENCE_MATH39_DERIVED_INPUT_SCHEMA_V1)
+    c_registry, f_registry = TRANCHE_C_IMPLEMENTATION_REGISTRY, _ST12F_NEW_EVIDENCE_CALLABLES_V1
+    public_registry, b_registry, b_adapters = CURRENT_IMPLEMENTATION_REGISTRY, IMPLEMENTATION_REGISTRY, _V34_INVOCATION_ADAPTERS
+    d_record = _ST12D_MATH_39_RECORD
+    selected = _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1 if public_routes else tuple(EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1)
+    originals = tuple((name, function, function.__code__) for name in selected
+                      for function in ((d_record.callable if name == "MATH-39" else b_adapters[name]) if public_routes
+                                       else c_registry[name].callable if name in c_registry else f_registry[name],))
+    public_dispatch = invoke_current_formula
+    public_records = tuple((name, public_registry[name], public_registry[name].callable, public_registry[name].callable.__code__)
+                           for name in _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1) if public_routes else ()
+    public_functions = tuple((function.__name__, function, function.__code__) for function in (
+        invoke_current_formula, invoke_formula_v34, _v34_mutable_call_value,
+        *(b_adapters[name] for name in _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1 if name != "MATH-39"),
+        *(row.callable for name, row in PREDECESSOR_IMPLEMENTATION_REGISTRY.items()
+          if name in _LP03_PUBLIC_EVIDENCE_INVOCATION_IDS_V1), d_record.callable)) if public_routes else ()
+    classes = {"KellyFractionV1": KellyFractionV1, "TailRiskV1": TailRiskV1,
+               "QuantizedEconomicAmountV1": QuantizedEconomicAmountV1, "QuantizationReceiptV1": QuantizationReceiptV1}
+    receipt_members = (("receipt_id", "str"), ("policy_ref", "str"), ("field_id", "str"), ("pre_value", "Decimal"),
+                       ("post_value", "Decimal"), ("residual", "Decimal"), ("unit", "str"), ("currency_or_asset", "str"),
+                       ("basis", "str"), ("scale", "int"), ("rounding", "rounding"))
+    quantum_original = None
+
+    def compose_quantum_bridge(bridge):
+        # The modules import each other. Bind once at the end of the original
+        # quantum module's initialization, never lazily to a per-call lookup.
+        import sys
+        from types import FunctionType, ModuleType
+        nonlocal quantum_original
+        name = __package__ + ".quantum_benchmark"
+        module = sys.modules.get(name)
+        _native_require(quantum_original is None and type(module) is ModuleType
+                        and module.__spec__ is not None and module.__spec__._initializing is True
+                        and type(bridge) is FunctionType and bridge.__globals__ is module.__dict__
+                        and bridge.__module__ == name
+                        and bridge.__qualname__ == "_bind_original_quantum_invocation_v1.<locals>.invoke"
+                        and module.__dict__.get("_invoke_evidence_original_quantum_v1") is bridge,
+                        "LP03_QUANTUM_ORIGINAL_BRIDGE_COMPOSITION")
+        quantum_original = (module, bridge, bridge.__code__)
+
+    def original_target(math_id):
+        # Check the known original native mappings before any lookup. Exact
+        # mapping-proxy type alone would not prove a callback-free backing map.
+        if public_routes:
+            _native_require(CURRENT_IMPLEMENTATION_REGISTRY is public_registry and IMPLEMENTATION_REGISTRY is b_registry
+                            and _V34_INVOCATION_ADAPTERS is b_adapters and _ST12D_MATH_39_RECORD is d_record,
+                            "LP03_PUBLIC_ORIGINAL_CALLABLE_CHANGED")
+            for name, function, code in public_functions:
+                _native_require(globals().get(name) is function and function.__code__ is code,
+                                "LP03_PUBLIC_ORIGINAL_CALLABLE_CHANGED")
+            for name, record, function, code in public_records:
+                _native_require(public_registry[name] is record and record.callable is function and function.__code__ is code,
+                                "LP03_PUBLIC_ORIGINAL_CALLABLE_CHANGED")
+        else:
+            _native_require(TRANCHE_C_IMPLEMENTATION_REGISTRY is c_registry and _ST12F_NEW_EVIDENCE_CALLABLES_V1 is f_registry,
+                            "LP03_PRIVATE_ORIGINAL_CALLABLE_CHANGED")
+        for name, function, code in originals:
+            if name == math_id:
+                current = ((d_record.callable if name == "MATH-39" else b_adapters[name]) if public_routes
+                           else c_registry[name].callable if name in c_registry else f_registry[name])
+                _native_require(current is function and function.__code__ is code, "LP03_PRIVATE_ORIGINAL_CALLABLE_CHANGED")
+                return function
+        _native_require(False, "LP03_PRIVATE_ORIGINAL_CALLABLE_UNAVAILABLE")
+
+    def invoke_evidence_private_wire_v1(contract, raw_inputs, *, maximum_input_bytes, maximum_nodes,
+                                        maximum_output_bytes, maximum_output_nodes):
+        """Invoke one original producer and bound its original raw output.
+
+        Output preflight is conservative, including native Decimal formatting
+        allocation. It is not an allocation bound on the formulas themselves,
+        physical-work accounting, source provenance or lane authorization.
+        """
+        import json
+        from .input_resolver import decode_evidence_private_inputs_v1, decode_evidence_public_invocation_inputs_v1
+        from .models import EvidenceOriginV1
+        from .serialization import _evidence_native_decimal_json_upper_v1, _encode_evidence_projection_json_v1
+        from .specification import decode_evidence_raw_output_v1
+        _native_require(type(maximum_output_bytes) is int and 0 < maximum_output_bytes <= 1048576
+                        and type(maximum_output_nodes) is int and 0 < maximum_output_nodes <= 4096,
+                        "LP03_PRIVATE_OUTPUT_BUDGET")
+        _native_require(type(contract) is EvidencePrivateInvocationContractV1
+                        and contract.math_id in selected, "LP03_PRIVATE_WIRE_INVOCATION_CONTRACT")
+        function = original_target(contract.math_id)
+        expected = resolve_evidence_invocation_v1(contract.math_id, implementation_pin=contract.raw_implementation_id,
+            specification_pin=contract.mathematical_semantic_version, resource_policy_ref=contract.resource_policy_ref,
+            origin=EvidenceOriginV1(contract.origin_policy))
+        _native_require(contract == expected, "LP03_PRIVATE_INVOCATION_CONTRACT_CHANGED")
+        decode_inputs = decode_evidence_public_invocation_inputs_v1 if public_routes else decode_evidence_private_inputs_v1
+        inputs = decode_inputs(contract.math_id, raw_inputs,
+            maximum_bytes=maximum_input_bytes, maximum_nodes=maximum_nodes)
+        if public_routes:
+            schema = CURRENT_NAMED_OUTPUT_CONTRACTS[contract.math_id]
+            root_kind = schema.output_type
+            root_members = tuple((member.name, EVIDENCE_PUBLIC_RAW_NESTED_FIELDS_V1.get(
+                (contract.math_id, member.name), member.type_name)) for member in schema.members)
+        else:
+            schema = EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1[contract.math_id]
+            root_kind, root_members = schema.native_type, schema.members
+        size = nodes = 0
+
+        def charge(count):
+            nonlocal size
+            _native_require(size + count <= maximum_output_bytes, "LP03_PRIVATE_OUTPUT_BYTES")
+            size += count
+
+        def text_size(item):
+            _native_require(type(item) is str and len(item) + 2 <= maximum_output_bytes - size,
+                            "LP03_PRIVATE_OUTPUT_TEXT")
+            needed = 2
+            for char in item:
+                point = ord(char)
+                _native_require(not 0xD800 <= point <= 0xDFFF, "LP03_PRIVATE_OUTPUT_TEXT")
+                needed += (2 if char in ('"', '\\', '\b', '\f', '\n', '\r', '\t') else 6 if point < 0x20
+                           else 1 if point < 0x80 else 2 if point < 0x800 else 3 if point < 0x10000 else 4)
+                _native_require(needed <= maximum_output_bytes - size, "LP03_PRIVATE_OUTPUT_BYTES")
+            charge(needed)
+
+        def measure(item, kind, members=()):
+            nonlocal nodes
+            nodes += 1
+            _native_require(nodes <= maximum_output_nodes, "LP03_PRIVATE_OUTPUT_NODES")
+            if kind in ("Decimal", "Decimal string"):
+                charge(_evidence_native_decimal_json_upper_v1(item, maximum_bytes=maximum_output_bytes))
+            elif kind in ("str", "enum") or (kind == "tau" and type(item) is str and item == "INF"):
+                _native_require(type(item) is str and bool(item), "LP03_PRIVATE_OUTPUT_TYPE")
+                text_size(item)
+            elif kind == "nullable_float64" and item is None:
+                charge(4)
+            elif kind == "rounding":
+                _native_require(type(item) is QuantizationRoundingV1, "LP03_PRIVATE_OUTPUT_TYPE")
+                text_size(item.value)
+            elif kind in ("bool", "true", "false", "zero_int", "int", "float64", "nullable_float64", "tau"):
+                valid = (type(item) is bool if kind == "bool" else item is True if kind == "true" else
+                         item is False if kind == "false" else type(item) is int and item == 0 if kind == "zero_int" else
+                         type(item) is int and item.bit_length() <= 426 if kind == "int" else type(item) is float and math.isfinite(item))
+                _native_require(valid, "LP03_PRIVATE_OUTPUT_TYPE")
+                # These native scalar tokens have a fixed finite maximum.
+                token = json.dumps(item, allow_nan=False, separators=(",", ":"))
+                _native_require(len(token) <= 128, "LP03_PRIVATE_OUTPUT_TYPE")
+                charge(len(token))
+            elif kind.startswith("list[") or kind == "interval_pair":
+                _native_require(type(item) in (list, tuple) and len(item) <= maximum_output_nodes - nodes,
+                                "LP03_PRIVATE_OUTPUT_SEQUENCE")
+                if kind == "interval_pair":
+                    _native_require(len(item) == 2, "LP03_PRIVATE_OUTPUT_SEQUENCE")
+                charge(2 + max(0, len(item) - 1))
+                for child in item:
+                    measure(child, "float64" if kind == "interval_pair" else kind[5:-1])
+            elif kind == "tuple[tuple[float64]]":
+                _native_require(type(item) is tuple and 0 < len(item) <= maximum_output_nodes - nodes,
+                                "LP03_PRIVATE_OUTPUT_MATRIX")
+                dimension = len(item)
+                _native_require(dimension * (dimension + 1) <= maximum_output_nodes - nodes, "LP03_PRIVATE_OUTPUT_NODES")
+                charge(2 + dimension - 1)
+                for row in item:
+                    _native_require(type(row) is tuple and len(row) == dimension, "LP03_PRIVATE_OUTPUT_MATRIX")
+                    nodes += 1
+                    charge(2 + dimension - 1)
+                    for value in row:
+                        measure(value, "float64")
+            else:
+                if kind == "QuantizationReceiptV1":
+                    members = receipt_members
+                public_record = public_routes and (kind == "record" or kind in EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1)
+                if public_record and kind != "record":
+                    members = EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1[kind]
+                _native_require(public_record or kind == "record" or kind in classes, "LP03_PRIVATE_OUTPUT_SCHEMA")
+                mapping_record = public_record or kind == "record"
+                _native_require(type(item) is (dict if public_record else MappingProxyType if kind == "record" else classes[kind]),
+                                "LP03_PRIVATE_OUTPUT_TYPE")
+                _native_require(2 * len(members) <= maximum_output_nodes - nodes, "LP03_PRIVATE_OUTPUT_NODES")
+                # A proxy reaches here only as this call's original output from
+                # the retained producer above. No external native value API.
+                if mapping_record:
+                    _native_require(len(item) == len(members) and all(name in item for name, _ in members),
+                                    "LP03_PRIVATE_OUTPUT_FIELDS")
+                charge(2 + len(members) + max(0, len(members) - 1))
+                for name, member_kind in members:
+                    measure(name, "str")
+                    measure(item[name] if mapping_record else object.__getattribute__(item, name), member_kind)
+
+        def normalize(item, kind, members=()):
+            # Only reached after aggregate original-graph preflight. Do not use
+            # dataclasses.asdict or rerun an original object's __post_init__.
+            if kind in ("Decimal", "Decimal string"):
+                return str(item)
+            if kind == "rounding":
+                return item.value
+            if kind == "tuple[tuple[float64]]":
+                return item
+            if kind.startswith("list[") or kind == "interval_pair":
+                return tuple(normalize(child, "float64" if kind == "interval_pair" else kind[5:-1]) for child in item)
+            if kind in ("str", "enum", "bool", "true", "false", "zero_int", "int", "float64", "nullable_float64", "tau"):
+                return item
+            if kind == "QuantizationReceiptV1":
+                members = receipt_members
+            public_record = public_routes and (kind == "record" or kind in EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1)
+            if public_record and kind != "record":
+                members = EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1[kind]
+            return {name: normalize(item[name] if public_record or kind == "record" else object.__getattribute__(item, name), member_kind)
+                    for name, member_kind in members}
+
+        with localcontext(decimal_context_v1()):
+            _native_require(original_target(contract.math_id) is function, "LP03_PRIVATE_ORIGINAL_CALLABLE_CHANGED")
+            supplemental, adapter = None, function
+            if public_routes:
+                # Preserve original mutable-call conversion and output-validator
+                # prefix. Its work belongs in eventual measured supervision;
+                # the following serialization bound does not qualify that work.
+                raw = public_dispatch(contract.math_id, inputs)
+                adapter = public_dispatch
+            elif contract.math_id in ("MATH-50", "MATH-51", "MATH-52"):
+                from . import quantum_benchmark
+                _native_require(quantum_original is not None, "LP03_QUANTUM_ORIGINAL_BRIDGE_UNAVAILABLE")
+                module, bridge, bridge_code = quantum_original
+                _native_require(quantum_benchmark is module and module._invoke_evidence_original_quantum_v1 is bridge
+                                and bridge.__code__ is bridge_code, "LP03_QUANTUM_ORIGINAL_BRIDGE_CHANGED")
+                raw, supplemental, adapter = bridge(contract.math_id, inputs)
+                _native_require(module._invoke_evidence_original_quantum_v1 is bridge and bridge.__code__ is bridge_code,
+                                "LP03_QUANTUM_ORIGINAL_BRIDGE_CHANGED")
+            else:
+                raw = function(**inputs)
+            _native_require(original_target(contract.math_id) is function, "LP03_PRIVATE_ORIGINAL_CALLABLE_CHANGED")
+            measure(raw, root_kind, root_members)
+            normalized = normalize(raw, root_kind, root_members)
+            output_json = _encode_evidence_projection_json_v1(normalized, maximum_bytes=maximum_output_bytes,
+                                                              maximum_nodes=maximum_output_nodes)
+            decoded = decode_evidence_raw_output_v1(contract.math_id, output_json,
+                maximum_bytes=maximum_output_bytes, maximum_nodes=maximum_output_nodes)
+        return EvidencePrivateWireInvocationResultV1(contract, raw_inputs, inputs, raw, supplemental,
+            output_json, decoded, function, adapter,
+            EVIDENCE_MATH39_DERIVED_INPUT_SCHEMA_V1 if contract.math_id == "MATH-39" else contract.input_schema_ref)
+    return invoke_evidence_private_wire_v1, compose_quantum_bridge
+
+
+invoke_evidence_private_wire_v1, _compose_evidence_quantum_bridge_v1 = _bind_evidence_private_wire_invocation_v1()
+invoke_evidence_public_wire_v1 = _bind_evidence_private_wire_invocation_v1(public_routes=True)[0]
+
 
 def get_st12f_evidence_math_callable_v1(math_spec_id: str) -> Callable[..., object]:
     """Internal evidence lookup; it is intentionally outside public service dispatch."""
@@ -5912,3 +6276,780 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "ST12-F evidence registry must reuse 39 and add exactly nine callables",
     )
+
+
+def _bind_evidence_probability_edge_chain_v1():
+    """Bind the existing two producers and converter; confer no source rights."""
+    from . import unit_conversion as conversion_owner
+    from .context import _native_require
+    from .models import (ComputationExecutionContextV1, ComputationScopeV1,
+                         ImplementationVersionPinV1, EvidenceOriginV1)
+    from weakref import WeakKeyDictionary
+    from types import FunctionType
+    issued = WeakKeyDictionary()
+    class_original = class_functions = ()
+    wire_call = invoke_evidence_public_wire_v1
+    resolver = resolve_evidence_invocation_v1
+    converter = conversion_owner.UnitConversionOwnerV1.convert
+    converters = conversion_owner._CONVERTERS
+    conversion_id = conversion_owner.ConversionIdentityV1.DECIMAL_PROBABILITY_TO_FINITE_FLOAT64
+    conversion_function = converters[conversion_id]
+    classes = (conversion_owner.UnitConversionOwnerV1, conversion_owner.UnitConversionReceiptV1,
+               conversion_owner.UnitBasisDescriptorV1)
+    pinned_functions = ((wire_call, wire_call.__code__), (resolver, resolver.__code__),
+        (converter, converter.__code__), (conversion_function, conversion_function.__code__),
+        (conversion_owner.finite_float, conversion_owner.finite_float.__code__),
+        (classes[1].__post_init__, classes[1].__post_init__.__code__),
+        (classes[2].__post_init__, classes[2].__post_init__.__code__))
+
+    def original_owners():
+        if class_original:
+            _native_require(tuple(_EvidenceProbabilityEdgeChainV1.__dict__) == tuple(name for name, _ in class_original)
+                and all(_EvidenceProbabilityEdgeChainV1.__dict__[name] is member for name, member in class_original)
+                and all(function.__code__ is code for function, code in class_functions),
+                "LP03_EDGE_CHAIN_ORIGINAL_OPERATION_CHANGED")
+        _native_require(invoke_evidence_public_wire_v1 is wire_call
+            and resolve_evidence_invocation_v1 is resolver
+            and conversion_owner.UnitConversionOwnerV1 is classes[0]
+            and conversion_owner.UnitConversionReceiptV1 is classes[1]
+            and conversion_owner.UnitBasisDescriptorV1 is classes[2]
+            and classes[0].convert is converter and conversion_owner._CONVERTERS is converters
+            and converters[conversion_id] is conversion_function
+            and conversion_owner._decimal_probability_to_float64 is conversion_function
+            and conversion_owner.finite_float is pinned_functions[4][0]
+            and classes[1].__post_init__ is pinned_functions[5][0]
+            and classes[2].__post_init__ is pinned_functions[6][0]
+            and all(function.__code__ is code for function, code in pinned_functions),
+            "LP03_EDGE_CHAIN_ORIGINAL_OWNER_CHANGED")
+
+    from . import latency_policy as clock_owner
+    from types import BuiltinFunctionType
+    clock_type = clock_owner._EvidenceLocalClockV1
+    clock_namespace = tuple(clock_type.__dict__.items())
+    clock_functions = tuple((member, member.__code__) for _name, member in clock_namespace if type(member) is FunctionType)
+    observe_clock, declare_clock = clock_type.observe_v1, clock_type.declaration_v1
+    validate_measurement = clock_owner._evidence_invocation_measurement_v1
+    measurement_code = validate_measurement.__code__
+    native_clock_functions = (clock_owner.time.time_ns, clock_owner.time.monotonic_ns, clock_owner.time.process_time_ns)
+    clock_fields = ("_kernel", "_ntdll", "_process", "_identity", "clock_domain_id", "process_identity_ref",
+                    "boot_identity_ref", "_EvidenceLocalClockV1__functions", "_EvidenceLocalClockV1__declarations")
+
+    def require_clock_owners():
+        _native_require(clock_owner._EvidenceLocalClockV1 is clock_type
+            and tuple(clock_type.__dict__) == tuple(name for name, _ in clock_namespace)
+            and all(clock_type.__dict__[name] is member for name, member in clock_namespace)
+            and all(function.__code__ is code for function, code in clock_functions)
+            and clock_owner._evidence_invocation_measurement_v1 is validate_measurement
+            and validate_measurement.__code__ is measurement_code
+            and all(type(function) is BuiltinFunctionType for function in native_clock_functions)
+            and all(actual is original for actual, original in zip(
+                (clock_owner.time.time_ns, clock_owner.time.monotonic_ns, clock_owner.time.process_time_ns), native_clock_functions)),
+            "LP03_EDGE_CHAIN_ORIGINAL_CLOCK_OWNER_CHANGED")
+
+    def bind_clock(clock, maximum_output_bytes, maximum_nodes):
+        from .serialization import _encode_evidence_projection_json_v1
+        if clock is None:
+            return None
+        require_clock_owners()
+        _native_require(type(clock) is clock_type, "LP03_EDGE_CHAIN_ORIGINAL_LOCAL_CLOCK_REQUIRED")
+        facts = tuple((name, object.__getattribute__(clock, name)) for name in clock_fields)
+        functions = object.__getattribute__(clock, "_EvidenceLocalClockV1__functions")
+        _native_require(type(functions) is tuple and len(functions) == 3
+            and all(actual is original for actual, original in zip(functions, native_clock_functions)),
+            "LP03_EDGE_CHAIN_ORIGINAL_CLOCK_FUNCTIONS")
+        declarations = declare_clock(clock)
+        # This is the closed three-clock schema from this exact native owner,
+        # not a general conversion of caller-provided mapping proxies.
+        native_declarations = {name: dict(implementation=declarations[name]["implementation"],
+            reported_resolution_ns=tuple(declarations[name]["reported_resolution_ns"]),
+            uncertainty_ns_or_absence=dict(declarations[name]["uncertainty_ns_or_absence"]))
+            for name in ("wall", "monotonic", "process_cpu")}
+        _encode_evidence_projection_json_v1(native_declarations, maximum_bytes=4096, maximum_nodes=256)
+        # Prospective widths only: these are not clock observations. Reserve
+        # space for three retained fragments and their three artifact copies.
+        maximum_counter = 2**63 - 1
+        sizing_sample = (maximum_counter,) * 3
+        sizing_measurement = dict(clock_domain_id=clock.clock_domain_id, boot_identity_ref=clock.boot_identity_ref,
+            process_identity_ref=clock.process_identity_ref, clock_declarations=native_declarations,
+            started=sizing_sample, completed=sizing_sample, duration_ns=maximum_counter, cpu_ns=maximum_counter, outcome="SUCCESS")
+        sizing_payload = dict(stage="CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1", measurement=sizing_measurement,
+            scope="ORIGINAL_CALL_WITH_CUSTODY_CHECKS_RETURN_CAPTURE_AND_ACCOUNTING_BEFORE_WITNESS_AND_SERIALIZATION")
+        payload_bound = len(_encode_evidence_projection_json_v1(sizing_payload,
+            maximum_bytes=65536, maximum_nodes=maximum_nodes))
+        _native_require(6 * payload_bound <= maximum_output_bytes, "LP03_EDGE_CHAIN_MEASUREMENT_SCOPE_BYTES")
+        return clock, facts, declarations, native_declarations, payload_bound
+
+    def require_clock(binding):
+        if binding is None:
+            return
+        require_clock_owners()
+        clock, facts, declarations, _native, _bound = binding
+        _native_require(type(clock) is clock_type
+            and all(object.__getattribute__(clock, name) is value for name, value in facts)
+            and declare_clock(clock) is declarations, "LP03_EDGE_CHAIN_ORIGINAL_CLOCK_CHANGED")
+
+    def require_execution_clock_bounds(state, observation):
+        limits = state["execution_clock_limits"]
+        if limits is not None:
+            # These immutable data bounds only restrict entry/continuation.
+            # Original parent/worker grants and their currentness remain
+            # separate; a sample does not promise an atomic real-time cutoff.
+            _native_require(limits[0] <= observation[0] < limits[1]
+                and limits[2] <= observation[1] < limits[3], "LP03_EDGE_CHAIN_EXECUTION_CLOCK_EXPIRED")
+
+    def execution_clock_limits_data(state):
+        limits = state["execution_clock_limits"]
+        return dict(zip(("valid_from_wall_ns", "exclusive_expiry_wall_ns", "admitted_monotonic_ns", "exclusive_deadline_monotonic_ns"), limits, strict=True))
+
+    def stage_snapshot(state):
+        # Raw observations survive even when validation or encoding failed.
+        # Exception types avoid retaining traceback cycles through this owner.
+        return tuple(MappingProxyType(dict(stage=row[0], status=row[1], started=row[2], completed=row[3],
+            call_outcome=row[4], measurement=row[5],
+            measurement_failure_class=None if row[6] is None else row[6].__module__ + "." + row[6].__qualname__,
+            call_failure_class=None if row[7] is None else row[7].__module__ + "." + row[7].__qualname__,
+            return_processing_failure_class=None if row[9] is None else row[9].__module__ + "." + row[9].__qualname__,
+            measurement_json=row[8])) for row in state["stage_records"])
+
+    wire_return_fields = ("contract", "input_json", "decoded_inputs", "raw_result", "constructor_receipt_or_none",
+                          "output_json", "decoded_output", "actual_callable", "actual_adapter", "invocation_input_schema_ref")
+    conversion_return_fields = ("receipt_id", "conversion_id", "conversion_version", "source", "target", "source_value",
+                                "converted_value", "rounding_and_precision", "execution_context", "failure_disposition", "no_authority_flag")
+    descriptor_return_fields = ("type_name", "shape", "unit", "basis")
+
+    def require_return_captures(state):
+        if state["clock_binding"] is None:
+            return
+        for name in ("producer", "conversion", "consumer"):
+            count = state["return_capture_counts"][name]
+            if not count:
+                continue
+            obj = state[name][1] if name == "conversion" else state[name]
+            names = conversion_return_fields if name == "conversion" else wire_return_fields
+            cells = state["return_capture_cells"][name]
+            for index in range(count):
+                _native_require(object.__getattribute__(obj, names[index]) is cells[index],
+                                "LP03_EDGE_CHAIN_RETURN_MEMBER_CHANGED_DURING_OBSERVATION")
+        for index in range(2):
+            count = state["descriptor_capture_counts"][index]
+            cells = state["descriptor_capture_cells"][index]
+            for position in range(count):
+                _native_require(object.__getattribute__(cells[0], descriptor_return_fields[position]) is cells[position + 1],
+                                "LP03_EDGE_CHAIN_DESCRIPTOR_CHANGED_DURING_OBSERVATION")
+
+    def lookup(operation):
+        from .input_resolver import _require_evidence_resolution_witness_v1
+        original_owners()
+        _native_require(type(operation) is _EvidenceProbabilityEdgeChainV1 and operation in issued,
+                        "LP03_EDGE_CHAIN_ORIGINAL_OPERATION_REQUIRED")
+        state = issued[operation]
+        require_clock(state["clock_binding"])
+        require_return_captures(state)
+        original = state["original"]
+        _require_evidence_resolution_witness_v1(original[9], original[10])
+        stack_owner, edge_owner, stacks, edges, stack, edge, stack_values, edge_values = state["stack_pins"]
+        _native_require(stack_owner.REGISTERED_FORMULA_STACKS is stacks and edge_owner.FROZEN_DEPENDENCY_RELATIONSHIPS is edges
+            and stacks[stack_values[0]] is stack and edges[edge_values[0]] is edge
+            and (stack.stack_id, stack.component_ids, stack.data_edge_id, stack.stack_version, stack.current_mode_admission) == stack_values
+            and (edge.edge_id, edge.kind.value, edge.producer_math_spec_id, edge.consumer_math_spec_id,
+                edge.producer_output_field, edge.producer_output_schema_ref, edge.consumer_input_field,
+                edge.conversion_ref, edge.point_in_time_rule, edge.type_shape_unit_basis_rule, edge.failure_route) == edge_values,
+            "LP03_EDGE_CHAIN_REGISTERED_STACK_CHANGED")
+        for name in ("producer", "conversion", "consumer"):
+            if state[name + "_status"] == "WITNESSED":
+                obj = state[name][1] if name == "conversion" else state[name]
+                _native_require(all(object.__getattribute__(obj, field) is value for field, value in state[name + "_fields"]),
+                                "LP03_EDGE_CHAIN_ORIGINAL_RESULT_CHANGED")
+            else:
+                _native_require(state[name + "_status"] in ("NOT_RETURNED", "RETURNED_UNWITNESSED"),
+                                "LP03_EDGE_CHAIN_RESULT_STATUS")
+        for obj, fields in state["descriptor_fields"]:
+            _native_require(all(object.__getattribute__(obj, field) is value for field, value in fields),
+                            "LP03_EDGE_CHAIN_ORIGINAL_DESCRIPTOR_CHANGED")
+        return state
+
+    class _EvidenceProbabilityEdgeChainV1:
+        """One registered stack sequence; no source or execution grant.
+
+        Only completed wire-owner returns are retained. If an inner call or
+        its output validation/encoding fails, its wire return is unavailable.
+        The entered failure and every earlier returned object remain recorded;
+        a failed operation cannot retry. Model/calibration authority, source
+        admission and aggregate worker measurement remain separate. An optional
+        original local clock measures these three call boundaries only.
+        """
+
+        __slots__ = ("__weakref__",)
+
+        def __init__(self, *, contracts, market_input_json, model_input_json, context,
+                     conversion_receipt_id, maximum_input_bytes, maximum_nodes, maximum_output_bytes, measurement_clock=None, execution_clock_limits=None):
+            from .serialization import _native_strict_json, _encode_evidence_projection_json_v1
+            from . import stack_resolver, dependency_graph
+            from .input_resolver import (decode_evidence_public_invocation_inputs_v1,
+                _evidence_native_graph_witness_v1, _require_evidence_resolution_witness_v1)
+            _native_require(type(self) is _EvidenceProbabilityEdgeChainV1 and self not in issued,
+                            "LP03_EDGE_CHAIN_ALREADY_INITIALIZED")
+            original_owners()
+            stacks, edges = stack_resolver.REGISTERED_FORMULA_STACKS, dependency_graph.FROZEN_DEPENDENCY_RELATIONSHIPS
+            stack = stacks["STACK::MATH-01::MATH-02::V3_4"]
+            edge = edges["EDGE::MATH-01::MATH-02"]
+            stack_values = (stack.stack_id, stack.component_ids, stack.data_edge_id, stack.stack_version, stack.current_mode_admission)
+            edge_values = (edge.edge_id, edge.kind.value, edge.producer_math_spec_id, edge.consumer_math_spec_id,
+                edge.producer_output_field, edge.producer_output_schema_ref, edge.consumer_input_field,
+                edge.conversion_ref, edge.point_in_time_rule, edge.type_shape_unit_basis_rule, edge.failure_route)
+            _native_require(stack_values == ("STACK::MATH-01::MATH-02::V3_4", ("MATH-01", "MATH-02"),
+                "EDGE::MATH-01::MATH-02", "3.4", "CONTRACT_AND_FIXTURE_ONLY_NO_MODE_ACTIVATION")
+                and edge_values == ("EDGE::MATH-01::MATH-02", "DATA_FLOW_EDGE", "MATH-01", "MATH-02",
+                    "implied_probability", "MATH-01::OUTPUT", "market_implied_probability",
+                    "CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1", "SAME_CONTEXT_SNAPSHOT",
+                    "Decimal scalar probability -> float64 scalar probability through EXACT_DECIMAL_TO_FINITE_FLOAT64_PROBABILITY_ADAPTER_V1",
+                    "DEPENDENCY_UNRESOLVED_BLOCK_CONTEXT_AND_STACK"), "LP03_EDGE_CHAIN_REGISTERED_STACK")
+            _native_require(type(contracts) is tuple and len(contracts) == 2
+                and all(type(row) is EvidencePrivateInvocationContractV1 for row in contracts)
+                and tuple(row.math_id for row in contracts) == ("MATH-01", "MATH-02")
+                and contracts[0].resource_policy_ref == contracts[1].resource_policy_ref
+                and all(row.origin_policy == EvidenceOriginV1.SOFTWARE_CONFORMANCE.value for row in contracts),
+                "LP03_EDGE_CHAIN_EXACT_CONTRACTS")
+            for row in contracts:
+                expected = resolver(row.math_id, implementation_pin=row.raw_implementation_id,
+                    specification_pin=row.mathematical_semantic_version, resource_policy_ref=row.resource_policy_ref,
+                    origin=EvidenceOriginV1.SOFTWARE_CONFORMANCE)
+                _native_require(row == expected, "LP03_EDGE_CHAIN_EXACT_CONTRACTS")
+            _native_require(type(context) is ComputationExecutionContextV1
+                and context.dependency_graph_id == "STACK::MATH-01::MATH-02::V3_4"
+                and context.dependency_graph_version == "3.4"
+                and tuple((row.math_spec_id, row.implementation_id) for row in context.implementation_versions)
+                    == tuple((row.math_id, row.raw_implementation_id) for row in contracts),
+                "LP03_EDGE_CHAIN_SAME_SNAPSHOT_CONTEXT")
+            _native_require(type(conversion_receipt_id) is str and 0 < len(conversion_receipt_id) <= 256
+                and conversion_receipt_id.isascii() and all(char.isalnum() or char in "_-.:" for char in conversion_receipt_id),
+                "LP03_EDGE_CHAIN_CONVERSION_RECEIPT_ID")
+            _native_require(type(maximum_input_bytes) is int and 0 < maximum_input_bytes <= 65536
+                and type(maximum_output_bytes) is int and 0 < maximum_output_bytes <= 65536
+                and type(maximum_nodes) is int and 0 < maximum_nodes <= 4096,
+                "LP03_EDGE_CHAIN_FINITE_LIMITS")
+            _native_require(type(market_input_json) is bytes and type(model_input_json) is bytes
+                and 0 < len(market_input_json) + len(model_input_json) < maximum_input_bytes,
+                "LP03_EDGE_CHAIN_INPUT_BYTES")
+            decode_evidence_public_invocation_inputs_v1("MATH-01", market_input_json,
+                maximum_bytes=maximum_input_bytes, maximum_nodes=maximum_nodes)
+            model = _native_strict_json(model_input_json, max_bytes=maximum_input_bytes,
+                                       max_nodes=maximum_nodes, binary64_numbers=True)
+            _native_require(type(model) is dict and set(model) == {"calibrated_model_probability", "calibration_state"}
+                and type(model["calibrated_model_probability"]) is float
+                and math.isfinite(model["calibrated_model_probability"])
+                and 0.0 <= model["calibrated_model_probability"] <= 1.0
+                and type(model["calibration_state"]) is str
+                and model["calibration_state"] == "CALIBRATED_FOR_DECLARED_CONTEXT",
+                "LP03_EDGE_CHAIN_MODEL_DATA_ONLY")
+            _native_require(_encode_evidence_projection_json_v1(model,
+                maximum_bytes=maximum_input_bytes, maximum_nodes=maximum_nodes) == model_input_json,
+                "LP03_EDGE_CHAIN_MODEL_NONCANONICAL")
+            model = MappingProxyType(model)
+            context_graph = (contracts, context, stack_values, edge_values)
+            context_witness = _evidence_native_graph_witness_v1(context_graph,
+                (EvidencePrivateInvocationContractV1, ComputationExecutionContextV1,
+                 ComputationScopeV1, ImplementationVersionPinV1),
+                maximum_bytes=maximum_input_bytes - len(market_input_json) - len(model_input_json))
+            # Bound the retained context reconstruction before either invocation.
+            _native_strict_json(context_witness[2].encode("utf-8"), max_bytes=maximum_input_bytes,
+                                max_nodes=maximum_nodes, binary64_numbers=True)
+            original = (contracts, market_input_json, model_input_json, context, conversion_receipt_id,
+                        maximum_input_bytes, maximum_nodes, maximum_output_bytes, model, context_graph, context_witness)
+            clock_binding = bind_clock(measurement_clock, maximum_output_bytes, maximum_nodes)
+            if execution_clock_limits is not None:
+                _native_require(clock_binding is not None and type(execution_clock_limits) is tuple
+                    and len(execution_clock_limits) == 4
+                    and all(type(value) is int and 0 <= value < 2**63 for value in execution_clock_limits)
+                    and execution_clock_limits[0] < execution_clock_limits[1]
+                    and execution_clock_limits[2] < execution_clock_limits[3],
+                    "LP03_EDGE_CHAIN_EXECUTION_CLOCK_LIMITS")
+            stage_records = tuple([name, "NOT_ENTERED", None, None, "NOT_ENTERED", None, None, None, None, None]
+                for name in ("MATH-01", "CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1", "MATH-02"))
+            issued[self] = dict(original=original, clock_binding=clock_binding, execution_clock_limits=execution_clock_limits, stage_records=stage_records,
+                return_capture_cells=dict(producer=[None] * 10, conversion=[None] * 11, consumer=[None] * 10),
+                return_capture_counts=dict(producer=0, conversion=0, consumer=0),
+                descriptor_capture_cells=([None] * 5, [None] * 5), descriptor_capture_counts=[0, 0],
+                phase="PREPARED", producer=None, conversion=None,
+                conversion_json=None, derived_inputs=None, consumer_input=None, consumer=None, artifact_json=None,
+                serialized_bytes=0, failure_phase=None, producer_status="NOT_RETURNED", conversion_status="NOT_RETURNED",
+                consumer_status="NOT_RETURNED", producer_fields=(), conversion_fields=(), consumer_fields=(),
+                descriptor_fields=(), stack_pins=(stack_resolver, dependency_graph, stacks, edges, stack, edge, stack_values, edge_values))
+
+        @property
+        def original(self):
+            return lookup(self)["original"]
+
+        @property
+        def phase(self):
+            return lookup(self)["phase"]
+
+        @property
+        def execution_clock_limits(self):
+            return lookup(self)["execution_clock_limits"]
+
+        @property
+        def producer(self):
+            return lookup(self)["producer"]
+
+        @property
+        def conversion(self):
+            return lookup(self)["conversion"]
+
+        @property
+        def consumer(self):
+            return lookup(self)["consumer"]
+
+        def inspect_v1(self):
+            state = lookup(self)
+            data = {name: state[name] for name in ("phase", "producer", "conversion",
+                "conversion_json", "derived_inputs", "consumer_input", "consumer", "artifact_json", "serialized_bytes",
+                "failure_phase", "producer_status", "conversion_status", "consumer_status")}
+            if state["clock_binding"] is not None:
+                data["stage_records"] = stage_snapshot(state)
+            if state["execution_clock_limits"] is not None:
+                data["execution_clock_limits"] = execution_clock_limits_data(state)
+            return MappingProxyType(data)
+
+        def failure_prefix_v1(self, *, maximum_bytes, maximum_embedded_bytes):
+            """Export captured diagnostics without re-reading damaged returns.
+
+            This cannot supply a completed result or source authority. It is
+            deliberately independent of lookup(): the failure may itself be a
+            changed owner, clock, descriptor or returned-object member. Only
+            the exact constructor-owned entry and immutable captured data are
+            read. A missing capture is reported rather than reconstructed.
+            The worker charges the returned bytes to its original output
+            allowance; this is separate from the completed chain artifact.
+            maximum_embedded_bytes includes the two outer JSON string quotes.
+            """
+            import struct
+            from .serialization import _encode_evidence_projection_json_v1
+            _native_require(type(self) is _EvidenceProbabilityEdgeChainV1 and self in issued,
+                            "LP03_EDGE_CHAIN_ORIGINAL_DIAGNOSTIC_REQUIRED")
+            state = issued[self]
+            _native_require(state["phase"] in ("FAILED", "COMPLETED")
+                and state["clock_binding"] is not None
+                and type(maximum_bytes) is int and 0 < maximum_bytes <= 65536
+                and type(maximum_embedded_bytes) is int and 0 < maximum_embedded_bytes <= 65536,
+                "LP03_EDGE_CHAIN_TERMINAL_DIAGNOSTIC_ONLY")
+            original = state["original"]
+            def exception_label(kind):
+                if kind is None:
+                    return None
+                # Read exact class metadata without a metaclass callback, and
+                # bound its concatenation before allocating the joined label.
+                _native_require(type(kind) is type, "LP03_EDGE_CHAIN_DIAGNOSTIC_EXCEPTION_TYPE")
+                module = type.__getattribute__(kind, "__module__")
+                name = type.__getattribute__(kind, "__qualname__")
+                _native_require(type(module) is str and type(name) is str and 0 < len(module) + 1 + len(name) <= 256,
+                                "LP03_EDGE_CHAIN_DIAGNOSTIC_EXCEPTION_LABEL")
+                from .context import _native_ident
+                label = module + "." + name
+                _native_ident(label)
+                return label
+            copies = []
+            def capture(raw, absence_reason):
+                if type(raw) is not bytes:
+                    return dict(state="ABSENT_WITH_REASON", reason=absence_reason)
+                cell = dict(state="CAPTURED_ORIGINAL_BYTES", value="")
+                copies.append((raw, cell))
+                return cell
+            # These objects were retained before the potentially damaging
+            # boundary. Do not inspect the original result/receipt objects.
+            returns = []
+            for name in ("producer", "consumer"):
+                count = state["return_capture_counts"][name]
+                cells = state["return_capture_cells"][name]
+                input_wire = cells[1] if count >= 2 and type(cells[1]) is bytes else None
+                output_wire = cells[5] if count >= 6 and type(cells[5]) is bytes else None
+                returns.append(dict(stage="MATH-01" if name == "producer" else "MATH-02",
+                    return_status=state[name + "_status"], captured_member_count=count,
+                    input_json_or_absence=capture(input_wire, "CAPTURED_INPUT_MEMBER_NOT_BYTES" if count >= 2 else "ORIGINAL_INPUT_BYTES_NOT_CAPTURED"),
+                    output_json_or_absence=capture(output_wire, "CAPTURED_OUTPUT_MEMBER_NOT_BYTES" if count >= 6 else "ORIGINAL_OUTPUT_BYTES_NOT_CAPTURED")))
+            cells = state["return_capture_cells"]["conversion"]
+            count = state["return_capture_counts"]["conversion"]
+            converted = cells[6] if count >= 7 and type(cells[6]) is float else None
+            receipt_wire = state["conversion_json"]
+            conversion = dict(return_status=state["conversion_status"], captured_member_count=count,
+                input_descriptor_captures=[dict(captured_member_count=state["descriptor_capture_counts"][index],
+                    fields={descriptor_return_fields[position]:state["descriptor_capture_cells"][index][position + 1]
+                            for position in range(state["descriptor_capture_counts"][index])}) for index in range(2)],
+                receipt_json_or_absence=capture(receipt_wire, "ORIGINAL_RECEIPT_BYTES_NOT_ENCODED"),
+                converted_binary64_or_absence=(dict(state="CAPTURED_ORIGINAL_BINARY64", big_endian_hex=struct.pack(">d", converted).hex())
+                    if converted is not None else dict(state="ABSENT_WITH_REASON",
+                        reason="CAPTURED_CONVERTED_MEMBER_NOT_BINARY64" if count >= 7 else "ORIGINAL_CONVERTED_VALUE_NOT_CAPTURED")))
+            stages = []
+            for row in state["stage_records"]:
+                stages.append(dict(stage=row[0], status=row[1], started=row[2], completed=row[3], call_outcome=row[4],
+                    measurement_validation="VALIDATED" if row[5] is not None else "NOT_VALIDATED",
+                    measurement_json_or_absence=capture(row[8], "ORIGINAL_MEASUREMENT_BYTES_NOT_ENCODED"),
+                    measurement_failure_class=exception_label(row[6]),
+                    call_failure_class=exception_label(row[7]),
+                    return_processing_failure_class=exception_label(row[9])))
+            binding = state["clock_binding"]
+            facts = dict(binding[1])
+            data = dict(profile="CAPTURED_ORIGINAL_STACK_PREFIX_DIAGNOSTIC_NO_RESULT_AUTHORITY_V1",
+                stack_id="STACK::MATH-01::MATH-02::V3_4", edge_id="EDGE::MATH-01::MATH-02",
+                conversion_receipt_id=original[4], phase=state["phase"], failure_phase=state["failure_phase"],
+                original_serialized_bytes=state["serialized_bytes"],
+                clock_identity=dict(clock_domain_id=facts["clock_domain_id"], boot_identity_ref=facts["boot_identity_ref"],
+                                    process_identity_ref=facts["process_identity_ref"]),
+                clock_declarations=binding[3],
+                returns=returns, conversion=conversion, stages=stages)
+            if state["execution_clock_limits"] is not None:
+                data["execution_clock_limits"] = execution_clock_limits_data(state)
+            # Preflight both copies of these bytes: first as a string in this
+            # prefix, then the prefix string embedded in the outer FAILED
+            # frame. UTF-8 continuation bytes pass through unchanged. The
+            # original encoder uses ensure_ascii=False and these exact JSON
+            # escapes. No source-sized decode has happened at this point.
+            def string_content_width(raw, *, twice=False):
+                size = 0
+                for byte in raw:
+                    size += ((4 if twice else 2) if byte in (34,92) else
+                             (3 if twice else 2) if byte in (8,9,10,12,13) else
+                             (7 if twice else 6) if byte < 32 else 1)
+                return size
+            base = _encode_evidence_projection_json_v1(data, maximum_bytes=maximum_bytes, maximum_nodes=4096)
+            prefix_size = len(base)
+            embedded_size = 2 + string_content_width(base)
+            for raw,_cell in copies:
+                prefix_size += string_content_width(raw)
+                embedded_size += string_content_width(raw, twice=True)
+                _native_require(prefix_size <= maximum_bytes and embedded_size <= maximum_embedded_bytes,
+                                "LP03_EDGE_CHAIN_DIAGNOSTIC_COPY_BOUND")
+            _native_require(prefix_size <= maximum_bytes and embedded_size <= maximum_embedded_bytes,
+                            "LP03_EDGE_CHAIN_DIAGNOSTIC_COPY_BOUND")
+            for raw,cell in copies:
+                cell["value"] = raw.decode("utf-8", "strict")
+            return _encode_evidence_projection_json_v1(data, maximum_bytes=maximum_bytes, maximum_nodes=4096)
+
+
+        def run_v1(self):
+            import struct
+            from .serialization import _native_strict_json, _encode_evidence_projection_json_v1
+            state = lookup(self)
+            _native_require(state["phase"] == "PREPARED", "LP03_EDGE_CHAIN_ALREADY_STARTED_OR_UNRESOLVED")
+            # All slots already exist. Immediately record entry and returned
+            # objects before allocating or validating their field witnesses.
+            state["phase"] = "MATH01_RUNNING"
+            original = state["original"]
+            contracts, market_wire, _model_wire, context, receipt_id, max_input, max_nodes, max_output, model, *_ = original
+
+            def charge(size):
+                _native_require(type(size) is int and size >= 0 and state["serialized_bytes"] + size <= max_output,
+                                "LP03_EDGE_CHAIN_OUTPUT_BYTES")
+                state["serialized_bytes"] += size
+
+            def witness_result(name):
+                obj = state[name]
+                _native_require(type(obj) is EvidencePrivateWireInvocationResultV1,
+                                "LP03_EDGE_CHAIN_ORIGINAL_WIRE_RESULT")
+                fields = tuple((field, object.__getattribute__(obj, field)) for field in (
+                    "contract", "input_json", "decoded_inputs", "raw_result", "constructor_receipt_or_none",
+                    "output_json", "decoded_output", "actual_callable", "actual_adapter", "invocation_input_schema_ref"))
+                state[name + "_fields"] = fields
+                state[name + "_status"] = "WITNESSED"
+
+            def begin_stage(index):
+                if state["clock_binding"] is None:
+                    return
+                row = state["stage_records"][index]
+                row[1] = "START_CLOCK_PENDING"
+                try:
+                    require_clock(state["clock_binding"])
+                    observed = observe_clock(state["clock_binding"][0])
+                    row[2] = observed
+                    _native_require(type(observed) is tuple and len(observed) == 3
+                        and all(type(value) is int and 0 <= value < 2**63 for value in observed),
+                        "LP03_EDGE_CHAIN_START_CLOCK_SAMPLE")
+                    require_execution_clock_bounds(state, observed)
+                    if index:
+                        previous = state["stage_records"][index - 1]
+                        _native_require(previous[1] == "VALIDATED" and previous[4] == "SUCCESS"
+                            and all(current >= earlier for current, earlier in zip(observed, previous[3])),
+                            "LP03_EDGE_CHAIN_ORDERED_STAGE_CLOCKS")
+                    # Native observation is itself a custody boundary. Check
+                    # all original owners, context and earlier returns again.
+                    lookup(self)
+                    row[1], row[4] = "CALL_ENTERED", "ENTERED"
+                except BaseException as error:
+                    row[6] = type(error)
+                    row[1] = "START_CLOCK_FAILED"
+                    raise
+
+            def finish_stage(index, outcome, *, encode=True):
+                if state["clock_binding"] is None:
+                    return
+                row = state["stage_records"][index]
+                row[4], row[1] = outcome, "END_CLOCK_PENDING"
+                try:
+                    require_clock(state["clock_binding"])
+                    clock = state["clock_binding"][0]
+                    ended = observe_clock(clock)
+                    row[3] = ended
+                    # End the actual call interval before allocating any
+                    # result-field witnesses or measurement representation.
+                    row[1] = "END_CLOCK_OBSERVED"
+                    lookup(self)
+                    _native_require(type(ended) is tuple and len(ended) == 3
+                        and all(type(value) is int and 0 <= value < 2**63 for value in ended),
+                        "LP03_EDGE_CHAIN_END_CLOCK_SAMPLE")
+                    require_execution_clock_bounds(state, ended)
+                    if not encode:
+                        row[1] = "END_CLOCK_OBSERVED_RETURN_CAPTURE_INCOMPLETE"
+                        return
+                    native = dict(clock_domain_id=clock.clock_domain_id, boot_identity_ref=clock.boot_identity_ref,
+                        process_identity_ref=clock.process_identity_ref, clock_declarations=state["clock_binding"][3],
+                        started=row[2], completed=ended, duration_ns=ended[1] - row[2][1],
+                        cpu_ns=ended[2] - row[2][2], outcome=outcome)
+                    payload = dict(stage=row[0], measurement=native,
+                        scope="ORIGINAL_CALL_WITH_CUSTODY_CHECKS_RETURN_CAPTURE_AND_ACCOUNTING_BEFORE_WITNESS_AND_SERIALIZATION")
+                    raw_measurement = _encode_evidence_projection_json_v1(payload,
+                        maximum_bytes=max_output - state["serialized_bytes"], maximum_nodes=max_nodes)
+                    row[8] = raw_measurement
+                    charge(len(raw_measurement))
+                    row[1] = "MEASUREMENT_ENCODED_UNVALIDATED"
+                    measurement = validate_measurement(native)
+                    row[5] = measurement
+                    row[1] = "RETURNED_UNWITNESSED" if outcome == "SUCCESS" else "CALL_FAILED"
+                except BaseException as error:
+                    row[6] = type(error)
+                    row[1] = "MEASUREMENT_UNAVAILABLE_OR_UNENCODED"
+                    raise
+
+            def failed_stage(index, primary):
+                if state["clock_binding"] is None:
+                    return
+                row = state["stage_records"][index]
+                row[7] = type(primary)
+                try:
+                    finish_stage(index, "FAILED")
+                except BaseException:
+                    # The original call exception remains the raised cause.
+                    # This secondary observation failure is already retained.
+                    pass
+
+            def validated_stage(index):
+                if state["clock_binding"] is not None:
+                    state["stage_records"][index][1] = "VALIDATED"
+
+            def latch_input_descriptors(source_descriptor, target_descriptor):
+                if state["clock_binding"] is None:
+                    return
+                for index, descriptor in enumerate((source_descriptor, target_descriptor)):
+                    cells = state["descriptor_capture_cells"][index]
+                    cells[0] = descriptor
+                    for position in range(4):
+                        cells[position + 1] = object.__getattribute__(descriptor, descriptor_return_fields[position])
+                        state["descriptor_capture_counts"][index] = position + 1
+
+            def latch_return_members(name, stage_index):
+                if state["clock_binding"] is None:
+                    return
+                # Every field slot existed before the first call. Preserve the
+                # original returned members before another native observation.
+                state["stage_records"][stage_index][4] = "SUCCESS"
+                try:
+                    require_return_captures(state)
+                    obj = state[name]
+                    if name == "conversion":
+                        _native_require(type(obj) is tuple and len(obj) == 2 and type(obj[1]) is classes[1],
+                                        "LP03_EDGE_CHAIN_ORIGINAL_CONVERSION_RESULT")
+                        obj = obj[1]
+                        names = conversion_return_fields
+                    else:
+                        _native_require(type(obj) is EvidencePrivateWireInvocationResultV1,
+                                        "LP03_EDGE_CHAIN_ORIGINAL_WIRE_RESULT")
+                        names = wire_return_fields
+                    cells = state["return_capture_cells"][name]
+                    for index in range(len(names)):
+                        cells[index] = object.__getattribute__(obj, names[index])
+                        state["return_capture_counts"][name] = index + 1
+                    if name == "conversion":
+                        for index in range(2):
+                            descriptor = cells[3 + index]
+                            fields = state["descriptor_capture_cells"][index]
+                            _native_require(type(descriptor) is classes[2] and descriptor is fields[0]
+                                and state["descriptor_capture_counts"][index] == 4,
+                                "LP03_EDGE_CHAIN_ORIGINAL_DESCRIPTOR")
+                    else:
+                        _native_require(type(cells[5]) is bytes, "LP03_EDGE_CHAIN_ORIGINAL_WIRE_BYTES")
+                        # Account the original returned output before timing
+                        # evidence can spend any of the remaining allowance.
+                        charge(len(cells[5]))
+                except BaseException as primary:
+                    state["stage_records"][stage_index][9] = type(primary)
+                    try:
+                        finish_stage(stage_index, "SUCCESS", encode=False)
+                    except BaseException:
+                        pass
+                    raise
+
+            try:
+                original_owners()
+                begin_stage(0)
+                try:
+                    result = wire_call(contracts[0], market_wire, maximum_input_bytes=max_input, maximum_nodes=max_nodes,
+                                      maximum_output_bytes=max_output, maximum_output_nodes=max_nodes)
+                except BaseException as error:
+                    failed_stage(0, error)
+                    raise
+                state["producer"] = result
+                state["producer_status"] = "RETURNED_UNWITNESSED"
+                state["phase"] = "MATH01_RETURNED"
+                if state["clock_binding"] is not None:
+                    state["stage_records"][0][1], state["stage_records"][0][4] = "RETURN_CAPTURE_PENDING", "SUCCESS"
+                latch_return_members("producer", 0)
+                finish_stage(0, "SUCCESS")
+                witness_result("producer")
+                lookup(self)
+                _native_require(result.contract is contracts[0] and result.input_json is market_wire
+                    and type(result.raw_result) is Decimal, "LP03_EDGE_CHAIN_ORIGINAL_PRODUCER_RESULT")
+                if state["clock_binding"] is None:
+                    charge(len(result.output_json))
+                validated_stage(0)
+                state["phase"] = "CONVERSION_RUNNING"
+                source_descriptor = classes[2]("Decimal", "scalar", "dimensionless", "winning payout-normalized probability")
+                target_descriptor = classes[2]("float64", "scalar", "probability points", "unit interval")
+                latch_input_descriptors(source_descriptor, target_descriptor)
+                begin_stage(1)
+                try:
+                    returned = converter(conversion_id=conversion_id, value=result.raw_result,
+                        source=source_descriptor, target=target_descriptor,
+                        context=context, receipt_id=receipt_id)
+                except BaseException as error:
+                    failed_stage(1, error)
+                    raise
+                state["conversion"] = returned
+                state["conversion_status"] = "RETURNED_UNWITNESSED"
+                state["phase"] = "CONVERSION_RETURNED"
+                if state["clock_binding"] is not None:
+                    state["stage_records"][1][1], state["stage_records"][1][4] = "RETURN_CAPTURE_PENDING", "SUCCESS"
+                latch_return_members("conversion", 1)
+                finish_stage(1, "SUCCESS")
+                _native_require(type(returned) is tuple and len(returned) == 2, "LP03_EDGE_CHAIN_ORIGINAL_CONVERSION_RESULT")
+                converted, receipt = returned
+                _native_require(type(converted) is float and type(receipt) is classes[1]
+                    and receipt.source_value is result.raw_result and receipt.converted_value is converted
+                    and receipt.execution_context is context and receipt.no_authority_flag is True,
+                    "LP03_EDGE_CHAIN_ORIGINAL_CONVERSION_RESULT")
+                fields = tuple((field, object.__getattribute__(receipt, field)) for field in (
+                    "receipt_id", "conversion_id", "conversion_version", "source", "target", "source_value",
+                    "converted_value", "rounding_and_precision", "execution_context", "failure_disposition", "no_authority_flag"))
+                descriptor_fields = tuple((descriptor, tuple((field, object.__getattribute__(descriptor, field))
+                    for field in ("type_name", "shape", "unit", "basis"))) for descriptor in (receipt.source, receipt.target))
+                state["conversion_fields"], state["descriptor_fields"] = fields, descriptor_fields
+                state["conversion_status"] = "WITNESSED"
+                lookup(self)
+                validated_stage(1)
+                # Preflight the entire known-original receipt before encoding.
+                context_data = _native_strict_json(original[10][2].encode("utf-8"),
+                    max_bytes=max_input, max_nodes=max_nodes, binary64_numbers=True)[1]
+                source_text = _native_strict_json(state["producer"].output_json,
+                    max_bytes=max_output, max_nodes=max_nodes, binary64_numbers=True)
+                receipt_data = dict(receipt_id=receipt.receipt_id, conversion_id=receipt.conversion_id.value,
+                    conversion_version=receipt.conversion_version,
+                    source=dict(type_name=receipt.source.type_name, shape=receipt.source.shape,
+                                unit=receipt.source.unit, basis=receipt.source.basis),
+                    target=dict(type_name=receipt.target.type_name, shape=receipt.target.shape,
+                                unit=receipt.target.unit, basis=receipt.target.basis),
+                    source_value=source_text, converted_value=converted,
+                    rounding_and_precision=receipt.rounding_and_precision, execution_context=context_data,
+                    failure_disposition=receipt.failure_disposition, no_authority_flag=receipt.no_authority_flag)
+                receipt_wire = _encode_evidence_projection_json_v1(receipt_data,
+                    maximum_bytes=max_output - state["serialized_bytes"], maximum_nodes=max_nodes)
+                state["conversion_json"] = receipt_wire
+                charge(len(receipt_wire))
+                derived_native = dict(model, market_implied_probability=converted)
+                derived = MappingProxyType(derived_native)
+                state["derived_inputs"] = derived
+                raw = _encode_evidence_projection_json_v1(derived_native,
+                    maximum_bytes=min(max_input, max_output - state["serialized_bytes"]), maximum_nodes=max_nodes)
+                state["consumer_input"] = raw
+                charge(len(raw))
+                lookup(self)
+                state["phase"] = "MATH02_RUNNING"
+                begin_stage(2)
+                try:
+                    result = wire_call(contracts[1], raw, maximum_input_bytes=max_input, maximum_nodes=max_nodes,
+                        maximum_output_bytes=max_output - state["serialized_bytes"], maximum_output_nodes=max_nodes)
+                except BaseException as error:
+                    failed_stage(2, error)
+                    raise
+                state["consumer"] = result
+                state["consumer_status"] = "RETURNED_UNWITNESSED"
+                state["phase"] = "MATH02_RETURNED"
+                if state["clock_binding"] is not None:
+                    state["stage_records"][2][1], state["stage_records"][2][4] = "RETURN_CAPTURE_PENDING", "SUCCESS"
+                latch_return_members("consumer", 2)
+                finish_stage(2, "SUCCESS")
+                witness_result("consumer")
+                lookup(self)
+                _native_require(result.contract is contracts[1] and result.input_json is raw
+                    and struct.pack(">d", result.decoded_inputs["market_implied_probability"]) == struct.pack(">d", converted)
+                    and struct.pack(">d", result.decoded_inputs["calibrated_model_probability"])
+                        == struct.pack(">d", model["calibrated_model_probability"])
+                    and result.decoded_inputs["calibration_state"] == model["calibration_state"],
+                    "LP03_EDGE_CHAIN_ORIGINAL_CONSUMER_RESULT")
+                if state["clock_binding"] is None:
+                    charge(len(result.output_json))
+                validated_stage(2)
+                artifact = dict(profile="ORIGINAL_REGISTERED_SAME_SNAPSHOT_MATH01_CONVERSION_MATH02_V1",
+                    stack_id="STACK::MATH-01::MATH-02::V3_4", edge_id="EDGE::MATH-01::MATH-02",
+                    use_limit="CONTRACT_AND_FIXTURE_ONLY_NO_MODE_ACTIVATION",
+                    producer_input_json=market_wire.decode("utf-8"), producer_output_json=state["producer"].output_json.decode("utf-8"),
+                    conversion_receipt_json=receipt_wire.decode("utf-8"), consumer_input_json=raw.decode("utf-8"),
+                    consumer_output_json=result.output_json.decode("utf-8"))
+                if state["execution_clock_limits"] is not None:
+                    artifact["execution_clock_limits"] = execution_clock_limits_data(state)
+                if state["clock_binding"] is not None:
+                    artifact["measured_original_stages"] = tuple(
+                        _native_strict_json(row[8], max_bytes=max_output, max_nodes=max_nodes, binary64_numbers=True)
+                        for row in state["stage_records"])
+                    artifact["measurement_scope"] = "THREE_ORIGINAL_CALL_INTERVALS_EXCLUDING_INTERSTAGE_WORK"
+                artifact_wire = _encode_evidence_projection_json_v1(artifact,
+                    maximum_bytes=max_output - state["serialized_bytes"], maximum_nodes=max_nodes)
+                state["artifact_json"] = artifact_wire
+                charge(len(artifact_wire))
+                lookup(self)
+                state["phase"] = "COMPLETED"
+                return self
+            except BaseException as primary:
+                if state["clock_binding"] is not None:
+                    index = (0 if state["phase"] == "MATH01_RETURNED" else 1 if state["phase"] == "CONVERSION_RETURNED"
+                             else 2 if state["phase"] == "MATH02_RETURNED" else None)
+                    if index is not None:
+                        row = state["stage_records"][index]
+                        row[9] = type(primary)
+                        # Even a failure allocating the capture-call frame
+                        # retains the successful original return. Attempt
+                        # one end observation only if none was attempted.
+                        if row[1] == "RETURN_CAPTURE_PENDING" and row[3] is None and row[6] is None:
+                            try:
+                                finish_stage(index, "SUCCESS", encode=False)
+                            except BaseException:
+                                pass
+                # These preallocated private entries require no witness walk.
+                # Preserve the primary exception even after damaged returned data.
+                state["failure_phase"] = state["phase"]
+                state["phase"] = "FAILED"
+                raise
+
+        def __copy__(self):
+            raise TypeError("LP03 same-snapshot invocation cannot be copied")
+
+        def __deepcopy__(self, memo):
+            raise TypeError("LP03 same-snapshot invocation cannot be copied")
+
+        def __reduce_ex__(self, protocol):
+            raise TypeError("LP03 same-snapshot invocation cannot be serialized")
+
+    class_original = tuple(_EvidenceProbabilityEdgeChainV1.__dict__.items())
+    class_functions = tuple((function, function.__code__) for _name, member in class_original
+        for function in ((member.fget,) if type(member) is property else (member,) if type(member) is FunctionType else ()))
+    return _EvidenceProbabilityEdgeChainV1
+
+
+_EvidenceProbabilityEdgeChainV1 = _bind_evidence_probability_edge_chain_v1()

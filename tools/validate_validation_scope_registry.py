@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+from hashlib import sha256
 import sys
 from pathlib import Path
 
@@ -16,6 +17,8 @@ from tools.validation_scope_registry import (  # noqa: E402
     PR168_RP5B_BRANCH,
     PR168_RANK4_BRANCH,
     PR168_RP_BRANCH,
+    S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH,
+    S1_LP03_EVIDENCE_PLATFORM_RESTART_ALLOWED_EXACT_PATHS,
     VALIDATION_FIXTURE_BRANCH,
     explain_pr_scope_decision,
     is_pr_scoped_changed_path_allowed,
@@ -27,8 +30,89 @@ from tools.validation_scope_registry import (  # noqa: E402
 SUCCESS_MARKER = "VALIDATION_SCOPE_REGISTRY_OK"
 
 
+def lp03_restart_scope_failures() -> tuple[str, ...]:
+    branch = S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH
+    paths = S1_LP03_EVIDENCE_PLATFORM_RESTART_ALLOWED_EXACT_PATHS
+    roster_test = "tests/stage1_prediction_markets/qku_computation_control_plane/architecture/test_repository_file_closure.py"
+    agent_import_test = "tests/pr169_agent_orch1/test_no_orphan_raw_scan.py"
+    pr96_validator = "tools/validate_owner_dashboard_approval_static_screen_contract.py"
+    pr97_validator = "tools/validate_atomicrows_full_bundle_row_expansion_plan.py"
+    pr167_writer = "src/qtt/stage1_prediction_markets/pr167_open_trade_simulator_integration/io.py"
+    map3_helpers = "tests/pr168_map3/_helpers.py"
+    map3_offline_test = "tests/pr168_map3/test_offline_ci.py"
+    rp5d_helpers = "tests/pr168_rp5d/_helpers.py"
+    pr162e_writer = "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/io.py"
+    cumulative_gate_test = "tests/core/test_qtt_cumulative_gate.py"
+    pr151_upstream_fixture_test = "tests/source_evidence/test_official_source_retrieval_target_pack_parameter_defaults.py"
+    pr134_determinism_test = "tests/source_evidence/test_pr134_generated_reports_are_deterministic.py"
+    rp5d_layer = "src/qtt/stage1_prediction_markets/pr168_rp5d_executability"
+    rp5d_validator = f"{rp5d_layer}/validator.py"
+    rp5d_runner = f"{rp5d_layer}/runner.py"
+    rp5d_models = f"{rp5d_layer}/models.py"
+    supplements = {
+        roster_test,
+        agent_import_test,
+        pr96_validator,
+        pr97_validator,
+        pr167_writer,
+        map3_helpers,
+        map3_offline_test,
+        rp5d_helpers,
+        pr162e_writer,
+        cumulative_gate_test,
+        pr151_upstream_fixture_test,
+        pr134_determinism_test,
+        rp5d_validator,
+        rp5d_runner,
+        rp5d_models,
+    }
+    # Keep the original Appendix A roster pinned independently of its supplements.
+    exact_manifest = "\n".join(sorted(paths - supplements)).encode("utf-8")
+    failures = []
+    if (
+        len(paths) != 108
+        or not supplements <= paths
+        or sha256(exact_manifest).hexdigest() != "1064f7f73bd7b3241d65cd379ffb71f170419d38c31b68b64fb8303bbf8631be"
+    ):
+        failures.append("LP03_RESTART_SCOPE_PATH_ROSTER_MISMATCH")
+    for path in sorted(paths):
+        decision = explain_pr_scope_decision(branch, path)
+        if not decision["allowed"] or decision["pr_id"] != "S1_LP03_EVIDENCE_PLATFORM":
+            failures.append(f"LP03_RESTART_SCOPE_EXPECTED_ALLOWED:{path}")
+    for path in (
+        "docs/master_plan/QTT_MasterPlan_Current.md",
+        "tools/currentize_pr152_after_generated_artifacts.py",
+        "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence_execution.py.copy",
+        agent_import_test + ".copy",
+        pr96_validator + ".copy",
+        pr97_validator + ".copy",
+        pr167_writer + ".copy",
+        map3_helpers + ".copy",
+        map3_offline_test + ".copy",
+        "tests/pr168_map3/test_handoffs.py",
+        "tools/pr168_map3_report_writer.py",
+        rp5d_helpers + ".copy",
+        "tests/pr168_rp5d/test_rp5d_adapter_queues.py",
+        rp5d_validator + ".copy",
+        rp5d_runner + ".copy",
+        rp5d_models + ".copy",
+        f"{rp5d_layer}/path_safety.py",
+        pr162e_writer + ".copy",
+        "src/qtt/stage1_prediction_markets/pr162e_plugin_framework/report_writer.py",
+        "tests/pr162e/test_pr162e_idempotence_bounded.py",
+        cumulative_gate_test + ".copy",
+        "tools/qtt_test_gate.py",
+        pr151_upstream_fixture_test + ".copy",
+        pr134_determinism_test + ".copy",
+        "tools/build_atomicrows_bundle.py",
+    ):
+        if is_pr_scoped_changed_path_allowed(branch, path):
+            failures.append(f"LP03_RESTART_SCOPE_EXPECTED_DENIED:{path}")
+    return tuple(failures)
+
+
 def main() -> int:
-    failures: list[str] = []
+    failures = list(lp03_restart_scope_failures())
 
     allowed_paths = [
         "docs/master_plan/generated/PR168_GFP_QKUBaselineCountReconcile.report.json",

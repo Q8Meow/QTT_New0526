@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+from hashlib import sha256
 from dataclasses import dataclass
 import os
 import pathlib
@@ -1145,6 +1146,46 @@ _SOURCE_USE_NATIVE_CALLS = (
 )
 
 
+# The three owners retain native handles for local evidence supervision, timing
+# and store identity. Pin the complete methods so a changed call, prototype or
+# guard requires a fresh review. No other uses of ctypes inherit admission.
+_LP03_NATIVE_CTYPES_OWNERS_V1 = {
+    'src/qtt/service/pr169_svc1_resolvers.py': ('_WindowsEvidenceProcessV1', {
+        '_load_api_v1': 'c41bb51927b58ed86cfcf870c9248312acea7f1447adc1ee77eddbe57d545800',
+        '_settlement_custody_locked_v1': '308612722aec2571d652d94a6be8878289b4e2a4e1e5535bd54bbb9ba7b84c88',
+    }),
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/latency_policy.py': ('_EvidenceLocalClockV1', {
+        '__init__': 'f6e3f93aebe1ff59c5cb42ff6d5d5c5631b5ec6d4060b24f06f4ee49feac3b88',
+    }),
+    'src/qtt/stage1_prediction_markets/qku_computation_control_plane/persistence.py': ('_EvidenceBoundStoreV1', {
+        '_retain_original_objects_v1': 'a1638eebb5b24e1d77dafb99cef7b42e368a309f6ef4927240b712d2f74a016d',
+        '_lock_original_control_store_v1': '4d3e5e1dc1f19a60316727044dbd4a09f77b1cbcdd471e19400123ebfb37a6f6',
+    })
+}
+
+
+def _lp03_native_ctypes_nodes_v1(relpath: str, tree: ast.Module) -> frozenset[int]:
+    contract = _LP03_NATIVE_CTYPES_OWNERS_V1.get(relpath)
+    if contract is None:
+        return frozenset()
+    owner_name, method_hashes = contract
+    owners = [node for node in tree.body
+              if isinstance(node, ast.ClassDef) and node.name == owner_name]
+    if len(owners) != 1:
+        return frozenset()
+    admitted = set()
+    for method_name, expected_hash in method_hashes.items():
+        methods = [node for node in owners[0].body
+                   if isinstance(node, ast.FunctionDef) and node.name == method_name]
+        if len(methods) != 1:
+            continue
+        method = methods[0]
+        evidence = ast.dump(method, include_attributes=False).encode("utf-8")
+        if sha256(evidence).hexdigest() == expected_hash:
+            admitted.update(id(node) for node in ast.walk(method))
+    return frozenset(admitted)
+
+
 def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, ...]:
     """Check explicit native entry and consequential source-use call sites."""
     failures = []
@@ -1202,6 +1243,7 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
         "_public_scope_resources_v1": {(_KALSHI_FEE_NATIVE_OWNER, "SourceUseAuthorityV1." + name)
                                         for name in ("prepare_action_v1", "_commit_verified_action_v1", "_bind_public_operational_inputs_v1")},
     }
+    lp03_ctypes = _lp03_native_ctypes_nodes_v1(relpath, tree)
     loader_count = 0
     entry_calls = []
     for node, owner in located:
@@ -1215,7 +1257,7 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
                 failures.append("SOURCE_USE_NATIVE_MODULE_ALIAS")
             if isinstance(node, ast.Name) and node.id == "ctypes" and isinstance(node.ctx, ast.Load):
                 parent = parents.get(id(node))
-                if not (isinstance(parent, ast.Attribute) and parent.value is node):
+                if id(node) not in lp03_ctypes and not (isinstance(parent, ast.Attribute) and parent.value is node):
                     failures.append("SOURCE_USE_NATIVE_MODULE_INDIRECTION")
             if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "ctypes" and node.attr in {
                     "WinDLL", "CDLL", "OleDLL", "PyDLL", "windll", "cdll"}:
@@ -1256,7 +1298,7 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
             valid = valid and node.args[0].value in allowed_loaders.get(owner, set())
             valid = valid and ast.dump(node, include_attributes=False) == ast.dump(ast.parse(
                 "ctypes.WinDLL(" + repr(node.args[0].value) + ", use_last_error=True, winmode=0x800)").body[0].value, include_attributes=False)
-            if not valid:
+            if not valid and id(node) not in lp03_ctypes:
                 failures.append("SOURCE_USE_NATIVE_DLL_BOUNDARY")
             loader_count += 1
         if native and name.startswith(("api.kernel.", "api.security.", "api.shell.", "api.ole.", "root.api.kernel.",
@@ -1295,6 +1337,29 @@ def source_use_native_contract_v1(relpath: str, tree: ast.Module) -> tuple[str, 
     return tuple(failures)
 
 
+def _validation_ipc_socket_call(relpath: str, tree: ast.Module) -> ast.Call | None:
+    if relpath != "tools/validation_reliability.py":
+        return None
+    channels = [
+        node for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "_InvocationChannel"
+    ]
+    if len(channels) != 1:
+        return None
+
+    # Bind the Linux descriptor reconstruction to the reviewed channel,
+    # including its AF_UNIX pair, descriptor inheritance and peer checks.
+    channel = channels[0]
+    reviewed = "7ccfbadba5fac1ab126dcdeee77307a42c6842aa005ffaf6d61463fca87cd0f9"
+    if sha256(ast.dump(channel, include_attributes=False).encode("utf-8")).hexdigest() != reviewed:
+        return None
+    return next(
+        (node for node in ast.walk(channel)
+         if isinstance(node, ast.Call) and ast.unparse(node) == "socket.socket(fileno=int(locator))"),
+        None,
+    )
+
+
 def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]) -> list[str]:
     try:
         tree = ast.parse(text, filename=str(path))
@@ -1307,6 +1372,7 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
     admitted = admitted | kalshi_admitted | public_admitted
     admission_failures = admission_failures + kalshi_failures + public_failures
     admission_failures += source_use_native_contract_v1(path.as_posix(), tree)
+    validation_ipc = _validation_ipc_socket_call(path.as_posix(), tree)
     found_by_flag = {flag: set[str]() for flag in enabled_flags}
     source_retrieval_imports = {
         "http.client": "http.client import/use",
@@ -1341,6 +1407,8 @@ def _scan_python_content(path: pathlib.Path, text: str, enabled_flags: list[str]
 
         if isinstance(node, ast.Call):
             labels = set(_call_labels(node))
+            if node is validation_ipc:
+                labels.discard("socket client")
             flag_to_labels = {
                 "forbid_source_retrieval": {
                     "websocket client",

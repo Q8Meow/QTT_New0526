@@ -10,7 +10,10 @@ import re
 from types import MappingProxyType
 from typing import ClassVar, Mapping, TypeVar
 
-from .context import ComputationContextKeyV1, parse_utc
+from .context import (
+    ComputationContextKeyV1, _native_ident, _native_obj, _native_require, _native_text,
+    _public_counter_v1, _public_refs_v1, parse_utc,
+)
 from .errors import ContractValidationError, ReasonCode
 
 
@@ -4875,3 +4878,12810 @@ class ST12HValidationCurrentizationOperationsPublicationReportV1:
                 ReasonCode.SOURCE_EPOCH_STALE,
                 "tracked report must reject every stale receipt class",
             )
+
+
+class EvidenceOriginV1(StrEnum):
+    SOFTWARE_CONFORMANCE = "SOFTWARE_CONFORMANCE"
+    OBSERVED_REPLAY = "OBSERVED_REPLAY"
+    OBSERVED_PAPER = "OBSERVED_PAPER"
+
+
+class EvidenceLaneV1(StrEnum):
+    REPLAY = "REPLAY"
+    PAPER = "PAPER"
+
+
+class EvidenceStoreRoleV1(StrEnum):
+    CONTROL = "CONTROL"
+    REPLAY = "REPLAY"
+    PAPER = "PAPER"
+    REVIEW = "REVIEW"
+    READINESS_ACK = "READINESS_ACK"
+    PRETRADE_ACK = "PRETRADE_ACK"
+    AGENT_ACK = "AGENT_ACK"
+    SVC_ACK = "SVC_ACK"
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceAbsenceV1:
+    """LP03's explicit absence value; legacy absence encodings stay unchanged.
+
+    The contract fixes the discriminator and contextual reasons. ``state`` and
+    ``reason`` are this implementation's closed two-member envelope spelling.
+    A value of this type supplies no reference, observation or permission.
+    """
+
+    reason: str
+    state: str = field(default="ABSENT_WITH_REASON", init=False)
+
+    def __post_init__(self) -> None:
+        _native_ident(self.reason)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAbsenceV1":
+        data = _native_obj(value, ("state", "reason"))
+        _native_require(type(data["state"]) is str and data["state"] == "ABSENT_WITH_REASON",
+                        "LP03_ABSENCE_DISCRIMINATOR")
+        return cls(reason=data["reason"])
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePublicationRefV1:
+    """An inert original-store address, never a publication or access handle."""
+
+    store_id: str
+    publication_record_id: str
+
+    def __post_init__(self) -> None:
+        _native_ident(self.store_id)
+        _native_ident(self.publication_record_id)
+        _native_require(re.fullmatch(r"LP03PUB::[0-9a-f]{32}", self.publication_record_id) is not None,
+                        "LP03_PUBLICATION_IDENTITY")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidencePublicationRefV1":
+        return cls(**_native_obj(value, ("store_id", "publication_record_id")))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidencePreparationLimitsV1:
+    """All values come from accepted policy; zero grants zero corresponding work."""
+
+    max_record_reads: int
+    max_read_bytes: int
+    max_owner_queries: int
+    max_query_result_records: int
+    max_control_writes: int
+    max_control_bytes: int
+    max_cpu_ns: int
+    max_wall_ns: int
+    aggregate_budget_ref: str
+
+    def __post_init__(self) -> None:
+        for member in dataclass_fields(self):
+            value = getattr(self, member.name)
+            if member.name == "aggregate_budget_ref":
+                _native_ident(value)
+            else:
+                _public_counter_v1(value, allow_zero=True)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidencePreparationLimitsV1":
+        return cls(**_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+
+
+_EVIDENCE_FAILURE_RESERVE_PAIRS_V1 = (
+    ("reserved_failure_wall_ns", "max_wall_ns"),
+    ("reserved_failure_cpu_ns", "max_cpu_ns"),
+    ("reserved_failure_input_reads", "max_input_reads"),
+    ("reserved_failure_input_bytes", "max_input_bytes"),
+    ("reserved_failure_persistent_operations", "max_persistent_operations"),
+    ("reserved_failure_persistent_bytes", "max_persistent_bytes"),
+)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceExecutionLimitsV1:
+    """Explicit finite resource policy for one attempt; no defaults or renewal."""
+
+    max_wall_ns: int
+    max_cpu_ns: int
+    max_process_memory_bytes: int
+    max_job_memory_bytes: int
+    max_events: int
+    max_callbacks: int
+    max_coordinates: int
+    max_attempts: int
+    max_input_reads: int
+    max_input_bytes: int
+    max_computations: int
+    max_output_bytes: int
+    max_persistent_operations: int
+    max_persistent_bytes: int
+    max_concurrency: int
+    stop_grace_ns: int
+    frame_byte_limit: int
+    segment_max_events: int
+    segment_max_bytes: int
+    reserved_failure_wall_ns: int
+    reserved_failure_cpu_ns: int
+    reserved_failure_input_reads: int
+    reserved_failure_input_bytes: int
+    reserved_failure_persistent_operations: int
+    reserved_failure_persistent_bytes: int
+    aggregate_budget_ref: str
+
+    def __post_init__(self) -> None:
+        for member in dataclass_fields(self):
+            value = getattr(self, member.name)
+            if member.name == "aggregate_budget_ref":
+                _native_ident(value)
+            else:
+                _public_counter_v1(value, allow_zero=True)
+        _native_require(0 < self.frame_byte_limit <= 65536, "LP03_FRAME_LIMIT")
+        for reserve, total in _EVIDENCE_FAILURE_RESERVE_PAIRS_V1:
+            _native_require(getattr(self, reserve) <= getattr(self, total), "LP03_FAILURE_RESERVE_EXCEEDS_TOTAL")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceExecutionLimitsV1":
+        return cls(**_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceEnvironmentIdentityV1:
+    """Registered interpreter/package facts; native image custody is separate."""
+
+    implementation: str
+    complete_version: str
+    build: str
+    architecture: str
+    package_versions: tuple[tuple[str, str], ...]
+
+    def __post_init__(self) -> None:
+        for name in ("implementation", "complete_version", "build", "architecture"):
+            value = _native_text(getattr(self, name))
+            _native_require(len(value) <= 4096, "LP03_ENVIRONMENT_TEXT_BOUND")
+        _native_require(type(self.package_versions) is tuple and len(self.package_versions) <= 256,
+                        "LP03_ENVIRONMENT_PACKAGE_ROSTER")
+        for item in self.package_versions:
+            _native_require(type(item) is tuple and len(item) == 2, "LP03_PACKAGE_VERSION_PAIR")
+            _native_ident(item[0])
+            _native_ident(item[1])
+        names = tuple(item[0] for item in self.package_versions)
+        _native_require(names == tuple(sorted(set(names))), "LP03_PACKAGE_ORDER_OR_DUPLICATE")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceEnvironmentIdentityV1":
+        data = dict(_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+        _native_require(type(data["package_versions"]) is list, "LP03_PACKAGE_VERSION_ENCODING")
+        _native_require(all(type(item) is list and len(item) == 2 for item in data["package_versions"]),
+                        "LP03_PACKAGE_VERSION_PAIR")
+        data["package_versions"] = tuple(tuple(item) for item in data["package_versions"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceStoreBindingV1:
+    """Fixed data-only store configuration; possession does not admit access."""
+
+    store_id: str
+    role: EvidenceStoreRoleV1
+    origin: EvidenceOriginV1
+    deployment_id: str
+    experiment_scope: tuple[str, ...]
+    resolved_root_identity: tuple[int, int]
+    database_file_identity: tuple[int, int]
+    expected_schema_version: str
+    allowed_writer_principal: str
+    allowed_reader_purposes: tuple[str, ...]
+    retention_policy_ref: str
+    capacity_budget_ref: str
+    qualification_ref: str
+
+    def __post_init__(self) -> None:
+        for name in ("store_id", "deployment_id", "allowed_writer_principal",
+                     "retention_policy_ref", "capacity_budget_ref", "qualification_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.role) is EvidenceStoreRoleV1 and type(self.origin) is EvidenceOriginV1,
+                        "LP03_STORE_ROLE_OR_ORIGIN")
+        _public_refs_v1(self.experiment_scope)
+        _public_refs_v1(self.allowed_reader_purposes)
+        _native_ident(self.expected_schema_version)
+        for identity in (self.resolved_root_identity, self.database_file_identity):
+            _native_require(type(identity) is tuple and len(identity) == 2
+                            and all(type(item) is int and 0 <= item < 2**128 for item in identity),
+                            "LP03_NATIVE_FILE_IDENTITY")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceStoreBindingV1":
+        data = dict(_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+        try:
+            data["role"] = EvidenceStoreRoleV1(data["role"])
+            data["origin"] = EvidenceOriginV1(data["origin"])
+        except (ValueError, TypeError) as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_STORE_ROLE_OR_ORIGIN") from exc
+        for name in ("experiment_scope", "allowed_reader_purposes", "resolved_root_identity", "database_file_identity"):
+            _native_require(type(data[name]) is list, "LP03_STORE_TUPLE_ENCODING")
+            data[name] = tuple(data[name])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceRecordRefV1:
+    """An original store/record identity, with no implied read permission."""
+
+    store_id: str
+    record_id: str
+
+    def __post_init__(self) -> None:
+        _native_ident(self.store_id)
+        _native_ident(self.record_id)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceRecordRefV1":
+        return cls(**_native_obj(value, ("store_id", "record_id")))
+
+
+class EvidenceKeyPurposeV1(StrEnum):
+    OWNER_APPROVAL = "OWNER_APPROVAL"
+    EVIDENCE_ISSUER = "EVIDENCE_ISSUER"
+    EVIDENCE_PRODUCER = "EVIDENCE_PRODUCER"
+    INDEPENDENT_REVIEW = "INDEPENDENT_REVIEW"
+    RECEIVER_ACCEPTANCE = "RECEIVER_ACCEPTANCE"
+
+
+class EvidenceMessageKindV1(StrEnum):
+    OWNER_ENVELOPE = "OWNER_ENVELOPE"
+    ASSEMBLY_GRANT = "ASSEMBLY_GRANT"
+    ATTEMPT_GRANT = "ATTEMPT_GRANT"
+    REVIEW_ADMISSION = "REVIEW_ADMISSION"
+    RECEIVER_ADMISSION = "RECEIVER_ADMISSION"
+    REVIEW_DECISION = "REVIEW_DECISION"
+    RECEIVER_ACK = "RECEIVER_ACK"
+    REVOCATION = "REVOCATION"
+
+
+_EVIDENCE_MESSAGE_PURPOSE_V1 = MappingProxyType({
+    EvidenceMessageKindV1.OWNER_ENVELOPE: EvidenceKeyPurposeV1.OWNER_APPROVAL,
+    EvidenceMessageKindV1.ASSEMBLY_GRANT: EvidenceKeyPurposeV1.EVIDENCE_ISSUER,
+    EvidenceMessageKindV1.ATTEMPT_GRANT: EvidenceKeyPurposeV1.EVIDENCE_ISSUER,
+    EvidenceMessageKindV1.REVIEW_ADMISSION: EvidenceKeyPurposeV1.EVIDENCE_ISSUER,
+    EvidenceMessageKindV1.RECEIVER_ADMISSION: EvidenceKeyPurposeV1.EVIDENCE_ISSUER,
+    EvidenceMessageKindV1.REVIEW_DECISION: EvidenceKeyPurposeV1.INDEPENDENT_REVIEW,
+    EvidenceMessageKindV1.RECEIVER_ACK: EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE,
+    EvidenceMessageKindV1.REVOCATION: EvidenceKeyPurposeV1.EVIDENCE_ISSUER,
+})
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceVerificationKeyV1:
+    """Public enrolled key facts; current revocation is checked by its owner."""
+
+    key_id: str
+    purpose: EvidenceKeyPurposeV1
+    principal: str
+    origin: EvidenceOriginV1
+    deployment_id: str
+    public_key_hex: str
+    valid_from_wall_ns: int
+    exclusive_expiry_wall_ns: int
+    validity_record_ref: str
+    revocation_record_ref_or_absence: str | EvidenceAbsenceV1
+
+    def __post_init__(self) -> None:
+        for name in ("key_id", "principal", "deployment_id", "validity_record_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.purpose) is EvidenceKeyPurposeV1
+                        and type(self.origin) is EvidenceOriginV1, "LP03_KEY_PURPOSE_OR_ORIGIN")
+        _native_require(type(self.public_key_hex) is str
+                        and re.fullmatch(r"[0-9a-f]{64}", self.public_key_hex) is not None,
+                        "LP03_ED25519_PUBLIC_KEY")
+        for name in ("valid_from_wall_ns", "exclusive_expiry_wall_ns"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _native_require(self.valid_from_wall_ns < self.exclusive_expiry_wall_ns,
+                        "LP03_KEY_VALIDITY")
+        absence = self.revocation_record_ref_or_absence
+        if type(absence) is EvidenceAbsenceV1:
+            _native_require(absence.reason == "NO_REVOCATION_OBSERVED", "LP03_KEY_REVOCATION_ABSENCE")
+        else:
+            _native_ident(absence)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceVerificationKeyV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        _native_require(type(data["purpose"]) is str and type(data["origin"]) is str,
+                        "LP03_KEY_ENUM_ENCODING")
+        try:
+            data["purpose"] = EvidenceKeyPurposeV1(data["purpose"])
+            data["origin"] = EvidenceOriginV1(data["origin"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_KEY_ENUM") from exc
+        if type(data["revocation_record_ref_or_absence"]) is dict:
+            data["revocation_record_ref_or_absence"] = EvidenceAbsenceV1.from_canonical_mapping(
+                data["revocation_record_ref_or_absence"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAuthorizationMessageV1:
+    """Signed message data, NOT an admitted grant or current access handle.
+
+    Verification proves this exact body came from the selected enrolled key.
+    The selected owner must additionally decode its kind-specific payload and
+    resolve original current ledger/source state before granting any effect.
+    """
+
+    kind: EvidenceMessageKindV1
+    schema_version: str
+    key_purpose: EvidenceKeyPurposeV1
+    key_id: str
+    issuer: str
+    subject: str
+    audience: str
+    deployment_id: str
+    origin: EvidenceOriginV1
+    generation: int
+    nonce: str
+    valid_from_wall_ns: int
+    exclusive_expiry_wall_ns: int
+    payload: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_frozen_data_v1, deterministic_json
+
+        _native_require(type(self.kind) is EvidenceMessageKindV1
+                        and type(self.key_purpose) is EvidenceKeyPurposeV1
+                        and type(self.origin) is EvidenceOriginV1,
+                        "LP03_MESSAGE_ENUM")
+        _native_require(type(self.schema_version) is str and self.schema_version == "1.0",
+                        "LP03_MESSAGE_SCHEMA")
+        _native_require(self.key_purpose is _EVIDENCE_MESSAGE_PURPOSE_V1[self.kind],
+                        "LP03_MESSAGE_KEY_PURPOSE")
+        for name in ("key_id", "issuer", "subject", "audience", "deployment_id"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.nonce) is str
+                        and re.fullmatch(r"[0-9a-f]{64}", self.nonce) is not None,
+                        "LP03_MESSAGE_NONCE")
+        for name in ("generation", "valid_from_wall_ns", "exclusive_expiry_wall_ns"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _native_require(self.valid_from_wall_ns < self.exclusive_expiry_wall_ns,
+                        "LP03_MESSAGE_VALIDITY")
+        _native_require(type(self.payload) in (dict, MappingProxyType) and bool(self.payload),
+                        "LP03_MESSAGE_PAYLOAD")
+        object.__setattr__(self, "payload", _evidence_frozen_data_v1(self.payload))
+        _native_require(len(b"QTT-LP03-EVIDENCE-AUTH-V1\0") + len(deterministic_json(self).encode("utf-8")) <= 65536,
+                        "LP03_MESSAGE_BYTE_BOUND")
+        _evidence_decode_authorization_payload_v1(self)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAuthorizationMessageV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        for name, enum in (("kind", EvidenceMessageKindV1), ("key_purpose", EvidenceKeyPurposeV1),
+                           ("origin", EvidenceOriginV1)):
+            _native_require(type(data[name]) is str, "LP03_MESSAGE_ENUM_ENCODING")
+            try:
+                data[name] = enum(data[name])
+            except ValueError as exc:
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_MESSAGE_ENUM") from exc
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceSignedMessageV1:
+    """Public signature envelope; decoding this value never verifies or admits it."""
+
+    canonical_message: str
+    signature_hex: str
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_canonical_object_v1
+
+        _native_require(type(self.canonical_message) is str and len(self.canonical_message) <= 65536,
+                        "LP03_SIGNED_MESSAGE_TEXT")
+        try:
+            body = self.canonical_message.encode("utf-8", "strict")
+        except UnicodeError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_SIGNED_MESSAGE_UTF8") from exc
+        EvidenceAuthorizationMessageV1.from_canonical_mapping(_evidence_canonical_object_v1(body))
+        _native_require(type(self.signature_hex) is str
+                        and re.fullmatch(r"[0-9a-f]{128}", self.signature_hex) is not None,
+                        "LP03_ED25519_SIGNATURE")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceSignedMessageV1":
+        return cls(**_native_obj(value, ("canonical_message", "signature_hex")))
+
+
+def _evidence_unsigned256_v1(value: object) -> int:
+    _native_require(type(value) is int and 0 <= value < 2**256, "LP03_UNSIGNED_256")
+    return value
+
+
+def _evidence_tuple_decode_v1(value: object, constructor=None) -> tuple:
+    _native_require(type(value) is list, "LP03_ARRAY_ENCODING")
+    return tuple(constructor(item) if constructor is not None else item for item in value)
+
+
+def _evidence_absence_or_ref_v1(value: object) -> str | EvidenceAbsenceV1:
+    if type(value) is dict:
+        return EvidenceAbsenceV1.from_canonical_mapping(value)
+    return _native_ident(value)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceRecordHeaderV1:
+    """Shared data header. Every use still requires original-store admission."""
+
+    record_id: str
+    schema_version: str
+    kind: str
+    origin: EvidenceOriginV1
+    experiment_id: str
+    experiment_revision: str
+    protocol_ref: str
+    input_lock_ref: str | EvidenceAbsenceV1
+    scenario_plan_ref: str
+    causation_ref: str
+    correlation_ref: str
+    producing_owner: str
+    producing_principal: str
+    source_lineage_refs: tuple[str, ...]
+    created_wall_ns: int
+    clock_domain_id: str
+    generation: int
+    no_order_authority: bool
+    no_provider_effect: bool
+    no_model_fit: bool
+    no_llm_execution: bool
+    no_qpu_execution: bool
+
+    def __post_init__(self) -> None:
+        _native_require(type(self) is not EvidenceRecordHeaderV1, "LP03_ABSTRACT_RECORD")
+        for name in ("record_id", "kind", "experiment_id", "experiment_revision", "protocol_ref",
+                     "scenario_plan_ref", "causation_ref", "correlation_ref", "producing_owner",
+                     "producing_principal", "clock_domain_id"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.schema_version) is str and self.schema_version == "1.0",
+                        "LP03_RECORD_SCHEMA")
+        _native_require(type(self.origin) is EvidenceOriginV1, "LP03_RECORD_ORIGIN")
+        if self.kind in {"SCENARIO_PLAN", "ASSEMBLY_GRANT", "ASSEMBLY_STATE", "INPUT_ASSEMBLY"}:
+            _native_require(type(self.input_lock_ref) is EvidenceAbsenceV1
+                            and self.input_lock_ref.reason == "NOT_YET_BOUND_BEFORE_EXECUTION",
+                            "LP03_PREPARATION_REQUIRES_PRELOCK_ABSENCE")
+        if type(self.input_lock_ref) is EvidenceAbsenceV1:
+            _native_require(self.kind in {"SCENARIO_PLAN", "ASSEMBLY_GRANT", "ASSEMBLY_STATE",
+                                          "INPUT_ASSEMBLY", "EXPERIMENT", "CLAIM", "REVOCATION"}
+                            and self.input_lock_ref.reason == "NOT_YET_BOUND_BEFORE_EXECUTION",
+                            "LP03_RECORD_REQUIRES_BOUND_LOCK")
+        else:
+            _native_ident(self.input_lock_ref)
+        _native_require(self.causation_ref != self.correlation_ref, "LP03_RECORD_TRACE")
+        _public_refs_v1(self.source_lineage_refs)
+        _public_counter_v1(self.created_wall_ns, allow_zero=True)
+        _public_counter_v1(self.generation, allow_zero=True)
+        for name in ("no_order_authority", "no_provider_effect", "no_model_fit",
+                     "no_llm_execution", "no_qpu_execution"):
+            _native_require(getattr(self, name) is True, "LP03_RECORD_FORBIDDEN_EFFECT")
+
+    @property
+    def schema_identity(self) -> str:
+        return "QTT_LP03_" + self.kind + "_V1"
+
+
+def _evidence_header_decode_v1(cls, value: object) -> dict:
+    data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+    for member in dataclass_fields(cls):
+        if not member.init:
+            _native_require(type(data[member.name]) is type(member.default)
+                            and data.pop(member.name) == member.default, "LP03_RECORD_KIND")
+    _native_require(type(data["origin"]) is str, "LP03_RECORD_ORIGIN_ENCODING")
+    try:
+        data["origin"] = EvidenceOriginV1(data["origin"])
+    except ValueError as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_RECORD_ORIGIN") from exc
+    data["input_lock_ref"] = _evidence_absence_or_ref_v1(data["input_lock_ref"])
+    data["source_lineage_refs"] = _evidence_tuple_decode_v1(data["source_lineage_refs"])
+    return data
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceNamespaceBindingV1:
+    namespace_ordinal: int
+    algorithm_version_ref_or_absence: str | EvidenceAbsenceV1
+    same_method_comparator_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        _evidence_unsigned256_v1(self.namespace_ordinal)
+        _public_refs_v1(self.same_method_comparator_refs, allow_empty=True)
+        if self.namespace_ordinal == 0:
+            _native_require(type(self.algorithm_version_ref_or_absence) is EvidenceAbsenceV1
+                            and self.algorithm_version_ref_or_absence.reason == "COMMON_EXOGENOUS"
+                            and self.same_method_comparator_refs == (), "LP03_EXOGENOUS_NAMESPACE")
+        else:
+            _native_ident(self.algorithm_version_ref_or_absence)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceNamespaceBindingV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        data["algorithm_version_ref_or_absence"] = _evidence_absence_or_ref_v1(
+            data["algorithm_version_ref_or_absence"])
+        data["same_method_comparator_refs"] = _evidence_tuple_decode_v1(data["same_method_comparator_refs"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceScenarioPlanV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="SCENARIO_PLAN", init=False)
+    plan_revision: int
+    master_seed: int
+    coordinate_roster: tuple[str, ...]
+    namespace_rules: tuple[EvidenceNamespaceBindingV1, ...]
+    sampling_profile: str
+    exact_environment_identity: EvidenceEnvironmentIdentityV1
+    formula_seed_bindings: tuple[tuple[str, int], ...]
+    maximum_coordinates: int
+    first_use_rule: str
+
+    def __post_init__(self) -> None:
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _evidence_unsigned256_v1(self.plan_revision)
+        _evidence_unsigned256_v1(self.master_seed)
+        _native_require(type(self.coordinate_roster) is tuple and self.coordinate_roster == (
+            "master_seed", "plan_revision", "scenario_ordinal", "dependence_group_ordinal",
+            "event_ordinal", "variable_purpose_ordinal", "draw_ordinal", "namespace_ordinal"),
+            "LP03_COORDINATE_ROSTER")
+        _native_require(all(type(item) is str for item in self.coordinate_roster), "LP03_COORDINATE_TYPE")
+        _native_require(type(self.namespace_rules) is tuple and 0 < len(self.namespace_rules) <= 256
+                        and all(type(item) is EvidenceNamespaceBindingV1 for item in self.namespace_rules),
+                        "LP03_NAMESPACE_RULES")
+        ordinals = tuple(item.namespace_ordinal for item in self.namespace_rules)
+        _native_require(ordinals == tuple(sorted(set(ordinals))) and ordinals[0] == 0,
+                        "LP03_NAMESPACE_ORDER")
+        _native_require(type(self.sampling_profile) is str
+                        and self.sampling_profile == "QTT_LP03_SCENARIO_MT19937_U53_V1", "LP03_RNG_PROFILE")
+        _native_require(type(self.exact_environment_identity) is EvidenceEnvironmentIdentityV1,
+                        "LP03_SCENARIO_ENVIRONMENT")
+        _native_require(type(self.formula_seed_bindings) is tuple and len(self.formula_seed_bindings) <= 52,
+                        "LP03_FORMULA_SEEDS")
+        for pair in self.formula_seed_bindings:
+            _native_require(type(pair) is tuple and len(pair) == 2, "LP03_FORMULA_SEED_PAIR")
+            _native_ident(pair[0])
+            _native_require(type(pair[1]) is int and -(2**256) < pair[1] < 2**256, "LP03_FORMULA_SEED")
+        names = tuple(pair[0] for pair in self.formula_seed_bindings)
+        _native_require(names == tuple(sorted(set(names))), "LP03_FORMULA_SEED_ORDER")
+        _public_counter_v1(self.maximum_coordinates, allow_zero=True)
+        _native_ident(self.first_use_rule)
+        _native_require(self.scenario_plan_ref == self.record_id, "LP03_PLAN_SELF_IDENTITY")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceScenarioPlanV1":
+        data = _evidence_header_decode_v1(cls, value)
+        data["coordinate_roster"] = _evidence_tuple_decode_v1(data["coordinate_roster"])
+        data["namespace_rules"] = _evidence_tuple_decode_v1(
+            data["namespace_rules"], EvidenceNamespaceBindingV1.from_canonical_mapping)
+        data["exact_environment_identity"] = EvidenceEnvironmentIdentityV1.from_canonical_mapping(
+            data["exact_environment_identity"])
+        data["formula_seed_bindings"] = _evidence_tuple_decode_v1(
+            data["formula_seed_bindings"], _evidence_tuple_decode_v1)
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceInlinePlanV1:
+    plan: EvidenceScenarioPlanV1
+    kind: str = field(default="INLINE_PLAN", init=False)
+
+    def __post_init__(self) -> None:
+        _native_require(type(self.plan) is EvidenceScenarioPlanV1, "LP03_INLINE_PLAN")
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceExistingPlanRefV1:
+    reference: EvidenceRecordRefV1
+    kind: str = field(default="EXISTING_PLAN_REF", init=False)
+
+    def __post_init__(self) -> None:
+        _native_require(type(self.reference) is EvidenceRecordRefV1, "LP03_EXISTING_PLAN_REF")
+
+
+def _evidence_plan_selection_decode_v1(value: object) -> EvidenceInlinePlanV1 | EvidenceExistingPlanRefV1:
+    _native_require(type(value) is dict and type(value.get("kind")) is str, "LP03_PLAN_SELECTION")
+    if value["kind"] == "INLINE_PLAN":
+        data = _native_obj(value, ("kind", "plan"))
+        return EvidenceInlinePlanV1(EvidenceScenarioPlanV1.from_canonical_mapping(data["plan"]))
+    _native_require(value["kind"] == "EXISTING_PLAN_REF", "LP03_PLAN_SELECTION")
+    data = _native_obj(value, ("kind", "reference"))
+    return EvidenceExistingPlanRefV1(EvidenceRecordRefV1.from_canonical_mapping(data["reference"]))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceOwnerSelectionV1:
+    """Frozen original-owner query identity, never SQL or an executable callback."""
+
+    predicate_id: str
+    parameter_refs: tuple[str, ...]
+    kind: str = field(default="OWNER_DEFINED_SELECTION", init=False)
+
+    def __post_init__(self) -> None:
+        _native_ident(self.predicate_id)
+        _public_refs_v1(self.parameter_refs, allow_empty=True)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceExactSelectionV1:
+    record_refs: tuple[str, ...]
+    kind: str = field(default="EXACT_RECORD_REFS", init=False)
+
+    def __post_init__(self) -> None:
+        _public_refs_v1(self.record_refs)
+        _native_require(bool(self.record_refs), "LP03_EXACT_SELECTION_EMPTY")
+
+
+def _evidence_source_selection_decode_v1(value: object):
+    _native_require(type(value) is dict and type(value.get("kind")) is str, "LP03_SOURCE_SELECTION")
+    if value["kind"] == "EXACT_RECORD_REFS":
+        data = _native_obj(value, ("kind", "record_refs"))
+        return EvidenceExactSelectionV1(record_refs=_evidence_tuple_decode_v1(data["record_refs"]))
+    _native_require(value["kind"] == "OWNER_DEFINED_SELECTION", "LP03_SOURCE_SELECTION")
+    data = _native_obj(value, ("kind", "predicate_id", "parameter_refs"))
+    return EvidenceOwnerSelectionV1(predicate_id=data["predicate_id"],
+                                    parameter_refs=_evidence_tuple_decode_v1(data["parameter_refs"]))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceSourceSelectionV1:
+    original_store_id: str
+    original_owner_id: str
+    permitted_record_kinds: tuple[str, ...]
+    selection: EvidenceExactSelectionV1 | EvidenceOwnerSelectionV1
+    profile_scope: tuple[str, ...] | EvidenceAbsenceV1
+    market_scope: tuple[str, ...] | EvidenceAbsenceV1
+    instrument_scope: tuple[str, ...] | EvidenceAbsenceV1
+    account_scope: tuple[str, ...] | EvidenceAbsenceV1
+    effective_from_wall_ns: int
+    effective_until_wall_ns: int
+    known_from_wall_ns: int
+    known_until_wall_ns: int
+    required_original_rights_refs: tuple[str, ...]
+    allowed_fields: tuple[str, ...]
+    result_limit: int
+
+    def __post_init__(self) -> None:
+        _native_ident(self.original_store_id)
+        _native_ident(self.original_owner_id)
+        for name in ("permitted_record_kinds", "required_original_rights_refs", "allowed_fields"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_SOURCE_SCOPE_EMPTY")
+        for name in ("profile_scope", "market_scope", "instrument_scope", "account_scope"):
+            value = getattr(self, name)
+            if type(value) is EvidenceAbsenceV1:
+                _native_require(value.reason == "NOT_APPLICABLE_TO_SELECTED_OWNER", "LP03_SOURCE_SCOPE_ABSENCE")
+            else:
+                _public_refs_v1(value)
+                _native_require(bool(value), "LP03_SOURCE_SCOPE_EMPTY")
+        _native_require(type(self.selection) in (EvidenceExactSelectionV1, EvidenceOwnerSelectionV1),
+                        "LP03_SOURCE_SELECTION_TYPE")
+        for name in ("effective_from_wall_ns", "effective_until_wall_ns", "known_from_wall_ns", "known_until_wall_ns"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _native_require(self.effective_from_wall_ns < self.effective_until_wall_ns
+                        and self.known_from_wall_ns < self.known_until_wall_ns,
+                        "LP03_SOURCE_INTERVAL")
+        _public_counter_v1(self.result_limit, allow_zero=True)
+        if type(self.selection) is EvidenceExactSelectionV1:
+            _native_require(len(self.selection.record_refs) <= self.result_limit, "LP03_SELECTION_RESULT_BOUND")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceSourceSelectionV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        data["selection"] = _evidence_source_selection_decode_v1(data["selection"])
+        for name in ("permitted_record_kinds", "required_original_rights_refs", "allowed_fields"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        for name in ("profile_scope", "market_scope", "instrument_scope", "account_scope"):
+            data[name] = (EvidenceAbsenceV1.from_canonical_mapping(data[name]) if type(data[name]) is dict
+                          else _evidence_tuple_decode_v1(data[name]))
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAssemblyScopeV1:
+    scope_ref: str
+    intended_experiment_id: str
+    intended_experiment_revision: str
+    protocol_ref: str
+    scenario_plan_body_or_existing_ref: EvidenceInlinePlanV1 | EvidenceExistingPlanRefV1
+    origin: EvidenceOriginV1
+    assembler_principal: str
+    assembler_audience: str
+    input_owner_roster: tuple[str, ...]
+    source_selections: tuple[EvidenceSourceSelectionV1, ...]
+    snapshot_decision_wall_ns: int
+    snapshot_pit_cutoff_wall_ns: int
+    source_purpose: str
+    input_schema_and_version_pins: tuple[tuple[str, str], ...]
+    control_store_id: str
+    allowed_control_kinds: tuple[str, ...]
+    generation: int
+    exclusive_expiry_wall_ns: int
+    preparation_limits: EvidencePreparationLimitsV1
+
+    def __post_init__(self) -> None:
+        for name in ("scope_ref", "intended_experiment_id", "intended_experiment_revision", "protocol_ref",
+                     "assembler_principal", "assembler_audience", "control_store_id"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.origin) is EvidenceOriginV1, "LP03_ASSEMBLY_ORIGIN")
+        _native_require(type(self.scenario_plan_body_or_existing_ref) in (EvidenceInlinePlanV1, EvidenceExistingPlanRefV1),
+                        "LP03_ASSEMBLY_PLAN")
+        _native_require(type(self.assembler_audience) is str
+                        and self.assembler_audience == "CP/input_lock.py::assemble_evidence_input_snapshot_v1",
+                        "LP03_ASSEMBLER_AUDIENCE")
+        _native_require(type(self.source_purpose) is str
+                        and self.source_purpose == "EVIDENCE_INPUT_ASSEMBLY_V1", "LP03_ASSEMBLY_PURPOSE")
+        _public_refs_v1(self.input_owner_roster)
+        _native_require(bool(self.input_owner_roster), "LP03_ASSEMBLY_OWNER_ROSTER")
+        _native_require(type(self.source_selections) is tuple and 0 < len(self.source_selections) <= 256
+                        and all(type(item) is EvidenceSourceSelectionV1 for item in self.source_selections),
+                        "LP03_ASSEMBLY_SELECTIONS")
+        _native_require(set(self.input_owner_roster) == {item.original_owner_id for item in self.source_selections},
+                        "LP03_ASSEMBLY_OWNER_CLOSURE")
+        for name in ("snapshot_decision_wall_ns", "snapshot_pit_cutoff_wall_ns", "generation", "exclusive_expiry_wall_ns"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _native_require(self.snapshot_pit_cutoff_wall_ns <= self.snapshot_decision_wall_ns
+                        < self.exclusive_expiry_wall_ns, "LP03_ASSEMBLY_TIME_ORDER")
+        _native_require(type(self.allowed_control_kinds) is tuple and self.allowed_control_kinds == (
+            "SCENARIO_PLAN", "ASSEMBLY_GRANT", "ASSEMBLY_STATE", "INPUT_ASSEMBLY")
+            and all(type(item) is str for item in self.allowed_control_kinds), "LP03_ASSEMBLY_CONTROL_SCOPE")
+        _native_require(type(self.preparation_limits) is EvidencePreparationLimitsV1, "LP03_ASSEMBLY_LIMITS")
+        _native_require(type(self.input_schema_and_version_pins) is tuple
+                        and 0 < len(self.input_schema_and_version_pins) <= 256, "LP03_INPUT_PINS")
+        for pair in self.input_schema_and_version_pins:
+            _native_require(type(pair) is tuple and len(pair) == 2, "LP03_INPUT_PIN_PAIR")
+            _native_ident(pair[0])
+            _native_ident(pair[1])
+        names = tuple(pair[0] for pair in self.input_schema_and_version_pins)
+        _native_require(names == tuple(sorted(set(names))), "LP03_INPUT_PIN_ORDER")
+        selected = self.scenario_plan_body_or_existing_ref
+        if type(selected) is EvidenceInlinePlanV1:
+            plan = selected.plan
+            if (plan.experiment_id, plan.experiment_revision, plan.protocol_ref, plan.origin, plan.generation) != (
+                    self.intended_experiment_id, self.intended_experiment_revision, self.protocol_ref,
+                    self.origin, self.generation):
+                raise ContractValidationError(ReasonCode.EVIDENCE_SCENARIO_MISMATCH, "LP03_ASSEMBLY_PLAN_SCOPE")
+        else:
+            _native_require(selected.reference.store_id == self.control_store_id, "LP03_ASSEMBLY_PLAN_STORE")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAssemblyScopeV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        _native_require(type(data["origin"]) is str, "LP03_ASSEMBLY_ORIGIN_ENCODING")
+        try:
+            data["origin"] = EvidenceOriginV1(data["origin"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_ASSEMBLY_ORIGIN") from exc
+        data["scenario_plan_body_or_existing_ref"] = _evidence_plan_selection_decode_v1(data["scenario_plan_body_or_existing_ref"])
+        data["source_selections"] = _evidence_tuple_decode_v1(data["source_selections"], EvidenceSourceSelectionV1.from_canonical_mapping)
+        for name in ("input_owner_roster", "allowed_control_kinds"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        data["input_schema_and_version_pins"] = _evidence_tuple_decode_v1(data["input_schema_and_version_pins"], _evidence_tuple_decode_v1)
+        data["preparation_limits"] = EvidencePreparationLimitsV1.from_canonical_mapping(data["preparation_limits"])
+        return cls(**data)
+
+
+def _evidence_pins_v1(pins: object, *, allow_empty: bool = False) -> None:
+    _native_require(type(pins) is tuple and len(pins) <= 256 and (allow_empty or bool(pins)),
+                    "LP03_VERSION_PINS")
+    for pair in pins:
+        _native_require(type(pair) is tuple and len(pair) == 2, "LP03_VERSION_PIN_PAIR")
+        _native_ident(pair[0])
+        _native_ident(pair[1])
+    names = tuple(pair[0] for pair in pins)
+    _native_require(names == tuple(sorted(set(names))), "LP03_VERSION_PIN_ORDER")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OwnerEvidenceEnvelopeV1:
+    """Exact unsigned owner payload. Only enrolled-key verification admits it."""
+
+    envelope_ref: str
+    experiment_id: str
+    experiment_revision: str
+    protocol_ref: str
+    permitted_origins: tuple[EvidenceOriginV1, ...]
+    permitted_lanes: tuple[EvidenceLaneV1, ...]
+    source_rights_refs: tuple[str, ...]
+    source_version_pins: tuple[tuple[str, str], ...]
+    component_closure: tuple[str, ...]
+    callback_pins: tuple[tuple[str, str], ...]
+    exclusive_expiry_wall_ns: int
+    assembly_scope: EvidenceAssemblyScopeV1
+    per_attempt_limits: EvidenceExecutionLimitsV1
+    aggregate_execution_limits: EvidenceExecutionLimitsV1
+    store_bindings: tuple[EvidenceStoreBindingV1, ...]
+    issuer_principal: str
+    deployment_id: str
+    package_identity_ref: str
+    environment_identity: EvidenceEnvironmentIdentityV1
+    stop_policy_ref: str
+    claim_policy_ref: str
+    required_receiver_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        for name in ("envelope_ref", "experiment_id", "experiment_revision", "protocol_ref", "issuer_principal",
+                     "deployment_id", "package_identity_ref", "stop_policy_ref", "claim_policy_ref"):
+            _native_ident(getattr(self, name))
+        for name, enum in (("permitted_origins", EvidenceOriginV1), ("permitted_lanes", EvidenceLaneV1)):
+            values = getattr(self, name)
+            _native_require(type(values) is tuple and bool(values)
+                            and all(type(item) is enum for item in values)
+                            and len(set(values)) == len(values), "LP03_ENVELOPE_ENUM_ROSTER")
+        for name in ("source_rights_refs", "component_closure", "required_receiver_ids"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_ENVELOPE_EMPTY_SCOPE")
+        _native_require(set(self.required_receiver_ids) == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"},
+                        "LP03_REQUIRED_RECEIVERS")
+        _evidence_pins_v1(self.source_version_pins)
+        _evidence_pins_v1(self.callback_pins, allow_empty=True)
+        _public_counter_v1(self.exclusive_expiry_wall_ns, allow_zero=False)
+        _native_require(type(self.assembly_scope) is EvidenceAssemblyScopeV1, "LP03_ENVELOPE_ASSEMBLY_SCOPE")
+        scope = self.assembly_scope
+        _native_require((scope.intended_experiment_id, scope.intended_experiment_revision, scope.protocol_ref)
+                        == (self.experiment_id, self.experiment_revision, self.protocol_ref)
+                        and scope.origin in self.permitted_origins
+                        and scope.exclusive_expiry_wall_ns <= self.exclusive_expiry_wall_ns,
+                        "LP03_ENVELOPE_ASSEMBLY_BINDING")
+        _native_require(all(set(selection.required_original_rights_refs) <= set(self.source_rights_refs)
+                            for selection in scope.source_selections), "LP03_ENVELOPE_SOURCE_RIGHTS")
+        _native_require(type(self.per_attempt_limits) is EvidenceExecutionLimitsV1
+                        and type(self.aggregate_execution_limits) is EvidenceExecutionLimitsV1,
+                        "LP03_ENVELOPE_EXECUTION_LIMITS")
+        _native_require(self.per_attempt_limits.aggregate_budget_ref == self.aggregate_execution_limits.aggregate_budget_ref,
+                        "LP03_AGGREGATE_BUDGET_BINDING")
+        for member in dataclass_fields(EvidenceExecutionLimitsV1):
+            if member.name != "aggregate_budget_ref":
+                _native_require(getattr(self.per_attempt_limits, member.name)
+                                <= getattr(self.aggregate_execution_limits, member.name), "LP03_ATTEMPT_EXCEEDS_AGGREGATE")
+        _native_require(type(self.environment_identity) is EvidenceEnvironmentIdentityV1, "LP03_ENVELOPE_ENVIRONMENT")
+        _native_require(type(self.store_bindings) is tuple and len(self.store_bindings) == 8
+                        and all(type(item) is EvidenceStoreBindingV1 for item in self.store_bindings),
+                        "LP03_EIGHT_STORE_BINDINGS")
+        if ({item.role for item in self.store_bindings} != set(EvidenceStoreRoleV1)
+                or len({item.store_id for item in self.store_bindings}) != 8
+                or len({item.database_file_identity for item in self.store_bindings}) != 8):
+            raise ContractValidationError(ReasonCode.EVIDENCE_STORE_ISOLATION_INVALID, "LP03_STORE_ALIAS_OR_ROLE")
+        _native_require(all(item.deployment_id == self.deployment_id and item.origin is scope.origin
+                            and self.experiment_id in item.experiment_scope for item in self.store_bindings),
+                        "LP03_STORE_ENVELOPE_SCOPE")
+        control = next(item for item in self.store_bindings if item.role is EvidenceStoreRoleV1.CONTROL)
+        _native_require(control.store_id == scope.control_store_id
+                        and control.allowed_writer_principal == self.issuer_principal, "LP03_CONTROL_ISSUER_BINDING")
+        if type(scope.scenario_plan_body_or_existing_ref) is EvidenceInlinePlanV1:
+            _native_require(scope.scenario_plan_body_or_existing_ref.plan.exact_environment_identity
+                            == self.environment_identity, "LP03_ENVELOPE_PLAN_ENVIRONMENT")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "OwnerEvidenceEnvelopeV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        for name, enum in (("permitted_origins", EvidenceOriginV1), ("permitted_lanes", EvidenceLaneV1)):
+            values = _evidence_tuple_decode_v1(data[name])
+            _native_require(all(type(item) is str for item in values), "LP03_ENVELOPE_ENUM_ENCODING")
+            try:
+                data[name] = tuple(enum(item) for item in values)
+            except ValueError as exc:
+                raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_ENVELOPE_ENUM_ROSTER") from exc
+        for name in ("source_rights_refs", "component_closure", "required_receiver_ids"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        for name in ("source_version_pins", "callback_pins"):
+            data[name] = _evidence_tuple_decode_v1(data[name], _evidence_tuple_decode_v1)
+        data["assembly_scope"] = EvidenceAssemblyScopeV1.from_canonical_mapping(data["assembly_scope"])
+        for name in ("per_attempt_limits", "aggregate_execution_limits"):
+            data[name] = EvidenceExecutionLimitsV1.from_canonical_mapping(data[name])
+        data["environment_identity"] = EvidenceEnvironmentIdentityV1.from_canonical_mapping(data["environment_identity"])
+        data["store_bindings"] = _evidence_tuple_decode_v1(data["store_bindings"], EvidenceStoreBindingV1.from_canonical_mapping)
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceProcessDeadlineV1:
+    """Original local deadline data; only the creating process may use it live."""
+
+    clock_domain_id: str
+    process_identity_ref: str
+    boot_identity_ref: str
+    admitted_monotonic_ns: int
+    exclusive_deadline_monotonic_ns: int
+
+    def __post_init__(self) -> None:
+        for name in ("clock_domain_id", "process_identity_ref", "boot_identity_ref"):
+            _native_ident(getattr(self, name))
+        _public_counter_v1(self.admitted_monotonic_ns, allow_zero=True)
+        _public_counter_v1(self.exclusive_deadline_monotonic_ns, allow_zero=True)
+        _native_require(self.admitted_monotonic_ns <= self.exclusive_deadline_monotonic_ns,
+                        "LP03_MONOTONIC_DEADLINE_ORDER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceProcessDeadlineV1":
+        return cls(**_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAssemblyGrantPayloadV1:
+    grant_ref: str
+    owner_envelope_ref: str
+    assembly_scope: EvidenceAssemblyScopeV1
+    preparation_ordinal: int
+    preparation_natural_key: tuple[str, str, str, str]
+    exact_frozen_plan_ref: EvidenceRecordRefV1
+    deadline: EvidenceProcessDeadlineV1
+    preparation_fence_ref: str
+
+    def __post_init__(self) -> None:
+        for name in ("grant_ref", "owner_envelope_ref", "preparation_fence_ref"):
+            _native_ident(getattr(self, name))
+        _public_counter_v1(self.preparation_ordinal)
+        _native_require(type(self.assembly_scope) is EvidenceAssemblyScopeV1
+                        and type(self.exact_frozen_plan_ref) is EvidenceRecordRefV1
+                        and type(self.deadline) is EvidenceProcessDeadlineV1, "LP03_ASSEMBLY_GRANT_TYPES")
+        _native_require(type(self.preparation_natural_key) is tuple and len(self.preparation_natural_key) == 4,
+                        "LP03_PREPARATION_NATURAL_KEY")
+        for item in self.preparation_natural_key:
+            _native_ident(item)
+        scope = self.assembly_scope
+        _native_require(self.preparation_natural_key[1:] == (
+            scope.origin.value, scope.intended_experiment_id, scope.intended_experiment_revision),
+            "LP03_PREPARATION_NATURAL_SCOPE")
+        _native_require(self.exact_frozen_plan_ref.store_id == scope.control_store_id,
+                        "LP03_PREPARATION_PLAN_STORE")
+        selection = scope.scenario_plan_body_or_existing_ref
+        plan_id = selection.plan.record_id if type(selection) is EvidenceInlinePlanV1 else selection.reference.record_id
+        _native_require(self.exact_frozen_plan_ref.record_id == plan_id, "LP03_PREPARATION_PLAN_ID")
+        _native_require(self.deadline.exclusive_deadline_monotonic_ns - self.deadline.admitted_monotonic_ns
+                        <= scope.preparation_limits.max_wall_ns, "LP03_PREPARATION_DEADLINE_LIMIT")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAssemblyGrantPayloadV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        data["assembly_scope"] = EvidenceAssemblyScopeV1.from_canonical_mapping(data["assembly_scope"])
+        data["preparation_natural_key"] = _evidence_tuple_decode_v1(data["preparation_natural_key"])
+        data["exact_frozen_plan_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["exact_frozen_plan_ref"])
+        data["deadline"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline"])
+        return cls(**data)
+
+
+def _evidence_timeline_canonical_object_v1(value):
+    """Reconstruct closed original data after a prior internal freeze."""
+    if type(value) is not MappingProxyType:
+        return value
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+    return _evidence_canonical_object_v1(deterministic_json(value).encode("utf-8"))
+
+
+class EvidenceCallbackRoleV1(StrEnum):
+    STRATEGY = "STRATEGY"
+    VENUE_REALITY = "VENUE_REALITY"
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceCallbackPinV1:
+    """One versioned strategy or venue callback selected by its original owner."""
+
+    callback_id: str
+    version: str
+    role: EvidenceCallbackRoleV1
+    package_identity_ref: str
+    implementation_ref: str
+    namespace_ordinal: int
+    origin: EvidenceOriginV1
+
+    def __post_init__(self) -> None:
+        for name in ("callback_id", "version", "package_identity_ref", "implementation_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.role) is EvidenceCallbackRoleV1 and type(self.origin) is EvidenceOriginV1,
+                        "LP03_CALLBACK_PIN_ROLE_OR_ORIGIN")
+        _evidence_unsigned256_v1(self.namespace_ordinal)
+        _native_require(self.namespace_ordinal > 0, "LP03_CALLBACK_NAMESPACE_REQUIRED")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceCallbackPinV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        _native_require(type(data["role"]) is str and data["role"] in EvidenceCallbackRoleV1,
+                        "LP03_CALLBACK_PIN_ROLE")
+        _native_require(type(data["origin"]) is str and data["origin"] in EvidenceOriginV1,
+                        "LP03_CALLBACK_PIN_ORIGIN")
+        data["role"] = EvidenceCallbackRoleV1(data["role"])
+        data["origin"] = EvidenceOriginV1(data["origin"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceStepComputationRequestV1:
+    """An original input roster for a component already selected by the grant."""
+
+    math_id: str
+    original_input_refs: tuple[EvidenceRecordRefV1, ...]
+
+    def __post_init__(self) -> None:
+        _native_ident(self.math_id)
+        refs = self.original_input_refs
+        _native_require(type(refs) is tuple and 0 < len(refs) <= 256
+                        and all(type(ref) is EvidenceRecordRefV1 for ref in refs)
+                        and len(set(refs)) == len(refs), "LP03_CALLBACK_COMPUTATION_INPUTS")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceStepComputationRequestV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        data["original_input_refs"] = _evidence_tuple_decode_v1(
+            data["original_input_refs"], EvidenceRecordRefV1.from_canonical_mapping
+        )
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceStepObservationV1:
+    """One explicit conformance observation associated with its original event."""
+
+    observation_id: str
+    parent_event_id: str
+    kind: str
+    origin: EvidenceOriginV1
+    payload: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_frozen_data_v1, deterministic_json
+
+        _native_ident(self.observation_id)
+        _native_ident(self.parent_event_id)
+        _native_require(type(self.kind) is str and self.kind in (
+            "SYNTHETIC_ORDER_ACK", "SYNTHETIC_FILL", "SYNTHETIC_CANCEL", "SYNTHETIC_AMEND",
+            "SYNTHETIC_RATE_BUDGET", "SYNTHETIC_SETTLEMENT", "SYNTHETIC_VOID",
+            "SYNTHETIC_TIMER", "SYNTHETIC_MULTILEG_OUTCOME",
+        ), "LP03_CALLBACK_OBSERVATION_KIND")
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE, "LP03_CALLBACK_OBSERVATION_ORIGIN")
+        value = _evidence_frozen_data_v1(self.payload)
+        _native_require(type(value) is MappingProxyType and bool(value)
+                        and len(deterministic_json(value).encode("utf-8")) <= 16384,
+                        "LP03_CALLBACK_OBSERVATION_BODY")
+        object.__setattr__(self, "payload", value)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceStepObservationV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        _native_require(type(data["origin"]) is str and data["origin"] == EvidenceOriginV1.SOFTWARE_CONFORMANCE.value,
+                        "LP03_CALLBACK_OBSERVATION_ORIGIN")
+        data["origin"] = EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceStepOutcomeV1:
+    """Typed callback output submitted to the original attempt's causal owner."""
+
+    next_lane_state_ref: str
+    proposed_intents: tuple[object, ...]
+    component_requests: tuple[EvidenceStepComputationRequestV1, ...]
+    generated_observations: tuple[EvidenceStepObservationV1, ...]
+    disposition: str
+    reasons: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        from .lifecycle import OrderIntentRecordV1
+
+        _native_ident(self.next_lane_state_ref)
+        for rows, row_type in (
+            (self.proposed_intents, OrderIntentRecordV1),
+            (self.component_requests, EvidenceStepComputationRequestV1),
+            (self.generated_observations, EvidenceStepObservationV1),
+        ):
+            _native_require(type(rows) is tuple and len(rows) <= 256 and all(type(row) is row_type for row in rows),
+                            "LP03_CALLBACK_OUTCOME_ROWS")
+        _public_refs_v1(self.reasons, allow_empty=True)
+        _native_require(type(self.disposition) is str and self.disposition in ("CONTINUE", "COMPLETE", "REJECTED"),
+                        "LP03_CALLBACK_OUTCOME_DISPOSITION")
+        _native_require((self.disposition == "CONTINUE") == (not self.reasons), "LP03_CALLBACK_OUTCOME_REASONS")
+        if self.disposition == "REJECTED":
+            _native_require(not (self.proposed_intents or self.component_requests or self.generated_observations),
+                            "LP03_CALLBACK_REJECTION_HAS_EFFECTS")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceStepOutcomeV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        data["proposed_intents"] = _evidence_tuple_decode_v1(data["proposed_intents"], _evidence_timeline_intent_v1)
+        data["component_requests"] = _evidence_tuple_decode_v1(
+            data["component_requests"], EvidenceStepComputationRequestV1.from_canonical_mapping
+        )
+        data["generated_observations"] = _evidence_tuple_decode_v1(
+            data["generated_observations"], EvidenceStepObservationV1.from_canonical_mapping
+        )
+        data["reasons"] = _evidence_tuple_decode_v1(data["reasons"])
+        return cls(**data)
+
+
+def _evidence_timeline_intent_v1(value):
+    from .lifecycle import OrderIntentRecordV1
+
+    data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value),
+                            tuple(member.name for member in dataclass_fields(OrderIntentRecordV1))))
+    for name in ("component_version_refs", "risk_cash_source_gate_refs"):
+        data[name] = _evidence_tuple_decode_v1(data[name])
+    return OrderIntentRecordV1(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceTimelineEventPinV1:
+    """Commitment to one exact original event without embedding its input bytes."""
+
+    event_id: str
+    source_record_ref: EvidenceRecordRefV1
+    local_ordinal: int
+    canonical_event_sha256: str
+
+    def __post_init__(self) -> None:
+        _native_ident(self.event_id)
+        _public_counter_v1(self.local_ordinal, allow_zero=True)
+        _native_require(type(self.source_record_ref) is EvidenceRecordRefV1
+                        and type(self.canonical_event_sha256) is str
+                        and re.fullmatch(r"[0-9a-f]{64}", self.canonical_event_sha256) is not None,
+                        "LP03_TIMELINE_EVENT_PIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceTimelineEventPinV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        data["source_record_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["source_record_ref"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceTimelineInputPinV1:
+    """An original component input and its independently retained availability."""
+
+    source_record_ref: EvidenceRecordRefV1
+    availability_wall_ns: int
+
+    def __post_init__(self):
+        _native_require(type(self.source_record_ref) is EvidenceRecordRefV1, "LP03_TIMELINE_COMPONENT_SOURCE")
+        _public_counter_v1(self.availability_wall_ns, allow_zero=True)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), ("source_record_ref", "availability_wall_ns")))
+        data["source_record_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["source_record_ref"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceTimelineCashBasisV1:
+    """The original baseline that bounds synthetic balance changes in a lane."""
+
+    source_record_ref: EvidenceRecordRefV1
+    amount: Mapping[str, object]
+
+    def __post_init__(self):
+        from .accounting import AccountingAmountV1
+        from .serialization import _evidence_frozen_data_v1
+
+        _native_require(type(self.source_record_ref) is EvidenceRecordRefV1, "LP03_TIMELINE_CASH_SOURCE")
+        exact = _evidence_timeline_canonical_object_v1(self.amount)
+        _native_obj(exact, tuple(member.name for member in dataclass_fields(AccountingAmountV1)))
+        _native_require(AccountingAmountV1(**exact).decimal >= 0, "LP03_TIMELINE_ORIGINAL_CASH_AMOUNT")
+        object.__setattr__(self, "amount", _evidence_frozen_data_v1(exact))
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), ("source_record_ref", "amount")))
+        data["source_record_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["source_record_ref"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceCausalTimelineScopeV1:
+    """Exact original profile data retained by registration and signed per attempt."""
+
+    scenario_plan: EvidenceScenarioPlanV1
+    callbacks: tuple[EvidenceCallbackPinV1, ...]
+    event_pins: tuple[EvidenceTimelineEventPinV1, ...]
+    component_input_pins: tuple[EvidenceTimelineInputPinV1, ...]
+    coordinates: tuple[tuple[int, ...], ...]
+    decision_wall_ns: tuple[int, ...]
+    numerical_work_limits: Mapping[str, int]
+    accepted_cash_basis_or_none: EvidenceTimelineCashBasisV1 | None = None
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_frozen_data_v1
+
+        plan = self.scenario_plan
+        _native_require(type(plan) is EvidenceScenarioPlanV1, "LP03_TIMELINE_ORIGINAL_PLAN")
+        pins = self.callbacks
+        _native_require(type(pins) is tuple and len(pins) == 2
+                        and all(type(pin) is EvidenceCallbackPinV1 and pin.origin is plan.origin for pin in pins),
+                        "LP03_TIMELINE_CALLBACK_PINS")
+        _native_require(tuple(pin.role for pin in pins) == (
+            EvidenceCallbackRoleV1.STRATEGY, EvidenceCallbackRoleV1.VENUE_REALITY),
+            "LP03_TIMELINE_CALLBACK_ORDER")
+        _native_require(len({pin.callback_id for pin in pins}) == 2 and len({pin.namespace_ordinal for pin in pins}) == 2,
+                        "LP03_TIMELINE_CALLBACK_DISTINCT_ROLES")
+        versions = {row.namespace_ordinal: row.algorithm_version_ref_or_absence for row in plan.namespace_rules}
+        _native_require(all(versions.get(row.namespace_ordinal) == row.version for row in pins),
+                        "LP03_TIMELINE_CALLBACK_ORIGINAL_NAMESPACE")
+        events = self.event_pins
+        _native_require(type(events) is tuple and 0 < len(events) <= 128
+                        and all(type(row) is EvidenceTimelineEventPinV1 for row in events)
+                        and tuple(row.local_ordinal for row in events) == tuple(range(len(events)))
+                        and len({row.event_id for row in events}) == len(events), "LP03_TIMELINE_EVENT_PIN_ROSTER")
+        inputs = self.component_input_pins
+        _native_require(type(inputs) is tuple and 0 < len(inputs) <= 128
+                        and all(type(row) is EvidenceTimelineInputPinV1 for row in inputs)
+                        and len({row.source_record_ref for row in inputs}) == len(inputs), "LP03_TIMELINE_COMPONENT_INPUT_ROSTER")
+        coords = self.coordinates
+        _native_require(type(coords) is tuple and len(coords) <= min(256, plan.maximum_coordinates),
+                        "LP03_TIMELINE_COORDINATE_RESERVATION")
+        allowed = {0, *(row.namespace_ordinal for row in pins)}
+        for coordinate in coords:
+            _native_require(type(coordinate) is tuple and len(coordinate) == len(plan.coordinate_roster)
+                            and coordinate[:2] == (plan.master_seed, plan.plan_revision)
+                            and coordinate[7] in allowed and 0 <= coordinate[4] < len(events),
+                            "LP03_TIMELINE_COORDINATE_JOIN")
+            for number in coordinate:
+                _evidence_unsigned256_v1(number)
+        _native_require(coords == tuple(sorted(set(coords))), "LP03_TIMELINE_COORDINATE_ORDER")
+        decisions = self.decision_wall_ns
+        _native_require(type(decisions) is tuple and 0 < len(decisions) <= len(events),
+                        "LP03_TIMELINE_DECISION_ROSTER")
+        for instant in decisions:
+            _public_counter_v1(instant, allow_zero=True)
+        _native_require(decisions == tuple(sorted(set(decisions))), "LP03_TIMELINE_DECISION_ORDER")
+        _native_require(self.accepted_cash_basis_or_none is None or type(self.accepted_cash_basis_or_none) is EvidenceTimelineCashBasisV1,
+                        "LP03_TIMELINE_ORIGINAL_CASH_BASIS")
+        limits = _evidence_frozen_data_v1(self.numerical_work_limits)
+        _native_require(type(limits) is MappingProxyType and set(limits) == {
+            "max_input_bits", "max_work_bits", "max_serialized_bytes"}, "LP03_TIMELINE_NUMERICAL_LIMITS")
+        for maximum in limits.values():
+            _public_counter_v1(maximum)
+        object.__setattr__(self, "numerical_work_limits", limits)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceCausalTimelineScopeV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        data["scenario_plan"] = EvidenceScenarioPlanV1.from_canonical_mapping(data["scenario_plan"])
+        data["callbacks"] = _evidence_tuple_decode_v1(data["callbacks"], EvidenceCallbackPinV1.from_canonical_mapping)
+        data["event_pins"] = _evidence_tuple_decode_v1(data["event_pins"], EvidenceTimelineEventPinV1.from_canonical_mapping)
+        data["component_input_pins"] = _evidence_tuple_decode_v1(
+            data["component_input_pins"], EvidenceTimelineInputPinV1.from_canonical_mapping)
+        data["coordinates"] = _evidence_tuple_decode_v1(data["coordinates"], _evidence_tuple_decode_v1)
+        data["decision_wall_ns"] = _evidence_tuple_decode_v1(data["decision_wall_ns"])
+        if data["accepted_cash_basis_or_none"] is not None:
+            data["accepted_cash_basis_or_none"] = EvidenceTimelineCashBasisV1.from_canonical_mapping(data["accepted_cash_basis_or_none"])
+        return cls(**data)
+
+
+_LP03_PUBLIC_TIMELINE_KINDS_V1 = frozenset((
+    "CATALOG", "LIFECYCLE", "BOOK_SNAPSHOT", "BOOK_DELTA", "BOOK_REPLACEMENT",
+    "BBO", "TRADE", "SETTLEMENT", "REFERENCE_PRICE", "HEARTBEAT", "SOURCE_STATUS",
+))
+_LP03_SOFTWARE_TIMELINE_KINDS_V1 = frozenset((
+    "SYNTHETIC_ORDER_INTENT", "SYNTHETIC_ORDER_ACK", "SYNTHETIC_FILL",
+    "SYNTHETIC_CANCEL", "SYNTHETIC_AMEND", "SYNTHETIC_RECONNECT",
+    "SYNTHETIC_RATE_BUDGET", "SYNTHETIC_SETTLEMENT", "SYNTHETIC_VOID",
+    "SYNTHETIC_TIMER", "SYNTHETIC_MULTILEG_OUTCOME",
+))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceTimelineEventV1:
+    """One original bounded event, ready for causal selection before a callback."""
+
+    event_id: str
+    kind: str
+    origin: EvidenceOriginV1
+    source_record_ref: EvidenceRecordRefV1
+    availability_wall_ns: int
+    effective_wall_ns: int
+    provider_order_or_absence: tuple[int, int] | EvidenceAbsenceV1
+    source_revision: int
+    connection_epoch: str
+    local_ordinal: int
+    payload: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_frozen_data_v1, deterministic_json
+
+        _native_ident(self.event_id)
+        _native_ident(self.connection_epoch)
+        _native_require(type(self.origin) is EvidenceOriginV1 and type(self.source_record_ref) is EvidenceRecordRefV1,
+                        "LP03_TIMELINE_ORIGINAL_SOURCE")
+        _native_require(type(self.kind) is str and (
+            self.kind in _LP03_PUBLIC_TIMELINE_KINDS_V1
+            or self.kind in _LP03_SOFTWARE_TIMELINE_KINDS_V1 and self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE),
+            "LP03_TIMELINE_KIND_OR_ORIGIN")
+        for name in ("availability_wall_ns", "effective_wall_ns", "source_revision", "local_ordinal"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        order = self.provider_order_or_absence
+        if type(order) is EvidenceAbsenceV1:
+            _native_require(order.reason == "NO_PROVIDER_ORDER", "LP03_TIMELINE_ORDER_ABSENCE")
+        else:
+            _native_require(type(order) is tuple and len(order) == 2, "LP03_TIMELINE_PROVIDER_SEQUENCE")
+            for value in order:
+                _public_counter_v1(value, allow_zero=True)
+            _native_require(order[0] <= order[1], "LP03_TIMELINE_PROVIDER_SEQUENCE")
+        data = _evidence_frozen_data_v1(self.payload)
+        _native_require(type(data) is MappingProxyType and data
+                        and len(deterministic_json(data).encode("utf-8")) <= 49152,
+                        "LP03_TIMELINE_EVENT_PAYLOAD")
+        object.__setattr__(self, "payload", data)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> EvidenceTimelineEventV1:
+        data = dict(_native_obj(_evidence_timeline_canonical_object_v1(value), tuple(member.name for member in dataclass_fields(cls))))
+        _native_require(type(data["origin"]) is str and data["origin"] in EvidenceOriginV1, "LP03_TIMELINE_EVENT_ORIGIN")
+        data["origin"] = EvidenceOriginV1(data["origin"])
+        data["source_record_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["source_record_ref"])
+        order = data["provider_order_or_absence"]
+        data["provider_order_or_absence"] = (
+            EvidenceAbsenceV1.from_canonical_mapping(order) if isinstance(order, Mapping)
+            else _evidence_tuple_decode_v1(order)
+        )
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAttemptGrantPayloadV1:
+    grant_ref: str
+    original_owner_envelope_ref: str
+    experiment_id: str
+    experiment_revision: str
+    input_assembly_ref: EvidenceRecordRefV1
+    registration_ref: EvidenceRecordRefV1
+    input_lock_ref: str
+    scenario_plan_ref: EvidenceRecordRefV1
+    protocol_ref: str
+    task_ref: str
+    claim_family_ref: str
+    component_closure: tuple[str, ...]
+    callback_pins: tuple[tuple[str, str], ...]
+    component_and_callback_pins: Mapping[str, object]
+    producer_principal: str
+    service_principal: str
+    lane: EvidenceLaneV1
+    attempt_ordinal: int
+    predecessor_attempt_ref: str | EvidenceAbsenceV1
+    original_source_grant_refs: tuple[str, ...]
+    allowed_reads: tuple[EvidenceSourceSelectionV1, ...]
+    allowed_write_store_ids: tuple[str, ...]
+    budgets: EvidenceExecutionLimitsV1
+    deadline: EvidenceProcessDeadlineV1
+    fence_ref: str
+    supervisor_binding_ref: str
+    no_order_authority: bool
+    no_provider_effect: bool
+    no_model_fit: bool
+    no_llm_execution: bool
+    no_qpu_execution: bool
+
+    def __post_init__(self) -> None:
+        for name in ("grant_ref", "original_owner_envelope_ref", "experiment_id", "experiment_revision",
+                     "input_lock_ref", "protocol_ref", "task_ref", "claim_family_ref", "producer_principal",
+                     "service_principal", "fence_ref", "supervisor_binding_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("input_assembly_ref", "registration_ref", "scenario_plan_ref"):
+            _native_require(type(getattr(self, name)) is EvidenceRecordRefV1, "LP03_ATTEMPT_ORIGINAL_REF")
+        for name in ("component_closure", "original_source_grant_refs", "allowed_write_store_ids"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_ATTEMPT_SCOPE_EMPTY")
+        _evidence_pins_v1(self.callback_pins, allow_empty=True)
+        from .serialization import _evidence_frozen_data_v1
+        pins = _evidence_frozen_data_v1(self.component_and_callback_pins)
+        _native_require(isinstance(pins, Mapping) and set(pins) in (
+            {"components","callbacks"},{"components","callbacks","supplementary_scorers"},
+            {"components","callbacks","supplementary_uncertainty_policy"},
+            {"components","callbacks","quantum_original_lock"},
+            {"components","callbacks","causal_timeline"}),
+            "LP03_ATTEMPT_PIN_FIELDS")
+        components = pins["components"]
+        _native_require(type(components) is tuple and 0 < len(components) <= 52, "LP03_ATTEMPT_COMPONENT_PINS")
+        for row in components:
+            _native_require(type(row) is tuple and len(row) == 3, "LP03_ATTEMPT_COMPONENT_PIN_ROW")
+            for value in row:
+                _native_ident(value)
+        _native_require(tuple(row[0] for row in components) == self.component_closure
+                        and pins["callbacks"] == self.callback_pins, "LP03_ATTEMPT_COMPONENT_PIN_CLOSURE")
+        held_out = self.component_closure in (("MATH-20",), ("MATH-21",))
+        _native_require(("supplementary_scorers" in pins) == held_out, "LP03_ATTEMPT_ORIGINAL_SCORER_PIN_LAYOUT")
+        recorded_dr = self.component_closure == ("MATH-22",)
+        _native_require(("supplementary_uncertainty_policy" in pins) == recorded_dr,
+            "LP03_ATTEMPT_DR_CONTINUATION_SCOPE")
+        quantum = len(self.component_closure) == 1 and self.component_closure[0] in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1
+        _native_require(("quantum_original_lock" in pins) == quantum, "LP03_ATTEMPT_QUANTUM_ORIGINAL_LOCK_SCOPE")
+        if quantum:
+            lock_pins = _evidence_quantum_original_lock_pins_v1(pins["quantum_original_lock"])
+            _native_require(lock_pins["scenario_set_ref"] == self.scenario_plan_ref.record_id,
+                "LP03_ATTEMPT_QUANTUM_ORIGINAL_SCENARIO")
+        if recorded_dr:
+            supplementary = pins["supplementary_uncertainty_policy"]
+            _native_require(isinstance(supplementary, Mapping) and set(supplementary) == {
+                "parameter_protocol_ref", "uncertainty_source_ref", "numerical_work_limits"},
+                "LP03_ATTEMPT_DR_CONTINUATION_POLICY")
+            _native_ident(supplementary["parameter_protocol_ref"])
+            _native_ident(supplementary["uncertainty_source_ref"])
+            limits = supplementary["numerical_work_limits"]
+            _native_require(isinstance(limits, Mapping) and set(limits) == {
+                "max_input_bits", "max_work_bits", "max_serialized_bytes"},
+                "LP03_ATTEMPT_DR_CONTINUATION_LIMIT_FIELDS")
+            for limit in limits.values():
+                _public_counter_v1(limit, allow_zero=False)
+        if held_out:
+            scorers = pins["supplementary_scorers"]
+            _native_require(self.callback_pins == () and type(scorers) is tuple and len(scorers) == 1
+                and type(scorers[0]) is tuple and len(scorers[0]) == 4, "LP03_ATTEMPT_ORIGINAL_SCORER_PIN_LAYOUT")
+            scorer, implementation, specification, resource_policy = scorers[0]
+            for value in (scorer, implementation, specification, resource_policy):
+                _native_ident(value)
+            _native_require(scorer in ("MATH-08","MATH-09") and implementation==scorer+"::1.1R1",
+                "LP03_ATTEMPT_ORIGINAL_SCORER_PIN")
+        object.__setattr__(self, "component_and_callback_pins", pins)
+        _native_require(type(self.lane) is EvidenceLaneV1, "LP03_ATTEMPT_LANE")
+        _public_counter_v1(self.attempt_ordinal)
+        if type(self.predecessor_attempt_ref) is EvidenceAbsenceV1:
+            _native_require(self.predecessor_attempt_ref.reason == "FIRST_ATTEMPT"
+                            and self.attempt_ordinal == 1, "LP03_ATTEMPT_PREDECESSOR")
+        else:
+            _native_ident(self.predecessor_attempt_ref)
+            _native_require(self.attempt_ordinal > 1, "LP03_ATTEMPT_PREDECESSOR")
+        _native_require(type(self.allowed_reads) is tuple and len(self.allowed_reads) <= 256
+                        and all(type(item) is EvidenceSourceSelectionV1 for item in self.allowed_reads),
+                        "LP03_ATTEMPT_READ_SCOPE")
+        _native_require(type(self.budgets) is EvidenceExecutionLimitsV1
+                        and type(self.deadline) is EvidenceProcessDeadlineV1, "LP03_ATTEMPT_LIMITS")
+        timeline = self.causal_timeline_v1()
+        _native_require((timeline is not None) == ("causal_timeline" in pins) == bool(self.callback_pins),
+                        "LP03_ATTEMPT_CALLBACK_PROFILE")
+        if timeline is not None:
+            original_refs = {EvidenceRecordRefV1(row.original_store_id, ref) for row in self.allowed_reads
+                             for ref in row.selection.record_refs}
+            cash_basis = timeline.accepted_cash_basis_or_none
+            _native_require(self.component_closure == ("MATH-03",)
+                            and timeline.scenario_plan.record_id == self.scenario_plan_ref.record_id
+                            and timeline.scenario_plan.experiment_id == self.experiment_id
+                            and timeline.scenario_plan.experiment_revision == self.experiment_revision
+                            and tuple(sorted((pin.callback_id, pin.version) for pin in timeline.callbacks)) == self.callback_pins
+                            and all(pin.source_record_ref in original_refs for pin in (*timeline.event_pins, *timeline.component_input_pins))
+                            and (cash_basis is None or cash_basis.source_record_ref in original_refs)
+                            and len(timeline.event_pins) <= min(self.budgets.max_events, self.budgets.max_input_reads)
+                            and len(timeline.coordinates) <= self.budgets.max_coordinates,
+                            "LP03_ATTEMPT_ORIGINAL_TIMELINE_SCOPE")
+        _native_require(self.deadline.exclusive_deadline_monotonic_ns - self.deadline.admitted_monotonic_ns
+                        <= self.budgets.max_wall_ns, "LP03_ATTEMPT_DEADLINE_LIMIT")
+        for name in ("no_order_authority", "no_provider_effect", "no_model_fit", "no_llm_execution", "no_qpu_execution"):
+            _native_require(getattr(self, name) is True, "LP03_ATTEMPT_FORBIDDEN_EFFECT")
+
+    def causal_timeline_v1(self) -> EvidenceCausalTimelineScopeV1 | None:
+        scope = self.component_and_callback_pins.get("causal_timeline")
+        return EvidenceCausalTimelineScopeV1.from_canonical_mapping(scope) if scope is not None else None
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAttemptGrantPayloadV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        for name in ("input_assembly_ref", "registration_ref", "scenario_plan_ref"):
+            data[name] = EvidenceRecordRefV1.from_canonical_mapping(data[name])
+        for name in ("component_closure", "original_source_grant_refs", "allowed_write_store_ids"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        data["callback_pins"] = _evidence_tuple_decode_v1(data["callback_pins"], _evidence_tuple_decode_v1)
+        _native_require(type(data["lane"]) is str, "LP03_ATTEMPT_LANE_ENCODING")
+        try:
+            data["lane"] = EvidenceLaneV1(data["lane"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_ATTEMPT_LANE") from exc
+        data["predecessor_attempt_ref"] = _evidence_absence_or_ref_v1(data["predecessor_attempt_ref"])
+        data["allowed_reads"] = _evidence_tuple_decode_v1(data["allowed_reads"], EvidenceSourceSelectionV1.from_canonical_mapping)
+        data["budgets"] = EvidenceExecutionLimitsV1.from_canonical_mapping(data["budgets"])
+        data["deadline"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceRevocationPayloadV1:
+    target_envelope_ref: str
+    target_experiment_id: str
+    target_generation: int
+    new_generation: int
+    exact_revocation_scope: tuple[str, ...]
+    authenticated_reason: str
+    observed_at_ns: int
+
+    def __post_init__(self):
+        for identity in (self.target_envelope_ref, self.target_experiment_id, self.authenticated_reason):
+            _native_ident(identity)
+        _public_counter_v1(self.target_generation, allow_zero=True)
+        _public_counter_v1(self.new_generation)
+        _public_counter_v1(self.observed_at_ns)
+        _native_require(self.new_generation == self.target_generation + 1, "LP03_REVOCATION_FORWARD_GENERATION")
+        _public_refs_v1(self.exact_revocation_scope)
+        known = ("ASSEMBLY_GRANT", "ATTEMPT_GRANT", "REVIEW_ADMISSION", "RECEIVER_ADMISSION")
+        _native_require(self.exact_revocation_scope == tuple(value for value in known if value in self.exact_revocation_scope),
+            "LP03_REVOCATION_EXACT_SCOPE")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        fields = ("target_envelope_ref", "target_experiment_id", "target_generation", "new_generation",
+            "exact_revocation_scope", "authenticated_reason", "observed_at_ns")
+        data = dict(_native_obj(value, fields))
+        data["exact_revocation_scope"] = _evidence_tuple_decode_v1(data["exact_revocation_scope"])
+        return cls(**data)
+
+
+def _evidence_decode_authorization_payload_v1(message: EvidenceAuthorizationMessageV1):
+    """Closed admission schema. Unimplemented kinds remain unavailable."""
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+    _native_require(type(message) is EvidenceAuthorizationMessageV1, "LP03_AUTH_MESSAGE_TYPE")
+    constructors = {
+        EvidenceMessageKindV1.OWNER_ENVELOPE: OwnerEvidenceEnvelopeV1,
+        EvidenceMessageKindV1.ASSEMBLY_GRANT: EvidenceAssemblyGrantPayloadV1,
+        EvidenceMessageKindV1.ATTEMPT_GRANT: EvidenceAttemptGrantPayloadV1,
+        EvidenceMessageKindV1.REVIEW_ADMISSION: EvidenceReviewAdmissionPayloadV1,
+        EvidenceMessageKindV1.REVIEW_DECISION: EvidenceReviewDecisionPayloadV1,
+        EvidenceMessageKindV1.RECEIVER_ADMISSION: EvidenceReceiverAdmissionPayloadV1,
+        EvidenceMessageKindV1.RECEIVER_ACK: EvidenceReceiverAckPayloadV1,
+        EvidenceMessageKindV1.REVOCATION: EvidenceRevocationPayloadV1,
+    }
+    cls = constructors.get(message.kind)
+    _native_require(cls is not None, "LP03_AUTH_PAYLOAD_UNAVAILABLE")
+    raw = deterministic_json(message.payload).encode("utf-8")
+    payload = cls.from_canonical_mapping(_evidence_canonical_object_v1(raw))
+    _native_require(deterministic_json(payload).encode("utf-8") == raw, "LP03_AUTH_PAYLOAD_NONCANONICAL")
+    if type(payload) is OwnerEvidenceEnvelopeV1:
+        _native_require(message.subject == payload.envelope_ref and message.audience == payload.issuer_principal
+                        and message.deployment_id == payload.deployment_id
+                        and message.origin is payload.assembly_scope.origin
+                        and message.generation == payload.assembly_scope.generation
+                        and message.exclusive_expiry_wall_ns == payload.exclusive_expiry_wall_ns,
+                        "LP03_OWNER_MESSAGE_BINDING")
+    elif type(payload) is EvidenceAssemblyGrantPayloadV1:
+        _native_require(message.subject == payload.grant_ref
+                        and message.audience == payload.assembly_scope.assembler_audience
+                        and message.deployment_id == payload.preparation_natural_key[0]
+                        and message.origin is payload.assembly_scope.origin
+                        and message.generation == payload.assembly_scope.generation
+                        and message.exclusive_expiry_wall_ns == payload.assembly_scope.exclusive_expiry_wall_ns,
+                        "LP03_ASSEMBLY_MESSAGE_BINDING")
+    elif type(payload) is EvidenceAttemptGrantPayloadV1:
+        _native_require(message.subject == payload.grant_ref and message.audience == payload.service_principal,
+                        "LP03_ATTEMPT_MESSAGE_BINDING")
+    elif type(payload) is EvidenceReviewAdmissionPayloadV1:
+        _native_require(message.subject == payload.grant_ref and message.audience == payload.reviewer_principal
+                        and message.origin is payload.origin and message.generation == payload.generation
+                        and message.exclusive_expiry_wall_ns == payload.expiry, "LP03_REVIEW_ADMISSION_MESSAGE_BINDING")
+    elif type(payload) is EvidenceReceiverAdmissionPayloadV1:
+        _native_require(message.subject == payload.grant_ref and message.audience == payload.receiver_principal
+                        and message.origin is payload.origin and message.generation == payload.generation
+                        and message.exclusive_expiry_wall_ns == payload.expiry, "LP03_RECEIVER_ADMISSION_MESSAGE_BINDING")
+    elif type(payload) is EvidenceRevocationPayloadV1:
+        _native_require(message.audience == "CP/sqlite_reference.py::recover_evidence_control_lifecycle_v1"
+                        and message.generation == payload.new_generation
+                        and message.valid_from_wall_ns <= payload.observed_at_ns < message.exclusive_expiry_wall_ns,
+                        "LP03_REVOCATION_MESSAGE_BINDING")
+    else:
+        _native_require(message.subject == payload.record_body["record_id"]
+                        and message.audience == payload.consumer_principal
+                        and message.issuer == payload.record_body["producing_principal"]
+                        and message.generation == payload.record_body["generation"]
+                        and message.origin.value == payload.record_body["origin"]
+                        and message.exclusive_expiry_wall_ns == payload.record_body["expiry"],
+                        "LP03_REVIEW_DECISION_MESSAGE_BINDING")
+    return payload
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceHostPublicConfigurationV1:
+    """Protected-host input contract, containing public facts only.
+
+    The object is not proof of protection, enrollment, or current store rights.
+    Conformance factories cannot upgrade it to observed-origin qualification.
+    """
+
+    schema_version: str
+    deployment_id: str
+    host_identity: str
+    service_owner: str
+    service_principal: str
+    signing_key_id: str
+    origin: EvidenceOriginV1
+    generation: int
+    verification_keys: tuple[EvidenceVerificationKeyV1, ...]
+    package_identity_ref: str
+    environment_identity: EvidenceEnvironmentIdentityV1
+    store_bindings: tuple[EvidenceStoreBindingV1, ...]
+    protected_configuration_ref: str
+    native_qualification_ref_or_absence: str | EvidenceAbsenceV1
+
+    def __post_init__(self) -> None:
+        _native_require(type(self.schema_version) is str and self.schema_version == "1.0",
+                        "LP03_HOST_SCHEMA")
+        for name in ("deployment_id", "host_identity", "service_owner", "service_principal", "signing_key_id",
+                     "package_identity_ref", "protected_configuration_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.origin) is EvidenceOriginV1, "LP03_HOST_ORIGIN")
+        _public_counter_v1(self.generation, allow_zero=True)
+        _native_require(type(self.verification_keys) is tuple and 0 < len(self.verification_keys) <= 64
+                        and all(type(item) is EvidenceVerificationKeyV1 for item in self.verification_keys),
+                        "LP03_HOST_PUBLIC_KEY_ROSTER")
+        _native_require(len({item.key_id for item in self.verification_keys}) == len(self.verification_keys)
+                        and len({item.public_key_hex for item in self.verification_keys}) == len(self.verification_keys),
+                        "LP03_HOST_KEY_ALIAS")
+        _native_require(all(item.origin is self.origin and item.deployment_id == self.deployment_id
+                            for item in self.verification_keys), "LP03_HOST_KEY_SCOPE")
+        selected = tuple(item for item in self.verification_keys if item.key_id == self.signing_key_id)
+        _native_require(len(selected) == 1 and selected[0].principal == self.service_principal
+                        and selected[0].purpose is not EvidenceKeyPurposeV1.OWNER_APPROVAL,
+                        "LP03_HOST_SIGNING_CUSTODY")
+        allowed = {
+            "AGENT_ORCH1": (EvidenceKeyPurposeV1.EVIDENCE_ISSUER, EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE),
+            "SVC1": (EvidenceKeyPurposeV1.EVIDENCE_PRODUCER, EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE),
+            "READINESS1": (EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE,),
+            "PRETRADE1": (EvidenceKeyPurposeV1.RECEIVER_ACCEPTANCE,),
+            "QKU_COMPUTATION_CONTROL_PLANE": (EvidenceKeyPurposeV1.EVIDENCE_PRODUCER,),
+            "INDEPENDENT_EVIDENCE_REVIEW": (EvidenceKeyPurposeV1.INDEPENDENT_REVIEW,),
+        }
+        _native_require(selected[0].purpose in allowed.get(self.service_owner, ()), "LP03_HOST_ROLE_PURPOSE")
+        producer_principals = {item.principal for item in self.verification_keys
+                               if item.purpose in (EvidenceKeyPurposeV1.EVIDENCE_PRODUCER,
+                                                   EvidenceKeyPurposeV1.EVIDENCE_ISSUER)}
+        reviewer_principals = {item.principal for item in self.verification_keys
+                               if item.purpose is EvidenceKeyPurposeV1.INDEPENDENT_REVIEW}
+        _native_require(not producer_principals.intersection(reviewer_principals), "LP03_PRODUCER_REVIEWER_SEPARATION")
+        _native_require(type(self.environment_identity) is EvidenceEnvironmentIdentityV1, "LP03_HOST_ENVIRONMENT")
+        _native_require(type(self.store_bindings) is tuple and len(self.store_bindings) == 8
+                        and all(type(item) is EvidenceStoreBindingV1 for item in self.store_bindings), "LP03_HOST_STORES")
+        if ({item.role for item in self.store_bindings} != set(EvidenceStoreRoleV1)
+                or len({item.store_id for item in self.store_bindings}) != 8
+                or len({item.database_file_identity for item in self.store_bindings}) != 8):
+            raise ContractValidationError(ReasonCode.EVIDENCE_STORE_ISOLATION_INVALID, "LP03_HOST_STORE_ALIAS")
+        _native_require(all(item.origin is self.origin and item.deployment_id == self.deployment_id
+                            for item in self.store_bindings), "LP03_HOST_STORE_SCOPE")
+        if self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE:
+            _native_require(type(self.native_qualification_ref_or_absence) is EvidenceAbsenceV1
+                            and self.native_qualification_ref_or_absence.reason == "SOFTWARE_CONFORMANCE_ONLY",
+                            "LP03_CONFORMANCE_NOT_NATIVE_QUALIFICATION")
+        else:
+            _native_ident(self.native_qualification_ref_or_absence)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceHostPublicConfigurationV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        _native_require(type(data["origin"]) is str, "LP03_HOST_ORIGIN_ENCODING")
+        try:
+            data["origin"] = EvidenceOriginV1(data["origin"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_HOST_ORIGIN") from exc
+        data["verification_keys"] = _evidence_tuple_decode_v1(data["verification_keys"], EvidenceVerificationKeyV1.from_canonical_mapping)
+        data["store_bindings"] = _evidence_tuple_decode_v1(data["store_bindings"], EvidenceStoreBindingV1.from_canonical_mapping)
+        data["environment_identity"] = EvidenceEnvironmentIdentityV1.from_canonical_mapping(data["environment_identity"])
+        data["native_qualification_ref_or_absence"] = _evidence_absence_or_ref_v1(data["native_qualification_ref_or_absence"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidencePreparationConsumptionV1:
+    record_reads: int
+    read_bytes: int
+    owner_queries: int
+    query_result_records: int
+    control_writes: int
+    control_bytes: int
+    cpu_ns: int
+    wall_ns: int
+    aggregate_budget_ref: str
+
+    def __post_init__(self) -> None:
+        for member in dataclass_fields(self):
+            if member.name == "aggregate_budget_ref":
+                _native_ident(getattr(self, member.name))
+            else:
+                _public_counter_v1(getattr(self, member.name), allow_zero=True)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidencePreparationConsumptionV1":
+        return cls(**_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAssemblyGrantRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="ASSEMBLY_GRANT", init=False)
+    owner_envelope_ref: str
+    assembly_scope_ref: str
+    signed_grant: EvidenceSignedMessageV1
+    preparation_ordinal: int
+    preparation_natural_key: tuple[str, str, str, str]
+    exact_frozen_plan_ref: EvidenceRecordRefV1
+    assembler_principal: str
+    assembler_audience: str
+    allowed_source_selections: tuple[EvidenceSourceSelectionV1, ...]
+    allowed_control_store_id: str
+    allowed_control_kinds: tuple[str, ...]
+    reserved_preparation_limits: EvidencePreparationLimitsV1
+    aggregate_budget_ref: str
+    deadline_clock_and_process: EvidenceProcessDeadlineV1
+    exclusive_expiry: int
+    preparation_fence_ref: str
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_canonical_object_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("owner_envelope_ref", "assembly_scope_ref", "assembler_principal", "assembler_audience",
+                     "allowed_control_store_id", "aggregate_budget_ref", "preparation_fence_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.signed_grant) is EvidenceSignedMessageV1, "LP03_ASSEMBLY_RECORD_SIGNATURE_TYPE")
+        message = EvidenceAuthorizationMessageV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(self.signed_grant.canonical_message.encode("utf-8")))
+        _native_require(message.kind is EvidenceMessageKindV1.ASSEMBLY_GRANT, "LP03_ASSEMBLY_RECORD_GRANT_KIND")
+        payload = _evidence_decode_authorization_payload_v1(message)
+        scope = payload.assembly_scope
+        _public_counter_v1(self.preparation_ordinal)
+        _public_counter_v1(self.exclusive_expiry, allow_zero=True)
+        _native_require(type(self.preparation_natural_key) is tuple
+                        and all(type(item) is str for item in self.preparation_natural_key), "LP03_PREPARATION_NATURAL_KEY")
+        _native_require(type(self.exact_frozen_plan_ref) is EvidenceRecordRefV1
+                        and type(self.reserved_preparation_limits) is EvidencePreparationLimitsV1
+                        and type(self.deadline_clock_and_process) is EvidenceProcessDeadlineV1,
+                        "LP03_ASSEMBLY_RECORD_TYPES")
+        _native_require(type(self.allowed_source_selections) is tuple
+                        and all(type(item) is EvidenceSourceSelectionV1 for item in self.allowed_source_selections),
+                        "LP03_ASSEMBLY_RECORD_SELECTIONS")
+        _public_refs_v1(self.allowed_control_kinds)
+        _native_require((self.record_id, self.owner_envelope_ref, self.preparation_ordinal, self.preparation_natural_key,
+                         self.exact_frozen_plan_ref, self.deadline_clock_and_process, self.preparation_fence_ref)
+                        == (payload.grant_ref, payload.owner_envelope_ref, payload.preparation_ordinal,
+                            payload.preparation_natural_key, payload.exact_frozen_plan_ref, payload.deadline,
+                            payload.preparation_fence_ref), "LP03_ASSEMBLY_RECORD_PAYLOAD_JOIN")
+        _native_require((self.assembly_scope_ref, self.assembler_principal, self.assembler_audience,
+                         self.allowed_source_selections, self.allowed_control_store_id, self.allowed_control_kinds,
+                         self.reserved_preparation_limits, self.aggregate_budget_ref, self.exclusive_expiry)
+                        == (scope.scope_ref, scope.assembler_principal, scope.assembler_audience,
+                            scope.source_selections, scope.control_store_id, scope.allowed_control_kinds,
+                            scope.preparation_limits, scope.preparation_limits.aggregate_budget_ref,
+                            scope.exclusive_expiry_wall_ns), "LP03_ASSEMBLY_RECORD_SCOPE_JOIN")
+        _native_require((self.experiment_id, self.experiment_revision, self.protocol_ref, self.origin, self.generation,
+                         self.producing_principal, self.scenario_plan_ref)
+                        == (scope.intended_experiment_id, scope.intended_experiment_revision, scope.protocol_ref,
+                            scope.origin, scope.generation, message.issuer, payload.exact_frozen_plan_ref.record_id),
+                        "LP03_ASSEMBLY_RECORD_HEADER_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAssemblyGrantRecordV1":
+        data = _evidence_header_decode_v1(cls, value)
+        data["signed_grant"] = EvidenceSignedMessageV1.from_canonical_mapping(data["signed_grant"])
+        data["preparation_natural_key"] = _evidence_tuple_decode_v1(data["preparation_natural_key"])
+        data["exact_frozen_plan_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["exact_frozen_plan_ref"])
+        data["allowed_source_selections"] = _evidence_tuple_decode_v1(data["allowed_source_selections"], EvidenceSourceSelectionV1.from_canonical_mapping)
+        data["allowed_control_kinds"] = _evidence_tuple_decode_v1(data["allowed_control_kinds"])
+        data["reserved_preparation_limits"] = EvidencePreparationLimitsV1.from_canonical_mapping(data["reserved_preparation_limits"])
+        data["deadline_clock_and_process"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline_clock_and_process"])
+        return cls(**data)
+
+
+class EvidenceAssemblyStateV1(StrEnum):
+    ADMITTED = "ADMITTED"
+    READING = "READING"
+    SEALED = "SEALED"
+    FAILED = "FAILED"
+    INVALIDATED = "INVALIDATED"
+    CANCELLED = "CANCELLED"
+    EXPIRED = "EXPIRED"
+    RESOURCE_EXHAUSTED = "RESOURCE_EXHAUSTED"
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAssemblyStateRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="ASSEMBLY_STATE", init=False)
+    assembly_grant_ref: str
+    preparation_ordinal: int
+    predecessor_state_ref_or_absence: str | EvidenceAbsenceV1
+    state: EvidenceAssemblyStateV1
+    consumed_preparation_budget: EvidencePreparationConsumptionV1
+    currentness_observation_ref: str
+    input_assembly_ref_or_absence: str | EvidenceAbsenceV1
+    all_reason_codes: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_ident(self.assembly_grant_ref)
+        _native_ident(self.currentness_observation_ref)
+        _public_counter_v1(self.preparation_ordinal)
+        _native_require(type(self.state) is EvidenceAssemblyStateV1
+                        and type(self.consumed_preparation_budget) is EvidencePreparationConsumptionV1,
+                        "LP03_ASSEMBLY_STATE_TYPES")
+        _public_refs_v1(self.all_reason_codes, allow_empty=True)
+        if self.state is EvidenceAssemblyStateV1.ADMITTED:
+            _native_require(type(self.predecessor_state_ref_or_absence) is EvidenceAbsenceV1
+                            and self.predecessor_state_ref_or_absence.reason == "INITIAL_PREPARATION_STATE",
+                            "LP03_ASSEMBLY_INITIAL_PREDECESSOR")
+        else:
+            _native_ident(self.predecessor_state_ref_or_absence)
+        if self.state is EvidenceAssemblyStateV1.SEALED:
+            _native_ident(self.input_assembly_ref_or_absence)
+        else:
+            _native_require(type(self.input_assembly_ref_or_absence) is EvidenceAbsenceV1
+                            and self.input_assembly_ref_or_absence.reason in ("NOT_YET_ASSEMBLED", "ASSEMBLY_UNAVAILABLE"),
+                            "LP03_ASSEMBLY_STATE_NO_SUCCESSFUL_SNAPSHOT")
+        if self.state in (EvidenceAssemblyStateV1.ADMITTED, EvidenceAssemblyStateV1.READING, EvidenceAssemblyStateV1.SEALED):
+            _native_require(self.all_reason_codes == (), "LP03_POSITIVE_PREPARATION_REASON")
+        else:
+            _native_require(bool(self.all_reason_codes), "LP03_FAILED_PREPARATION_REASON_REQUIRED")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAssemblyStateRecordV1":
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["state"]) is str, "LP03_ASSEMBLY_STATE_ENCODING")
+        try:
+            data["state"] = EvidenceAssemblyStateV1(data["state"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_ASSEMBLY_STATE") from exc
+        for name in ("predecessor_state_ref_or_absence", "input_assembly_ref_or_absence"):
+            data[name] = _evidence_absence_or_ref_v1(data[name])
+        data["all_reason_codes"] = _evidence_tuple_decode_v1(data["all_reason_codes"])
+        data["consumed_preparation_budget"] = EvidencePreparationConsumptionV1.from_canonical_mapping(data["consumed_preparation_budget"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceRevocationRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="REVOCATION", init=False)
+    target_envelope_ref: str
+    target_experiment_id: str
+    target_generation: int
+    new_generation: int
+    exact_revocation_scope: tuple[str, ...]
+    authenticated_reason: str
+    observed_at_ns: int
+    issuer_signature: EvidenceSignedMessageV1
+
+    def __post_init__(self):
+        from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        supplied = EvidenceRevocationPayloadV1(self.target_envelope_ref, self.target_experiment_id, self.target_generation,
+            self.new_generation, self.exact_revocation_scope, self.authenticated_reason, self.observed_at_ns)
+        _native_require(type(self.issuer_signature) is EvidenceSignedMessageV1, "LP03_REVOCATION_ORIGINAL_ISSUER_SIGNATURE")
+        message = EvidenceAuthorizationMessageV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(self.issuer_signature.canonical_message.encode("utf-8")))
+        _native_require(message.kind is EvidenceMessageKindV1.REVOCATION
+            and message.issuer == self.producing_principal and message.subject == self.record_id
+            and self.producing_owner == "AGENT_ORCH1"
+            and message.origin is self.origin and message.generation == self.new_generation == self.generation
+            and message.valid_from_wall_ns <= self.observed_at_ns < message.exclusive_expiry_wall_ns
+            and self.created_wall_ns == self.observed_at_ns
+            and self.experiment_id == self.target_experiment_id
+            and self.causation_ref == self.target_envelope_ref
+            and self.target_envelope_ref in self.source_lineage_refs
+            and deterministic_json(message.payload) == deterministic_json(supplied),
+            "LP03_REVOCATION_ORIGINAL_SIGNED_RECORD_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["exact_revocation_scope"] = _evidence_tuple_decode_v1(data["exact_revocation_scope"])
+        data["issuer_signature"] = EvidenceSignedMessageV1.from_canonical_mapping(data["issuer_signature"])
+        return cls(**data)
+
+
+def _evidence_control_record_from_mapping_v1(value: object) -> EvidenceRecordHeaderV1:
+    """Closed record reconstruction; subsequent original-owner joins are required."""
+    _native_require(type(value) is dict and type(value.get("kind")) is str, "LP03_CONTROL_RECORD_OBJECT")
+    constructors = {
+        "SCENARIO_PLAN": EvidenceScenarioPlanV1,
+        "ASSEMBLY_GRANT": EvidenceAssemblyGrantRecordV1,
+        "REVOCATION": EvidenceRevocationRecordV1,
+        "ASSEMBLY_STATE": EvidenceAssemblyStateRecordV1,
+        "INPUT_ASSEMBLY": EvidenceInputAssemblyRecordV1,
+        "EXPERIMENT": EvidenceExperimentRecordV1,
+        "CLAIM": EvidenceClaimRecordV1,
+        "ATTEMPT_GRANT": EvidenceAttemptGrantRecordV1,
+        "ATTEMPT_STATE": EvidenceAttemptStateRecordV1,
+        "EVENT_SEGMENT": EvidenceEventSegmentRecordV1,
+        "DEPENDENCY_EXECUTION": EvidenceDependencyExecutionRecordV1,
+        "DR_GROUP_MEASUREMENT": EvidenceRecordedDrGroupMeasurementRecordV1,
+        "UNCERTAINTY": EvidenceRecordedDrUncertaintyRecordV1,
+        "HELD_OUT_FOLD_SCORE": EvidenceHeldOutFoldScoreRecordV1,
+        "HELD_OUT_CPCV_PATH_SCORE": EvidenceHeldOutCpcvPathScoreRecordV1,
+        "VALUE_PROJECTION": EvidenceValueProjectionRecordV1,
+        "NUMERICAL_CONVERSION": EvidenceAnalyticBinary64ConversionRecordV1,
+        "PUBLICATION": EvidencePublicationRecordV1,
+        "LANE_REGISTRATION": EvidenceLaneRegistrationRecordV1,
+        "CONFORMANCE": EvidencePipelineConformanceV1,
+        "REVIEW": EvidenceIndependentReviewRecordV1,
+        "DELIVERY": EvidenceDeliveryRecordV1,
+        "RECEIVER_ACK": EvidenceReceiverAckRecordV1,
+    }
+    constructor = constructors.get(value["kind"])
+    _native_require(constructor is not None, "LP03_CONTROL_RECORD_KIND_UNAVAILABLE")
+    return constructor.from_canonical_mapping(value)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceExperimentRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="EXPERIMENT", init=False)
+    owner_envelope_ref: str
+    registration_ordinal: int
+    semantic_variant_ref: str
+    selection_history_ref: str
+    input_assembly_ref: str
+    component_closure: tuple[str, ...]
+    callbacks: tuple[tuple[str, str], ...]
+    scopes: Mapping[str, object]
+    observation_plan: Mapping[str, object]
+    comparator_plan: Mapping[str, object]
+    accounting_policy_ref: str
+    source_purposes: tuple[str, ...]
+    parameter_protocol_ref: str
+    required_metric_ids: tuple[str, ...]
+    required_receiver_ids: tuple[str, ...]
+    expiry_wall_ns: int
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("owner_envelope_ref", "semantic_variant_ref", "selection_history_ref", "input_assembly_ref",
+                     "accounting_policy_ref", "parameter_protocol_ref"):
+            _native_ident(getattr(self, name))
+        _public_counter_v1(self.registration_ordinal)
+        for name in ("component_closure", "source_purposes", "required_metric_ids", "required_receiver_ids"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_EXPERIMENT_EMPTY_ROSTER")
+        _native_require(set(self.required_receiver_ids) == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"},
+                        "LP03_REQUIRED_RECEIVERS")
+        _evidence_pins_v1(self.callbacks, allow_empty=True)
+        for name in ("scopes", "observation_plan", "comparator_plan"):
+            value = _evidence_frozen_data_v1(getattr(self, name))
+            _native_require(isinstance(value, Mapping) and bool(value), "LP03_EXPERIMENT_PLAN_REQUIRED")
+            object.__setattr__(self, name, value)
+        _native_require(set(self.scopes) == {"market_scope", "venue_scope", "instrument_scope"}, "LP03_EXPERIMENT_SCOPE_FIELDS")
+        for values in self.scopes.values():
+            _public_refs_v1(values)
+            _native_require(bool(values), "LP03_EXPERIMENT_SCOPE_EMPTY")
+        _public_counter_v1(self.expiry_wall_ns)
+        _native_require(self.created_wall_ns < self.expiry_wall_ns, "LP03_EXPERIMENT_EXPIRY")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        for name in ("component_closure", "source_purposes", "required_metric_ids", "required_receiver_ids"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        data["callbacks"] = _evidence_tuple_decode_v1(data["callbacks"], _evidence_tuple_decode_v1)
+        return cls(**data)
+
+
+_LP03_DR_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "MEAN_CONDITIONAL_RECORDED_DR_SCORE",
+    "ORIGINAL_POLICY_VALUE_AUTHORITY_ABSENT", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+_LP03_HELD_OUT_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "ORIGINAL_HELD_OUT_SCORES_AND_TOPOLOGY",
+    "SYNTHETIC_PROVIDER_AND_DECLARED_AGGREGATION_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+_LP03_CSCV_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_19_CLOSURE_ONLY",
+    "NO_EMPIRICAL_OVERFITTING_OR_GENERALIZATION_CERTIFICATION",
+    "ALL_CSCV_ARITHMETIC_INTERMEDIATES_DERIVED", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+
+_LP03_SHARPE_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "SELECTED_SHARPE_CLOSURE_ONLY",
+    "NO_INDEPENDENCE_SUPPORT_OR_STATISTICAL_COVERAGE_CERTIFICATION",
+    "DERIVED_SOURCE_MODEL_ONLY_NO_LIBM_BINARY_ATTESTATION", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+
+_LP03_SHARPE_PROJECTION_PROFILES_V1 = MappingProxyType({
+    "MATH-17": ("psr", "probabilistic_sharpe_ratio", "MATH-17::1.1.0", "probability_sharpe_exceeds_benchmark"),
+    "MATH-18": ("dsr", "deflated_sharpe_ratio", "MATH-18::2.0.0", "multiple_testing_adjusted_sharpe_probability"),
+})
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceClaimRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="CLAIM", init=False)
+    family_ref: str
+    immutable_claim_ordinal: int
+    target: Mapping[str, object]
+    candidate_ref: str
+    lane_or_paired: str
+    metric_id: str
+    comparator_ref: str
+    observation_group_rule: str
+    raw_to_analysis_rule: str
+    fixed_lower: str
+    fixed_upper: str
+    alpha_ref: str | EvidenceAbsenceV1
+    success_hurdle_ref: str | EvidenceAbsenceV1
+    futility_hurdle_ref: str | EvidenceAbsenceV1
+    coverage_rule_ref: str
+    first_unrevealed_group_ordinal: int
+    preregistered_at_ns: int
+
+    def __post_init__(self):
+        from .context import exact_decimal
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("family_ref", "candidate_ref", "metric_id", "comparator_ref", "observation_group_rule",
+                     "raw_to_analysis_rule", "coverage_rule_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("immutable_claim_ordinal", "first_unrevealed_group_ordinal", "preregistered_at_ns"):
+            _public_counter_v1(getattr(self, name))
+        _native_require(type(self.lane_or_paired) is str and self.lane_or_paired in {"REPLAY", "PAPER", "PAIRED"},
+                        "LP03_CLAIM_LANE")
+        _native_require(type(self.fixed_lower) is str and type(self.fixed_upper) is str
+                        and len(self.fixed_lower) <= 4096 and len(self.fixed_upper) <= 4096,
+                        "LP03_CLAIM_BOUND_ENCODING")
+        if self.metric_id == "CONFORMANCE::MATH-16::spa_receipt":
+            # This software SPA profile has one exact, immutable binary64
+            # coordinate enclosure. Its 163-digit integer endpoints are data,
+            # already parsed by the original bounded registration work. Do not
+            # round these strings through the unrelated financial context.
+            # This data check grants no registration or source authority.
+            spa_upper = '3599131035634557106248430806148785487095757694641533306480604458089470064537190296255232548883112685719936728506816716098566612844395439751206812144692131084107776'
+            _native_require(self.fixed_lower == "-" + spa_upper and self.fixed_upper == spa_upper,
+                            "LP03_CLAIM_FIXED_BOUNDS")
+        else:
+            lower, upper = exact_decimal(self.fixed_lower), exact_decimal(self.fixed_upper)
+            ordered = lower <= upper if self.metric_id == "CONFORMANCE::MATH-26::evi" else lower < upper
+            from decimal import localcontext
+            from .context import decimal_context_v1
+            with localcontext(decimal_context_v1()):
+                canonical_bounds = str(lower) == self.fixed_lower and str(upper) == self.fixed_upper
+            _native_require(ordered and canonical_bounds,
+                            "LP03_CLAIM_FIXED_BOUNDS")
+        target = _evidence_frozen_data_v1(self.target)
+        _native_require(isinstance(target, Mapping) and set(target) == {"quantity", "unit", "currency", "horizon"},
+                        "LP03_CLAIM_TARGET_FIELDS")
+        for text in target.values():
+            _native_ident(text)
+        object.__setattr__(self, "target", target)
+        for name in ("alpha_ref", "success_hurdle_ref", "futility_hurdle_ref"):
+            value = getattr(self, name)
+            if type(value) is EvidenceAbsenceV1:
+                _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                                and value.reason == "NOT_APPLICABLE_TO_DETERMINISTIC_CONFORMANCE", "LP03_CLAIM_POLICY_ABSENCE")
+            else:
+                _native_ident(value)
+        policy_values = (self.alpha_ref, self.success_hurdle_ref, self.futility_hurdle_ref)
+        if any(type(value) is EvidenceAbsenceV1 for value in policy_values):
+            # This data profile declares analytic equality only. Admission must
+            # still resolve its original accepted protocol; no confidence or
+            # economic stopping method can consume these absent policies.
+            midpoint = (target["quantity"] == "RAW_MIDPOINT_VALUE" and target["unit"] == "currency/contract"
+                        and target["horizon"] == "SAME_EVENT" and self.metric_id == "CONFORMANCE::MATH-03::mid"
+                        and self.raw_to_analysis_rule == "MATH-03::RAW_IDENTITY::1.5")
+            brier = (dict(target) == dict(quantity="MEAN_BRIER_SCORE", unit="SQUARED_PROBABILITY_ERROR",
+                                         currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_DATASET")
+                     and self.metric_id == "CONFORMANCE::MATH-08::brier_score"
+                     and self.raw_to_analysis_rule == "MATH-08::MEAN_FIELD_IDENTITY::1.5")
+            log_loss = (dict(target) == dict(quantity="MEAN_LOG_LOSS", unit="nats/sample",
+                                            currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_DATASET")
+                        and self.metric_id == "CONFORMANCE::MATH-09::log_loss"
+                        and self.raw_to_analysis_rule == "MATH-09::MEAN_FIELD_IDENTITY::1.5")
+            recorded_dr = (target["quantity"] == "MEAN_CONDITIONAL_RECORDED_DR_SCORE"
+                and target["currency"] == "NOT_APPLICABLE"
+                and self.metric_id == "CONFORMANCE::MATH-22::dr_value_and_uncertainty"
+                and self.raw_to_analysis_rule == "MATH-22::ORIGINAL_ESTIMATOR_AND_RECORDED_SCORE_UNCERTAINTY::1.5")
+            heldout = (target["quantity"] == "COMPLETE_HELD_OUT_SCORE_DISTRIBUTION"
+                and target["currency"] == "NOT_APPLICABLE" and self.fixed_lower == "0"
+                and ((target["unit"], self.fixed_upper) in (("SQUARED_PROBABILITY_ERROR", "4"), ("nats/sample", "1074")))
+                and any(self.metric_id == f"CONFORMANCE::{math_id}::{field}"
+                    and self.raw_to_analysis_rule == f"{math_id}::ORIGINAL_COMPLETE_HELD_OUT_SCORES::1.5"
+                    for math_id, field in (("MATH-20","split_indices"), ("MATH-21","cpcv_paths"))))
+            pbo = (dict(target) == dict(quantity="COMPLETE_DECLARED_CSCV_SPLIT_AND_LOGIT_RECORD",
+                                       unit="MEMBER_SPECIFIC_CSCV_COORDINATES", currency="NOT_APPLICABLE",
+                                       horizon="DECLARED_CHRONOLOGICAL_STRATEGY_MATRIX")
+                   and self.metric_id == "CONFORMANCE::MATH-19::pbo_receipt"
+                   and self.raw_to_analysis_rule == "MATH-19::COMPLETE_RECORD_IDENTITY::1.5"
+                   and (self.fixed_lower, self.fixed_upper) == ("0", "1"))
+            sharpe = (dict(target) == dict(quantity="DECLARED_SOFTWARE_SHARPE_PROBABILITY_COORDINATE",
+                                          unit="probability", currency="NOT_APPLICABLE",
+                                          horizon="DECLARED_SYNTHETIC_TRIAL_UNIVERSE")
+                      and (self.fixed_lower, self.fixed_upper) == ("0", "1")
+                      and any(self.metric_id == f"CONFORMANCE::{math_id}::{descriptor[0]}"
+                              and self.raw_to_analysis_rule == f"{math_id}::SELECT_PROBABILITY_COORDINATE::1.5"
+                              for math_id, descriptor in _LP03_SHARPE_PROJECTION_PROFILES_V1.items()))
+            spa = (dict(target) == dict(quantity="BOUNDED_COMPLETE_FAMILY_SPA_RECORD",
+                                             unit="MEMBER_SPECIFIC_SPA_STATISTIC_LOSS_VARIANCE_AND_PROBABILITY",
+                                             currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_CANDIDATE_TIME_GRID")
+                       and self.metric_id == "CONFORMANCE::MATH-16::spa_receipt"
+                       and self.raw_to_analysis_rule == "MATH-16::COMPLETE_RECORD_IDENTITY::1.5")
+            reality = (dict(target) == dict(quantity="BOUNDED_COMPLETE_FAMILY_REALITY_CHECK_RECORD",
+                                             unit="MEMBER_SPECIFIC_PROBABILITY_AND_LOSS_DIFFERENTIAL",
+                                             currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_CANDIDATE_TIME_GRID")
+                       and self.metric_id == "CONFORMANCE::MATH-15::reality_check_receipt"
+                       and self.raw_to_analysis_rule == "MATH-15::COMPLETE_RECORD_IDENTITY::1.5")
+            bootstrap = (dict(target) == dict(quantity="BOUNDED_STATIONARY_BOOTSTRAP_RECORD", unit="statistic_unit",
+                                             currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_ORDERED_SERIES")
+                         and self.metric_id == "CONFORMANCE::MATH-14::bootstrap_distribution_and_interval"
+                         and self.raw_to_analysis_rule == "MATH-14::COMPLETE_RECORD_IDENTITY::1.5")
+            wilson = (dict(target) == dict(quantity="ORDERED_WILSON_INTERVAL_ENDPOINTS", unit="probability",
+                                            currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_BERNOULLI_COUNTS")
+                        and self.metric_id == "CONFORMANCE::MATH-11::interval"
+                        and self.raw_to_analysis_rule == "MATH-11::ORDERED_ENDPOINTS_IDENTITY::1.5")
+            calibration = (dict(target) == dict(quantity="EXPECTED_CALIBRATION_ERROR", unit="probability",
+                                            currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_DATASET")
+                        and self.metric_id == "CONFORMANCE::MATH-10::ece"
+                        and self.raw_to_analysis_rule == "MATH-10::ECE_FIELD_IDENTITY::1.5")
+            multiple = (dict(target) == dict(quantity="INDEXED_ADJUSTED_P_AND_REJECTION_MASK", unit="probability",
+                                            currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_TRIAL_UNIVERSE")
+                        and any(self.metric_id == "CONFORMANCE::" + math_id + "::rejections_and_adjusted_p"
+                            and self.raw_to_analysis_rule == math_id + "::INDEXED_ADJUSTED_P_MASK_IDENTITY::1.5"
+                            for math_id in ("MATH-12", "MATH-13")))
+            research = (target["quantity"] == "EXPECTED_VALUE_OF_INFORMATION"
+                        and self.metric_id == "CONFORMANCE::MATH-26::evi"
+                        and self.raw_to_analysis_rule == "MATH-26::RAW_IDENTITY::1.5")
+            cashflow = (self.metric_id in ("CONFORMANCE::MATH-06::expected_net_cash","CONFORMANCE::MATH-07::expected_net_cash")
+                and target["quantity"] == "EXPECTED_NET_CASH" and target["unit"] == target["currency"]
+                and type(target["currency"]) is str and len(target["currency"]) == 3
+                and target["currency"].isascii() and target["currency"].isalpha() and target["currency"].isupper()
+                and self.raw_to_analysis_rule == self.metric_id.split("::")[1]+"::EXPECTED_NET_CASH_FIELD_IDENTITY::1.5")
+            market = any(self.metric_id == "CONFORMANCE::" + math_id + "::" + descriptor[0]
+                and target["quantity"] == descriptor[4]
+                and target["unit"] == (target["currency"] + "/CONTRACT" if math_id == "MATH-04" else descriptor[2])
+                and (math_id == "MATH-04" or target["currency"] == "NOT_APPLICABLE")
+                and self.raw_to_analysis_rule == math_id + ("::RATIO_FIELD_IDENTITY::1.5" if math_id == "MATH-05" else "::RAW_IDENTITY::1.5")
+                for math_id, descriptor in _LP03_MARKET_METRIC_PROFILES_V1.items())
+            edge = (target["quantity"] == "MODEL_MINUS_MARKET_PROBABILITY" and target["unit"] == "PROBABILITY_POINTS"
+                    and target["currency"] == "NOT_APPLICABLE" and self.metric_id == "CONFORMANCE::MATH-02::edge"
+                    and self.raw_to_analysis_rule == "MATH-02::RAW_IDENTITY::1.5")
+            kelly27 = (target["quantity"] == "RAW_KELLY_FRACTION" and target["unit"] == "fraction_of_approved_risk_capital"
+                       and target["currency"] == "NOT_APPLICABLE"
+                       and self.metric_id == "CONFORMANCE::MATH-27::full_kelly_fraction"
+                       and self.raw_to_analysis_rule == "MATH-27::RAW_FRACTION_FIELD_IDENTITY::1.5")
+            kelly28 = (target["quantity"] == "BOUNDED_FRACTIONAL_KELLY" and target["unit"] == "fraction_of_approved_risk_capital"
+                       and target["currency"] == "NOT_APPLICABLE"
+                       and self.metric_id == "CONFORMANCE::MATH-28::bounded_fraction"
+                       and self.raw_to_analysis_rule == "MATH-28::RAW_IDENTITY::1.5")
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+            analytic = any(self.metric_id == f"CONFORMANCE::{math_id}::{EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].output_name}"
+                and target["quantity"] == EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement
+                and target["currency"] == "NOT_APPLICABLE"
+                and self.raw_to_analysis_rule == math_id + "::CERTIFIED_EXACT_TO_BINARY64_CELL::1.5"
+                for math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37"))
+            private_execution = any(
+                self.metric_id == f"CONFORMANCE::{math_id}::{EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].output_name}"
+                and target["quantity"] == EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement
+                and target["currency"] == (target["unit"] if math_id in ("MATH-32", "MATH-33", "MATH-35", "MATH-40") else "NOT_APPLICABLE")
+                and self.raw_to_analysis_rule == math_id + "::ORIGINAL_EXECUTION_VALUE_PROJECTION::1.5" for math_id in ("MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45"))
+            quantum = any(
+                self.metric_id == f"CONFORMANCE::{math_id}::{EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].output_name}"
+                and target["quantity"] == EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement
+                and target["unit"] == _LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1[math_id]
+                and target["currency"] == "NOT_APPLICABLE"
+                and self.raw_to_analysis_rule == math_id + "::ORIGINAL_QUANTUM_CONSTRUCTOR::1.5"
+                for math_id in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1)
+            ope_point = any(self.metric_id == f"CONFORMANCE::{math_id}::{metric}"
+                and target["quantity"] == basis and target["unit"] == "REWARD" and target["currency"] == "NOT_APPLICABLE"
+                and self.raw_to_analysis_rule == math_id + "::ORIGINAL_POINT_ESTIMATOR_PROJECTION::1.5"
+                for math_id, (_, metric, basis, _) in _LP03_OPE_POINT_PROJECTION_PROFILES_V1.items())
+            _native_require(all(type(value) is EvidenceAbsenceV1 for value in policy_values) and (midpoint or brier or log_loss or calibration or wilson or bootstrap or reality or spa or heldout or recorded_dr or ope_point or analytic or private_execution or quantum or sharpe or pbo or multiple or research or market or cashflow or kelly27 or kelly28 or edge),
+                            "LP03_CLAIM_DETERMINISTIC_ABSENCE_PROFILE")
+        _native_require(self.preregistered_at_ns == self.created_wall_ns, "LP03_CLAIM_REGISTRATION_TIME")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        for name in ("alpha_ref", "success_hurdle_ref", "futility_hurdle_ref"):
+            data[name] = _evidence_absence_or_ref_v1(data[name])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceInputAssemblyRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="INPUT_ASSEMBLY", init=False)
+    existing_snapshot_body: Mapping[str, object]
+    native_clock_companions: Mapping[str, object]
+    ordered_field_lineage: tuple[tuple[str, tuple[str, ...]], ...]
+    source_grant_refs: tuple[str, ...]
+    owner_packet_refs: tuple[EvidenceRecordRefV1, ...]
+    registry_version_tuple: tuple[tuple[str, str], ...]
+    actual_missing_fields: tuple[str, ...]
+    snapshot_origin: EvidenceOriginV1
+    actual_assembly_times: tuple[tuple[str, int], ...]
+    assembly_grant_ref: str
+    preparation_ordinal: int
+
+    def __post_init__(self):
+        from .input_lock import CanonicalReplayPaperInputSnapshotV1
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_ident(self.assembly_grant_ref)
+        _public_counter_v1(self.preparation_ordinal)
+        _native_require(type(self.snapshot_origin) is EvidenceOriginV1 and self.snapshot_origin is self.origin,
+                        "LP03_ASSEMBLY_SNAPSHOT_ORIGIN")
+        _native_require(self.actual_missing_fields == (), "LP03_ASSEMBLY_REQUIRED_INPUTS_MISSING")
+        body = _evidence_frozen_data_v1(self.existing_snapshot_body)
+        _native_require(isinstance(body, Mapping), "LP03_ASSEMBLY_SNAPSHOT_BODY")
+        roster = tuple(f.name for f in dataclass_fields(CanonicalReplayPaperInputSnapshotV1))
+        _native_require(set(body) == set(roster), "LP03_ASSEMBLY_SNAPSHOT_FIELDS")
+        snapshot = CanonicalReplayPaperInputSnapshotV1(**dict(body))
+        object.__setattr__(self, "existing_snapshot_body", body)
+        _native_require(type(self.ordered_field_lineage) is tuple
+                        and len(self.ordered_field_lineage) == len(roster), "LP03_ASSEMBLY_LINEAGE_ROSTER")
+        for name, row in zip(roster, self.ordered_field_lineage):
+            _native_require(type(row) is tuple and len(row) == 2 and row[0] == name,
+                            "LP03_ASSEMBLY_FIELD_LINEAGE_ORDER")
+            _public_refs_v1(row[1])
+            _native_require(bool(row[1]), "LP03_ASSEMBLY_FIELD_LINEAGE_MISSING")
+        _public_refs_v1(self.source_grant_refs)
+        _native_require(type(self.owner_packet_refs) is tuple and bool(self.owner_packet_refs)
+                        and all(type(ref) is EvidenceRecordRefV1 for ref in self.owner_packet_refs)
+                        and len(set(self.owner_packet_refs)) == len(self.owner_packet_refs), "LP03_ASSEMBLY_PACKET_REFS")
+        _evidence_pins_v1(self.registry_version_tuple)
+        clocks = _evidence_frozen_data_v1(self.native_clock_companions)
+        _native_require(isinstance(clocks, Mapping), "LP03_ASSEMBLY_NATIVE_CLOCK_FIELDS")
+        clock_fields={"decision_wall_ns", "pit_cutoff_wall_ns", "created_wall_ns"}
+        if set(clocks)==clock_fields|{"source_records"}:
+            source_clock_rows=clocks["source_records"]
+        else:
+            _native_require(set(clocks)==clock_fields|{"source_clock_encoding","source_records_json"},
+                "LP03_ASSEMBLY_NATIVE_CLOCK_FIELDS")
+            _native_require(clocks["source_clock_encoding"]=="ORIGINAL_SIX_CLOCK_RECORDS_CANONICAL_JSON_V1"
+                and type(clocks["source_records_json"])is str,"LP03_ASSEMBLY_SOURCE_CLOCK_ENCODING")
+            from .serialization import _evidence_canonical_object_v1
+            # Closed data reconstruction only: original64KiB/4096-node guards,
+            # canonical encoding and the same complete original clock joins.
+            encoded_clocks=_evidence_canonical_object_v1(clocks["source_records_json"].encode("utf-8"))
+            _native_require(set(encoded_clocks)=={"source_records"},"LP03_ASSEMBLY_SOURCE_CLOCK_ENCODING_FIELDS")
+            source_clock_rows=_evidence_frozen_data_v1(encoded_clocks["source_records"])
+        from datetime import UTC, timedelta
+        for key, actual in (("decision_wall_ns", snapshot.decision_time), ("pit_cutoff_wall_ns", snapshot.point_in_time_cutoff),
+                            ("created_wall_ns", snapshot.created_at)):
+            _public_counter_v1(clocks[key], allow_zero=True)
+            seconds, ns = divmod(clocks[key], 1_000_000_000)
+            _native_require(actual == datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds, microseconds=ns // 1000),
+                            "LP03_ASSEMBLY_CLOCK_PROJECTION")
+        _native_require(clocks["pit_cutoff_wall_ns"] <= clocks["decision_wall_ns"] <= clocks["created_wall_ns"]
+                        and clocks["created_wall_ns"] == self.created_wall_ns, "LP03_ASSEMBLY_NATIVE_CLOCK_ORDER")
+        _native_require(type(source_clock_rows) is tuple and len(source_clock_rows) == len(self.owner_packet_refs),
+                        "LP03_ASSEMBLY_SOURCE_CLOCK_ROSTER")
+        for ref, row in zip(self.owner_packet_refs, source_clock_rows):
+            _native_require(type(row) is tuple and len(row) == 2 and row[0] == ref.record_id
+                            and type(row[1]) is tuple and len(row[1]) == 6, "LP03_ASSEMBLY_SOURCE_CLOCK_JOIN")
+            _native_require(all(type(pair)is tuple and len(pair)==2 for pair in row[1]),
+                            "LP03_ASSEMBLY_SOURCE_CLOCK_PAIR")
+            _native_require(tuple(pair[0] for pair in row[1]) == ("observed_time", "effective_time", "available_time",
+                "received_time", "processed_time", "as_of_time"), "LP03_ASSEMBLY_SOURCE_CLOCK_FIELDS")
+            for name, value in row[1]:
+                _public_counter_v1(value, allow_zero=True)
+                _native_require(value <= clocks["decision_wall_ns"], "LP03_ASSEMBLY_FUTURE_SOURCE_CLOCK")
+            _native_require(dict(row[1])["available_time"] <= clocks["pit_cutoff_wall_ns"], "LP03_ASSEMBLY_LATE_SOURCE_CLOCK")
+        object.__setattr__(self, "native_clock_companions", clocks)
+        times = self.actual_assembly_times
+        _native_require(type(times) is tuple and len(times) == 4 and all(type(row) is tuple and len(row) == 2 for row in times)
+                        and tuple(row[0] for row in times) == ("started_wall_ns", "completed_wall_ns", "started_monotonic_ns",
+                                                             "completed_monotonic_ns"), "LP03_ASSEMBLY_TIME_FIELDS")
+        for _, value in times:
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(times[0][1] <= times[1][1] == self.created_wall_ns and times[2][1] <= times[3][1],
+                        "LP03_ASSEMBLY_TIME_ORDER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        for name in ("source_grant_refs", "actual_missing_fields"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        data["owner_packet_refs"] = _evidence_tuple_decode_v1(data["owner_packet_refs"], EvidenceRecordRefV1.from_canonical_mapping)
+        for name in ("registry_version_tuple", "actual_assembly_times"):
+            data[name] = _evidence_tuple_decode_v1(data[name], _evidence_tuple_decode_v1)
+        rows = _evidence_tuple_decode_v1(data["ordered_field_lineage"], _evidence_tuple_decode_v1)
+        _native_require(all(len(row) == 2 for row in rows), "LP03_ASSEMBLY_FIELD_LINEAGE_PAIR")
+        data["ordered_field_lineage"] = tuple((row[0], _evidence_tuple_decode_v1(row[1])) for row in rows)
+        _native_require(type(data["snapshot_origin"]) is str, "LP03_ASSEMBLY_SNAPSHOT_ORIGIN")
+        try:
+            data["snapshot_origin"] = EvidenceOriginV1(data["snapshot_origin"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_ASSEMBLY_SNAPSHOT_ORIGIN") from exc
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceAssemblyRequestV1:
+    assembly_scope_ref: str
+    idempotency_key: str
+
+    def __post_init__(self) -> None:
+        _native_ident(self.assembly_scope_ref)
+        _native_ident(self.idempotency_key)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceAssemblyRequestV1":
+        return cls(**_native_obj(value, ("assembly_scope_ref", "idempotency_key")))
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceRegistrationRequestV1:
+    input_assembly_ref: EvidenceRecordRefV1
+    idempotency_key: str
+
+    def __post_init__(self):
+        _native_require(type(self.input_assembly_ref) is EvidenceRecordRefV1, "LP03_REGISTRATION_ASSEMBLY_REF")
+        _native_ident(self.idempotency_key)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(value, ("input_assembly_ref", "idempotency_key")))
+        data["input_assembly_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["input_assembly_ref"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceAttemptRequestV1:
+    registration_binding_ref: EvidenceRecordRefV1
+    lane: EvidenceLaneV1
+    attempt_ordinal: int
+    idempotency_key: str
+
+    def __post_init__(self):
+        _native_require(type(self.registration_binding_ref) is EvidenceRecordRefV1
+                        and type(self.lane) is EvidenceLaneV1, "LP03_ATTEMPT_REQUEST_TYPES")
+        _public_counter_v1(self.attempt_ordinal)
+        _native_ident(self.idempotency_key)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(value, ("registration_binding_ref", "lane", "attempt_ordinal", "idempotency_key")))
+        data["registration_binding_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["registration_binding_ref"])
+        _native_require(type(data["lane"]) is str and data["lane"] in ("REPLAY", "PAPER"), "LP03_ATTEMPT_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceExecutionConsumptionV1:
+    """Actual observed work and high-water values, never a renewed budget."""
+
+    wall_ns: int
+    cpu_ns: int
+    process_memory_high_water_bytes: int
+    job_memory_high_water_bytes: int
+    events: int
+    callbacks: int
+    coordinates: int
+    attempts: int
+    input_reads: int
+    input_bytes: int
+    computations: int
+    output_bytes: int
+    persistent_operations: int
+    persistent_bytes: int
+    active_workers: int
+    aggregate_budget_ref: str
+
+    def __post_init__(self):
+        for member in dataclass_fields(self):
+            if member.name == "aggregate_budget_ref":
+                _native_ident(getattr(self, member.name))
+            else:
+                _public_counter_v1(getattr(self, member.name), allow_zero=True)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        return cls(**_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAttemptGrantRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="ATTEMPT_GRANT", init=False)
+    original_owner_envelope_ref: str
+    signed_grant: EvidenceSignedMessageV1
+    lane: EvidenceLaneV1
+    attempt_ordinal: int
+    predecessor_attempt_ref: str | EvidenceAbsenceV1
+    supervisor_binding_ref: str
+    component_and_callback_pins: Mapping[str, object]
+    allowed_reads: tuple[EvidenceSourceSelectionV1, ...]
+    allowed_writes: tuple[str, ...]
+    budgets: EvidenceExecutionLimitsV1
+    deadline: EvidenceProcessDeadlineV1
+    exclusive_expiry: int
+    fence_ref: str
+
+    def __post_init__(self):
+        from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(type(self.signed_grant) is EvidenceSignedMessageV1, "LP03_ATTEMPT_RECORD_SIGNATURE_TYPE")
+        message = EvidenceAuthorizationMessageV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(self.signed_grant.canonical_message.encode("utf-8")))
+        _native_require(message.kind is EvidenceMessageKindV1.ATTEMPT_GRANT, "LP03_ATTEMPT_RECORD_GRANT_KIND")
+        payload = _evidence_decode_authorization_payload_v1(message)
+        _native_require(type(self.lane) is EvidenceLaneV1 and type(self.budgets) is EvidenceExecutionLimitsV1
+                        and type(self.deadline) is EvidenceProcessDeadlineV1, "LP03_ATTEMPT_RECORD_TYPES")
+        _native_require(type(self.allowed_reads) is tuple and all(type(row) is EvidenceSourceSelectionV1 for row in self.allowed_reads),
+                        "LP03_ATTEMPT_RECORD_READ_SCOPE")
+        _public_refs_v1(self.allowed_writes)
+        _public_counter_v1(self.attempt_ordinal)
+        _public_counter_v1(self.exclusive_expiry)
+        pins = _evidence_frozen_data_v1(self.component_and_callback_pins)
+        _native_require(isinstance(pins, Mapping) and set(pins) in (
+            {"components","callbacks"},{"components","callbacks","supplementary_scorers"},
+            {"components","callbacks","supplementary_uncertainty_policy"},
+            {"components","callbacks","quantum_original_lock"},
+            {"components","callbacks","causal_timeline"}),
+            "LP03_ATTEMPT_PIN_FIELDS")
+        components = pins["components"]
+        _native_require(type(components) is tuple and 0 < len(components) <= 52, "LP03_ATTEMPT_COMPONENT_PINS")
+        for row in components:
+            _native_require(type(row) is tuple and len(row) == 3, "LP03_ATTEMPT_COMPONENT_PIN_ROW")
+            for value in row:
+                _native_ident(value)
+        _native_require(pins == payload.component_and_callback_pins, "LP03_ATTEMPT_AUTHENTICATED_COMPONENT_PINS")
+        object.__setattr__(self, "component_and_callback_pins", pins)
+        _native_require((self.record_id, self.original_owner_envelope_ref, self.lane, self.attempt_ordinal,
+                         self.predecessor_attempt_ref, self.supervisor_binding_ref, self.allowed_reads, self.allowed_writes,
+                         self.budgets, self.deadline, self.fence_ref)
+                        == (payload.grant_ref, payload.original_owner_envelope_ref, payload.lane, payload.attempt_ordinal,
+                            payload.predecessor_attempt_ref, payload.supervisor_binding_ref, payload.allowed_reads,
+                            payload.allowed_write_store_ids, payload.budgets, payload.deadline, payload.fence_ref),
+                        "LP03_ATTEMPT_RECORD_PAYLOAD_JOIN")
+        _native_require((self.experiment_id, self.experiment_revision, self.protocol_ref, self.input_lock_ref,
+                         self.scenario_plan_ref, self.origin, self.generation, self.producing_principal, self.exclusive_expiry)
+                        == (payload.experiment_id, payload.experiment_revision, payload.protocol_ref, payload.input_lock_ref,
+                            payload.scenario_plan_ref.record_id, message.origin, message.generation, message.issuer,
+                            message.exclusive_expiry_wall_ns)
+                        and message.valid_from_wall_ns <= self.created_wall_ns < self.exclusive_expiry,
+                        "LP03_ATTEMPT_RECORD_HEADER_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["signed_grant"] = EvidenceSignedMessageV1.from_canonical_mapping(data["signed_grant"])
+        _native_require(type(data["lane"]) is str and data["lane"] in ("REPLAY", "PAPER"), "LP03_ATTEMPT_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["predecessor_attempt_ref"] = _evidence_absence_or_ref_v1(data["predecessor_attempt_ref"])
+        data["allowed_reads"] = _evidence_tuple_decode_v1(data["allowed_reads"], EvidenceSourceSelectionV1.from_canonical_mapping)
+        data["allowed_writes"] = _evidence_tuple_decode_v1(data["allowed_writes"])
+        data["budgets"] = EvidenceExecutionLimitsV1.from_canonical_mapping(data["budgets"])
+        data["deadline"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAttemptStateRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="ATTEMPT_STATE", init=False)
+    grant_ref: str
+    prior_state_ref: str | EvidenceAbsenceV1
+    state: object
+    all_reason_codes: tuple[str, ...]
+    primary_reason: str | EvidenceAbsenceV1
+    event_ordinal: int
+    supervisor_instance_ref: str
+    process_observation_ref_or_absence: str | EvidenceAbsenceV1
+    consumed_budget: EvidenceExecutionConsumptionV1
+    currentness_observation_ref: str
+
+    def __post_init__(self):
+        from .lifecycle import EvidenceAttemptStateV1, evidence_attempt_primary_reason_v1, _EVIDENCE_REASON_STATE_V1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("grant_ref", "supervisor_instance_ref", "currentness_observation_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.state) is EvidenceAttemptStateV1 and type(self.consumed_budget) is EvidenceExecutionConsumptionV1,
+                        "LP03_ATTEMPT_STATE_TYPES")
+        _public_refs_v1(self.all_reason_codes, allow_empty=True)
+        _public_counter_v1(self.event_ordinal, allow_zero=True)
+        if type(self.prior_state_ref) is EvidenceAbsenceV1:
+            _native_require(self.prior_state_ref.reason == "INITIAL_ATTEMPT_STATE"
+                            and self.state is EvidenceAttemptStateV1.ADMITTED, "LP03_ATTEMPT_INITIAL_STATE")
+        else:
+            _native_ident(self.prior_state_ref)
+        if type(self.primary_reason) is EvidenceAbsenceV1:
+            _native_require(self.primary_reason.reason == "NO_STOP_REASON" and not self.all_reason_codes
+                            and self.state in (EvidenceAttemptStateV1.ADMITTED, EvidenceAttemptStateV1.RUNNING),
+                            "LP03_ATTEMPT_REASON_ABSENCE")
+        else:
+            _native_ident(self.primary_reason)
+            _native_require(self.primary_reason == evidence_attempt_primary_reason_v1(self.all_reason_codes),
+                            "LP03_ATTEMPT_PRIMARY_REASON_PRECEDENCE")
+            expected = _EVIDENCE_REASON_STATE_V1[self.primary_reason]
+            allowed = {expected, "STOP_REQUESTED"}
+            if expected == "CANCELLED":
+                allowed.add("CANCELLED_NOT_STARTED")
+            if expected in ("FAILED", "INVALIDATED", "EXPIRED", "RESOURCE_EXHAUSTED", "CAPACITY_EXHAUSTED"):
+                allowed.add("FAILED_TO_START")
+            _native_require(self.state.value in allowed, "LP03_ATTEMPT_STATE_REASON_JOIN")
+        if type(self.process_observation_ref_or_absence) is EvidenceAbsenceV1:
+            _native_require(self.process_observation_ref_or_absence.reason == "NOT_STARTED"
+                            and self.state in (EvidenceAttemptStateV1.ADMITTED, EvidenceAttemptStateV1.CANCELLED_NOT_STARTED,
+                                               EvidenceAttemptStateV1.FAILED_TO_START), "LP03_ATTEMPT_PROCESS_ABSENCE")
+        else:
+            _native_ident(self.process_observation_ref_or_absence)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        from .lifecycle import EvidenceAttemptStateV1
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["state"]) is str and data["state"] in EvidenceAttemptStateV1._value2member_map_,
+                        "LP03_ATTEMPT_STATE_ENCODING")
+        data["state"] = EvidenceAttemptStateV1(data["state"])
+        for name in ("prior_state_ref", "primary_reason", "process_observation_ref_or_absence"):
+            data[name] = _evidence_absence_or_ref_v1(data[name])
+        data["all_reason_codes"] = _evidence_tuple_decode_v1(data["all_reason_codes"])
+        data["consumed_budget"] = EvidenceExecutionConsumptionV1.from_canonical_mapping(data["consumed_budget"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceEventSegmentRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="EVENT_SEGMENT", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    first_event_ordinal: int
+    last_event_ordinal: int
+    predecessor_segment_ref: str | EvidenceAbsenceV1
+    count: int
+    exact_ordered_events: tuple[Mapping[str, object], ...]
+    gap_dispositions: tuple[Mapping[str, object], ...]
+    observed_bytes: int
+    aggregate_refs: tuple[str, ...]
+    commit_sequence: int
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(type(self.lane) is EvidenceLaneV1, "LP03_SEGMENT_LANE")
+        _native_ident(self.attempt_ref)
+        for name in ("first_event_ordinal", "last_event_ordinal", "observed_bytes", "commit_sequence"):
+            _public_counter_v1(getattr(self, name), allow_zero=name != "commit_sequence")
+        _public_counter_v1(self.count)
+        _public_refs_v1(self.aggregate_refs)
+        if type(self.predecessor_segment_ref) is EvidenceAbsenceV1:
+            _native_require(self.predecessor_segment_ref.reason == "FIRST_EVENT_SEGMENT", "LP03_SEGMENT_PREDECESSOR_ABSENCE")
+        else:
+            _native_ident(self.predecessor_segment_ref)
+        _native_require(type(self.exact_ordered_events) is tuple and len(self.exact_ordered_events) == self.count
+                        and type(self.gap_dispositions) is tuple and not self.gap_dispositions
+                        and self.count <= 4096 and self.last_event_ordinal - self.first_event_ordinal + 1 == self.count,
+                        "LP03_SEGMENT_CONTIGUOUS_PROFILE")
+        events = _evidence_frozen_data_v1(self.exact_ordered_events)
+        for ordinal, event in enumerate(events, self.first_event_ordinal):
+            if "profile" in event:
+                from .evidence_execution import _CAUSAL_TIMELINE_WORKER_PROFILE_V1, _evidence_timeline_coordinate_receipt_v1
+
+                row = _native_obj(_evidence_timeline_canonical_object_v1(event), ("profile", "dispatch_ordinal", "event", "decision_ordinal",
+                                          "decision_wall_ns", "outcomes", "scenario_values", "component_event_or_none", "domain_state"))
+                original = EvidenceTimelineEventV1.from_canonical_mapping(row["event"])
+                _public_counter_v1(row["decision_ordinal"], allow_zero=True)
+                _public_counter_v1(row["decision_wall_ns"], allow_zero=True)
+                _native_require(row["profile"] == _CAUSAL_TIMELINE_WORKER_PROFILE_V1
+                                and type(row["dispatch_ordinal"]) is int and row["dispatch_ordinal"] == ordinal
+                                and original.origin is self.origin and original.availability_wall_ns <= row["decision_wall_ns"]
+                                and type(row["outcomes"]) is list and len(row["outcomes"]) == 2
+                                and type(row["domain_state"]) is dict and set(row["domain_state"]) == {
+                                    "books", "reconnect_pending", "legs", "rate_budget", "cash_reserve"}
+                                and type(row["scenario_values"]) is list and len(row["scenario_values"]) <= 256,
+                                "LP03_SEGMENT_CAUSAL_EVENT")
+                for raw in row["outcomes"]:
+                    outcome = EvidenceStepOutcomeV1.from_canonical_mapping(raw)
+                    _native_require(outcome.next_lane_state_ref.startswith(self.attempt_ref + "::")
+                                    and outcome.disposition != "REJECTED", "LP03_SEGMENT_CAUSAL_OUTCOME")
+                component = row["component_event_or_none"]
+                if component is not None:
+                    normalized = _evidence_normalized_event_v1(component)
+                    _native_require(normalized["origin"] == self.origin.value
+                                    and normalized["availability_wall_ns"] <= row["decision_wall_ns"],
+                                    "LP03_SEGMENT_CAUSAL_COMPONENT_EVENT")
+                for receipt in row["scenario_values"]:
+                    coordinate = _evidence_timeline_coordinate_receipt_v1(receipt)
+                    _native_require(coordinate[4] == original.local_ordinal, "LP03_SEGMENT_CAUSAL_COORDINATE")
+            else:
+                _evidence_normalized_event_v1(event)
+                _native_require(event["local_ordinal"] == ordinal and event["origin"] == self.origin.value,
+                                "LP03_SEGMENT_EVENT_ORIGIN_ORDINAL")
+        object.__setattr__(self, "exact_ordered_events", events)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_, "LP03_SEGMENT_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["predecessor_segment_ref"] = _evidence_absence_or_ref_v1(data["predecessor_segment_ref"])
+        for name in ("exact_ordered_events", "gap_dispositions", "aggregate_refs"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        return cls(**data)
+
+
+def _evidence_heldout_source_data_v1(payload):
+    """Decode exact selected topology, prediction, and label source data."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, _native_strict_json, deterministic_json
+
+    data=_evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data,Mapping) and set(data)=={"association_profile","topology_math_id",
+        "scorer_math_id","consumer_decision_wall_ns","consumer_cutoff_wall_ns","topology_source_slices",
+        "prediction_trace_slice","outcome_label_slice","clip_epsilon_json_or_absence"},
+        "LP03_FOLD_SOURCE_PAYLOAD_FIELDS")
+    math_id,scorer=(data[key] for key in ("topology_math_id","scorer_math_id"))
+    decision,cutoff=(data[key] for key in ("consumer_decision_wall_ns","consumer_cutoff_wall_ns"))
+    _native_require(data["association_profile"]=="ORIGINAL_SOFTWARE_HELD_OUT_TOPOLOGY_TRACE_AND_LABELS"
+        and type(math_id) is str and math_id in ("MATH-20","MATH-21")
+        and type(scorer) is str and scorer in ("MATH-08","MATH-09")
+        and type(decision) is type(cutoff) is int and 0<cutoff<=decision,
+        "LP03_FOLD_SOURCE_PROFILE")
+    _native_require(data["prediction_trace_slice"] is not None,"LP03_MISSING_PREDICTION_PRODUCER")
+    bindings=FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(type(data["topology_source_slices"]) is tuple and len(data["topology_source_slices"])==len(bindings)
+        ==(3 if math_id=="MATH-20" else 5),"LP03_FOLD_SOURCE_TOPOLOGY_ROSTER")
+    parts=[]
+    events=[]
+    for body in (*data["topology_source_slices"],data["prediction_trace_slice"],data["outcome_label_slice"]):
+        part=EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8")))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs)==len(part.reconstructed_canonical_events)==1,
+            "LP03_FOLD_SOURCE_ORIGINAL_SLICE")
+        event=part.reconstructed_canonical_events[0]
+        c=event["native_clocks"]
+        _native_require(c["as_of_time"]==decision and c["observed_time"]<=c["available_time"]
+            <=c["received_time"]<=c["processed_time"]<=cutoff and 0<=decision-c["observed_time"]<=event["ttl_ns"],
+            "LP03_FOLD_SOURCE_POINT_IN_TIME")
+        parts.append(part)
+        events.append(event)
+    _native_require(len({part.original_record_refs[0] for part in parts})
+        ==len({event["record_ref"] for event in events})==len({event["producer_receipt_id"] for event in events})==len(parts)
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name])==deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id","scope","source_epoch_id","input_version")),
+        "LP03_FOLD_SOURCE_EXACT_CONTEXT_AND_IDENTITIES")
+    inputs={}
+    for event,binding in zip(events[:len(bindings)],bindings,strict=True):
+        _native_require((event["owner_id"],event["record_kind"],event["schema_id"],event["schema_version"],
+            event["producer_receipt_type"],event["authorized_binding_ids"],event["source_state_and_claim_lineage"])==(
+                binding.accepted_upstream_owner_id,binding.accepted_packet_or_snapshot_type,binding.schema_id,binding.schema_version,
+                binding.producer_receipt_type,(binding.binding_id,),binding.source_state_and_claim_lineage)
+            and tuple(event["values"])==(binding.exact_field_path,),"LP03_FOLD_SOURCE_TOPOLOGY_BINDING")
+        inputs[binding.input_name]=_evidence_decode_source_values_v1(event)[binding.exact_field_path]
+    sizes=inputs["folds"] if math_id=="MATH-20" else inputs["N_groups"]
+    k=1 if math_id=="MATH-20" else inputs["k_test_groups"]
+    _native_require(type(sizes) is type(k) is int and 2<=sizes<=min(4,len(inputs["sample_intervals"]))
+        and (k==1 or (sizes,k)==(4,2)) and type(inputs["embargo_duration"]) is float
+        and 0.0<=inputs["embargo_duration"]<=1_000_000
+        and (math_id=="MATH-20" or inputs["aggregation_rule"]=="ALL_PATHS_NO_CHERRY_PICKING"),
+        "LP03_FOLD_SOURCE_TOPOLOGY_POLICY")
+    trace_binding=FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-02"][0]
+    label_binding=FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-08"][1]
+
+    def auxiliary(event, owner, kind, schema, receipt, field, binding_ref, lineage):
+        _native_require((event["owner_id"],event["record_kind"],event["schema_id"],event["schema_version"],
+            event["producer_receipt_type"]) == (owner, kind, schema, "1.0", receipt)
+            and event["authorized_binding_ids"] == (binding_ref,)
+            and event["source_state_and_claim_lineage"] == lineage
+            and tuple(event["values"]) == (field,),"LP03_FOLD_SOURCE_SCORING_OWNER")
+        text=event["values"][field]
+        _native_require(type(text) is str and 0<len(text)<=32768,"LP03_FOLD_SOURCE_SCORING_WIRE")
+        decoded=_native_strict_json(text.encode("utf-8","strict"),max_bytes=32768,max_nodes=4096,binary64_numbers=True)
+        _native_require(deterministic_json(decoded)==text,"LP03_FOLD_SOURCE_SCORING_WIRE")
+        return decoded
+
+    trace=auxiliary(events[-2],trace_binding.accepted_upstream_owner_id,"EvidenceHeldOutPredictionTraceV1",
+        "LP03::ORIGINAL_HELD_OUT_PREDICTION_TRACE_V1", "EvidenceHeldOutPredictionTraceReceiptV1",
+        "held_out_prediction_trace_json", "LP03::HELD_OUT_PREDICTION_TRACE_RIGHT_V1",
+        "SYNTHETIC_VERSION_PINNED_MODEL_TRACE_WITH_TRAINING_MEMBERSHIP")
+    labels=auxiliary(events[-1],label_binding.accepted_upstream_owner_id,"EvidenceHeldOutOutcomeLabelRosterV1",
+        "LP03::ORIGINAL_HELD_OUT_OUTCOME_LABELS_V1", "EvidenceHeldOutOutcomeLabelReceiptV1",
+        "held_out_outcome_labels_json", "LP03::HELD_OUT_OUTCOME_LABEL_RIGHT_V1",
+        "SYNTHETIC_ACCEPTED_OUTCOME_WITH_FIRST_VISIBILITY")
+    _native_require(type(trace) is dict and set(trace)=={"model_id","model_version","split_traces"}
+        and type(trace["split_traces"]) is list and 2<=len(trace["split_traces"])<=6
+        and type(labels) is list and len(labels)==len(inputs["sample_intervals"]),
+        "LP03_FOLD_SOURCE_SCORING_ROSTER")
+    for item in labels:
+        _native_require(type(item) is dict and type(item.get("available_wall_ns")) is int
+            and 0 < item["available_wall_ns"] <= events[-1]["native_clocks"]["available_time"],
+            "LP03_FOLD_OUTCOME_FIRST_VISIBILITY_ORDER")
+    for split_trace in trace["split_traces"]:
+        _native_require(type(split_trace) is dict and type(split_trace.get("prediction_rows")) is list,
+            "LP03_FOLD_TRACE_ORIGINAL_ROSTER")
+        for prediction in split_trace["prediction_rows"]:
+            _native_require(type(prediction) is dict and type(prediction.get("issued_wall_ns")) is int
+                and 0 < prediction["issued_wall_ns"] <= events[-2]["native_clocks"]["available_time"],
+                "LP03_FOLD_PREDICTION_ORIGINAL_VISIBILITY_ORDER")
+    for key in ("model_id","model_version"):
+        _native_ident(trace[key])
+    clip=data["clip_epsilon_json_or_absence"]
+    if scorer=="MATH-08":
+        _native_require(clip=={"state":"ABSENT_WITH_REASON","reason":"BRIER_NO_CLIP"},"LP03_FOLD_SOURCE_SCORER_CLIP")
+        clip=dict(clip)
+    else:
+        _native_require(type(clip) is str and 0<len(clip)<=32 and clip.isascii(),"LP03_FOLD_SOURCE_SCORER_CLIP")
+        parsed=_native_strict_json(clip.encode("ascii"),max_bytes=32,max_nodes=2,binary64_numbers=True)
+        _native_require(type(parsed) is float and 0.0<parsed<0.5 and deterministic_json(parsed)==clip,
+            "LP03_FOLD_SOURCE_SCORER_CLIP")
+        clip=parsed
+    scored_trace=dict(profile="SOFTWARE_CONFORMANCE_ORIGINAL_HELD_OUT_PREDICTION_TRACE_V1",
+        prediction_owner=events[-2]["owner_id"],prediction_model_id=trace["model_id"],prediction_model_version=trace["model_version"],
+        evaluation_cutoff_wall_ns=cutoff,outcome_labels=labels,split_traces=trace["split_traces"],scorer_math_id=scorer,
+        clip_epsilon_or_absence=clip)
+    return tuple(parts),inputs,scored_trace
+
+
+def _evidence_dr_original_source_data_v1(payload, *, original_raw_ref):
+    """Reconstruct the original M22 rows and bounded uncertainty policy inputs."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .parameter_policy import decode_evidence_dr_uncertainty_policy_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    _native_ident(original_raw_ref)
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {"profile", "decision_wall_ns", "cutoff_wall_ns",
+        "original_logged_input_slice", "original_policy_slice", "original_assumption_slices", "estimator_original_raw_ref"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_MATH22_RECORDED_DR_UNCERTAINTY"
+        and data["estimator_original_raw_ref"] == original_raw_ref,
+        "LP03_DR_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_DR_ORIGINAL_DECISION_AND_CUTOFF")
+    assumption_data = data["original_assumption_slices"]
+    _native_require(type(assumption_data) is tuple and len(assumption_data) <= 6, "LP03_DR_ORIGINAL_ASSUMPTION_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8")))
+        for row in (data["original_logged_input_slice"], data["original_policy_slice"], *assumption_data))
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_DR_ORIGINAL_SINGLE_SOURCE_SLICE")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    refs = tuple(part.original_record_refs[0] for part in parts)
+    _native_require(len({ref.record_id for ref in refs}) == len({event["producer_receipt_id"] for event in events}) == len(parts),
+        "LP03_DR_ORIGINAL_DISTINCT_SOURCE_AND_RECEIPTS")
+    first = events[0]
+    for event in events:
+        clock = event["native_clocks"]
+        _native_require(clock["as_of_time"] == decision and clock["observed_time"] <= clock["available_time"]
+            <= clock["received_time"] <= clock["processed_time"] <= cutoff
+            and 0 <= decision - clock["observed_time"] <= event["ttl_ns"]
+            and all(event[name] == first[name] for name in ("context_id", "scope", "source_epoch_id", "input_version")),
+            "LP03_DR_ORIGINAL_POINT_IN_TIME_AND_CONTEXT")
+    binding, = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-22"]
+    _native_require((first["owner_id"], first["record_kind"], first["schema_id"], first["schema_version"],
+            first["producer_receipt_type"], first["authorized_binding_ids"], first["source_state_and_claim_lineage"]) == (
+            binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type, binding.schema_id,
+            binding.schema_version, binding.producer_receipt_type, (binding.binding_id,), binding.source_state_and_claim_lineage)
+        and tuple(first["values"]) == ("logged_rows",), "LP03_DR_ORIGINAL_LOGGED_ROW_BINDING")
+    rows = _evidence_decode_source_values_v1(first)["logged_rows"]
+    policy_event = events[1]
+    _native_require((policy_event["owner_id"], policy_event["record_kind"], policy_event["schema_id"],
+            policy_event["schema_version"], policy_event["producer_receipt_type"], policy_event["authorized_binding_ids"],
+            policy_event["source_state_and_claim_lineage"]) == (
+            "ComputationParameterPolicyOwnerV1", "EvidenceRecordedDrUncertaintyPolicyV1",
+            "LP03::RECORDED_DR_UNCERTAINTY_POLICY_V1", "1.0", "EvidenceRecordedDrUncertaintyPolicyReceiptV1",
+            ("LP03::RECORDED_DR_UNCERTAINTY_POLICY_RIGHT_V1",), "ORIGINAL_SOFTWARE_GROUP_AND_UNCERTAINTY_POLICY")
+        and tuple(policy_event["values"]) == ("policy_json",), "LP03_DR_ORIGINAL_POLICY_BINDING")
+    text = policy_event["values"]["policy_json"]
+    _native_require(type(text) is str and 0 < len(text) <= 32768, "LP03_DR_ORIGINAL_POLICY_WIRE")
+    policy_template = _evidence_canonical_object_v1(text.encode("utf-8"), max_bytes=32768)
+    _native_require(policy_template.get("raw_receipt_ref") == "ORIGINAL_ATTEMPT_RAW_RESULT_REQUIRED"
+        and policy_template.get("input_receipt_ref") == first["producer_receipt_id"],
+        "LP03_DR_ORIGINAL_INPUT_AND_RAW_POLICY_BINDING")
+    materialized = dict(policy_template, raw_receipt_ref=original_raw_ref)
+    policy_wire = deterministic_json(materialized).encode("utf-8")
+    policy = decode_evidence_dr_uncertainty_policy_v1(policy_wire, maximum_bytes=32768, maximum_nodes=4096)
+    roles = (
+        ("logging_policy_ref", "LoggedPolicyEvaluationDatasetOwnerV1", "LOGGING_POLICY_AND_POSITIVITY_RULE"),
+        ("support_receipt_ref", "LoggedPolicyEvaluationDatasetOwnerV1", "ORIGINAL_TARGET_ACTION_SUPPORT_TRACE"),
+        ("reward_basis_ref", "LoggedPolicyEvaluationDatasetOwnerV1", "ORIGINAL_REWARD_UNIT_AND_HORIZON"),
+        ("crossfit_plan_ref", "LoggedPolicyEvaluationDatasetOwnerV1", "ORIGINAL_NUISANCE_FIT_AND_EXCLUSION_PLAN"),
+        ("conditional_target_assumption_ref", "ComputationParameterPolicyOwnerV1", "SYNTHETIC_CONDITIONAL_RECORDED_SCORE_ASSUMPTION"),
+        ("group_bound_proof_ref", "ComputationParameterPolicyOwnerV1", "ORIGINAL_BOUNDED_GROUP_AND_ERROR_ALLOCATION"),
+    )
+    expected = tuple((name, owner, role) for name, owner, role in roles if policy[name] is not None)
+    _native_require(len(expected) == len(assumption_data), "LP03_DR_ORIGINAL_REQUIRED_ASSUMPTIONS")
+    original_fit_after_first_label = False
+    for event, (name, owner, role) in zip(events[2:], expected, strict=True):
+        _native_require((event["record_ref"], event["owner_id"], event["record_kind"], event["schema_id"],
+                event["schema_version"], event["producer_receipt_type"], event["authorized_binding_ids"]) == (
+                policy[name], owner, "EvidenceRecordedDrAssumptionV1", "LP03::RECORDED_DR_ASSUMPTION_V1", "1.0",
+                "EvidenceRecordedDrAssumptionReceiptV1", ("LP03::RECORDED_DR_ASSUMPTION_RIGHT_V1::"+name,))
+            and tuple(event["values"]) == ("assumption",), "LP03_DR_ORIGINAL_ASSUMPTION_SOURCE_BINDING")
+        claim = event["values"]["assumption"]
+        _native_require(isinstance(claim, Mapping) and set(claim) == {"role", "dataset_receipt_ref", "protocol_ref", "row_ids",
+                "declared_target", "basis", "unit", "supporting_record"}
+            and claim["role"] == role and claim["dataset_receipt_ref"] == first["producer_receipt_id"]
+            and claim["protocol_ref"] == policy["protocol_ref"] and claim["row_ids"] == policy["row_ids"]
+            and claim["declared_target"] == "MEAN_CONDITIONAL_RECORDED_DR_SCORE"
+            and claim["basis"] == policy["basis"] and claim["unit"] == policy["unit"],
+            "LP03_DR_ORIGINAL_ASSUMPTION_DATA_JOIN")
+        supporting = claim["supporting_record"]
+        _native_require(isinstance(supporting, Mapping), "LP03_DR_ORIGINAL_ASSUMPTION_BODY")
+        if name == "support_receipt_ref":
+            _native_require(set(supporting) == {"rule", "supported_logged_actions"}
+                and supporting["rule"] == "ALL_POSITIVE_TARGET_ACTIONS_WITHIN_LOGGING_POLICY_SUPPORT"
+                and supporting["supported_logged_actions"] == tuple(row["logged_action_index"] for row in rows)
+                and all(mu > 0 or pi == 0 for row in rows for mu,pi in zip(
+                    row["behavior_action_probabilities"],row["target_action_probabilities"],strict=True)),
+                "LP03_DR_ORIGINAL_POSITIVITY_SUPPORT")
+        elif name == "crossfit_plan_ref":
+            _native_require(set(supporting) == {"policy", "fit_receipts"} and supporting["policy"] == "ORIGINAL_CROSSFIT",
+                "LP03_DR_ORIGINAL_CROSSFIT_SOURCE_SHAPE")
+            cohorts = supporting["fit_receipts"]
+            _native_require(type(cohorts) is tuple and len(cohorts) == len(policy["crossfit_records"]),
+                "LP03_DR_ORIGINAL_CROSSFIT_SOURCE_ROSTER")
+            for row, original in zip(cohorts, policy["crossfit_records"], strict=True):
+                _native_require(isinstance(row, Mapping) and set(row) == {"fold_id", "training_row_ids", "evaluation_row_ids",
+                        "prediction_receipt_ref", "training_exclusion_ref", "nuisance_fit_cutoff_wall_ns",
+                        "first_evaluation_label_available_wall_ns"}
+                    and all(row[k] == original[k] for k in original)
+                    and type(row["nuisance_fit_cutoff_wall_ns"]) is type(row["first_evaluation_label_available_wall_ns"]) is int
+                    and 0 < max(row["nuisance_fit_cutoff_wall_ns"], row["first_evaluation_label_available_wall_ns"])
+                        <= event["native_clocks"]["available_time"]
+                    and min(row["nuisance_fit_cutoff_wall_ns"], row["first_evaluation_label_available_wall_ns"]) > 0,
+                    "LP03_DR_ORIGINAL_CROSSFIT_SOURCE_POINT_IN_TIME")
+                if row["nuisance_fit_cutoff_wall_ns"] >= row["first_evaluation_label_available_wall_ns"]:
+                    original_fit_after_first_label = True
+        elif name == "group_bound_proof_ref":
+            _native_require(supporting == dict(coverage="COMPLETE_EQUAL_SIZE_EQUAL_WEIGHT_ORDERED_GROUPS",
+                group_lower=policy["group_lower"], group_upper=policy["group_upper"], alpha=policy["alpha"],
+                claim_ordinal=policy["claim_ordinal"]), "LP03_DR_ORIGINAL_GROUP_BOUND_AND_ERROR_ALLOC")
+        elif name == "conditional_target_assumption_ref":
+            _native_require(supporting == dict(assumption="FIXED_SYNTHETIC_CONDITIONAL_RECORDED_SCORE_MEAN",
+                origin="SOFTWARE_CONFORMANCE", original_policy_value_claim=False), "LP03_DR_ORIGINAL_CONDITIONAL_ASSUMPTION")
+        elif name == "reward_basis_ref":
+            _native_require(supporting == dict(unit=policy["unit"], basis=policy["basis"], recorded_reward=True),
+                "LP03_DR_ORIGINAL_REWARD_BASIS")
+        else:
+            _native_require(supporting == dict(behavior_propensity_rule="ORIGINAL_RECORDED_ACTION_POLICY",
+                target_support_required=True), "LP03_DR_ORIGINAL_LOGGING_POLICY")
+    _native_require(tuple(row["row_id"] for row in rows) == policy["row_ids"],
+        "LP03_DR_ORIGINAL_POLICY_ROW_ORDER")
+    return parts, dict(logged_rows=rows), policy, policy_wire, original_fit_after_first_label
+
+
+def _evidence_recorded_ope_source_data_v1(payload, *, math_id):
+    """Reconstruct selected original OPE point inputs and alignment."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1, _parse_typed
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    _native_require(math_id in ("MATH-23", "MATH-24", "MATH-25"), "LP03_OPE_ORIGINAL_POINT_MATH")
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "selected_math_id", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns", "source_slices"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_OPE_POINT_ESTIMATION"
+        and data["selected_math_id"] == math_id, "LP03_OPE_ORIGINAL_POINT_SOURCE_FIELDS")
+    decision, cutoff = data["consumer_decision_wall_ns"], data["consumer_cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_OPE_ORIGINAL_POINT_CUTOFF")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    source = data["source_slices"]
+    _native_require(type(source) is tuple and len(source) == len(bindings), "LP03_OPE_ORIGINAL_POINT_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8"))) for row in source)
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_OPE_ORIGINAL_POINT_SINGLE_SOURCE_SLICE")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len({part.original_record_refs[0] for part in parts}) == len(parts)
+        and len({event["producer_receipt_id"] for event in events}) == len(parts), "LP03_OPE_ORIGINAL_POINT_DISTINCT_CUSTODY")
+    first = events[0]
+    inputs = {}
+    aligned_rows = ()
+    fit_roster = ()
+    for part, event, binding in zip(parts, events, bindings, strict=True):
+        clock = event["native_clocks"]
+        _native_require(clock["as_of_time"] == decision and clock["observed_time"] <= clock["available_time"]
+            <= clock["received_time"] <= clock["processed_time"] <= cutoff
+            and 0 <= decision - clock["observed_time"] <= event["ttl_ns"]
+            and all(event[k] == first[k] for k in ("context_id", "scope", "source_epoch_id", "input_version")),
+            "LP03_OPE_ORIGINAL_POINT_PIT_AND_CONTEXT")
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["authorized_binding_ids"], event["source_state_and_claim_lineage"]) == (
+            binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type, binding.schema_id, binding.schema_version,
+            binding.producer_receipt_type, (binding.binding_id,), binding.source_state_and_claim_lineage),
+            "LP03_OPE_ORIGINAL_POINT_INPUT_BINDING")
+        field = binding.exact_field_path
+        sidecars = ("aligned_rows.row_ids", "aligned_rows.snapshot_ref") if math_id == "MATH-24" else (
+            ("original_nuisance_fit_roster",) if binding.input_name == "logged_rows" else ())
+        _native_require(set(event["values"]) == {field, *sidecars}, "LP03_OPE_ORIGINAL_POINT_EXACT_SOURCE_FIELDS")
+        original = _evidence_decode_source_values_v1(event)
+        inputs[binding.input_name] = _parse_typed(original[field], binding)
+        if math_id == "MATH-24":
+            roster = original["aligned_rows.row_ids"]
+            _public_refs_v1(roster)
+            _native_ident(original["aligned_rows.snapshot_ref"])
+            _native_require(0 < len(roster) == len(inputs[binding.input_name]) <= 64
+                and (not aligned_rows or roster == aligned_rows)
+                and original["aligned_rows.snapshot_ref"] == first["values"]["aligned_rows.snapshot_ref"],
+                "LP03_OPE_SNIPS_ORIGINAL_ALIGNED_SNAPSHOT")
+            aligned_rows = roster
+        elif binding.input_name == "logged_rows":
+            rows = inputs["logged_rows"]
+            roster = original["original_nuisance_fit_roster"]
+            _native_require(type(rows) is type(roster) is tuple and 0 < len(rows) <= 64 and 0 < len(roster) <= len(rows),
+                "LP03_OPE_ORIGINAL_NUISANCE_FIT_ROSTER")
+            aligned_rows = tuple(row["row_id"] for row in rows)
+            _public_refs_v1(aligned_rows)
+            fit_folds = []
+            row_folds = {row["row_id"]: row["fold_id"] for row in rows}
+            for fit in roster:
+                _native_require(isinstance(fit, Mapping) and set(fit) == {"fold_id", "evaluation_row_ids", "training_row_ids",
+                    "nuisance_prediction_receipt_ref", "training_exclusion_ref", "fit_cutoff_wall_ns",
+                    "first_evaluation_label_available_wall_ns"}, "LP03_OPE_ORIGINAL_NUISANCE_FIT_FIELDS")
+                fold_id = fit["fold_id"]
+                evaluated, trained = fit["evaluation_row_ids"], fit["training_row_ids"]
+                _public_refs_v1(evaluated)
+                _public_refs_v1(trained)
+                _native_ident(fit["nuisance_prediction_receipt_ref"])
+                _native_ident(fit["training_exclusion_ref"])
+                _native_require(type(fold_id) is int and fold_id not in fit_folds
+                    and evaluated == tuple(name for name in aligned_rows if row_folds[name] == fold_id)
+                    and set(evaluated).isdisjoint(trained)
+                    and type(fit["fit_cutoff_wall_ns"]) is type(fit["first_evaluation_label_available_wall_ns"]) is int
+                    and 0 < fit["fit_cutoff_wall_ns"] < fit["first_evaluation_label_available_wall_ns"] <= clock["available_time"],
+                    "LP03_OPE_ORIGINAL_NUISANCE_FIT_AND_EXCLUSION")
+                fit_folds.append(fold_id)
+            _native_require(set(fit_folds) == set(row_folds.values()), "LP03_OPE_ORIGINAL_NUISANCE_FIT_COVERAGE")
+            fit_roster = roster
+    _native_require(len(aligned_rows) <= 64, "LP03_OPE_ORIGINAL_POINT_ROW_LIMIT")
+    return parts, inputs, aligned_rows, fit_roster
+
+
+def _evidence_analytic_private_sources_v1(payload, *, math_id):
+    """Reconstruct the original private owners and exact analytic input scope."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .serialization import _native_utc_nanoseconds
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    _native_require(math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37"),
+        "LP03_ANALYTIC_PRIVATE_MATH")
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_PRIVATE_ANALYTIC_INPUT_V1"
+        and data["math_id"] == math_id, "LP03_ANALYTIC_PRIVATE_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_ANALYTIC_PRIVATE_DECISION_CUTOFF")
+    contract = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id]
+    rows = data["source_slices"]
+    _native_require(type(rows) is tuple and len(rows) == len(contract.bindings),
+        "LP03_ANALYTIC_PRIVATE_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8"))) for row in rows)
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_ANALYTIC_PRIVATE_SINGLE_SOURCE")
+    records = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len({part.original_record_refs[0] for part in parts})
+        == len({record["producer_receipt_id"] for record in records}) == len(parts),
+        "LP03_ANALYTIC_PRIVATE_DISTINCT_SOURCE_AND_RECEIPT")
+    first = records[0]
+    native_values = {}
+    owners = []
+    joins = None
+    common_fields = ("quantity_scope_ref", "horizon_ref", "ordered_coordinate_ids", "unit", "basis")
+    for record, binding in zip(records, contract.bindings, strict=True):
+        clock = record["native_clocks"]
+        _native_require(clock["as_of_time"] == decision
+            and clock["observed_time"] <= clock["available_time"] <= clock["received_time"] <= clock["processed_time"] <= cutoff
+            and 0 <= decision-clock["observed_time"] <= record["ttl_ns"]
+            and all(record[key] == first[key] for key in ("context_id", "scope", "source_epoch_id", "input_version")),
+            "LP03_ANALYTIC_PRIVATE_PIT_CONTEXT")
+        _native_require((record["record_kind"], record["schema_id"], record["schema_version"], record["producer_receipt_type"],
+            record["source_state_and_claim_lineage"], record["authorized_binding_ids"]) ==
+            ("LP03OriginalPrivateInputSourceV1", f"LP03::{math_id}::ORIGINAL_INPUT_SOURCE_V1", "1.0",
+                f"LP03::{math_id}::ORIGINAL_INPUT_RECEIPT_V1", f"LP03::{math_id}::ORIGINAL_INPUT::{binding.producer_role}",
+                (binding.binding_id,))
+            and set(record["values"]) == {binding.input_name, "private_source_context"}, "LP03_ANALYTIC_PRIVATE_PRODUCER_SCHEMA")
+        metadata = record["values"]["private_source_context"]
+        _native_require(isinstance(metadata, Mapping) and set(metadata) == {
+            "binding_id", "producer_role", "original_basis_ref", *common_fields}
+            and metadata["binding_id"] == binding.binding_id and metadata["producer_role"] == binding.producer_role
+            and metadata["original_basis_ref"] == binding.unit_or_basis_requirement, "LP03_ANALYTIC_PRIVATE_EXACT_SOURCE_BASIS")
+        for name in ("quantity_scope_ref", "horizon_ref", "unit", "basis"):
+            _native_ident(metadata[name])
+        _public_refs_v1(metadata["ordered_coordinate_ids"])
+        _native_require(0 < len(metadata["ordered_coordinate_ids"]) <= 64, "LP03_ANALYTIC_PRIVATE_COORDINATE_SCOPE")
+        current = tuple(metadata[name] for name in common_fields)
+        if joins is None:
+            joins = current
+        _native_require(current == joins, "LP03_ANALYTIC_PRIVATE_ALIGNED_SCOPE")
+        native_values[binding.input_name] = record["values"][binding.input_name]
+        owners.append(record["owner_id"])
+    scope_ref, horizon_ref, coordinate_ids, unit, basis = joins
+    values = decode_evidence_private_inputs_v1(math_id, deterministic_json(native_values).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    if math_id == "MATH-29":
+        n = len(coordinate_ids)
+        _native_require(n == len(values["weights"]) == len(values["expected_returns"]) == len(values["covariance"])
+            and all(len(row) == n for row in values["covariance"]), "LP03_ANALYTIC_PRIVATE_PORTFOLIO_ORDER")
+    elif math_id in ("MATH-30", "MATH-31"):
+        _native_require(len(coordinate_ids) == len(values["losses"]), "LP03_ANALYTIC_PRIVATE_LOSS_ORDER")
+    else:
+        artifact = values["artifact"]
+        _native_require(artifact is not None and artifact.feature_schema_ref == values["feature_schema_ref"]
+            and artifact.scope_ref == values["scope_ref"] == scope_ref and artifact.horizon_seconds == values["horizon_seconds"]
+            and coordinate_ids == (artifact.feature_snapshot_ref,)
+            and _native_utc_nanoseconds(artifact.evaluated_at.isoformat()) <= cutoff
+            < _native_utc_nanoseconds(artifact.artifact_valid_until.isoformat()),
+            "LP03_ANALYTIC_PRIVATE_CALIBRATED_ARTIFACT_SCOPE")
+    return parts, values, dict(quantity_scope_ref=scope_ref, horizon_ref=horizon_ref, ordered_coordinate_ids=coordinate_ids,
+        unit=unit, basis=basis, original_owner_ids=tuple(owners))
+
+
+def _evidence_original_execution_cost_sources_v1(payload, *, math_id):
+    """Reconstruct the selected synthetic order/fill and original TCA roles."""
+    from decimal import Decimal, localcontext
+    from .accounting import CostEmbeddingV1, TCADecompositionV1, _TCA_COMPONENTS
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .context import decimal_context_v1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    _native_require(math_id in ("MATH-32", "MATH-33"), "LP03_TCA_SELECTED_ORIGINAL_MATH")
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_EXECUTION_COST_INPUTS_V1"
+        and data["math_id"] == math_id, "LP03_TCA_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision, "LP03_TCA_DECISION_AND_CUTOFF")
+    contract = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id]
+    raw = data["source_slices"]
+    _native_require(type(raw) is tuple and len(raw) == len(contract.bindings), "LP03_TCA_EXACT_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8"))) for row in raw)
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_TCA_SINGLE_ORIGINAL_SOURCE")
+    rows = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len({row["record_ref"] for row in rows}) == len({row["producer_receipt_id"] for row in rows}) == len(rows),
+        "LP03_TCA_DISTINCT_ORIGINAL_ROLE_RECEIPTS")
+    fixed = ("original_lane_order_ref", "original_lane_fill_ref", "original_decision_quote_ref",
+        "instrument_ref", "venue_ref", "currency", "quantity_unit", "price_basis",
+        "decision_quote_wall_ns", "fill_effective_wall_ns")
+    if math_id == "MATH-32":
+        fixed = (*fixed[:-2], "original_tca_ref", *fixed[-2:])
+    source_scope = None
+    tca_source = None
+    values, cost_receipts = {}, {}
+    for event, binding in zip(rows, contract.bindings, strict=True):
+        context = event["values"].get("execution_cost_context")
+        attaches_tca = math_id == "MATH-32" and binding.input_name == "other_declared_costs"
+        allowed_fields = {binding.input_name, "execution_cost_context"}
+        if attaches_tca:
+            allowed_fields.add("original_tca_decomposition_json")
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["authorized_binding_ids"]) == (
+                "LP03OriginalSyntheticExecutionCostSourceV1", f"LP03::{math_id}::ORIGINAL_INPUT_SOURCE_V1",
+                "1.0", f"LP03::{math_id}::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+            and set(event["values"]) == allowed_fields,
+            "LP03_TCA_ORIGINAL_SOURCE_SCHEMA")
+        _native_require(isinstance(context, Mapping) and set(context) == {*fixed, "binding_id", "producer_role", "bound_field_basis"}
+            and (context["binding_id"], context["producer_role"], context["bound_field_basis"])
+            == (binding.binding_id, binding.producer_role, binding.unit_or_basis_requirement),
+            "LP03_TCA_ORIGINAL_PRODUCER_ROLE_AND_BASIS")
+        for name in fixed[:-2]:
+            _native_ident(context[name])
+        joined = tuple(context[name] for name in fixed)
+        if source_scope is None:
+            source_scope = joined
+        _native_require(joined == source_scope and event["scope"] == rows[0]["scope"]
+            and context["instrument_ref"] == event["scope"]["instrument_or_contract_scope_id"]
+            and context["venue_ref"] == event["scope"]["venue_scope_id"]
+            and event["context_id"] == rows[0]["context_id"] and event["source_epoch_id"] == rows[0]["source_epoch_id"]
+            and event["input_version"] == rows[0]["input_version"], "LP03_TCA_SAME_ORIGINAL_ORDER_FILL_QUOTE")
+        quote, fill = joined[-2:]
+        clocks = event["native_clocks"]
+        _native_require(type(quote) is type(fill) is int and 0 < quote <= fill <= cutoff
+            and clocks["as_of_time"] == decision
+            and clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"] <= clocks["processed_time"] <= cutoff
+            and 0 <= decision - clocks["observed_time"] <= event["ttl_ns"],
+            "LP03_TCA_ORIGINAL_SIX_CLOCKS")
+        role = binding.producer_role
+        if role == "LANE_DECISION_QUOTE":
+            _native_require(clocks["effective_time"] == quote, "LP03_TCA_ORIGINAL_DECISION_QUOTE_CLOCK")
+        elif role == "LANE_FILL":
+            _native_require(clocks["effective_time"] == fill, "LP03_TCA_ORIGINAL_FILL_CLOCK")
+        elif role == "LANE_COST":
+            _native_require(fill <= clocks["effective_time"] <= cutoff, "LP03_TCA_ORIGINAL_COST_EFFECTIVE_CLOCK")
+            cost_receipts[binding.input_name] = event["producer_receipt_id"]
+        if attaches_tca:
+            tca_source = event["values"]["original_tca_decomposition_json"]
+        values[binding.input_name] = event["values"][binding.input_name]
+    typed = decode_evidence_private_inputs_v1(math_id, deterministic_json(values).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    _native_require(typed["side"] in ("BUY", "SELL") and typed["quantity"] >= 0,
+        "LP03_TCA_ORIGINAL_ORDER_SIDE_QUANTITY")
+    scope = dict(zip(fixed, source_scope, strict=True), original_cost_receipts=cost_receipts)
+    if math_id == "MATH-32":
+        _native_require(type(tca_source) is str and 0 < len(tca_source.encode("utf-8")) <= 8192,
+            "LP03_TCA_ORIGINAL_DECOMPOSITION_REQUIRED")
+        input_tca = _evidence_canonical_object_v1(tca_source.encode("utf-8"), max_bytes=8192)
+        names = {"tca_id", "decision_benchmark_ref", "fill_refs", "total_cost", "embedding_attribution", *_TCA_COMPONENTS}
+        _native_require(set(input_tca) == names and type(input_tca["fill_refs"]) is list
+            and type(input_tca["embedding_attribution"]) is list
+            and all(type(item) is list and len(item) == 2 and item[0] in _TCA_COMPONENTS
+                and type(item[1]) is str and item[1] in CostEmbeddingV1._value2member_map_ for item in input_tca["embedding_attribution"]),
+            "LP03_TCA_ORIGINAL_DECOMPOSITION_WIRE")
+        input_tca["fill_refs"] = tuple(input_tca["fill_refs"])
+        input_tca["embedding_attribution"] = tuple((name, CostEmbeddingV1(value)) for name,value in input_tca["embedding_attribution"])
+        with localcontext(decimal_context_v1()):
+            tca = TCADecompositionV1(**input_tca)
+            _native_require(deterministic_json(tca) == tca_source and tca.tca_id == scope["original_tca_ref"]
+                and tca.decision_benchmark_ref == scope["original_decision_quote_ref"]
+                and tca.fill_refs == (scope["original_lane_fill_ref"],),
+                "LP03_TCA_ORIGINAL_DECOMPOSITION_LINEAGE")
+            embedded = sum((getattr(tca, name) for name, state in tca.embedding_attribution
+                if state is CostEmbeddingV1.ALREADY_EMBEDDED), Decimal(0))
+            explicit = {name:getattr(tca, name) if state is CostEmbeddingV1.EXPLICIT else Decimal(0)
+                for name,state in tca.embedding_attribution}
+            net_fee = explicit["fees"] + explicit["rebates"]
+            opportunity = explicit["opportunity_cost"]
+            other = sum((amount for name,amount in explicit.items()
+                if name not in ("fees", "rebates", "opportunity_cost")), Decimal(0))
+            signed_quantity = typed["quantity"] if typed["side"] == "BUY" else -typed["quantity"]
+            price_cost = signed_quantity * (typed["execution_price"] - typed["decision_price"])
+            _native_require(embedded == price_cost and net_fee == typed["explicit_fees"]
+                and opportunity == typed["opportunity_cost_unfilled"] and other == typed["other_declared_costs"],
+                "LP03_TCA_ORIGINAL_DECOMPOSITION_PARTITION")
+        scope["original_tca_decomposition_json"] = tca_source
+    return parts, typed, scope
+
+
+def _evidence_original_fill_distribution_source_v1(payload):
+    """Retain the original quantity distribution, scope, and exact source clock."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, _native_utc_nanoseconds, deterministic_json
+
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and data["math_id"] == "MATH-38"
+        and data["profile"] == "ORIGINAL_SOFTWARE_FILL_DISTRIBUTION_INPUT_V1",
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision
+        and type(data["source_slices"]) is tuple and len(data["source_slices"]) == 1,
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_SCOPE")
+    source = EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(data["source_slices"][0]).encode("utf-8")))
+    _native_require(source.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(source.original_record_refs) == len(source.reconstructed_canonical_events) == 1,
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_SOFTWARE_SOURCE")
+    row, = source.reconstructed_canonical_events
+    binding, = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1["MATH-38"].bindings
+    _native_require((row["record_kind"], row["schema_id"], row["schema_version"], row["producer_receipt_type"],
+        row["authorized_binding_ids"]) == (
+            "LP03OriginalFillQuantityDistributionSourceV1", "LP03::MATH-38::ORIGINAL_INPUT_SOURCE_V1",
+            "1.0", "LP03::MATH-38::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+        and set(row["values"]) == {"artifact", "distribution_context"},
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_SCHEMA")
+    scope = row["values"]["distribution_context"]
+    _native_require(isinstance(scope, Mapping) and set(scope) == {
+        "binding_id", "producer_role", "bound_field_basis", "original_order_ref", "quantity_scope_ref",
+        "quantity_unit", "original_model_source_ref", "horizon_ref", "horizon_seconds", "original_order_quantity"}
+        and (scope["binding_id"], scope["producer_role"], scope["bound_field_basis"])
+            == (binding.binding_id, binding.producer_role, binding.unit_or_basis_requirement),
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_BASIS")
+    for name in ("original_order_ref", "quantity_scope_ref", "quantity_unit", "original_model_source_ref", "horizon_ref"):
+        _native_ident(scope[name])
+    times = row["native_clocks"]
+    _native_require(times["as_of_time"] == decision
+        and times["observed_time"] <= times["available_time"] <= times["received_time"] <= times["processed_time"] <= cutoff
+        and 0 <= decision - times["observed_time"] <= row["ttl_ns"], "LP03_FILL_DISTRIBUTION_ORIGINAL_SIX_CLOCKS")
+    values = decode_evidence_private_inputs_v1("MATH-38", deterministic_json({"artifact": row["values"]["artifact"]}).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    artifact = values["artifact"]
+    _native_require(artifact is not None
+        and (artifact.scope_ref, artifact.source_binding_ref, artifact.horizon_seconds, str(artifact.order_quantity))
+            == (scope["quantity_scope_ref"], scope["original_model_source_ref"], scope["horizon_seconds"], scope["original_order_quantity"])
+        and type(scope["horizon_seconds"]) is int
+        and _native_utc_nanoseconds(artifact.evaluated_at.isoformat()) <= times["available_time"] <= cutoff
+            < _native_utc_nanoseconds(artifact.artifact_valid_until.isoformat()),
+        "LP03_FILL_DISTRIBUTION_ORDER_SCOPE_HORIZON_AND_VALIDITY")
+    _native_require(0 < len(artifact.fill_quantity_distribution) <= 64,
+        "LP03_FILL_DISTRIBUTION_ORIGINAL_SUPPORT_ROSTER")
+    return (source,), values, scope
+
+
+def _evidence_original_risk_decision_sources_v1(payload, *, math_id):
+    """Reconstruct exact signed post-fill markout or preregistered no-trade inputs."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    _native_require(math_id in ("MATH-40", "MATH-45"), "LP03_RISK_SELECTED_ORIGINAL_MATH")
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_EXECUTION_RISK_INPUTS_V1" and data["math_id"] == math_id,
+        "LP03_RISK_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_RISK_ORIGINAL_DECISION_CUTOFF")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id].bindings
+    _native_require(type(data["source_slices"]) is tuple and len(data["source_slices"]) == len(bindings),
+        "LP03_RISK_ORIGINAL_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(item).encode("utf-8"))) for item in data["source_slices"])
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_RISK_ORIGINAL_SOURCE_KIND")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len(set(part.original_record_refs[0] for part in parts)) == len(set(
+        row["producer_receipt_id"] for row in events)) == len(parts), "LP03_RISK_DISTINCT_SOURCE_ROLES")
+    scope = None
+    native = {}
+    fields = (("lane_fill_ref", "post_fill_quote_ref", "instrument_ref", "horizon_ref", "currency",
+        "quantity_unit", "horizon_duration_ns", "fill_effective_wall_ns", "post_fill_quote_wall_ns") if math_id == "MATH-40" else
+        ("original_estimate_target_ref", "claim_family_ref", "horizon_ref", "edge_unit", "uncertainty_basis_ref",
+         "allocation_ref", "preregistered_wall_ns", "first_outcome_available_wall_ns"))
+    for event, binding in zip(events, bindings, strict=True):
+        context = event["values"]["original_risk_context"]
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["authorized_binding_ids"]) == (
+                "LP03OriginalSoftwareExecutionRiskSourceV1", f"LP03::{math_id}::ORIGINAL_INPUT_SOURCE_V1",
+                "1.0", f"LP03::{math_id}::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+            and set(event["values"]) == {binding.input_name, "original_risk_context"}
+            and isinstance(context, Mapping) and set(context) == {*fields, "binding_id", "producer_role", "input_basis"}
+            and (context["binding_id"], context["producer_role"], context["input_basis"])
+                == (binding.binding_id, binding.producer_role, binding.unit_or_basis_requirement),
+            "LP03_RISK_ORIGINAL_SOURCE_SCHEMA")
+        for name in fields[:-2]:
+            if name != "horizon_duration_ns":
+                _native_ident(context[name])
+        material = tuple(context[name] for name in fields)
+        if scope is None:
+            scope = material
+        _native_require(material == scope and all(event[key] == events[0][key] for key in (
+            "context_id", "scope", "source_epoch_id", "input_version")), "LP03_RISK_ORIGINAL_SCOPE_JOIN")
+        prior, later = material[-2:]
+        clocks = event["native_clocks"]
+        _native_require(type(prior) is type(later) is int and 0 < prior < later <= cutoff
+            and clocks["as_of_time"] == decision and clocks["observed_time"] <= clocks["available_time"]
+            <= clocks["received_time"] <= clocks["processed_time"] <= cutoff
+            and 0 <= decision - clocks["observed_time"] <= event["ttl_ns"], "LP03_RISK_ORIGINAL_CLOCKS")
+        if math_id == "MATH-40":
+            expected_effective = later if binding.input_name == "midpoint_after_fill" else prior
+            horizon = context["horizon_duration_ns"]
+            _native_require(type(horizon) is int and 0 < horizon == later-prior
+                and context["instrument_ref"] == event["scope"]["instrument_or_contract_scope_id"]
+                and clocks["effective_time"] == expected_effective, "LP03_MARKOUT_ORIGINAL_POST_FILL_QUOTE")
+        elif binding.input_name in ("z_or_quantile", "model_risk_haircut"):
+            _native_require(clocks["available_time"] <= prior, "LP03_GATE_PREREGISTERED_POLICY_BEFORE_OUTCOME")
+        else:
+            _native_require(later <= clocks["available_time"], "LP03_GATE_ORIGINAL_ESTIMATE_OUTCOME_ORDER")
+        native[binding.input_name] = event["values"][binding.input_name]
+    values = decode_evidence_private_inputs_v1(math_id, deterministic_json(native).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    return parts, values, dict(zip(fields, scope, strict=True))
+
+
+def _evidence_original_signed_fee_sources_v1(payload):
+    """Join the exact selected synthetic fee family, schedule, and quantization policy."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, _native_utc_nanoseconds, deterministic_json
+
+    math_id = "MATH-35"
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(data, Mapping) and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and data["profile"] == "ORIGINAL_SOFTWARE_SIGNED_QUADRATIC_FEE_INPUTS_V1" and data["math_id"] == math_id,
+        "LP03_SIGNED_FEE_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_SIGNED_FEE_ORIGINAL_DECISION_CUTOFF")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id].bindings
+    _native_require(type(data["source_slices"]) is tuple and len(data["source_slices"]) == len(bindings),
+        "LP03_SIGNED_FEE_ORIGINAL_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(item).encode("utf-8"))) for item in data["source_slices"])
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_SIGNED_FEE_ORIGINAL_SOURCE_KIND")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len(set(part.original_record_refs[0] for part in parts)) == len(set(
+        row["producer_receipt_id"] for row in events)) == len(parts), "LP03_SIGNED_FEE_DISTINCT_SOURCE_ROLES")
+    scope = None
+    original_values = {}
+    roster = ("original_fill_ref", "original_payout_ref", "schedule_family", "original_applicability_ref",
+        "original_quantization_ref", "currency", "actual_venue_ref", "original_market_ref", "horizon_ref",
+        "original_reservation_ref", "payout_unit_amount", "fill_effective_wall_ns")
+    for row, binding in zip(events, bindings, strict=True):
+        _native_require((row["record_kind"], row["schema_id"], row["schema_version"],
+            row["producer_receipt_type"], row["authorized_binding_ids"]) == (
+                "LP03OriginalSignedQuadraticFeeSourceV1", "LP03::MATH-35::ORIGINAL_INPUT_SOURCE_V1",
+                "1.0", "LP03::MATH-35::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+            and set(row["values"]) == {binding.input_name, "fee_context"}, "LP03_SIGNED_FEE_ORIGINAL_ROLE_SCHEMA")
+        metadata = row["values"]["fee_context"]
+        _native_require(isinstance(metadata, Mapping) and set(metadata) == {*roster, "producer_role", "binding_id", "input_basis"}
+            and (metadata["producer_role"], metadata["binding_id"], metadata["input_basis"])
+                == (binding.producer_role, binding.binding_id, binding.unit_or_basis_requirement),
+            "LP03_SIGNED_FEE_ORIGINAL_ROLE_BASIS")
+        for key in roster[:-2]:
+            _native_ident(metadata[key])
+        _native_require(metadata["payout_unit_amount"] == "1.00",
+                        "LP03_SIGNED_FEE_ORIGINAL_UNIT_PAYOUT")
+        original = tuple(metadata[name] for name in roster)
+        if scope is None:
+            scope = original
+        clocks = row["native_clocks"]
+        fill = metadata["fill_effective_wall_ns"]
+        _native_require(original == scope and metadata["schedule_family"] == "SOFTWARE_ORIGINAL_SIGNED_THETA_QUADRATIC_V1"
+            and metadata["actual_venue_ref"] == row["scope"]["venue_scope_id"]
+            and metadata["original_market_ref"] == row["scope"]["market_scope_id"]
+            and all(row[name] == events[0][name] for name in ("context_id", "scope", "source_epoch_id", "input_version"))
+            and type(fill) is int and 0 < fill <= cutoff and clocks["as_of_time"] == decision
+            and clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"] <= clocks["processed_time"] <= cutoff
+            and 0 <= decision-clocks["observed_time"] <= row["ttl_ns"],
+            "LP03_SIGNED_FEE_ORIGINAL_FAMILY_SCOPE_OR_CLOCKS")
+        if binding.producer_role in ("ACCEPTED_FEE_SCHEDULE", "PARAMETER_POLICY", "LANE_COMPUTATION"):
+            _native_require(clocks["available_time"] <= fill, "LP03_SIGNED_FEE_SCHEDULE_AND_RESERVATION_PRECEDENCE")
+        else:
+            _native_require(clocks["effective_time"] == fill, "LP03_SIGNED_FEE_ORIGINAL_FILL_CLOCK")
+        original_values[binding.input_name] = row["values"][binding.input_name]
+        if binding.input_name == "schedule_binding":
+            _native_require(row["producer_receipt_id"] == metadata["original_applicability_ref"],
+                            "LP03_SIGNED_FEE_ORIGINAL_APPLICABILITY_RECEIPT")
+        if binding.input_name == "contracts":
+            _native_require(row["producer_receipt_id"] == metadata["original_fill_ref"],
+                            "LP03_SIGNED_FEE_ORIGINAL_FILL_RECEIPT")
+        if binding.input_name == "price":
+            _native_require(row["producer_receipt_id"] == metadata["original_payout_ref"],
+                            "LP03_SIGNED_FEE_ORIGINAL_PAYOUT_RECEIPT")
+    values = decode_evidence_private_inputs_v1(math_id, deterministic_json(original_values).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    metadata = dict(zip(roster, scope, strict=True))
+    schedule, quantization = values["schedule_binding"], values["quantization_policy"]
+    role = values["liquidity_role"]
+    component = "MAKER_REBATE" if role == "MAKER" else "TAKER_FEE"
+    wire_schedule = original_values["schedule_binding"]
+    fill = metadata["fill_effective_wall_ns"]
+    schedule_start = _native_utc_nanoseconds(wire_schedule["valid_from"])
+    schedule_stop = wire_schedule["valid_until"]
+    _native_require(schedule_start <= fill and (schedule_stop is None or fill < _native_utc_nanoseconds(schedule_stop))
+        and _native_utc_nanoseconds(wire_schedule["evaluated_at"]) == fill,
+        "LP03_SIGNED_FEE_ORIGINAL_SCHEDULE_NANOSECOND_INTERVAL")
+    _native_require(role in ("MAKER", "TAKER") and set(schedule.component_classes) <= {"MAKER_REBATE", "TAKER_FEE"}
+        and component in schedule.component_classes
+        and (schedule.venue_ref, schedule.market_or_category_ref, schedule.source_epoch_ref)
+            == (metadata["actual_venue_ref"], metadata["original_market_ref"], events[0]["source_epoch_id"])
+        and _native_utc_nanoseconds(schedule.evaluated_at.isoformat()) == fill // 1000 * 1000
+        and values["theta"] == schedule.rate_for(component)
+        and (values["theta"] <= 0 if role == "MAKER" else values["theta"] >= 0),
+        "LP03_SIGNED_FEE_ORIGINAL_SCHEDULE_AND_COMPONENT")
+    _native_require(quantization.policy_id == metadata["original_quantization_ref"]
+        and quantization.source_binding_ref == schedule.binding_ref
+        and quantization.currency_or_asset == quantization.unit == metadata["currency"]
+        and (quantization.field_id, quantization.basis) == ("SIGNED_FEE", "SIGNED_EXPLICIT_FEE")
+        and quantization.scale == 2 and str(quantization.increment) == "0.01"
+        and quantization.rounding.value == "ROUND_HALF_EVEN"
+        and values["receipt_id"] == metadata["original_reservation_ref"],
+        "LP03_SIGNED_FEE_ORIGINAL_QUANTIZATION_AND_RECEIPT_RESERVATION")
+    return parts, values, metadata
+
+
+def _evidence_independent_signed_fee_v1(values, *, work, exact, step, arithmetic):
+    """Match the original Decimal34 steps, then independently round signed cents."""
+    from decimal import Decimal
+    from fractions import Fraction
+
+    contracts, theta, price = (exact(values[name]) for name in ("contracts", "theta", "price"))
+    liquidity, schedule, policy = (values[name] for name in ("liquidity_role", "schedule_binding", "quantization_policy"))
+    work._require(contracts >= 0 and 0 <= price <= 1 and liquidity in ("MAKER", "TAKER")
+        and (theta <= 0 if liquidity == "MAKER" else theta >= 0), "LP03_FEE_INDEPENDENT_ORIGINAL_DOMAIN")
+    loss = step(arithmetic.subtract, Decimal(1), price)
+    raw = step(arithmetic.multiply, step(arithmetic.multiply, step(arithmetic.multiply, contracts, theta), price), loss)
+    increment = exact(policy.increment)
+    units = step(arithmetic.divide, raw, increment)
+    ratio = work._exact_private_execution_decimal_v1(work._parse_private_execution_decimal_v1(str(units)))
+    numerator, denominator = abs(ratio.numerator), ratio.denominator
+    work._bits(numerator.bit_length() + denominator.bit_length() + 16)
+    work._consumed["integer_operations"] += 4
+    whole, remainder = divmod(numerator, denominator)
+    rounded = whole + int(2 * remainder > denominator or 2 * remainder == denominator and whole % 2 != 0)
+    rounded_units = Decimal(("-" if units.is_signed() else "") + str(rounded))
+    post = step(arithmetic.quantize, step(arithmetic.multiply, rounded_units, increment), increment)
+    residual = step(arithmetic.subtract, raw, post)
+    receipt = dict(receipt_id=values["receipt_id"], policy_ref=policy.policy_id, field_id=policy.field_id,
+        pre_value=str(raw), post_value=str(post), residual=str(residual), unit=policy.unit,
+        currency_or_asset=policy.currency_or_asset, basis=policy.basis, scale=policy.scale, rounding=policy.rounding.value)
+    raw_record = dict(amount_before_rounding=str(raw), amount_after_rounding=str(post), quantization_receipt=receipt,
+        component_class="EXPLICIT_MAKER_REBATE" if raw < 0 else "EXPLICIT_TAKER_FEE",
+        source_binding_ref=schedule.binding_ref, embedded_in_price=False)
+    proof = dict(original_amount_before_quantization=str(raw), original_signed_units=str(units),
+        quotient=whole, remainder=remainder, denominator=denominator, rounded_unit_count=str(rounded_units),
+        quantization_policy_ref=policy.policy_id, original_receipt_ref=values["receipt_id"])
+    return raw_record, proof
+
+
+def _evidence_original_dynamic_book_source_data_v1(payload):
+    """Join one original book and one versioned market metadata record."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .context import exact_decimal
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(type(data) is MappingProxyType and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and (data["profile"],data["math_id"]) == ("ORIGINAL_SOFTWARE_DYNAMIC_BINARY_BOOK_V1","MATH-36")
+        and type(data["source_slices"]) is tuple,
+        "LP03_BINARY_BOOK_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = data["decision_wall_ns"], data["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+                    "LP03_BINARY_BOOK_ORIGINAL_DECISION_CUTOFF")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-36"]
+    _native_require(len(data["source_slices"]) == len(bindings) == 7, "LP03_BINARY_BOOK_ORIGINAL_BINDING_COUNT")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8","strict"),max_bytes=32768))
+        for row in data["source_slices"])
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts)
+        and len({part.original_record_refs[0] for part in parts}) == len(parts), "LP03_BINARY_BOOK_EXACT_SOURCE_ROSTER")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    role_originals = {}
+    originals = {}
+    maximum_age = min(row["ttl_ns"] for row in events)
+    for event,binding in zip(events,bindings,strict=True):
+        field, values, clocks = binding.exact_field_path, event["values"], event["native_clocks"]
+        _native_require(event["authorized_binding_ids"] == (binding.binding_id,) and set(values) == {field}
+            and (event["owner_id"],event["record_kind"],event["schema_id"],event["schema_version"],
+                event["producer_receipt_type"],event["source_state_and_claim_lineage"]) ==
+                (binding.accepted_upstream_owner_id,binding.accepted_packet_or_snapshot_type,binding.schema_id,
+                 binding.schema_version,binding.producer_receipt_type,binding.source_state_and_claim_lineage),
+            "LP03_BINARY_BOOK_ORIGINAL_OWNER_FIELD_BINDING")
+        _native_require(all(event[name] == events[0][name] for name in ("scope","context_id","source_epoch_id","input_version"))
+            and clocks["as_of_time"] == decision and 0 < clocks["effective_time"] <= clocks["observed_time"]
+            <= clocks["available_time"] <= clocks["received_time"] <= clocks["processed_time"] <= cutoff
+            and decision - clocks["observed_time"] <= maximum_age, "LP03_BINARY_BOOK_ORIGINAL_SNAPSHOT_CLOCKS")
+        prior = event["prior_revision_available_wall_ns_or_absence"]
+        _native_require(type(prior) is not int or prior <= cutoff, "LP03_BINARY_BOOK_ORIGINAL_PRIOR_REVISION_AT_CUTOFF")
+        role = "GRID" if binding.input_name in ("payout","price_ranges") else "BOOK"
+        original = (event["producer_receipt_id"],clocks,event["ttl_ns"],event["provider_sequence"],event["revision"],prior)
+        _native_require(role_originals.setdefault(role,original) == original, "LP03_BINARY_BOOK_ORIGINAL_SHARED_ROLE_RECEIPT")
+        originals[binding.input_name] = values[field]
+    book,grid = (role_originals[role] for role in ("BOOK","GRID"))
+    _native_require(book[0] != grid[0] and type(book[3]) is type(originals["book_sequence"]) is int
+        and book[3] == originals["book_sequence"] and type(grid[4]) in (int,str)
+        and grid[1]["effective_time"] <= book[1]["effective_time"]
+        and grid[1]["available_time"] <= book[1]["available_time"],
+        "LP03_BINARY_BOOK_ORIGINAL_SEQUENCE_AND_EFFECTIVE_GRID")
+    _native_require(type(originals["expected_sequence"]) is int
+        and originals["expected_sequence"] == book[3]
+        and originals["book_state"] == "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS",
+        "LP03_BINARY_BOOK_ORIGINAL_CURRENT_CONTIGUOUS_SEQUENCE")
+    _native_require(type(originals["price_ranges"]) is tuple and 0 < len(originals["price_ranges"]) <= 16
+        and all(type(originals[name]) is tuple and 0 < len(originals[name]) <= 32
+            for name in ("yes_bids","no_bids")), "LP03_BINARY_BOOK_BOUNDED_LADDERS_AND_GRID")
+    inputs = decode_evidence_public_invocation_inputs_v1("MATH-36",
+        deterministic_json(originals).encode("utf-8","strict"), maximum_bytes=16384, maximum_nodes=1024)
+    _native_require(set(inputs) == {binding.input_name for binding in bindings},
+        "LP03_BINARY_BOOK_ORIGINAL_INVOCATION_FIELDS")
+    numeric = (inputs["payout"], *inputs["yes_bids"], *inputs["no_bids"])
+    for row in inputs["price_ranges"]:
+        _native_require(type(row) is MappingProxyType and set(row) == {"minimum", "maximum", "step"},
+            "LP03_BINARY_BOOK_ORIGINAL_GRID_FIELDS")
+        numeric += tuple(row.values())
+    _native_require(all(type(value) is str and 0 < len(value) <= 128
+        and str(exact_decimal(value)) == value for value in numeric),
+        "LP03_BINARY_BOOK_ORIGINAL_EXACT_DECIMAL")
+    inputs = MappingProxyType({binding.input_name: inputs[binding.input_name] for binding in bindings})
+    return parts, inputs, dict(original_book_receipt_ref=book[0],original_grid_receipt_ref=grid[0],
+        original_grid_revision=grid[4],agreed_original_sequence=book[3])
+
+
+def _evidence_original_binary_book_bounds_v1(bounds, values, *, work):
+    """Rebind signed price interval to the original payout."""
+    work._require(type(bounds) is tuple and len(bounds) == 2, "LP03_BINARY_BOOK_REGISTERED_BOUND_SHAPE")
+    lower, upper, payout = (
+        work._exact_private_execution_decimal_v1(work._parse_private_execution_decimal_v1(token))
+        for token in (*bounds, values["payout"])
+    )
+    work._require(lower == 0 and upper == payout and payout > 0,
+        "LP03_BINARY_BOOK_SIGNED_BOUND_PAYOUT_MISMATCH")
+
+
+def _evidence_independent_dynamic_book_v1(values, authority, *, work, exact, step, arithmetic):
+    """Confirm the two exact complementary asks under the original declared grid."""
+    payout = exact(values["payout"])
+    yes, no = (tuple(exact(item) for item in values[name]) for name in ("yes_bids","no_bids"))
+    grids = tuple(tuple(exact(row[name]) for name in ("minimum","maximum","step")) for row in values["price_ranges"])
+    work._require(payout > 0 and type(values["book_sequence"]) is type(values["expected_sequence"]) is int
+        and values["book_sequence"] == values["expected_sequence"] == authority["agreed_original_sequence"]
+        and values["book_state"] == "CURRENT_CONTIGUOUS_SNAPSHOT_PLUS_DELTAS"
+        and all(ladder and all(left < right for left,right in zip(ladder,ladder[1:])) for ladder in (yes,no)),
+        "LP03_BINARY_BOOK_REVIEW_ORIGINAL_PAYOUT_AND_SEQUENCE")
+    work._require(all(0 <= low <= high and tick > 0 for low, high, tick in grids),
+        "LP03_BINARY_BOOK_REVIEW_ACTIVE_GRID")
+    yes_ask = step(arithmetic.subtract, payout, no[-1])
+    no_ask = step(arithmetic.subtract, payout, yes[-1])
+    for amount in (*yes, *no, yes_ask, no_ask):
+        work._require(0 <= amount <= payout, "LP03_BINARY_BOOK_REVIEW_PAYOUT_BOUND")
+        # The original grid applies the fixed Decimal34 context to both
+        # subtraction and remainder. Exact rational alignment has a
+        # different domain at rounded boundaries.
+        active = ((low, tick) for low, high, tick in grids if low <= amount <= high)
+        work._require(any(step(arithmetic.remainder, step(arithmetic.subtract, amount, low), tick).is_zero()
+            for low, tick in active), "LP03_BINARY_BOOK_REVIEW_ACTIVE_GRID_POINT")
+    raw = dict(best_yes_bid=str(yes[-1]),best_no_bid=str(no[-1]),derived_yes_ask=str(yes_ask),
+        derived_no_ask=str(no_ask),book_sequence=values["book_sequence"])
+    return raw, dict(grid_revision=authority["original_grid_revision"],
+        original_grid_receipt_ref=authority["original_grid_receipt_ref"],
+        original_book_receipt_ref=authority["original_book_receipt_ref"],
+        exact_bands=tuple(tuple(str(value) for value in row) for row in grids), payout=str(payout))
+
+
+def _evidence_math41_published_edge_fact_v1(fact, *, name, value, event, metadata):
+    """Check the bound material from one original measured edge and its publication."""
+    from fractions import Fraction
+    import struct
+
+    from .latency_policy import _evidence_invocation_measurement_v1, _evidence_storage_observation_v1
+    from .serialization import _native_strict_json, deterministic_json
+
+    common = {"original_receipt_ref", "quantity_scope_ref", "horizon_ref", "basis_ref"}
+    published_fields = {
+        "profile", "original_lane", "original_context_ref", "original_input_lock_ref", "original_grant_ref",
+        "original_fence_ref", "original_edge_ref", "original_edge_output_json", "original_measurement_ref",
+        "original_process_observation_ref", "original_publication_ref", "original_collection_complete_ref",
+        "original_data_store_id", "original_row_sha256", "measured_original_edge_call", "measured_original_edge_unit",
+        "measured_original_edge_basis", "publication_available_observation", "collection_complete_observed",
+        "bridge_visibility_observation",
+    }
+    _native_require(set(fact) == common | published_fields and
+        (fact["profile"], fact["original_lane"], fact["measured_original_edge_unit"], fact["measured_original_edge_basis"]) ==
+        ("ORIGINAL_PUBLISHED_EDGE_AND_CALL_MEASUREMENT_V1", "REPLAY", "probability points", "MODEL_MINUS_MARKET_SAME_SNAPSHOT"),
+        "LP03_MEASURED_EDGE_ORIGINAL_PUBLISHED_FIELDS")
+    for key in ("original_context_ref", "original_input_lock_ref", "original_grant_ref", "original_fence_ref",
+                "original_edge_ref", "original_measurement_ref", "original_process_observation_ref",
+                "original_publication_ref", "original_collection_complete_ref", "original_data_store_id"):
+        _native_ident(fact[key])
+    grant = fact["original_grant_ref"]
+    expected = fact["original_edge_ref" if name == "edge_now" else "original_measurement_ref"]
+    _native_require(fact["original_context_ref"] == event["context_id"] and
+        (fact["original_edge_ref"], fact["original_measurement_ref"], fact["original_process_observation_ref"],
+         fact["original_collection_complete_ref"]) ==
+        (grant + "::DATA::RAW", grant + "::CONVERSION", grant + "::PROCESS:TERMINAL", grant + "::STATE:2")
+        and event["record_ref"] == event["producer_receipt_id"] == expected and fact["original_receipt_ref"] == expected
+        and (metadata["quantity_scope_ref"], metadata["horizon_ref"]) ==
+        (event["scope"]["instrument_or_contract_scope_id"], event["scope"]["event_scope_id"]),
+        "LP03_MEASURED_EDGE_ORIGINAL_PUBLICATION_LINEAGE")
+    EvidencePublicationRefV1(fact["original_data_store_id"], fact["original_publication_ref"])
+    hashes = fact["original_row_sha256"]
+    _native_require(isinstance(hashes, Mapping)
+        and set(hashes) == {fact["original_edge_ref"], fact["original_measurement_ref"], fact["original_publication_ref"]}
+        and all(type(token) is str and re.fullmatch(r"[0-9a-f]{64}", token) for token in hashes.values()),
+        "LP03_MEASURED_EDGE_ORIGINAL_PUBLICATION_DIGESTS")
+    from .serialization import _evidence_canonical_object_v1
+
+    observations = []
+    for member in ("measured_original_edge_call", "publication_available_observation"):
+        text = fact[member]
+        _native_require(type(text) is str and 0 < len(text) <= 16384,
+            "LP03_MEASURED_EDGE_ORIGINAL_CLOCK_CAPSULE_BOUND")
+        wire = text.encode("utf-8", "strict")
+        _native_require(len(wire) <= 16384, "LP03_MEASURED_EDGE_ORIGINAL_CLOCK_CAPSULE_BOUND")
+        observations.append(_evidence_canonical_object_v1(wire, max_bytes=16384))
+    measured = _evidence_invocation_measurement_v1(observations[0])
+    available = _evidence_storage_observation_v1(observations[1])
+    completed, visible = fact["collection_complete_observed"], fact["bridge_visibility_observation"]
+    _native_require(type(completed) is type(visible) is tuple and len(completed) == 2 and len(visible) == 3
+        and all(type(time) is int and time >= 0 for time in (*completed, *visible)),
+        "LP03_MEASURED_EDGE_ORIGINAL_VISIBILITY_SHAPE")
+    clocks = event["native_clocks"]
+    _native_require(measured["outcome"] == "SUCCESS"
+        and measured["clock_domain_id"] == available["clock_domain_id"]
+        and measured["boot_identity_ref"] == available["boot_identity_ref"]
+        and measured["clock_declarations"] == available["clock_declarations"]
+        and clocks["effective_time"] == clocks["observed_time"] == measured["completed"][0]
+        and clocks["available_time"] == available["wall_ns"]
+        and clocks["received_time"] == clocks["processed_time"] == clocks["as_of_time"]
+        and available["wall_ns"] <= clocks["as_of_time"] <= completed[0] <= visible[0]
+        and measured["completed"][1] <= available["monotonic_ns"] <= completed[1] <= visible[1],
+        "LP03_MEASURED_EDGE_ORIGINAL_VISIBILITY_AND_CLOCKS")
+    raw = fact["original_edge_output_json"]
+    _native_require(type(raw) is str and 0 < len(raw) <= 256, "LP03_MEASURED_EDGE_ORIGINAL_RAW_WIRE")
+    edge = _native_strict_json(raw.encode("utf-8"), max_bytes=256, max_nodes=1, binary64_numbers=True)
+    _native_require(type(edge) is float and deterministic_json(edge) == raw and type(value) is float
+        and struct.pack(">d", value) == struct.pack(">d", edge if name == "edge_now"
+            else float(Fraction(measured["duration_ns"], 10**9))),
+        "LP03_MEASURED_EDGE_ORIGINAL_AMOUNT_AND_DURATION")
+
+
+def _evidence_math41_fitted_tau_fact_v1(fact, *, value, event, metadata):
+    """Link the supplied duration to its admitted original fitted-parameter row."""
+    import struct
+    from .serialization import _native_strict_json, deterministic_json
+
+    common = {"original_receipt_ref", "quantity_scope_ref", "horizon_ref", "basis_ref"}
+    if set(fact) != common | {"original_fitted_parameter_ref", "fit_window_ref", "fit_policy_ref",
+            "fit_known_wall_ns", "fitted_duration_unit", "fitted_duration_json"}:
+        raise ContractValidationError(ReasonCode.EVIDENCE_INPUT_UNAVAILABLE, "LP03_MEASURED_EDGE_FITTED_TAU_REQUIRED")
+    for key in ("original_fitted_parameter_ref", "fit_window_ref", "fit_policy_ref"):
+        _native_ident(fact[key])
+    fitted_wire = fact["fitted_duration_json"]
+    _native_require(type(fitted_wire) is str and 0 < len(fitted_wire) <= 256,
+        "LP03_MEASURED_EDGE_FITTED_DURATION_WIRE")
+    fitted = _native_strict_json(fitted_wire.encode("utf-8"), max_bytes=256, max_nodes=1, binary64_numbers=True)
+    _native_require(fact["original_fitted_parameter_ref"] == event["record_ref"]
+        and fact["fit_policy_ref"] != fact["fit_window_ref"] != fact["original_fitted_parameter_ref"]
+        and type(fact["fit_known_wall_ns"]) is int
+        and 0 < fact["fit_known_wall_ns"] <= event["native_clocks"]["available_time"]
+        and fact["fitted_duration_unit"] == metadata["original_time_unit"] == "SECONDS"
+        and type(fitted) is type(value) is float and fitted > 0
+        and deterministic_json(fitted) == fitted_wire and struct.pack(">d", value) == struct.pack(">d", fitted),
+        "LP03_MEASURED_EDGE_MATCHED_FITTED_DURATION")
+
+
+def _evidence_original_binary64_execution_role_v1(math_id, name, fact, value, event, metadata):
+    """Join each source role to its original scope, horizon and receipt."""
+    from fractions import Fraction
+    import struct
+    common = {"original_receipt_ref", "quantity_scope_ref", "horizon_ref", "basis_ref"}
+    _native_require(type(fact) is MappingProxyType and common <= set(fact)
+        and tuple(fact[key] for key in ("original_receipt_ref", "quantity_scope_ref", "horizon_ref", "basis_ref"))
+        == (event["producer_receipt_id"], metadata["quantity_scope_ref"],
+            metadata["horizon_ref"], metadata["basis_ref"]),
+        "LP03_EXECUTION_ORIGINAL_ROLE_RECEIPT_AND_HORIZON")
+    if math_id == "MATH-41":
+        if name == "tau":
+            _evidence_math41_fitted_tau_fact_v1(fact, value=value, event=event, metadata=metadata)
+        else:
+            _evidence_math41_published_edge_fact_v1(fact, name=name, value=value, event=event, metadata=metadata)
+    elif math_id == "MATH-43" and name == "participation":
+        _native_require(set(fact) == common | {"filled_quantity", "observed_market_volume", "original_quantity_unit"}
+            and fact["original_quantity_unit"] == metadata["original_quantity_unit"],
+            "LP03_CAPACITY_ORIGINAL_PARTICIPATION_FIELDS")
+        tokens = tuple(fact[key] for key in ("filled_quantity", "observed_market_volume"))
+        _native_require(all(type(token) is str and 0 < len(token) <= 64
+            and re.fullmatch(r"(?:0|[1-9][0-9]*)(?:[.][0-9]+)?",token) is not None for token in tokens),
+            "LP03_CAPACITY_ORIGINAL_PARTICIPATION_QUANTITY")
+        filled, total = (Fraction(token) for token in tokens)
+        _native_require(0 <= filled <= total and total > 0
+            and type(value) is float
+            and struct.pack(">d", value) == struct.pack(">d", float(filled/total)),
+            "LP03_CAPACITY_ORIGINAL_PARTICIPATION_RATIO")
+    elif math_id == "MATH-44" and name in ("sample_covariance", "target"):
+        _native_require(set(fact) == common | {"ordered_coordinate_ids", "original_matrix_source_ref"}
+            and fact["ordered_coordinate_ids"] == metadata["ordered_coordinate_ids"],
+            "LP03_SHRINKAGE_ORIGINAL_COEFFICIENT_AXIS_ORDER")
+        _native_ident(fact["original_matrix_source_ref"])
+    else:
+        _native_require(set(fact) == common | {"original_role_source_ref"}, "LP03_EXECUTION_ORIGINAL_ROLE_FIELDS")
+        _native_ident(fact["original_role_source_ref"])
+
+
+def _evidence_original_binary64_execution_sources_v1(payload, *, math_id):
+    """Decode exactly the originally represented risk inputs under their owner scope."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, _native_strict_json, deterministic_json
+
+    _native_require(math_id in ("MATH-41", "MATH-42", "MATH-43", "MATH-44"), "LP03_BINARY64_EXECUTION_SELECTED_MATH")
+    body = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(body, Mapping) and set(body) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and body["profile"] == "ORIGINAL_SOFTWARE_BINARY64_EXECUTION_INPUTS_V1" and body["math_id"] == math_id,
+        "LP03_BINARY64_EXECUTION_SOURCE_FIELDS")
+    decision, cutoff = body["decision_wall_ns"], body["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_BINARY64_EXECUTION_DECISION_CUTOFF")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id].bindings
+    rows = body["source_slices"]
+    _native_require(type(rows) is tuple and len(rows) == len(bindings), "LP03_BINARY64_EXECUTION_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8"))) for row in rows)
+    _native_require(all(type(part) is EvidenceSourceSliceV1 and part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_BINARY64_EXECUTION_ORIGINAL_SOURCE")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len({part.original_record_refs[0] for part in parts}) ==
+        len({event["producer_receipt_id"] for event in events}) == len(parts), "LP03_BINARY64_EXECUTION_DISTINCT_SOURCE_ROLES")
+    scope = None
+    original, evidence = {}, {}
+    maximum_age_ns = min(event["ttl_ns"] for event in events)
+    members = ("quantity_scope_ref", "horizon_ref", "output_unit", "output_basis", "ordered_coordinate_ids", "original_time_unit",
+        "original_quantity_unit")
+    for part, event, binding in zip(parts, events, bindings, strict=True):
+        packed = event["values"]
+        historical = math_id == "MATH-41" and binding.input_name in ("edge_now", "latency")
+        expected_owner = ("QKU_COMPUTATION_CONTROL_PLANE.MATH-02" if historical
+            else "ORIGINAL-SOFTWARE-EXECUTION-OWNER::"+binding.producer_role)
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"], event["producer_receipt_type"],
+            event["authorized_binding_ids"]) == ("LP03OriginalBinary64ExecutionInputSourceV1",
+                f"LP03::{math_id}::ORIGINAL_INPUT_SOURCE_V1", "1.0", f"LP03::{math_id}::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+            and (event["owner_id"], event["source_state_and_claim_lineage"]) ==
+                (expected_owner, f"LP03::{math_id}::ORIGINAL_EXECUTION_INPUT::{binding.producer_role}")
+            and set(packed) == {binding.input_name, "original_execution_context"}, "LP03_BINARY64_EXECUTION_SOURCE_SCHEMA")
+        metadata = packed["original_execution_context"]
+        _native_require(isinstance(metadata, Mapping) and set(metadata) == {*members, "binding_id", "producer_role", "basis_ref", "original_fact"}
+            and (metadata["binding_id"], metadata["producer_role"], metadata["basis_ref"]) ==
+                (binding.binding_id, binding.producer_role, binding.unit_or_basis_requirement),
+            "LP03_BINARY64_EXECUTION_ORIGINAL_BASIS")
+        ordered = tuple(metadata[key] for key in members)
+        for key in members:
+            if key == "ordered_coordinate_ids":
+                _public_refs_v1(metadata[key])
+            else:
+                _native_ident(metadata[key])
+        if scope is None:
+            scope = ordered
+        clocks = event["native_clocks"]
+        _native_require(ordered == scope
+            and all(event[key] == events[0][key] for key in ("context_id", "scope", "source_epoch_id", "input_version"))
+            and (clocks["processed_time"] <= clocks["as_of_time"] <= cutoff if historical
+                else clocks["as_of_time"] == decision)
+            and 0 < clocks["effective_time"] <= clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+            <= clocks["processed_time"] <= cutoff and 0 <= decision-clocks["observed_time"]
+            <= (maximum_age_ns if math_id == "MATH-41" else event["ttl_ns"]),
+            "LP03_BINARY64_EXECUTION_ORIGINAL_SCOPE_AND_CLOCKS")
+        raw = packed[binding.input_name]
+        _native_require(type(raw) is str and 0 < len(raw.encode("utf-8")) <= 12288, "LP03_BINARY64_EXECUTION_FIELD_WIRE")
+        decoded = _native_strict_json(raw.encode("utf-8"), max_bytes=12288, max_nodes=1024, binary64_numbers=True)
+        _native_require(deterministic_json(decoded) == raw, "LP03_BINARY64_EXECUTION_CANONICAL_FIELD")
+        original[binding.input_name] = decoded
+        fact = metadata["original_fact"]
+        _evidence_original_binary64_execution_role_v1(math_id, binding.input_name,
+            fact, decoded, event, metadata)
+        if historical:
+            _native_require(fact["bridge_visibility_observation"][0] <= cutoff
+                and event["revision"] == fact["original_publication_ref"]
+                and part.original_record_refs[0].store_id == fact["original_data_store_id"],
+                "LP03_MEASURED_EDGE_ORIGINAL_HISTORICAL_CUTOFF_AND_STORE")
+        evidence[binding.input_name] = fact
+    if math_id == "MATH-41":
+        edge, timing = (evidence[name] for name in ("edge_now", "latency"))
+        _native_require(set(edge) == set(timing) and all(timing[key] == value
+            for key, value in edge.items() if key not in ("original_receipt_ref", "basis_ref")),
+            "LP03_MEASURED_EDGE_SAME_ORIGINAL_CALL_REQUIRED")
+    values = decode_evidence_private_inputs_v1(math_id, deterministic_json(original).encode("utf-8"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    scope = dict(zip(members, scope, strict=True))
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+
+    _native_require((scope["output_unit"], scope["output_basis"]) ==
+        (_LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_UNITS_V1[math_id],
+         EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement),
+        "LP03_BINARY64_EXECUTION_EXACT_PROJECTION_UNIT_AND_BASIS")
+    if math_id == "MATH-44":
+        size = len(scope["ordered_coordinate_ids"])
+        _native_require(0 < size <= 16
+            and len(values["sample_covariance"]) == len(values["target"]) == size
+            and all(len(row) == size for row in (*values["sample_covariance"], *values["target"])),
+            "LP03_SHRINKAGE_ORIGINAL_ORDERED_MATRIX_DIMENSIONS")
+    return parts, values, dict(scope, original_role_facts=evidence)
+
+
+def _evidence_binary64_rounded_ratio_v1(work, ratio, *, negative_zero=False):
+    """Certify nearest/even from exact rational neighbors of a float candidate."""
+    import math
+    import struct
+
+    work._bits(max(ratio.numerator.bit_length(), ratio.denominator.bit_length()) + 1076)
+    work._consumed["integer_operations"] += 1
+    try:
+        candidate = float(ratio) if ratio else -0.0 if negative_zero else 0.0
+    except OverflowError:
+        work._require(False, "LP03_EXECUTION_BINARY64_UNREPRESENTABLE")
+    work._require(math.isfinite(candidate), "LP03_EXECUTION_BINARY64_UNREPRESENTABLE")
+    below, above = math.nextafter(candidate, -math.inf), math.nextafter(candidate, math.inf)
+    work._require(math.isfinite(below) and math.isfinite(above), "LP03_EXECUTION_FINITE_ROUNDING_NEIGHBORS")
+    actual, lower, upper = (work._binary64_ratio(value) for value in (candidate, below, above))
+    two = work._fraction(2)
+    left = work._divide(work._add(lower, actual), two)
+    right = work._divide(work._add(actual, upper), two)
+    even = not (int.from_bytes(struct.pack(">d", candidate), "big") & 1)
+    low, high = work._compare(ratio, left), work._compare(ratio, right)
+    work._require((low > 0 or low == 0 and even) and (high < 0 or high == 0 and even),
+        "LP03_EXECUTION_BINARY64_ROUNDING_CELL_UNPROVEN", reason=ReasonCode.EVIDENCE_NUMERIC_UNCERTIFIED)
+    return candidate
+
+
+def _evidence_binary64_rounded_sqrt_v1(work, operand):
+    """Check a square-root cell by exact squaring of its nonnegative midpoints."""
+    import math
+    import struct
+
+    ratio = work._binary64_ratio(operand)
+    work._require(ratio >= 0, "LP03_EXECUTION_BINARY64_SQRT_DOMAIN")
+    if ratio == 0:
+        return operand
+    candidate = math.sqrt(operand)
+    below, above = math.nextafter(candidate, -math.inf), math.nextafter(candidate, math.inf)
+    actual, lower, upper = (work._binary64_ratio(value) for value in (candidate, below, above))
+    two = work._fraction(2)
+    left = work._divide(work._add(lower, actual), two)
+    right = work._divide(work._add(actual, upper), two)
+    even = not (int.from_bytes(struct.pack(">d", candidate), "big") & 1)
+    low = work._compare(ratio, work._multiply(left, left))
+    high = work._compare(ratio, work._multiply(right, right))
+    work._require((low > 0 or low == 0 and even) and (high < 0 or high == 0 and even),
+        "LP03_EXECUTION_BINARY64_SQRT_CELL_UNPROVEN", reason=ReasonCode.EVIDENCE_NUMERIC_UNCERTIFIED)
+    return candidate
+
+
+def _evidence_independent_binary64_execution_v1(math_id, values, *, work, charge_original_inputs):
+    """Re-derive each supported original binary64 operation with exact rounding."""
+    import math
+    import struct
+    from decimal import Context, ROUND_HALF_EVEN
+
+    def finite(value):
+        work._require(type(value) is float and math.isfinite(value), "LP03_EXECUTION_ORIGINAL_FINITE_BINARY64")
+        if charge_original_inputs:
+            work._consumed["input_values"] += 1
+        work._binary64_ratio(value, original_input=True)
+        return value
+
+    def operate(op, left, right, *, negative_zero=False):
+        lhs, rhs = work._binary64_ratio(left), work._binary64_ratio(right)
+        return _evidence_binary64_rounded_ratio_v1(work, op(lhs, rhs), negative_zero=negative_zero)
+
+    def add(left, right):
+        return operate(work._add, left, right, negative_zero=
+            math.copysign(1.0, left) < 0 and math.copysign(1.0, right) < 0)
+
+    def subtract(left, right):
+        return operate(work._subtract, left, right, negative_zero=
+            math.copysign(1.0, left) < 0 < math.copysign(1.0, right))
+
+    def multiply(left, right):
+        return operate(work._multiply, left, right, negative_zero=
+            math.copysign(1.0, left) != math.copysign(1.0, right))
+
+    def divide(left, right):
+        return operate(work._divide, left, right, negative_zero=
+            math.copysign(1.0, left) != math.copysign(1.0, right))
+
+    def decay(value):
+        ratio = work._binary64_ratio(value)
+        one = work._fraction(1)
+        work._require(0 <= ratio <= one, "LP03_EXECUTION_CERTIFIED_EXPONENT_INTERVAL_UNAVAILABLE",
+            reason=ReasonCode.EVIDENCE_NUMERIC_UNCERTIFIED)
+        # Alternating exact terms enclose exp(-x) for 0 <= x <= 1.
+        total, term = one, one
+        for index in range(1, 65):
+            term = work._divide(work._multiply(term, ratio), work._fraction(index))
+            if index % 2:
+                lower = work._subtract(total, term)
+                total = lower
+            else:
+                total = work._add(total, term)
+        lower_cell, upper_cell = (_evidence_binary64_rounded_ratio_v1(work, end) for end in (lower, total))
+        work._require(struct.pack(">d", lower_cell) == struct.pack(">d", upper_cell),
+            "LP03_EXECUTION_EXPONENTIAL_CELL_UNPROVEN", reason=ReasonCode.EVIDENCE_NUMERIC_UNCERTIFIED)
+        return lower_cell
+
+    def priced_covariance():
+        delta = finite(values["delta"])
+        sample, target = (tuple(tuple(finite(entry) for entry in row) for row in values[name])
+            for name in ("sample_covariance", "target"))
+        size = len(sample)
+        tolerance = 1e-12
+        work._require(0 <= delta <= 1 and size == len(target) and 0 < size <= 16
+            and all(len(row) == size for row in (*sample, *target)), "LP03_EXECUTION_SHRINKAGE_ORDERED_DIMENSIONS")
+        # This is the exact predecessor acceptance threshold, applied to the
+        # predecessor's rounded subtraction, never a result-comparison tolerance.
+        work._require(all(abs(subtract(matrix[row][column], matrix[column][row])) <= tolerance
+            for matrix in (sample, target) for row in range(size) for column in range(row)),
+            "LP03_EXECUTION_SHRINKAGE_SYMMETRY")
+        weight = subtract(1.0, delta)
+        result = tuple(tuple(add(multiply(weight, left), multiply(delta, right))
+            for left, right in zip(row, other, strict=True)) for row, other in zip(sample, target, strict=True))
+        lower = [[0.0] * size for _ in range(size)]
+        for r in range(size):
+            for c in range(r+1):
+                term_sum = work._fraction(0)
+                for previous in range(c):
+                    term = multiply(lower[r][previous], lower[c][previous])
+                    term_sum = work._add(term_sum, work._binary64_ratio(term))
+                residual = subtract(result[r][c], _evidence_binary64_rounded_ratio_v1(work, term_sum))
+                if r == c:
+                    work._require(residual >= -tolerance, "LP03_EXECUTION_SHRINKAGE_PSD")
+                    lower[r][c] = _evidence_binary64_rounded_sqrt_v1(work, max(0.0, residual))
+                elif lower[c][c] > tolerance:
+                    lower[r][c] = divide(residual, lower[c][c])
+                else:
+                    work._require(abs(residual) <= tolerance, "LP03_EXECUTION_SHRINKAGE_PSD")
+        return result
+
+    with work:
+        if math_id == "MATH-41":
+            edge, latency, tau = (finite(values[name]) for name in ("edge_now", "latency", "tau"))
+            work._require(latency >= 0 and tau > 0, "LP03_EXECUTION_LATENCY_ORIGINAL_DOMAIN")
+            result = multiply(edge, decay(divide(latency, tau)))
+        elif math_id == "MATH-42":
+            y, sigma = (finite(values[name]) for name in ("Y", "sigma"))
+            q, adv = (work._parse_private_execution_decimal_v1(str(values[name])) for name in ("Q", "ADV"))
+            work._require(y >= 0 and sigma >= 0 and adv > 0, "LP03_EXECUTION_IMPACT_ORIGINAL_DOMAIN")
+            work._exact_private_execution_decimal_v1(q)
+            adv_ratio = work._exact_private_execution_decimal_v1(adv)
+            context = Context(prec=34, rounding=ROUND_HALF_EVEN)
+            work._bits(4 * (len(q.as_tuple().digits) + len(adv.as_tuple().digits)
+                + abs(q.as_tuple().exponent) + abs(adv.as_tuple().exponent)) + 256)
+            work._consumed["integer_operations"] += 2
+            decimal_ratio = context.divide(context.abs(q), adv)
+            work._require(decimal_ratio.is_finite() and adv_ratio > 0,
+                "LP03_EXECUTION_IMPACT_ORIGINAL_DOMAIN")
+            observed = work._parse_private_execution_decimal_v1(str(decimal_ratio))
+            native_ratio = _evidence_binary64_rounded_ratio_v1(work, work._exact_private_execution_decimal_v1(observed))
+            result = multiply(multiply(y, sigma), _evidence_binary64_rounded_sqrt_v1(work, native_ratio))
+        elif math_id == "MATH-43":
+            participation, cap, scale = (finite(values[name]) for name in
+                ("participation", "approved_participation_cap", "penalty_scale"))
+            work._require(participation >= 0 and cap > 0 and scale >= 0, "LP03_EXECUTION_CAPACITY_ORIGINAL_DOMAIN")
+            excess = max(0.0, subtract(divide(participation, cap), 1.0))
+            work._bits(1075)
+            work._consumed["integer_operations"] += 1
+            host_power = excess ** 2
+            certified_power = multiply(excess, excess)
+            work._require(struct.pack(">d", host_power) == struct.pack(">d", certified_power),
+                "LP03_EXECUTION_ORIGINAL_CAPACITY_POWER_CELL_UNPROVEN", reason=ReasonCode.EVIDENCE_NUMERIC_UNCERTIFIED)
+            result = multiply(host_power, scale)
+        else:
+            work._require(math_id == "MATH-44", "LP03_EXECUTION_BINARY64_MATH")
+            result = priced_covariance()
+
+    def bits(value):
+        if type(value) is tuple:
+            return tuple(bits(item) for item in value)
+        return struct.pack(">d", value).hex()
+    return result, {"exact_output_bits": bits(result)}
+
+
+def _evidence_original_decimal_execution_data_v1(payload, *, math_id):
+    """Resolve one explicitly admitted private execution source profile."""
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+
+    if math_id in ("MATH-32", "MATH-33"):
+        parts, values, authority = _evidence_original_execution_cost_sources_v1(payload, math_id=math_id)
+        scope_ref = authority["original_lane_order_ref"]
+        horizon_ref = authority["original_decision_quote_ref"]
+        coordinates = (authority["original_lane_fill_ref"],)
+        unit = authority["currency"]
+    elif math_id == "MATH-35":
+        parts, values, authority = _evidence_original_signed_fee_sources_v1(payload)
+        scope_ref = authority["original_fill_ref"]
+        horizon_ref = authority["horizon_ref"]
+        coordinates = (authority["original_reservation_ref"],)
+        unit = authority["currency"]
+    elif math_id == "MATH-36":
+        parts, values, authority = _evidence_original_dynamic_book_source_data_v1(payload)
+        scope_ref = authority["original_book_receipt_ref"]
+        horizon_ref = authority["original_grid_receipt_ref"]
+        coordinates = (scope_ref,)
+        unit = "DECLARED_PAYOUT_UNIT_AND_PROVIDER_SEQUENCE"
+    elif math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1:
+        parts, values, authority = _evidence_original_binary64_execution_sources_v1(payload, math_id=math_id)
+        scope_ref = authority["quantity_scope_ref"]
+        horizon_ref = authority["horizon_ref"]
+        coordinates = authority["ordered_coordinate_ids"]
+        unit = authority["output_unit"]
+    elif math_id == "MATH-38":
+        parts, values, authority = _evidence_original_fill_distribution_source_v1(payload)
+        scope_ref = authority["quantity_scope_ref"]
+        horizon_ref = authority["horizon_ref"]
+        coordinates = (authority["original_order_ref"],)
+        unit = authority["quantity_unit"]
+    else:
+        parts, values, authority = _evidence_original_risk_decision_sources_v1(payload, math_id=math_id)
+        horizon_ref = authority["horizon_ref"]
+        if math_id == "MATH-40":
+            scope_ref = authority["lane_fill_ref"]
+            coordinates = (authority["post_fill_quote_ref"],)
+            unit = authority["currency"]
+        else:
+            scope_ref = authority["original_estimate_target_ref"]
+            coordinates = (authority["allocation_ref"],)
+            unit = authority["edge_unit"]
+    rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    return parts, values, dict(quantity_scope_ref=scope_ref, horizon_ref=horizon_ref,
+        ordered_coordinate_ids=coordinates, unit=unit, basis=rule.basis_requirement,
+        original_owner_ids=tuple(part.reconstructed_canonical_events[0]["owner_id"] for part in parts),
+        exact_original_authority=authority)
+
+
+def _evidence_independent_acknowledged_queue_v1(values, authority, *, work, exact, step, arithmetic):
+    """Independent original event aggregation before the public Decimal34 expression."""
+    from decimal import Decimal
+    from fractions import Fraction
+    from .context import _native_retail_finite_decimal_text_v1
+
+    terms = {
+        "DISPLAYED_BEFORE_ORDER": "displayed_quantity_before_order",
+        "PRIOR_ADDITION": "net_prior_additions",
+        "PRIOR_CANCELLATION": "observed_prior_cancellations",
+        "TRADE_AHEAD": "observed_trades_ahead",
+    }
+    rows = authority["original_book_events"]
+    ack = authority["original_acknowledgement"]
+    work._require(type(rows) is tuple and 0 < len(rows) <= 32
+        and ack["matching_priority"] == "PRICE_TIME_FIFO" and ack["basis"] == "ACKNOWLEDGED_INSERTION_POINT"
+        and ack["unit"] == "units", "LP03_QUEUE_REVIEW_ORIGINAL_INSERTION_EVIDENCE")
+    amounts = {kind:Fraction(0) for kind in terms}
+    displayed = 0
+    for offset, row in enumerate(rows):
+        kind = row["event_kind"]
+        work._require(type(kind) is str and kind in terms and row["sequence"] == rows[0]["sequence"] + offset
+            and (row["priority_order_id"], row["venue_id"], row["instrument_id"], row["side"], row["venue_evidence_ref"])
+            == (ack["order_id"], ack["venue_id"], ack["instrument_id"], ack["side"], ack["venue_evidence_ref"]),
+            "LP03_QUEUE_REVIEW_EXACT_ORDERED_EVENT_ASSOCIATION")
+        quantity = exact(row["quantity"])
+        rational = work._exact_private_execution_decimal_v1(quantity)
+        work._require(rational >= 0, "LP03_QUEUE_REVIEW_ORIGINAL_NONNEGATIVE_QUANTITY")
+        amounts[kind] = work._add(amounts[kind], rational)
+        displayed += int(kind == "DISPLAYED_BEFORE_ORDER")
+    exact_totals = {key:Decimal(_native_retail_finite_decimal_text_v1(amounts[kind])) for kind,key in terms.items()}
+    work._require(displayed == 1 and exact_totals == dict(values), "LP03_QUEUE_REVIEW_DERIVED_INPUT_SUBSTITUTION")
+    order = tuple(terms.values())
+    first, added, cancelled, traded = tuple(exact_totals[key] for key in order)
+    unbounded = step(arithmetic.subtract, step(arithmetic.subtract,
+        step(arithmetic.add, first, added), cancelled), traded)
+    result = max(Decimal(0), unbounded)
+    return str(result), dict(original_order_ref=ack["order_id"],
+        ordered_original_event_ids=tuple(row["event_id"] for row in rows),
+        ordered_original_sequences=tuple(row["sequence"] for row in rows),
+        exact_input_totals=tuple((key,str(exact_totals[key])) for key in order),
+        signed_pre_floor_queue=str(unbounded))
+
+
+def _evidence_independent_decimal_execution_v1(math_id, values, *, work, authority=None,
+        charge_original_binary64_inputs=True):
+    """Recompute the original exact or binary64 execution route."""
+    from decimal import Context, Decimal, FloatOperation, ROUND_HALF_EVEN
+
+    if math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1:
+        return _evidence_independent_binary64_execution_v1(math_id, values, work=work,
+            charge_original_inputs=charge_original_binary64_inputs)
+    arithmetic = Context(prec=34, rounding=ROUND_HALF_EVEN)
+    arithmetic.traps[FloatOperation] = True
+
+    def exact(value):
+        original = work._parse_private_execution_decimal_v1(str(value))
+        work._exact_private_execution_decimal_v1(original)
+        return original
+
+    def step(operation, *operands):
+        metadata = tuple(value.as_tuple() for value in operands)
+        width = sum(len(value.digits) for value in metadata)
+        exponent = max(abs(value.exponent) for value in metadata)
+        work._bits(4 * (width + exponent) + 256)
+        work._consumed["integer_operations"] += 1
+        result = operation(*operands)
+        work._require(result.is_finite(), "LP03_EXECUTION_INDEPENDENT_DECIMAL34_STEP")
+        return result
+
+    with work:
+        if math_id in ("MATH-32", "MATH-33"):
+            quote_key = "decision_price" if math_id == "MATH-32" else "midpoint_at_decision"
+            quantity, execution, quote = (exact(values[name]) for name in ("quantity", "execution_price", quote_key))
+            work._require(values["side"] in ("BUY", "SELL") and quantity >= 0, "LP03_TCA_ORIGINAL_SIGN")
+            directed = quantity if values["side"] == "BUY" else step(arithmetic.minus, quantity)
+            market = step(arithmetic.multiply, directed, step(arithmetic.subtract, execution, quote))
+            result = market
+            cost_values = ()
+            if math_id == "MATH-32":
+                costs = ("explicit_fees", "opportunity_cost_unfilled", "other_declared_costs")
+                cost_values = tuple((key, exact(values[key])) for key in costs)
+                result = step(arithmetic.add, Decimal(0), market)
+                for _, amount in cost_values:
+                    result = step(arithmetic.add, result, amount)
+            return str(result), dict(signed_quantity=str(directed), matched_quote_field=quote_key,
+                signed_price_cost=str(market), disjoint_declared_costs=tuple((key, str(amount)) for key, amount in cost_values))
+        if math_id == "MATH-35":
+            return _evidence_independent_signed_fee_v1(values, work=work, exact=exact, step=step, arithmetic=arithmetic)
+        if math_id == "MATH-36":
+            return _evidence_independent_dynamic_book_v1(values, authority, work=work, exact=exact, step=step, arithmetic=arithmetic)
+        if math_id == "MATH-38":
+            artifact = values["artifact"]
+            maximum, tolerance = exact(artifact.order_quantity), exact(artifact.normalization_tolerance)
+            work._require(0 <= tolerance < 1, "LP03_FILL_INDEPENDENT_NORMALIZATION_TOLERANCE")
+            mass, weighted = Decimal(0), Decimal(0)
+            for quantity, probability in artifact.fill_quantity_distribution:
+                quantity, probability = exact(quantity), exact(probability)
+                work._require(0 <= quantity <= maximum and 0 <= probability <= 1,
+                    "LP03_FILL_INDEPENDENT_ORIGINAL_SUPPORT")
+                weighted = step(arithmetic.add, weighted, step(arithmetic.multiply, quantity, probability))
+                mass = step(arithmetic.add, mass, probability)
+            work._require(mass > 0 and step(arithmetic.abs, step(arithmetic.subtract, mass, Decimal(1))) <= tolerance,
+                "LP03_FILL_INDEPENDENT_NORMALIZATION_MASS")
+            native = step(arithmetic.divide, weighted, mass)
+            work._require(0 <= native <= maximum, "LP03_FILL_INDEPENDENT_EXPECTED_QUANTITY_BOUNDS")
+            return str(native), dict(original_mass=str(mass), weighted_quantity=str(weighted),
+                original_model_artifact_ref=artifact.artifact_id, original_quantity_support_count=len(artifact.fill_quantity_distribution),
+                original_order_quantity=str(maximum), original_horizon_seconds=artifact.horizon_seconds)
+        if math_id == "MATH-39":
+            return _evidence_independent_acknowledged_queue_v1(values, authority,
+                work=work, exact=exact, step=step, arithmetic=arithmetic)
+        if math_id == "MATH-40":
+            signed, midpoint, price = (exact(values[name]) for name in ("signed_fill_quantity", "midpoint_after_fill", "fill_price"))
+            move = step(arithmetic.subtract, midpoint, price)
+            return str(step(arithmetic.multiply, signed, move)), dict(signed_fill_quantity=str(signed), original_post_fill_price_move=str(move))
+        work._require(math_id == "MATH-45", "LP03_GATE_SELECTED_ORIGINAL_MATH")
+        edge, uncertainty, multiplier, haircut = (exact(values[name]) for name in (
+            "estimated_net_edge", "uncertainty", "z_or_quantile", "model_risk_haircut"))
+        work._require(min(uncertainty, multiplier, haircut) >= 0, "LP03_GATE_ORIGINAL_DOMAIN")
+        confidence_cost = step(arithmetic.multiply, multiplier, uncertainty)
+        guarded_edge = step(arithmetic.subtract, edge, confidence_cost)
+        net = step(arithmetic.subtract, guarded_edge, haircut)
+        positive = net > 0
+        return dict(lcb_net=str(net), trade_gate=positive), dict(uncertainty_charge=str(confidence_cost),
+            signed_net_before_model_haircut=str(guarded_edge), model_risk_haircut=str(haircut),
+            decision="POSITIVE_NET_LCB" if positive else "NONPOSITIVE_NET_LCB", no_order_authority=True)
+
+
+_LP03_ORIGINAL_PRIVATE_ANALYTIC_IDS_V1 = ("MATH-29", "MATH-30", "MATH-31", "MATH-37")
+_LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_UNITS_V1 = MappingProxyType({
+    "MATH-41": "PROBABILITY-POINT",
+    "MATH-42": "PRICE-FRACTION",
+    "MATH-43": "UTILITY-POINT",
+    "MATH-44": "RETURN-COVARIANCE",
+})
+_LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1 = tuple(_LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_UNITS_V1)
+_LP03_ORIGINAL_PRIVATE_EXECUTION_IDS_V1 = ("MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45")
+
+
+_LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1 = ("MATH-50", "MATH-51", "MATH-52")
+_LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1 = MappingProxyType({
+    "MATH-50": "TRACE-AND-ECONOMIC-MEMBER-UNITS", "MATH-51": "TRACE-AND-ECONOMIC-MEMBER-UNITS",
+    "MATH-52": "ECONOMIC-UTILITY",
+})
+
+
+def _evidence_quantum_original_lock_pins_v1(pins, *, basis=None):
+    """Validate bounded immutable lock data used by the original trace and alternatives."""
+    _native_require(isinstance(pins, Mapping) and set(pins) == {"scenario_set_ref", "source_epoch_pairs"},
+        "LP03_QUANTUM_ORIGINAL_LOCK_PIN_FIELDS")
+    _native_ident(pins["scenario_set_ref"])
+    epoch_pairs = pins["source_epoch_pairs"]
+    _native_require(type(epoch_pairs) is tuple and 0 < len(epoch_pairs) <= 256,
+        "LP03_QUANTUM_ORIGINAL_LOCK_EPOCH_LAYOUT")
+    for pair in epoch_pairs:
+        _native_require(type(pair) is tuple and len(pair) == 2, "LP03_QUANTUM_ORIGINAL_LOCK_EPOCH_LAYOUT")
+        _native_ident(pair[0])
+        _native_ident(pair[1])
+    records = tuple(record for record, _epoch in epoch_pairs)
+    encoded = frozenset(f"{record}={epoch}" for record, epoch in epoch_pairs)
+    _native_require(tuple(sorted(set(records))) == records and len(encoded) == len(epoch_pairs),
+        "LP03_QUANTUM_ORIGINAL_LOCK_EPOCH_LAYOUT")
+    if basis is not None:
+        actual = frozenset(basis.version_epoch_pins)
+        prefixes = tuple(record+"=" for record in records)
+        alternate = any(pin.startswith(prefixes) for pin in actual - encoded)
+        _native_require(pins["scenario_set_ref"] == basis.scenario_set_ref and encoded <= actual and not alternate,
+            "LP03_QUANTUM_ORIGINAL_LOCK_EPOCHS_AND_SCENARIO")
+    return pins
+
+
+def _evidence_quantum_source_epochs_v1(parts):
+    epochs = {}
+    for part in parts:
+        for event in part.reconstructed_canonical_events:
+            record, epoch = event["record_ref"], event["source_epoch_id"]
+            _native_require(epochs.setdefault(record, epoch) == epoch, "LP03_QUANTUM_ORIGINAL_CONFLICTING_SOURCE_EPOCH")
+    return tuple(sorted(epochs.items()))
+
+
+def _evidence_original_quantum_sources_v1(payload, *, math_id):
+    """Reconstruct the exact protected trace or three comparator alternatives."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, _native_strict_json, deterministic_json
+
+    _native_require(math_id in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1, "LP03_QUANTUM_ORIGINAL_SELECTED_MATH")
+    body = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(body, Mapping) and set(body) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and body["profile"] == "ORIGINAL_SOFTWARE_QUANTUM_INPUTS_V1" and body["math_id"] == math_id,
+        "LP03_QUANTUM_ORIGINAL_SOURCE_FIELDS")
+    decision, cutoff = body["decision_wall_ns"], body["cutoff_wall_ns"]
+    _native_require(type(decision) is type(cutoff) is int and 0 < cutoff <= decision,
+        "LP03_QUANTUM_ORIGINAL_DECISION_CUTOFF")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1[math_id].bindings
+    rows = body["source_slices"]
+    _native_require(type(rows) is tuple and len(rows) == len(bindings), "LP03_QUANTUM_ORIGINAL_SOURCE_ROSTER")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(row).encode("utf-8"), max_bytes=65536)) for row in rows)
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_QUANTUM_ORIGINAL_SOFTWARE_SOURCE")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    _native_require(len({part.original_record_refs[0] for part in parts}) ==
+        len({event["producer_receipt_id"] for event in events}) == len(parts), "LP03_QUANTUM_ORIGINAL_DISTINCT_ROLES")
+    scope, untyped = None, {}
+    for binding, event in zip(bindings, events, strict=True):
+        role = binding.producer_role
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"], event["producer_receipt_type"],
+            event["authorized_binding_ids"]) == ("LP03OriginalQuantumInputSourceV1",
+                f"LP03::{math_id}::ORIGINAL_INPUT_SOURCE_V1", "1.0", f"LP03::{math_id}::ORIGINAL_INPUT_RECEIPT_V1", (binding.binding_id,))
+            and (event["owner_id"], event["source_state_and_claim_lineage"]) ==
+                ("ORIGINAL-SOFTWARE-QUANTUM-OWNER::"+role, f"LP03::{math_id}::ORIGINAL_QUANTUM_INPUT::{role}"),
+            "LP03_QUANTUM_ORIGINAL_SOURCE_OWNER_AND_SCHEMA")
+        packed = event["values"]
+        _native_require(set(packed) == {binding.input_name, "original_quantum_context"},
+            "LP03_QUANTUM_ORIGINAL_EXACT_SOURCE_VALUES")
+        metadata = packed["original_quantum_context"]
+        _native_require(isinstance(metadata, Mapping) and set(metadata) == {
+            "binding_id", "producer_role", "basis_requirement", "origin_profile", "original_lock_id",
+            "economic_basis", "source_trace_or_comparator_ref"}
+            and (metadata["binding_id"], metadata["producer_role"], metadata["basis_requirement"], metadata["origin_profile"])
+            == (binding.binding_id, role, binding.unit_or_basis_requirement, "PREEXISTING_SYNTHETIC_TRACE_CONFORMANCE"),
+            "LP03_QUANTUM_ORIGINAL_ROLE_AND_ORIGIN")
+        _native_ident(metadata["original_lock_id"])
+        _native_ident(metadata["source_trace_or_comparator_ref"])
+        if scope is None:
+            scope = (metadata["original_lock_id"], metadata["economic_basis"])
+        clocks = event["native_clocks"]
+        _native_require((metadata["original_lock_id"], metadata["economic_basis"]) == scope
+            and all(event[key] == events[0][key] for key in ("context_id", "scope", "source_epoch_id", "input_version"))
+            and clocks["as_of_time"] == decision
+            and 0 < clocks["effective_time"] <= clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+            <= clocks["processed_time"] <= cutoff and 0 <= decision-clocks["observed_time"] <= event["ttl_ns"],
+            "LP03_QUANTUM_ORIGINAL_SCOPE_AND_NATIVE_CLOCKS")
+        text = packed[binding.input_name]
+        _native_require(type(text) is str, "LP03_QUANTUM_ORIGINAL_FIELD_WIRE")
+        wire = text.encode("utf-8", "strict")
+        original = _native_strict_json(wire, max_bytes=32768, max_nodes=3072, binary64_numbers=True)
+        _native_require(deterministic_json(original) == text, "LP03_QUANTUM_ORIGINAL_CANONICAL_FIELD")
+        untyped[binding.input_name] = original
+    inputs = decode_evidence_private_inputs_v1(math_id, deterministic_json(untyped).encode("utf-8", "strict"),
+        maximum_bytes=65536, maximum_nodes=4096)
+    from .quantum_benchmark import QuantumEconomicBasisV1
+
+    lock, basis_fields = scope
+    basis = QuantumEconomicBasisV1.from_canonical_mapping(basis_fields)
+    _native_require(basis.input_lock_id == lock, "LP03_QUANTUM_ORIGINAL_ECONOMIC_BASIS_LOCK")
+    refs = tuple(event["values"]["original_quantum_context"]["source_trace_or_comparator_ref"] for event in events)
+    if math_id == "MATH-52":
+        quantum = inputs["quantum_receipt"]
+        classical = inputs["strongest_classical_receipt"]
+        no_trade = inputs["no_trade_receipt"]
+        _native_require(refs == (inputs["comparison_id"], quantum.receipt_id, classical.receipt_id, no_trade.receipt_id)
+            and inputs["comparison_id"] == f"ST12F-QUANTUM-COMPARISON::{events[0]['producer_receipt_id']}"
+            and (classical.comparator_class, no_trade.comparator_class) == ("STRONGEST_CLASSICAL", "NO_TRADE")
+            and all(receipt.comparison_basis == basis for receipt in (quantum, classical, no_trade)),
+            "LP03_QUANTUM_ORIGINAL_SAME_BASIS_ALTERNATIVES")
+    else:
+        trace = inputs["trace"]
+        _native_require(refs == (trace.trace_id,) and trace.input_lock_id == lock
+            and trace.comparison_basis == trace.strongest_classical_comparator.comparison_basis ==
+                trace.no_trade_comparator.comparison_basis == basis
+            and trace.trace_complete is trace.original_model_interpret_back_valid is True,
+            "LP03_QUANTUM_ORIGINAL_TRACE_AND_ALTERNATIVES")
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+
+    coordinates = (tuple(refs[1:]) if math_id == "MATH-52" else
+        tuple(point.candidate_id for point in inputs["trace"].points) if math_id == "MATH-50" else
+        tuple(point.parameter_point_id for point in inputs["trace"].points))
+    _native_require(0 < len(coordinates) <= 128, "LP03_QUANTUM_ORIGINAL_COORDINATE_BOUND")
+    return parts, inputs, dict(original_lock_id=lock, original_economic_basis=basis, ordered_coordinate_ids=coordinates,
+        quantity_scope_ref=basis.original_formulation_id, horizon_ref=basis.ttl_policy_ref,
+        unit=_LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1[math_id], basis=EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement,
+        original_owner_ids=tuple(event["owner_id"] for event in events),
+        original_source_role_refs=refs, origin_profile="PREEXISTING_SYNTHETIC_TRACE_CONFORMANCE")
+
+
+def _evidence_original_private_input_profile_v1(math_id):
+    """Select the declared data, event and registration profile."""
+    if math_id in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1:
+        return ("ORIGINAL_SOFTWARE_QUANTUM_INPUTS_V1", "SYNTHETIC_ORIGINAL_QUANTUM_INPUT",
+            "DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1")
+    if math_id in _LP03_ORIGINAL_PRIVATE_ANALYTIC_IDS_V1:
+        return ("ORIGINAL_SOFTWARE_PRIVATE_ANALYTIC_INPUT_V1", "SYNTHETIC_PRIVATE_ANALYTIC_INPUT",
+            "DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1")
+    _native_require(math_id in _LP03_ORIGINAL_PRIVATE_EXECUTION_IDS_V1, "LP03_ORIGINAL_PRIVATE_INPUT_PROFILE")
+    if math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1:
+        return ("ORIGINAL_SOFTWARE_BINARY64_EXECUTION_INPUTS_V1", "SYNTHETIC_PRIVATE_BINARY64_EXECUTION_INPUT",
+            "DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1")
+    if math_id == "MATH-39":
+        return ("ORIGINAL_SOFTWARE_ACKNOWLEDGED_QUEUE_INPUTS_V1", "SYNTHETIC_ACKNOWLEDGED_QUEUE",
+            "DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1")
+    if math_id in ("MATH-32", "MATH-33"):
+        source = "ORIGINAL_SOFTWARE_EXECUTION_COST_INPUTS_V1"
+    elif math_id == "MATH-35":
+        source = "ORIGINAL_SOFTWARE_SIGNED_QUADRATIC_FEE_INPUTS_V1"
+    elif math_id == "MATH-36":
+        source = "ORIGINAL_SOFTWARE_DYNAMIC_BINARY_BOOK_V1"
+    elif math_id == "MATH-38":
+        source = "ORIGINAL_SOFTWARE_FILL_DISTRIBUTION_INPUT_V1"
+    else:
+        source = "ORIGINAL_SOFTWARE_EXECUTION_RISK_INPUTS_V1"
+    return source, "SYNTHETIC_PRIVATE_DECIMAL_EXECUTION_INPUT", "DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1"
+
+
+def _evidence_original_private_inputs_v1(payload, *, math_id):
+    """Decode original arguments within their exact selected source schema."""
+    if math_id in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1:
+        return _evidence_original_quantum_sources_v1(payload, math_id=math_id)
+    if math_id in _LP03_ORIGINAL_PRIVATE_ANALYTIC_IDS_V1:
+        return _evidence_analytic_private_sources_v1(payload, math_id=math_id)
+    if math_id == "MATH-39":
+        from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+        parts, resolution = _evidence_math39_queue_source_data_v1(payload)
+        book, ack = (part.reconstructed_canonical_events[0] for part in parts)
+        authority = dict(original_book_events=book["values"]["book.sequenced_book_events"],
+            original_acknowledgement=ack["values"]["execution.order_ack"])
+        order = authority["original_acknowledgement"]["order_id"]
+        return parts, resolution.authoritative_values, dict(quantity_scope_ref=order,
+            horizon_ref=book["producer_receipt_id"], ordered_coordinate_ids=(order,), unit="units",
+            basis=EVIDENCE_PROJECTION_CONTRACTS_V1[math_id].basis_requirement,
+            exact_original_authority=authority)
+    return _evidence_original_decimal_execution_data_v1(payload, math_id=math_id)
+
+
+def _evidence_original_execution_source_material_digest_v1(source, parts):
+    """Join registered source identities while allowing later access times."""
+    from hashlib import sha256
+    from .serialization import deterministic_json
+
+    material = dict(decision_wall_ns=source["decision_wall_ns"], cutoff_wall_ns=source["cutoff_wall_ns"],
+        sources=tuple(dict(original_record_refs=part.original_record_refs,
+            reconstructed_canonical_events=part.reconstructed_canonical_events,
+            original_native_clock_companions=part.original_native_clock_companions, origin=part.origin,
+            rights_refs=part.rights_refs, revision_limitations=part.revision_limitations) for part in parts))
+    return sha256(deterministic_json(material).encode("utf-8","strict")).hexdigest()
+
+
+def _evidence_math39_queue_source_data_v1(payload):
+    """Decode the two original queue source slices in public binding order."""
+    from .input_resolver import _evidence_math39_original_source_resolution_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    data = _evidence_frozen_data_v1(payload)
+    _native_require(type(data) is MappingProxyType and set(data) == {
+        "profile", "math_id", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and (data["profile"], data["math_id"]) == ("ORIGINAL_SOFTWARE_ACKNOWLEDGED_QUEUE_INPUTS_V1","MATH-39")
+        and type(data["source_slices"]) is tuple and len(data["source_slices"]) == 2,
+        "LP03_QUEUE_ORIGINAL_SOURCE_DATA")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(
+        _evidence_canonical_object_v1(deterministic_json(item).encode("utf-8", "strict"), max_bytes=65536))
+        for item in data["source_slices"])
+    resolved = _evidence_math39_original_source_resolution_v1(parts, decision_ns=data["decision_wall_ns"],
+        cutoff_ns=data["cutoff_wall_ns"])
+    return parts, resolved
+
+
+def _evidence_normalized_event_v1(value):
+    """Selected synthetic source event; native LP02 normalization stays separate."""
+    from .serialization import _evidence_frozen_data_v1
+    _native_require(isinstance(value, Mapping) and set(value) == {
+        "event_id", "kind", "origin", "source_record_ref", "availability_wall_ns", "effective_wall_ns",
+        "provider_order_or_absence", "source_revision", "connection_epoch", "local_ordinal", "payload"},
+        "LP03_NORMALIZED_EVENT_FIELDS")
+    for name in ("event_id", "connection_epoch"):
+        _native_ident(value[name])
+    _native_require(type(value["kind"]) is str and value["kind"] in (
+                        "SYNTHETIC_BOOK_SNAPSHOT", "SYNTHETIC_FORECAST_EVALUATION_BATCH", "SYNTHETIC_LOG_LOSS_EVALUATION_BATCH", "SYNTHETIC_BERNOULLI_COUNT_BATCH", "SYNTHETIC_STATIONARY_BOOTSTRAP_BATCH", "SYNTHETIC_RECORDED_DR_UNCERTAINTY", "SYNTHETIC_RECORDED_OPE_POINT", "SYNTHETIC_ACKNOWLEDGED_QUEUE", "SYNTHETIC_ORIGINAL_QUANTUM_INPUT", "SYNTHETIC_PRIVATE_ANALYTIC_INPUT", "SYNTHETIC_PRIVATE_DECIMAL_EXECUTION_INPUT", "SYNTHETIC_PRIVATE_BINARY64_EXECUTION_INPUT", "SYNTHETIC_HELD_OUT_FOLD_SCORING", "SYNTHETIC_CSCV_MATRIX_AND_GROUP_POLICY", "SYNTHETIC_SHARPE_LEDGER_AND_MOMENTS", "SYNTHETIC_SPA_BATCH", "SYNTHETIC_REALITY_CHECK_BATCH", "SYNTHETIC_CALIBRATION_EVALUATION_BATCH", "SYNTHETIC_MULTIPLE_TESTING_BATCH", "SYNTHETIC_RESEARCH_DECISION",
+                        "SYNTHETIC_MARKET_PRICE_CONTEXT", "SYNTHETIC_SIGNED_TOTAL_CASHFLOW_CONTEXT", "SYNTHETIC_KELLY_PROBABILITY_PAYOFF_CONTEXT", "SYNTHETIC_FRACTIONAL_KELLY_CONTEXT", "SYNTHETIC_SAME_SNAPSHOT_PROBABILITY_EDGE")
+                    and value["origin"] == "SOFTWARE_CONFORMANCE",
+                    "LP03_NORMALIZED_EVENT_PROFILE_UNAVAILABLE")
+    ref = value["source_record_ref"]
+    _native_require(isinstance(ref, Mapping) and set(ref) == {"store_id", "record_id"}, "LP03_NORMALIZED_EVENT_SOURCE_REF")
+    _native_ident(ref["store_id"])
+    _native_ident(ref["record_id"])
+    for name in ("availability_wall_ns", "effective_wall_ns", "local_ordinal"):
+        _public_counter_v1(value[name], allow_zero=True)
+    if value["kind"] in ("SYNTHETIC_FORECAST_EVALUATION_BATCH", "SYNTHETIC_LOG_LOSS_EVALUATION_BATCH", "SYNTHETIC_BERNOULLI_COUNT_BATCH", "SYNTHETIC_STATIONARY_BOOTSTRAP_BATCH", "SYNTHETIC_RECORDED_DR_UNCERTAINTY", "SYNTHETIC_RECORDED_OPE_POINT", "SYNTHETIC_ACKNOWLEDGED_QUEUE", "SYNTHETIC_ORIGINAL_QUANTUM_INPUT", "SYNTHETIC_PRIVATE_ANALYTIC_INPUT", "SYNTHETIC_PRIVATE_DECIMAL_EXECUTION_INPUT", "SYNTHETIC_PRIVATE_BINARY64_EXECUTION_INPUT", "SYNTHETIC_HELD_OUT_FOLD_SCORING", "SYNTHETIC_CSCV_MATRIX_AND_GROUP_POLICY", "SYNTHETIC_SHARPE_LEDGER_AND_MOMENTS", "SYNTHETIC_SPA_BATCH", "SYNTHETIC_REALITY_CHECK_BATCH", "SYNTHETIC_CALIBRATION_EVALUATION_BATCH", "SYNTHETIC_MULTIPLE_TESTING_BATCH", "SYNTHETIC_RESEARCH_DECISION", "SYNTHETIC_MARKET_PRICE_CONTEXT", "SYNTHETIC_SIGNED_TOTAL_CASHFLOW_CONTEXT",
+                         "SYNTHETIC_KELLY_PROBABILITY_PAYOFF_CONTEXT", "SYNTHETIC_FRACTIONAL_KELLY_CONTEXT", "SYNTHETIC_SAME_SNAPSHOT_PROBABILITY_EDGE"):
+        frozen = _evidence_frozen_data_v1(value)
+        edge = value["kind"] == "SYNTHETIC_SAME_SNAPSHOT_PROBABILITY_EDGE"
+        multiple = value["kind"] == "SYNTHETIC_MULTIPLE_TESTING_BATCH"
+        calibration = value["kind"] == "SYNTHETIC_CALIBRATION_EVALUATION_BATCH"
+        held_out = value["kind"] == "SYNTHETIC_HELD_OUT_FOLD_SCORING"
+        recorded_dr = value["kind"] == "SYNTHETIC_RECORDED_DR_UNCERTAINTY"
+        ope_point = value["kind"] == "SYNTHETIC_RECORDED_OPE_POINT"
+        analytic = value["kind"] in ("SYNTHETIC_PRIVATE_ANALYTIC_INPUT", "SYNTHETIC_PRIVATE_DECIMAL_EXECUTION_INPUT", "SYNTHETIC_PRIVATE_BINARY64_EXECUTION_INPUT")
+        pbo = value["kind"] == "SYNTHETIC_CSCV_MATRIX_AND_GROUP_POLICY"
+        sharpe = value["kind"] == "SYNTHETIC_SHARPE_LEDGER_AND_MOMENTS"
+        spa = value["kind"] == "SYNTHETIC_SPA_BATCH"
+        reality = value["kind"] == "SYNTHETIC_REALITY_CHECK_BATCH"
+        bootstrap = value["kind"] == "SYNTHETIC_STATIONARY_BOOTSTRAP_BATCH"
+        wilson = value["kind"] == "SYNTHETIC_BERNOULLI_COUNT_BATCH"
+        log_loss = value["kind"] == "SYNTHETIC_LOG_LOSS_EVALUATION_BATCH"
+        research = value["kind"] == "SYNTHETIC_RESEARCH_DECISION"
+        cashflow = value["kind"] == "SYNTHETIC_SIGNED_TOTAL_CASHFLOW_CONTEXT"
+        market = value["kind"] == "SYNTHETIC_MARKET_PRICE_CONTEXT"
+        kelly27 = value["kind"] == "SYNTHETIC_KELLY_PROBABILITY_PAYOFF_CONTEXT"
+        kelly28 = value["kind"] == "SYNTHETIC_FRACTIONAL_KELLY_CONTEXT"
+        if value["kind"] == "SYNTHETIC_ACKNOWLEDGED_QUEUE":
+            sources, _ = _evidence_math39_queue_source_data_v1(frozen["payload"])
+        elif recorded_dr:
+            payload = frozen["payload"]
+            sources = _evidence_dr_original_source_data_v1(payload,
+                original_raw_ref=payload["estimator_original_raw_ref"])[0]
+        elif value["kind"] == "SYNTHETIC_ORIGINAL_QUANTUM_INPUT":
+            payload = frozen["payload"]
+            _native_require(isinstance(payload, Mapping), "LP03_QUANTUM_ORIGINAL_EVENT_PAYLOAD")
+            sources = _evidence_original_quantum_sources_v1(payload, math_id=payload.get("math_id"))[0]
+        elif analytic:
+            payload = frozen["payload"]
+            _native_require(isinstance(payload, Mapping), "LP03_ANALYTIC_PRIVATE_SOURCE_FIELDS")
+            math_id = payload.get("math_id")
+            _, event_profile, _ = _evidence_original_private_input_profile_v1(math_id)
+            _native_require(event_profile == value["kind"], "LP03_ORIGINAL_PRIVATE_EVENT_SUBTYPE")
+            sources = _evidence_original_private_inputs_v1(payload, math_id=math_id)[0]
+        elif ope_point:
+            payload = frozen["payload"]
+            _native_require(isinstance(payload, Mapping), "LP03_OPE_ORIGINAL_POINT_SOURCE_FIELDS")
+            sources = _evidence_recorded_ope_source_data_v1(payload, math_id=payload.get("selected_math_id"))[0]
+        else:
+            sources = _evidence_heldout_source_data_v1(frozen["payload"])[0] if held_out else (
+                   _evidence_cscv_source_slices_v1 if pbo else _evidence_sharpe_source_slices_v1 if sharpe else _evidence_cashflow_source_slices_v1 if cashflow else _evidence_probability_edge_chain_sources_v1 if edge else _evidence_kelly28_source_slices_v1 if kelly28 else _evidence_kelly27_source_slices_v1 if kelly27 else _evidence_market_source_slices_v1 if market else
+                   _evidence_research_source_slices_v1 if research else _evidence_multiple_testing_source_slices_v1 if multiple else _evidence_calibration_source_slices_v1 if calibration else _evidence_spa_source_slices_v1 if spa else _evidence_reality_check_source_slices_v1 if reality else _evidence_bootstrap_source_slices_v1 if bootstrap else _evidence_wilson_source_slices_v1 if wilson else _evidence_log_loss_source_slices_v1 if log_loss else _evidence_forecast_source_slices_v1)(frozen["payload"])
+        events = tuple(part.reconstructed_canonical_events[0] for part in sources)
+        anchor = sources[0].original_record_refs[0]
+        available = max(event["native_clocks"]["available_time"] for event in events)
+        if multiple or reality or spa or sharpe or pbo:
+            available = max(available, events[0]["values"]["material_trial_ledger"]["publication_visibility_wall_ns"])
+        elif analytic and math_id == "MATH-41":
+            fact = events[0]["values"]["original_execution_context"]["original_fact"]
+            available = max(available, fact["bridge_visibility_observation"][0])
+        _native_require(dict(frozen["source_record_ref"]) == dict(store_id=anchor.store_id, record_id=anchor.record_id)
+                        and frozen["availability_wall_ns"] == available
+                        and frozen["effective_wall_ns"] == max(event["native_clocks"]["effective_time"] for event in events)
+                        and frozen["connection_epoch"] == events[0]["source_epoch_id"]
+                        and type(frozen["source_revision"]) is type(events[0]["revision"])
+                        and frozen["source_revision"] == events[0]["revision"]
+                        and frozen["provider_order_or_absence"] == {
+                            "state": "ABSENT_WITH_REASON", "reason": "NO_AGGREGATE_PROVIDER_ORDER"},
+                        "LP03_QUEUE_ORIGINAL_CONTEXT_SUMMARY_JOIN" if value["kind"] == "SYNTHETIC_ACKNOWLEDGED_QUEUE" else
+                        "LP03_DR_ORIGINAL_CONTEXT_SUMMARY_JOIN" if recorded_dr else
+                        "LP03_QUANTUM_ORIGINAL_EVENT_JOIN" if value["kind"] == "SYNTHETIC_ORIGINAL_QUANTUM_INPUT" else "LP03_OPE_POINT_ORIGINAL_EVENT_JOIN" if ope_point else "LP03_ANALYTIC_PRIVATE_EVENT_JOIN" if analytic else "LP03_FOLD_CONTEXT_SUMMARY_JOIN" if held_out else "LP03_CSCV_CONTEXT_SUMMARY_JOIN" if pbo else "LP03_SHARPE_CONTEXT_SUMMARY_JOIN" if sharpe else "LP03_CASHFLOW_CONTEXT_SUMMARY_JOIN" if cashflow else "LP03_EDGE_CHAIN_CONTEXT_SUMMARY_JOIN" if edge else "LP03_KELLY28_CONTEXT_SUMMARY_JOIN" if kelly28 else "LP03_KELLY27_CONTEXT_SUMMARY_JOIN" if kelly27 else "LP03_MARKET_CONTEXT_SUMMARY_JOIN" if market else
+                        "LP03_RESEARCH_DECISION_SUMMARY_JOIN" if research else "LP03_MULTIPLE_BATCH_SUMMARY_JOIN" if multiple else "LP03_CALIBRATION_BATCH_SUMMARY_JOIN" if calibration else "LP03_SPA_BATCH_SUMMARY_JOIN" if spa else "LP03_REALITY_BATCH_SUMMARY_JOIN" if reality else "LP03_BOOTSTRAP_BATCH_SUMMARY_JOIN" if bootstrap else "LP03_WILSON_BATCH_SUMMARY_JOIN" if wilson else "LP03_LOG_LOSS_BATCH_SUMMARY_JOIN" if log_loss else "LP03_FORECAST_BATCH_SUMMARY_JOIN")
+        return frozen
+    _public_counter_v1(value["source_revision"], allow_zero=True)
+    order = value["provider_order_or_absence"]
+    if isinstance(order, Mapping):
+        _native_require(set(order) == {"state", "reason"} and order["state"] == "ABSENT_WITH_REASON"
+                        and order["reason"] == "ORIGINAL_PROVIDER_SEQUENCE_ABSENT", "LP03_NORMALIZED_EVENT_ORDER_ABSENCE")
+    else:
+        _public_counter_v1(order, allow_zero=True)
+    _native_require(isinstance(value["payload"], Mapping), "LP03_NORMALIZED_EVENT_PAYLOAD")
+    return _evidence_frozen_data_v1(value)
+
+
+_LP03_MARKET_METRIC_PROFILES_V1 = MappingProxyType({
+    "MATH-01": ("p_market", "$", "probability", "PAYOUT_NORMALIZED_CONTRACT_PRICE", "PAYOUT_NORMALIZED_MARKET_PROBABILITY"),
+    "MATH-04": ("spread", "$", "CURRENCY_PER_CONTRACT", "SAME_INSTRUMENT_SAME_SNAPSHOT_FULL_ASK_MINUS_BID", "FULL_SPREAD"),
+    "MATH-05": ("relative_spread", "relative_spread_ratio", "ratio", "SAME_INSTRUMENT_SAME_SNAPSHOT_FULL_SPREAD_OVER_MIDPOINT", "RELATIVE_SPREAD"),
+})
+
+
+def _evidence_cashflow_source_slices_v1(payload):
+    """Exact single-binding source packets; decoded data supplies no authority."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1,_evidence_frozen_data_v1,deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(type(frozen) is MappingProxyType and set(frozen) == {"association_profile","math_id","source_slices"}
+        and frozen["association_profile"] == "ORIGINAL_SOFTWARE_SIGNED_TOTAL_CASHFLOW_CONTEXT"
+        and type(frozen["math_id"]) is str and frozen["math_id"] in ("MATH-06","MATH-07")
+        and type(frozen["source_slices"]) is tuple,"LP03_CASHFLOW_SOURCE_ROSTER")
+    math_id = frozen["math_id"]
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(len(frozen["source_slices"]) == len(bindings) == (17 if math_id == "MATH-06" else 16),
+        "LP03_CASHFLOW_SOURCE_ROSTER")
+    context_fields = {"profile","input_snapshot_ref","event_ref","instrument_ref","horizon_ref","horizon_end_wall_ns",
+        "currency","cashflow_basis","account_basis","account_context_ref","outcome_ids","ordered_outcome_roles",
+        "empirical_evidence_bundle"}
+    result,events,contexts,inputs = [],[],[],{}
+    for body,binding in zip(frozen["source_slices"],bindings,strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"),max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_CASHFLOW_SINGLE_BINDING_SOURCE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"],event["record_kind"],event["schema_id"],event["schema_version"],
+            event["producer_receipt_type"],event["source_state_and_claim_lineage"]) ==
+            (binding.accepted_upstream_owner_id,binding.accepted_packet_or_snapshot_type,binding.schema_id,
+             binding.schema_version,binding.producer_receipt_type,binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and set(event["values"]) == {binding.exact_field_path,"cashflow_context"}
+            and type(event["revision"]) in (int,str),"LP03_CASHFLOW_ORIGINAL_BINDING_SOURCE_JOIN")
+        value = event["values"][binding.exact_field_path]
+        if binding.input_name in ("outcome_ids","outcome_probabilities","outcome_terminal_cashflow_totals"):
+            _native_require(type(value) is tuple and 2 <= len(value) <= 4096
+                and all(type(item) is str and 0 < len(item) <= 4096 for item in value),
+                "LP03_CASHFLOW_ORIGINAL_VECTOR_TEXT")
+        else:
+            _native_require(type(value) is str and 0 < len(value) <= 4096,"LP03_CASHFLOW_ORIGINAL_SCALAR_TEXT")
+        context = event["values"]["cashflow_context"]
+        _native_require(type(context) is MappingProxyType and set(context) == context_fields
+            and context["profile"] == "SOFTWARE_ORIGINAL_SIGNED_TOTAL_CASHFLOW_CONTEXT_V1"
+            and context["cashflow_basis"] == "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE"
+            and context["account_basis"] == "SYNTHETIC_TOTAL_ACCOUNT_NO_CASH_MOVEMENT",
+            "LP03_CASHFLOW_ORIGINAL_CONTEXT_PROFILE")
+        for name in ("input_snapshot_ref","event_ref","instrument_ref","horizon_ref","account_context_ref"):
+            _native_ident(context[name])
+        currency = context["currency"]
+        _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+            and currency.isalpha() and currency.isupper(),"LP03_CASHFLOW_ORIGINAL_CURRENCY")
+        _public_counter_v1(context["horizon_end_wall_ns"])
+        _native_require(event["native_clocks"]["as_of_time"] < context["horizon_end_wall_ns"]
+            and context["input_snapshot_ref"] == event["scope"]["input_snapshot_id"]
+            and context["event_ref"] == event["scope"]["event_scope_id"]
+            and context["instrument_ref"] == event["scope"]["instrument_or_contract_scope_id"],
+            "LP03_CASHFLOW_ORIGINAL_SCOPE_HORIZON")
+        _native_require(type(context["outcome_ids"]) is tuple and 2 <= len(context["outcome_ids"]) <= 4096
+            and all(type(item) is str and bool(item) for item in context["outcome_ids"])
+            and len(set(context["outcome_ids"])) == len(context["outcome_ids"]),
+            "LP03_CASHFLOW_ORIGINAL_OUTCOME_IDENTITIES")
+        for identity in context["outcome_ids"]:
+            _native_ident(identity)
+        _native_require(context["ordered_outcome_roles"] == (("WIN","LOSE","VOID") if math_id == "MATH-06"
+            else ("DECLARED_OUTCOME_ORDER",))
+            and (len(context["outcome_ids"]) == 3 if math_id == "MATH-06" else True),
+            "LP03_CASHFLOW_ORIGINAL_OUTCOME_ORIENTATION")
+        absence = context["empirical_evidence_bundle"]
+        _native_require(type(absence) is MappingProxyType and dict(absence) == {
+            "state":"ABSENT_WITH_REASON","reason":"NO_EMPIRICAL_MODEL_FEE_OR_ACCOUNT_BUNDLE_IN_SOFTWARE_FIXTURE"},
+            "LP03_CASHFLOW_EMPIRICAL_BUNDLE_ABSENCE")
+        result.append(part);events.append(event);contexts.append(context);inputs[binding.input_name]=value
+    _native_require(len(set(part.original_record_refs[0] for part in result)) == len(result)
+        and len({event["record_ref"] for event in events}) == len(events)
+        and len({event["producer_receipt_id"] for event in events}) == len(events)
+        and all(all(type(event[name]) is type(events[0][name])
+            and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for name in ("context_id","scope","source_epoch_id","input_version")) for event in events[1:])
+        and all(event["native_clocks"]["as_of_time"] == events[0]["native_clocks"]["as_of_time"] for event in events[1:])
+        and all(deterministic_json(context) == deterministic_json(contexts[0]) for context in contexts[1:]),
+        "LP03_CASHFLOW_ORIGINAL_CONTEXT_JOIN")
+    _native_require(inputs["cashflow_basis"] == contexts[0]["cashflow_basis"],"LP03_CASHFLOW_ORIGINAL_BASIS_JOIN")
+    if math_id == "MATH-07":
+        _native_require(inputs["outcome_ids"] == contexts[0]["outcome_ids"]
+            and len(inputs["outcome_probabilities"]) == len(inputs["outcome_terminal_cashflow_totals"]) == len(inputs["outcome_ids"]),
+            "LP03_CASHFLOW_ORIGINAL_OUTCOME_VECTOR_JOIN")
+    return tuple(result)
+
+
+def _evidence_market_source_slices_v1(payload):
+    """Closed original market/payout data; decoded slices confer no custody.
+
+    Each binding retains its own rights, six clocks and original reference.
+    The market sources must describe one identical book (or price), and the
+    payout source must name the same instrument, snapshot and currency.
+    """
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {"association_profile", "math_id", "source_slices"}
+                    and frozen["association_profile"] == "SHARED_ORIGINAL_MARKET_AND_PAYOUT_CONTEXT"
+                    and type(frozen["math_id"]) is str and frozen["math_id"] in ("MATH-01", "MATH-04", "MATH-05")
+                    and type(frozen["source_slices"]) is tuple, "LP03_MARKET_SOURCE_ROSTER")
+    math_id = frozen["math_id"]
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(len(frozen["source_slices"]) == len(bindings) == (2 if math_id == "MATH-01" else 5),
+                    "LP03_MARKET_SOURCE_ROSTER")
+    result, events, books, currencies = [], [], [], []
+    for body, binding in zip(frozen["source_slices"], bindings):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+                        "LP03_MARKET_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+                         event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+                        == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                            binding.schema_id, binding.schema_version, binding.producer_receipt_type,
+                            binding.source_state_and_claim_lineage)
+                        and event["authorized_binding_ids"] == (binding.binding_id,)
+                        and type(event["revision"]) in (int, str), "LP03_MARKET_BINDING_SOURCE_JOIN")
+        book = binding.accepted_upstream_owner_id == "SelectedVenuePublicMarketDataOwnerV1"
+        root = "market_state" if book else "contract_semantics"
+        payout_name = "payout_per_winning_contract" if math_id == "MATH-01" else "payout"
+        names = ({"contract_price", "currency"} if math_id == "MATH-01" else
+                 {"best_bid", "best_ask", "same_instrument_snapshot", "snapshot_state", "currency"}) if book else {payout_name, "currency"}
+        _native_require(set(event["values"]) == {root} and type(event["values"][root]) is MappingProxyType
+                        and set(event["values"][root]) == names, "LP03_MARKET_SOURCE_VALUE_FIELDS")
+        values = event["values"][root]
+        currency = values["currency"]
+        _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+                        and currency.isalpha() and currency.isupper(), "LP03_MARKET_ORIGINAL_CURRENCY")
+        for name in names - {"currency", "same_instrument_snapshot", "snapshot_state"}:
+            # Numerical parsing and domain admission belong to the original
+            # preregistration work. This data decoder preserves exact text.
+            _native_require(type(values[name]) is str and 0 < len(values[name]) <= 4096,
+                            "LP03_MARKET_ORIGINAL_FINANCIAL_TEXT")
+        if book:
+            if math_id != "MATH-01":
+                _native_require(values["same_instrument_snapshot"] is True
+                                and values["snapshot_state"] == "CURRENT_CONTIGUOUS_BOOK", "LP03_MARKET_BOOK_STATE")
+            books.append(event)
+        result.append(part)
+        events.append(event)
+        currencies.append(currency)
+    _native_require(len(set(part.original_record_refs[0] for part in result)) == len(result)
+                    and len({event["record_ref"] for event in events}) == len(events)
+                    and len({event["producer_receipt_id"] for event in events}) == len(events)
+                    and len(set(currencies)) == 1
+                    and all(all(type(event[name]) is type(events[0][name])
+                                and deterministic_json(event[name]) == deterministic_json(events[0][name])
+                                for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision"))
+                            for event in events[1:])
+                    and all(all(deterministic_json(event[name]) == deterministic_json(books[0][name])
+                                for name in ("values", "native_clocks", "provider_sequence")) for event in books[1:]),
+                    "LP03_MARKET_ORIGINAL_CONTEXT_JOIN")
+    return tuple(result)
+
+
+def _evidence_kelly27_context_v1(context, *, binding, original_refs, producer_receipt_id, instrument_ref, event_ref):
+    """Closed M27 source metadata, not calibration or capital-use authority."""
+    names = {"profile", "binding_id", "producer_role", "sizing_decision_ref", "probability_event_ref",
+             "calibration_source_ref", "payoff_source_ref", "risk_capital_basis_ref", "risk_capital_currency",
+             "instrument_ref", "horizon_ref", "payoff_basis", "original_resolution_receipt_ref"}
+    _native_require(type(context) is MappingProxyType and set(context) == names,
+                    "LP03_KELLY27_SOURCE_CONTEXT_FIELDS")
+    for name in names - {"calibration_source_ref", "payoff_source_ref"}:
+        _native_ident(context[name])
+    _native_require(context["profile"] == "LP03_MATH27_ORIGINAL_PROBABILITY_PAYOFF_INPUT_V1"
+                    and context["binding_id"] == binding.binding_id and context["producer_role"] == binding.producer_role
+                    and context["original_resolution_receipt_ref"] == producer_receipt_id
+                    and context["instrument_ref"] == instrument_ref
+                    and context["probability_event_ref"] == event_ref
+                    and context["payoff_basis"] == "NET_ODDS_PER_UNIT_AT_RISK",
+                    "LP03_KELLY27_SOURCE_CONTEXT_PROFILE")
+    currency = context["risk_capital_currency"]
+    _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+                    and currency.isalpha() and currency.isupper(), "LP03_KELLY27_ORIGINAL_CURRENCY")
+    for name, ref in zip(("calibration_source_ref", "payoff_source_ref"), original_refs, strict=True):
+        value = context[name]
+        _native_require(type(value) is MappingProxyType and set(value) == {"store_id", "record_id"}
+                        and EvidenceRecordRefV1(value["store_id"], value["record_id"]) == ref,
+                        "LP03_KELLY27_ORIGINAL_SOURCE_REF")
+    return context
+
+
+def _evidence_kelly27_source_slices_v1(payload):
+    """Preserve both original M27 source packets and their separate clocks."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {"association_profile", "source_slices"}
+                    and frozen["association_profile"] == "SHARED_ORIGINAL_KELLY_PROBABILITY_PAYOFF_CONTEXT"
+                    and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 2,
+                    "LP03_KELLY27_SOURCE_ROSTER")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1["MATH-27"].bindings
+    _native_require(tuple(binding.input_name for binding in bindings) == ("win_probability", "net_odds"),
+                    "LP03_KELLY27_BINDING_ORDER")
+    result, events = [], []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+                        "LP03_KELLY27_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"],
+                         event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+                        == ("LP03OriginalPrivateInputSourceV1", "LP03::MATH-27::ORIGINAL_INPUT_SOURCE_V1", "1.0",
+                            "LP03_MATH27_ORIGINAL_INPUT_RECEIPT_V1", "LP03::MATH-27::ORIGINAL_INPUT::" + binding.producer_role)
+                        and event["authorized_binding_ids"] == (binding.binding_id,)
+                        and set(event["values"]) == {binding.input_name, "private_source_context"}
+                        and type(event["revision"]) in (int, str), "LP03_KELLY27_BINDING_SOURCE_JOIN")
+        text = event["values"][binding.input_name]
+        _native_require(type(text) is str and 0 < len(text) <= 4096, "LP03_KELLY27_ORIGINAL_FINANCIAL_TEXT")
+        result.append(part)
+        events.append(event)
+    refs = tuple(part.original_record_refs[0] for part in result)
+    contexts = tuple(_evidence_kelly27_context_v1(event["values"]["private_source_context"], binding=binding,
+        original_refs=refs, producer_receipt_id=event["producer_receipt_id"],
+        instrument_ref=event["scope"]["instrument_or_contract_scope_id"], event_ref=event["scope"]["event_scope_id"])
+        for event, binding in zip(events, bindings, strict=True))
+    shared = set(contexts[0]) - {"binding_id", "producer_role", "original_resolution_receipt_ref"}
+    _native_require(len(set(refs)) == len({event["record_ref"] for event in events})
+                    == len({event["producer_receipt_id"] for event in events}) == 2
+                    and all(all(type(event[name]) is type(events[0][name])
+                                and deterministic_json(event[name]) == deterministic_json(events[0][name])
+                                for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision"))
+                            for event in events[1:])
+                    and all(all(type(context[name]) is type(contexts[0][name])
+                                and deterministic_json(context[name]) == deterministic_json(contexts[0][name]) for name in shared)
+                            for context in contexts[1:]), "LP03_KELLY27_ORIGINAL_CONTEXT_JOIN")
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _encode_evidence_projection_json_v1
+    native = {binding.input_name: event["values"][binding.input_name] for binding, event in zip(bindings, events, strict=True)}
+    wire = _encode_evidence_projection_json_v1(native, maximum_bytes=65536, maximum_nodes=4096)
+    decode_evidence_private_inputs_v1("MATH-27", wire, maximum_bytes=65536, maximum_nodes=4096)
+    return tuple(result)
+
+
+def _evidence_kelly28_source_slices_v1(payload):
+    """Closed M28 data join; original producer/read authority stays external."""
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(type(frozen) is MappingProxyType and set(frozen) == {
+        "association_profile", "source_slice_jsons", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns"}
+        and frozen["association_profile"] == "ORIGINAL_PUBLISHED_KELLY_AND_CURRENT_CONSTRAINTS"
+        and type(frozen["source_slice_jsons"]) is tuple and len(frozen["source_slice_jsons"]) == 3,
+        "LP03_KELLY28_SOURCE_ROSTER")
+    decision, cutoff = frozen["consumer_decision_wall_ns"], frozen["consumer_cutoff_wall_ns"]
+    _public_counter_v1(decision, allow_zero=False)
+    _public_counter_v1(cutoff, allow_zero=False)
+    _native_require(cutoff <= decision, "LP03_KELLY28_CONSUMER_CUTOFF")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1["MATH-28"].bindings
+    _native_require(tuple(binding.input_name for binding in bindings) == (
+        "full_kelly_fraction", "fraction_multiplier", "risk_caps"), "LP03_KELLY28_BINDING_ORDER")
+    texts = frozen["source_slice_jsons"]
+    _native_require(all(type(text) is str and 0 < len(text) <= 65536 for text in texts),
+                    "LP03_KELLY28_ORIGINAL_SOURCE_TEXT_BOUND")
+    parts = tuple(EvidenceSourceSliceV1.from_canonical_mapping(_evidence_canonical_object_v1(
+        text.encode("utf-8"), max_bytes=65536)) for text in texts)
+    _native_require(all(deterministic_json(part) == text for part, text in zip(parts, texts, strict=True)),
+                    "LP03_KELLY28_ORIGINAL_SOURCE_CANONICAL_TEXT")
+    _native_require(all(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1 for part in parts),
+        "LP03_KELLY28_SINGLE_SOURCE_SLICE")
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    refs = tuple(part.original_record_refs[0] for part in parts)
+    _native_require(len(set(refs)) == len({event["record_ref"] for event in events})
+        == len({event["producer_receipt_id"] for event in events}) == 3
+        and all(event["context_id"] == events[0]["context_id"] and event["scope"] == events[0]["scope"]
+                for event in events), "LP03_KELLY28_ORIGINAL_CONTEXT_JOIN")
+
+    def temporal(event):
+        clocks = event["native_clocks"]
+        _native_require(max(clocks.values()) <= decision and clocks["available_time"] <= cutoff
+            and clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+                <= clocks["processed_time"] <= clocks["as_of_time"]
+            and 0 <= decision - clocks["observed_time"] <= event["ttl_ns"],
+            "LP03_KELLY28_ORIGINAL_HISTORICAL_PIT_OR_TTL")
+        prior = event["prior_revision_available_wall_ns_or_absence"]
+        _native_require(isinstance(prior, Mapping) or type(prior) is int
+            and prior <= clocks["available_time"] <= cutoff, "LP03_KELLY28_ORIGINAL_REVISION_CUTOFF")
+    for event, binding in zip(events, bindings, strict=True):
+        _native_require(event["authorized_binding_ids"] == (binding.binding_id,)
+            and event["source_conflict"] is False and type(event["revision"]) in (int, str),
+            "LP03_KELLY28_BINDING_SOURCE_JOIN")
+        temporal(event)
+    produced = events[0]
+    _native_require((produced["record_kind"], produced["schema_id"], produced["schema_version"],
+        produced["producer_receipt_type"], produced["source_state_and_claim_lineage"])
+        == ("LP03PublishedKellySourceV1", "LP03::MATH-27::PUBLISHED_RAW_SOURCE_V1", "1.0",
+            "LP03_MATH27_PUBLISHED_RAW_RECEIPT_V1", "LP03::MATH-27::ORIGINAL_PUBLISHED_RAW_RESULT")
+        and produced["owner_id"] == "QKU_COMPUTATION_CONTROL_PLANE.MATH-27"
+        and set(produced["values"]) == {"full_kelly_fraction", "published_source_context"},
+        "LP03_KELLY28_ORIGINAL_PUBLISHED_SCHEMA")
+    context = produced["values"]["published_source_context"]
+    fields = {"binding_id", "boot_identity_ref", "bridge_visibility_observation", "clock_domain_id",
+        "collection_complete_ref", "completion_observation", "data_commit_observation", "data_readback_observation",
+        "finalization_readback_observation", "input_lock_ref", "invocation_contract", "lane_registration_ref",
+        "original_fence_ref", "original_grant_ref", "original_input_json", "original_raw_output_json",
+        "original_raw_record_json", "original_source_payload", "process_identity_ref", "producer_lane",
+        "producer_role", "profile", "publication_availability_observation", "publication_available_wall_ns",
+        "publication_commit_observation", "publication_readback_observation", "publication_record_json"}
+    _native_require(type(context) is MappingProxyType and set(context) == fields
+        and context["profile"] == "LP03_PUBLISHED_MATH27_RAW_SOURCE_V1"
+        and context["producer_role"] == bindings[0].producer_role
+        and context["binding_id"] == bindings[0].binding_id and context["producer_lane"] == "REPLAY",
+        "LP03_KELLY28_ORIGINAL_PUBLISHED_CONTEXT")
+    observations = tuple(context[name] for name in ("data_commit_observation", "data_readback_observation",
+        "publication_commit_observation", "publication_readback_observation", "finalization_readback_observation",
+        "completion_observation", "bridge_visibility_observation"))
+    _native_require(all(type(row) is tuple and len(row) == (4 if index in (1, 3, 4) else 3)
+        and all(type(value) is int and value >= 0 for value in row[:3]) for index, row in enumerate(observations))
+        and all(all(right[index] >= left[index] for index in (0, 1, 2))
+            for left, right in zip(observations, observations[1:]))
+        and observations[-1][0] <= cutoff <= decision,
+        "LP03_KELLY28_ORIGINAL_PUBLICATION_ORDER")
+    counter_names = ("record_reads", "read_bytes", "owner_queries", "query_result_records", "control_writes",
+                     "control_bytes", "cpu_ns", "wall_ns")
+    counters = tuple(observations[index][3] for index in (1, 3, 4))
+    _native_require(all(type(rows) is tuple and len(rows) == len(counter_names)
+        and all(type(row) is tuple and len(row) == 2 and row[0] == name
+            and type(row[1]) is int and row[1] >= 0 for row, name in zip(rows, counter_names, strict=True)) for rows in counters)
+        and all(all(right[index][1] >= left[index][1] for index in range(len(counter_names)))
+            for left, right in zip(counters, counters[1:])), "LP03_KELLY28_ORIGINAL_READBACK_COUNTERS")
+    available = context["publication_availability_observation"]
+    _native_require(available["wall_ns"] == context["publication_available_wall_ns"]
+        == produced["native_clocks"]["available_time"]
+        and observations[3][0] <= available["wall_ns"] <= observations[4][0]
+        and observations[3][1] <= available["monotonic_ns"] <= observations[4][1]
+        and produced["native_clocks"]["received_time"] == produced["native_clocks"]["processed_time"]
+            == produced["native_clocks"]["as_of_time"] == observations[4][0]
+        and produced["native_clocks"]["observed_time"] == produced["native_clocks"]["effective_time"]
+        and all(available[key] == context[key] for key in ("clock_domain_id", "boot_identity_ref", "process_identity_ref")),
+        "LP03_KELLY28_ORIGINAL_PUBLICATION_CLOCKS")
+    original_sources = _evidence_kelly27_source_slices_v1(context["original_source_payload"])
+    upstream = tuple(part.reconstructed_canonical_events[0] for part in original_sources)
+    for event in upstream:
+        # Publishing a computation must not renew its input applicability.
+        temporal(event)
+    metadata = upstream[0]["values"]["private_source_context"]
+    _native_require(produced["scope"] == upstream[0]["scope"]
+        and produced["context_id"] == upstream[0]["context_id"], "LP03_KELLY28_UPSTREAM_CONTEXT_JOIN")
+    raw_spine = _evidence_canonical_object_v1(context["original_raw_record_json"].encode("utf-8"), max_bytes=65536)
+    publication_spine = _evidence_canonical_object_v1(context["publication_record_json"].encode("utf-8"), max_bytes=65536)
+    raw = raw_spine["typed_payload"]
+    publication = publication_spine["typed_payload"]["record"]
+    output = _evidence_canonical_object_v1(context["original_raw_output_json"].encode("utf-8"), max_bytes=65536)
+    original_input = dict(win_probability=upstream[0]["values"]["win_probability"], net_odds=upstream[1]["values"]["net_odds"])
+    _native_require(set(output) == {"raw_fraction", "sizing_candidate"}
+        and all(type(value) is str for value in output.values())
+        and output["raw_fraction"] == produced["values"]["full_kelly_fraction"]
+        and raw_spine["record_id"] == raw["record_id"] == produced["producer_receipt_id"]
+        and raw["existing_receipt"]["output_json"] == context["original_raw_output_json"]
+        and raw["existing_receipt"]["specification_id"] == context["invocation_contract"]["math_id"] == "MATH-27"
+        and raw["existing_receipt"]["implementation_id"] == context["invocation_contract"]["raw_implementation_id"]
+            == "qku/economic_math.py::MATH-27::ST12C-CURRENTIZED-1.0"
+        and raw["mode_ref"] == "REPLAY" and raw["output_basis"] == "wealth_fraction"
+        and raw["output_unit"] == "fraction_of_approved_risk_capital"
+        and raw["accounting_class"] == "SYNTHETIC_MEASURED_VALUE_NO_CASH_MOVEMENT"
+        and context["original_input_json"] == deterministic_json(original_input)
+        and publication_spine["record_id"] == publication["record_id"] == produced["source_epoch_id"]
+        and publication["kind"] == "PUBLICATION" and publication["origin"] == "SOFTWARE_CONFORMANCE"
+        and publication["lane"] == "REPLAY" and publication["input_lock_ref"] == context["input_lock_ref"]
+        and publication["original_grant_ref"] == context["original_grant_ref"]
+        and publication["fence_ref"] == context["original_fence_ref"]
+        and raw["record_id"] in publication["underlying_record_refs"]
+        and publication["underlying_store_id"] == refs[0].store_id,
+        "LP03_KELLY28_ORIGINAL_RAW_PUBLICATION_JOIN")
+    basis = ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")
+    for event, binding in zip(events[1:], bindings[1:], strict=True):
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"], event["producer_receipt_type"],
+            event["source_state_and_claim_lineage"]) == ("LP03OriginalPrivateInputSourceV1",
+                "LP03::MATH-28::ORIGINAL_INPUT_SOURCE_V1", "1.0", "LP03_MATH28_ORIGINAL_INPUT_RECEIPT_V1",
+                "LP03::MATH-28::ORIGINAL_INPUT::" + binding.producer_role)
+            and set(event["values"]) == {binding.input_name, "private_source_context"},
+            "LP03_KELLY28_ORIGINAL_POLICY_SCHEMA")
+        policy = event["values"]["private_source_context"]
+        _native_require(type(policy) is MappingProxyType and set(policy) == {
+            "profile", "binding_id", "producer_role", "original_resolution_receipt_ref", "published_kelly_source_ref", *basis}
+            and policy["profile"] == "LP03_MATH28_ORIGINAL_PARAMETER_RISK_INPUT_V1"
+            and policy["binding_id"] == binding.binding_id and policy["producer_role"] == binding.producer_role
+            and policy["original_resolution_receipt_ref"] == event["producer_receipt_id"]
+            and policy["published_kelly_source_ref"] == dict(store_id=refs[0].store_id, record_id=refs[0].record_id)
+            and all(policy[key] == metadata[key] for key in basis), "LP03_KELLY28_ORIGINAL_RISK_BASIS_JOIN")
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _encode_evidence_projection_json_v1
+    native = {binding.input_name: event["values"][binding.input_name] for binding, event in zip(bindings, events, strict=True)}
+    wire = _encode_evidence_projection_json_v1(native, maximum_bytes=65536, maximum_nodes=4096)
+    decode_evidence_private_inputs_v1("MATH-28", wire, maximum_bytes=65536, maximum_nodes=4096)
+    return parts
+
+
+
+def _evidence_research_source_slices_v1(payload):
+    """Closed M26 source data; original owner custody remains external.
+
+    All three complete slices retain their own clocks, rights and revisions.
+    The first slice anchors the action roster; outer maximum clocks describe
+    the decision batch without replacing any binding-specific observation.
+    """
+    from .bindings import EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {"association_profile", "source_slices"}
+                    and frozen["association_profile"] == "SHARED_ORIGINAL_RESEARCH_DECISION_CONTEXT"
+                    and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 3,
+                    "LP03_RESEARCH_SOURCE_ROSTER")
+    bindings = EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1["MATH-26"].bindings
+    _native_require(tuple(binding.input_name for binding in bindings)
+                    == ("current_action_values", "new_information_scenarios", "acquisition_cost"),
+                    "LP03_RESEARCH_BINDING_ORDER")
+    result, events, contexts = [], [], []
+    common = {"profile", "binding_id", "producer_role", "research_decision_ref", "action_roster_source_ref",
+              "ordered_action_ids", "utility_unit", "utility_currency_or_absence", "utility_basis_ref", "horizon_ref"}
+    for body, binding in zip(frozen["source_slices"], bindings):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+                        "LP03_RESEARCH_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["record_kind"], event["schema_id"], event["schema_version"],
+                         event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+                        == ("LP03OriginalPrivateInputSourceV1", "LP03::MATH-26::ORIGINAL_INPUT_SOURCE_V1", "1.0",
+                            "LP03_MATH26_ORIGINAL_INPUT_RECEIPT_V1", "LP03::MATH-26::ORIGINAL_INPUT::" + binding.producer_role)
+                        and event["authorized_binding_ids"] == (binding.binding_id,)
+                        and set(event["values"]) == {binding.input_name, "private_source_context"}
+                        and type(event["revision"]) in (int, str), "LP03_RESEARCH_BINDING_SOURCE_JOIN")
+        context = event["values"]["private_source_context"]
+        extra = ({"ordered_scenario_ids", "probability_resolution_receipt_ref"} if binding.input_name == "new_information_scenarios"
+                 else {"acquisition_target_ref"} if binding.input_name == "acquisition_cost" else set())
+        _native_require(type(context) is MappingProxyType and set(context) == common | extra,
+                        "LP03_RESEARCH_SOURCE_CONTEXT_FIELDS")
+        for name in common - {"action_roster_source_ref", "ordered_action_ids", "utility_currency_or_absence"}:
+            _native_ident(context[name])
+        _native_require(context["profile"] == "LP03_MATH26_ORIGINAL_UTILITY_INPUT_V1"
+                        and context["binding_id"] == binding.binding_id and context["producer_role"] == binding.producer_role,
+                        "LP03_RESEARCH_SOURCE_CONTEXT_PROFILE")
+        actions = context["ordered_action_ids"]
+        _native_require(type(actions) is tuple and 0 < len(actions) <= 4096, "LP03_RESEARCH_ACTION_ROSTER")
+        for action in actions:
+            _native_ident(action)
+        _native_require(len(set(actions)) == len(actions), "LP03_RESEARCH_ACTION_ROSTER")
+        currency = context["utility_currency_or_absence"]
+        if type(currency) is MappingProxyType:
+            _native_require(EvidenceAbsenceV1.from_canonical_mapping(dict(currency)).reason == "NOT_CURRENCY_DENOMINATED",
+                            "LP03_RESEARCH_UTILITY_CURRENCY_ABSENCE")
+        else:
+            _native_ident(currency)
+            _native_require(type(currency) is str and len(currency) == 3 and currency.isascii() and currency.isalpha()
+                            and currency.isupper() and currency == context["utility_unit"], "LP03_RESEARCH_UTILITY_UNIT")
+        roster = context["action_roster_source_ref"]
+        _native_require(type(roster) is MappingProxyType and set(roster) == {"store_id", "record_id"},
+                        "LP03_RESEARCH_ACTION_SOURCE_REF")
+        _native_ident(roster["store_id"])
+        _native_ident(roster["record_id"])
+        if binding.input_name == "new_information_scenarios":
+            scenarios = context["ordered_scenario_ids"]
+            _native_require(type(scenarios) is tuple and 0 < len(scenarios) <= 4096, "LP03_RESEARCH_SCENARIO_ROSTER")
+            for scenario in scenarios:
+                _native_ident(scenario)
+            _native_ident(context["probability_resolution_receipt_ref"])
+            _native_require(len(set(scenarios)) == len(scenarios)
+                            and context["probability_resolution_receipt_ref"] == event["producer_receipt_id"],
+                            "LP03_RESEARCH_PROBABILITY_RECEIPT")
+        elif binding.input_name == "acquisition_cost":
+            _native_ident(context["acquisition_target_ref"])
+            _native_require(context["acquisition_target_ref"] == context["research_decision_ref"], "LP03_RESEARCH_COST_SCOPE")
+        result.append(part)
+        events.append(event)
+        contexts.append(context)
+    anchor = result[0].original_record_refs[0]
+    source_refs = tuple(part.original_record_refs[0] for part in result)
+    shared = common - {"binding_id", "producer_role"}
+    _native_require(len(set(source_refs)) == 3 and len({event["record_ref"] for event in events}) == 3
+                    and len({event["producer_receipt_id"] for event in events}) == 3
+                    and all(dict(context["action_roster_source_ref"]) == dict(store_id=anchor.store_id, record_id=anchor.record_id)
+                            for context in contexts)
+                    and all(all(type(event[name]) is type(events[0][name])
+                                and deterministic_json(event[name]) == deterministic_json(events[0][name])
+                                for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision"))
+                            for event in events[1:])
+                    and all(all(type(context[name]) is type(contexts[0][name])
+                                and deterministic_json(context[name]) == deterministic_json(contexts[0][name]) for name in shared)
+                            for context in contexts[1:]), "LP03_RESEARCH_ORIGINAL_CONTEXT_JOIN")
+    from .input_resolver import decode_evidence_private_inputs_v1
+    from .serialization import _encode_evidence_projection_json_v1
+    native = {binding.input_name: event["values"][binding.input_name] for binding, event in zip(bindings, events)}
+    wire = _encode_evidence_projection_json_v1(native, maximum_bytes=65536, maximum_nodes=4096)
+    typed = decode_evidence_private_inputs_v1("MATH-26", wire, maximum_bytes=65536, maximum_nodes=4096)
+    _native_require(len(typed["current_action_values"]) == len(contexts[0]["ordered_action_ids"])
+                    and len(typed["new_information_scenarios"]) == len(contexts[1]["ordered_scenario_ids"])
+                    and all(len(row[1]) == len(contexts[0]["ordered_action_ids"]) for row in typed["new_information_scenarios"]),
+                    "LP03_RESEARCH_ORIGINAL_VALUE_ROSTER")
+    return tuple(result)
+
+
+def _evidence_forecast_source_slices_v1(payload):
+    """Closed two-source batch data; reconstructed slices never confer custody.
+
+    The probability slice is the declared anchor. Outer maximum clocks describe
+    the batch only. Every binding-specific source clock and revision remains in
+    its original slice, with no invented sample or evaluation-window identity.
+    """
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices"}
+        and frozen["association_profile"] == "SHARED_ORIGINAL_DATASET_CONTEXT"
+        and frozen["row_identity_profile"] == "ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 2,
+        "LP03_FORECAST_SOURCE_ROSTER")
+    result = []
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-08"]
+    _native_require(tuple(row.input_name for row in bindings) == ("probability_rows", "outcome_indices"),
+                    "LP03_FORECAST_BINDING_ORDER")
+    for body, binding in zip(frozen["source_slices"], bindings):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+                        "LP03_FORECAST_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+                         event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+                        == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                            binding.schema_id, binding.schema_version, binding.producer_receipt_type,
+                            binding.source_state_and_claim_lineage)
+                        and event["authorized_binding_ids"] == (binding.binding_id,)
+                        and tuple(event["values"]) == (binding.exact_field_path,)
+                        and type(event["revision"]) in (int, str), "LP03_FORECAST_BINDING_SOURCE_JOIN")
+        result.append(part)
+    first, second = (part.reconstructed_canonical_events[0] for part in result)
+    _native_require(result[0].original_record_refs[0] != result[1].original_record_refs[0]
+                    and first["record_ref"] != second["record_ref"]
+                    and all(type(first[name]) is type(second[name])
+                            and deterministic_json(first[name]) == deterministic_json(second[name])
+                            for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+                    "LP03_FORECAST_DATASET_ASSOCIATION")
+    return tuple(result)
+
+
+def _evidence_log_loss_source_slices_v1(payload):
+    """Closed original forecast/outcome/clip-policy data, never live custody."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices"}
+        and frozen["association_profile"] == "SHARED_ORIGINAL_DATASET_AND_CLIP_POLICY_CONTEXT"
+        and frozen["row_identity_profile"] == "ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 3,
+        "LP03_LOG_LOSS_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-09"]
+    _native_require(tuple(row.input_name for row in bindings) == ("probability_rows", "outcome_indices", "clip_epsilon"),
+        "LP03_LOG_LOSS_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_LOG_LOSS_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and tuple(event["values"]) == (binding.exact_field_path,)
+            and type(event["revision"]) in (int, str), "LP03_LOG_LOSS_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 3
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_LOG_LOSS_DATASET_POLICY_ASSOCIATION")
+    return tuple(result)
+
+
+def _evidence_cscv_result_v1(value):
+    """Closed, complete projection of the bounded original CSCV record."""
+    from itertools import combinations
+    from math import isfinite
+    import struct
+
+    data = value
+    _native_require(type(data) in (dict, MappingProxyType) and len(data) == 5 and set(data) == {
+        "probability_of_backtest_overfitting", "S", "split_count", "logits", "splits"
+    } and type(data["S"]) is int and data["S"] in (2, 4), "LP03_CSCV_RESULT_FIELDS")
+    groups = tuple(combinations(range(data["S"]), data["S"] // 2))
+    probability, count, logits, splits = (data[key] for key in
+        ("probability_of_backtest_overfitting", "split_count", "logits", "splits"))
+    _native_require(type(probability) is float and isfinite(probability) and 0.0 <= probability <= 1.0
+        and type(count) is int and count == len(groups)
+        and type(logits) in (tuple,list) and type(splits) in (tuple,list) and len(logits) == len(splits) == count,
+        "LP03_CSCV_RESULT_COMPLETE_SPLIT_ROSTER")
+    accepted = []
+    for index, (row, expected_groups) in enumerate(zip(splits, groups, strict=True)):
+        _native_require(type(row) in (dict, MappingProxyType) and len(row) == 5 and set(row) == {"train_groups", "is_winner_strategy_id",
+            "oos_midrank_worst_1_best_n", "relative_rank", "logit"}
+            and type(row["train_groups"]) in (tuple,list) and len(row["train_groups"]) == len(expected_groups)
+            and all(type(group) is int for group in row["train_groups"]) and tuple(row["train_groups"]) == expected_groups, "LP03_CSCV_RESULT_SPLIT_FIELDS")
+        _native_ident(row["is_winner_strategy_id"])
+        rank, relative, logit = (row[key] for key in ("oos_midrank_worst_1_best_n", "relative_rank", "logit"))
+        _native_require(all(type(value) is float and isfinite(value) for value in (rank, relative, logit, logits[index]))
+            and 1.0 <= rank <= 4.0 and 0.0 < relative < 1.0
+            and struct.pack(">d", logit) == struct.pack(">d", logits[index]), "LP03_CSCV_RESULT_SPLIT_DOMAINS")
+        accepted.append(MappingProxyType(dict(row, train_groups=expected_groups)))
+    _native_require(struct.pack(">d", probability) == struct.pack(">d", sum(value <= 0.0 for value in logits) / count),
+        "LP03_CSCV_RESULT_PROBABILITY_JOIN")
+    return MappingProxyType(dict(data, splits=tuple(accepted), logits=tuple(logits)))
+
+
+
+def _evidence_cscv_source_slices_v1(payload):
+    """Decode the original finite software matrix and its separate group policy."""
+    import struct
+    from math import isfinite
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+    def fields(value, names, reason):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), reason)
+
+    data = _evidence_frozen_data_v1(payload)
+    fields(data, ("association_profile", "row_identity_profile", "consumer_decision_wall_ns",
+        "consumer_cutoff_wall_ns", "source_slices"), "LP03_CSCV_SOURCE_FIELDS")
+    decision, cutoff = data["consumer_decision_wall_ns"], data["consumer_cutoff_wall_ns"]
+    _native_require(data["association_profile"] == "ORIGINAL_DECLARED_SOFTWARE_CSCV_MATRIX_AND_GROUP_POLICY"
+        and data["row_identity_profile"] == "COMPLETE_DECLARED_CHRONOLOGICAL_MATRIX_AND_STRATEGY_ROSTER"
+        and type(decision) is type(cutoff) is int and 0 < cutoff <= decision
+        and type(data["source_slices"]) is tuple and len(data["source_slices"]) == 3,
+        "LP03_CSCV_SOURCE_PROFILE")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-19"]
+    parts, events, typed = [], [], {}
+    for index, (source, binding) in enumerate(zip(data["source_slices"], bindings, strict=True)):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(source).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_CSCV_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"], event["authorized_binding_ids"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type, binding.schema_id,
+                binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage, (binding.binding_id,)),
+            "LP03_CSCV_BINDING_SOURCE_JOIN")
+        exact_fields = {binding.exact_field_path, "material_trial_ledger"} if index == 0 else {binding.exact_field_path}
+        _native_require(set(event["values"]) == exact_fields, "LP03_CSCV_BINDING_SOURCE_FIELDS")
+        values = _evidence_decode_source_values_v1(event)
+        typed[binding.input_name] = values[binding.exact_field_path]
+        if index == 0:
+            ledger = values["material_trial_ledger"]
+        clocks = event["native_clocks"]
+        _native_require(clocks["as_of_time"] == decision
+            and clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+                <= clocks["processed_time"] <= cutoff
+            and 0 <= decision - clocks["observed_time"] <= event["ttl_ns"],
+            "LP03_CSCV_SOURCE_POINT_IN_TIME")
+        parts.append(part)
+        events.append(event)
+    _native_require(len({part.original_record_refs[0] for part in parts})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 3
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version")),
+        "LP03_CSCV_SOURCE_CONTEXT_JOIN")
+    _native_require(events[0]["revision"] == events[1]["revision"]
+        and events[0]["native_clocks"] == events[1]["native_clocks"] and events[0]["ttl_ns"] == events[1]["ttl_ns"],
+        "LP03_CSCV_SOURCE_MATRIX_ROSTER_ASSOCIATION")
+
+    matrix, strategies, groups = (typed[key] for key in ("performance_matrix", "strategy_ids", "S"))
+    _native_require(type(strategies) is tuple and 1 <= len(strategies) <= 4
+        and all(type(name) is str and 0 < len(name) <= 128 for name in strategies)
+        and len(set(strategies)) == len(strategies)
+        and type(matrix) is tuple and 2 <= len(matrix) <= 8 and all(
+            type(row) is tuple and len(row) == len(strategies)
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for value in row)
+            for row in matrix)
+        and type(groups) is int and groups in (2, 4) and len(matrix) % groups == 0,
+        "LP03_CSCV_SOURCE_TYPED_ROSTER")
+    fields(ledger, ("profile", "math_id", "implementation_id", "origin", "candidate_universe_id",
+        "evidence_window_id", "return_basis_id", "ordered_strategy_ids", "ordered_strategy_dispositions", "ordered_time_ids",
+        "rows", "source_associations", "end_record", "publication_visibility_wall_ns"), "LP03_CSCV_LEDGER_FIELDS")
+    _native_require(ledger["profile"] == "DECLARED_CONTIGUOUS_SYNTHETIC_STRATEGY_PERFORMANCE_MATRIX_V1"
+        and ledger["math_id"] == "MATH-19" and ledger["implementation_id"] == "MATH-19::2.0.0"
+        and ledger["origin"] == "SOFTWARE_CONFORMANCE" and ledger["evidence_window_id"] == events[0]["revision"]
+        and ledger["ordered_strategy_ids"] == strategies,
+        "LP03_CSCV_LEDGER_SOURCE_JOIN")
+    times, statuses, rows, associations = (ledger[name] for name in
+        ("ordered_time_ids", "ordered_strategy_dispositions", "rows", "source_associations"))
+    _native_require(type(times) is type(statuses) is type(rows) is type(associations) is tuple
+        and len(times) == len(rows) == len(matrix) and len(statuses) == len(strategies) and len(associations) == 2
+        and all(type(status) is str and status in ("ATTEMPTED", "PRUNED") for status in statuses),
+        "LP03_CSCV_LEDGER_COMPLETE_ROSTER")
+    for name in (*strategies, *times, ledger["candidate_universe_id"], ledger["evidence_window_id"], ledger["return_basis_id"]):
+        _native_require(type(name) is str and 0 < len(name) <= 128, "LP03_CSCV_LEDGER_ID_DOMAIN")
+        _native_ident(name)
+    _native_require(len(set(times)) == len(times), "LP03_CSCV_LEDGER_DUPLICATE_TIME_ID")
+    receipt_ids = set()
+    for ordinal, (row, time_id, values) in enumerate(zip(rows, times, matrix, strict=True)):
+        fields(row, ("original_index", "time_id", "cells"), "LP03_CSCV_LEDGER_ROW_FIELDS")
+        _native_require(type(row["original_index"]) is int and row["original_index"] == ordinal and row["time_id"] == time_id
+            and type(row["cells"]) is tuple and len(row["cells"]) == len(strategies), "LP03_CSCV_LEDGER_ROW_ASSOCIATION")
+        for cell, strategy, value in zip(row["cells"], strategies, values, strict=True):
+            fields(cell, ("strategy_id", "synthetic_input_receipt_id", "value_binary64_bits"), "LP03_CSCV_LEDGER_CELL_FIELDS")
+            ref = cell["synthetic_input_receipt_id"]
+            _native_require(cell["strategy_id"] == strategy and type(ref) is str and 0 < len(ref) <= 64
+                and ref not in receipt_ids and cell["value_binary64_bits"] == struct.pack(">d", value).hex(),
+                "LP03_CSCV_LEDGER_CELL_ASSOCIATION")
+            _native_ident(ref)
+            receipt_ids.add(ref)
+    _native_require(receipt_ids.isdisjoint(event["producer_receipt_id"] for event in events),
+        "LP03_CSCV_LEDGER_DUPLICATE_RECEIPT")
+    for association, event, binding in zip(associations, events[:2], bindings[:2], strict=True):
+        _native_require(isinstance(association, Mapping) and dict(association) == dict(binding_id=binding.binding_id,
+            packet_id=event["record_ref"], producer_receipt_id=event["producer_receipt_id"]),
+            "LP03_CSCV_LEDGER_ORIGINAL_SOURCE_ASSOCIATION")
+    end = ledger["end_record"]
+    fields(end, ("candidate_universe_id", "evidence_window_id", "observation_count", "strategy_count", "cell_count",
+        "final_time_id"), "LP03_CSCV_LEDGER_END_FIELDS")
+    _native_require(all(type(end[key]) is int for key in ("observation_count", "strategy_count", "cell_count"))
+        and dict(end) == dict(candidate_universe_id=ledger["candidate_universe_id"], evidence_window_id=ledger["evidence_window_id"],
+            observation_count=len(times), strategy_count=len(strategies), cell_count=len(times)*len(strategies), final_time_id=times[-1])
+        and type(ledger["publication_visibility_wall_ns"]) is int
+        and max(part.reconstructed_canonical_events[0]["native_clocks"]["available_time"] for part in parts[:2])
+            <= ledger["publication_visibility_wall_ns"] <= cutoff,
+        "LP03_CSCV_LEDGER_END_OR_VISIBILITY")
+    return tuple(parts)
+
+
+
+def _evidence_sharpe_source_slices_v1(payload):
+    """Reconstruct original synthetic Sharpe data; never create live custody."""
+    import struct
+    from math import isfinite
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1, _parse_typed
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "math_id", "source_slices", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns"}
+        and frozen["association_profile"] == "ORIGINAL_DECLARED_SOFTWARE_SHARPE_LEDGER_AND_MOMENTS"
+        and frozen["row_identity_profile"] == "COMPLETE_DECLARED_ATTEMPTED_AND_PRUNED_ROSTER_NO_STATISTICAL_SUPPORT_CLAIM"
+        and type(frozen["math_id"]) is str and frozen["math_id"] in ("MATH-17", "MATH-18")
+        and type(frozen["consumer_decision_wall_ns"]) is int and type(frozen["consumer_cutoff_wall_ns"]) is int
+        and 0 < frozen["consumer_cutoff_wall_ns"] <= frozen["consumer_decision_wall_ns"], "LP03_SHARPE_SOURCE_PROFILE")
+    math_id = frozen["math_id"]
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == len(bindings)
+        == (5 if math_id == "MATH-17" else 6), "LP03_SHARPE_SOURCE_ROSTER")
+    result, native = [], {}
+    for index, (body, binding) in enumerate(zip(frozen["source_slices"], bindings, strict=True)):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_SHARPE_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        expected_fields = (binding.exact_field_path, "material_trial_ledger") if index == 0 else (binding.exact_field_path,)
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+                event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,) and set(event["values"]) == set(expected_fields)
+            and type(event["revision"]) is str, "LP03_SHARPE_BINDING_SOURCE_JOIN")
+        decoded = _evidence_decode_source_values_v1(event)
+        source_value = decoded[binding.exact_field_path]
+        _native_require(type(source_value) is float if binding.input_type == "float64" else
+            type(source_value) is int if binding.input_type == "int" else
+            type(source_value) is tuple and all(type(value) is float for value in source_value),
+            "LP03_SHARPE_ORIGINAL_SOURCE_NUMERIC_TYPES")
+        native[binding.input_name] = _parse_typed(source_value, binding)
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == len(bindings)
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision", "native_clocks", "ttl_ns")),
+        "LP03_SHARPE_ORIGINAL_PACKET_ASSOCIATION")
+    clocks = events[0]["native_clocks"]
+    decision, cutoff = frozen["consumer_decision_wall_ns"], frozen["consumer_cutoff_wall_ns"]
+    _native_require(clocks["as_of_time"] == decision, "LP03_SHARPE_SOURCE_DECISION_JOIN")
+    _native_require(clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+        <= clocks["processed_time"] <= cutoff <= decision, "LP03_SHARPE_SOURCE_CUTOFF_ORDER")
+    _native_require(0 <= decision - clocks["observed_time"] <= events[0]["ttl_ns"], "LP03_SHARPE_SOURCE_TTL")
+    # Effective-time field-class laws and the original execution context's
+    # maximum_age/epoch/scope remain mandatory at the original caller boundary.
+    ledger = _evidence_decode_source_values_v1(events[0])["material_trial_ledger"]
+    _native_require(isinstance(ledger, Mapping) and set(ledger) == {
+        "profile", "math_id", "implementation_id", "origin", "candidate_universe_id", "evidence_window_id",
+        "completeness_scope", "value_provenance", "return_basis_id", "annualization_basis_id", "support_input_declaration_ref",
+        "support_scope", "candidate_trial_id", "ordered_trial_ids", "rows", "candidate_moments", "source_associations",
+        "end_record", "publication_visibility_wall_ns"}, "LP03_SHARPE_LEDGER_SOURCE_FIELDS")
+    _native_require(ledger["profile"] == "DECLARED_FINITE_SOFTWARE_SHARPE_LEDGER_V1" and ledger["math_id"] == math_id
+        and ledger["implementation_id"] == math_id + ("::1.1.0" if math_id == "MATH-17" else "::2.0.0")
+        and ledger["origin"] == "SOFTWARE_CONFORMANCE"
+        and ledger["completeness_scope"] == "EXACT_PROSPECTIVELY_DECLARED_ATTEMPTED_AND_PRUNED_SOFTWARE_ROSTER_ONLY"
+        and ledger["value_provenance"] == "SYNTHETIC_OWNER_RECORDED_SHARPES_AND_MOMENTS_ONLY"
+        and ledger["support_scope"] == "SOFTWARE_INTEGER_INPUT_ONLY_NO_STATISTICAL_SUPPORT_CLAIM",
+        "LP03_SHARPE_LEDGER_ORIGIN_SCOPE")
+    roster, rows, moments, associations, end = (ledger[name] for name in
+        ("ordered_trial_ids", "rows", "candidate_moments", "source_associations", "end_record"))
+    _native_require(type(roster) is tuple and type(rows) is tuple
+        and (1 if math_id == "MATH-17" else 2) <= len(roster) == len(rows) <= 5
+        and type(associations) is tuple and len(associations) == len(bindings)
+        and isinstance(moments, Mapping) and set(moments) == {
+            "synthetic_moment_receipt_id", "original_integer_support", "integer_support_field", "binary64_fields"}
+        and isinstance(end, Mapping) and set(end) == {"candidate_universe_id", "evidence_window_id", "trial_count",
+            "last_trial_id", "final_original_index", "attempted_count", "pruned_count"}, "LP03_SHARPE_LEDGER_COMPLETE_LAYOUT")
+    for value in (*roster, *(ledger[name] for name in ("candidate_universe_id", "evidence_window_id", "return_basis_id",
+            "annualization_basis_id", "support_input_declaration_ref", "candidate_trial_id"))):
+        _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_SHARPE_LEDGER_ID_BOUND")
+        _native_ident(value)
+    _native_require(len(set(roster)) == len(roster) and ledger["candidate_trial_id"] in roster
+        and ledger["evidence_window_id"] == events[0]["revision"], "LP03_SHARPE_LEDGER_ORIGINAL_UNIVERSE")
+    receipts, sharpes, statuses = [], [], []
+    def binary(value):
+        _native_require(type(value) is str and len(value) == 16 and all(char in "0123456789abcdef" for char in value),
+            "LP03_SHARPE_LEDGER_BINARY64_BITS")
+        result = struct.unpack(">d", bytes.fromhex(value))[0]
+        _native_require(isfinite(result), "LP03_SHARPE_LEDGER_BINARY64_BITS")
+        return result
+    for index, (trial, row) in enumerate(zip(roster, rows, strict=True)):
+        _native_require(isinstance(row, Mapping) and set(row) == {
+            "original_index", "trial_id", "synthetic_input_receipt_id", "disposition", "sharpe_binary64_bits"}
+            and type(row["original_index"]) is int and row["original_index"] == index
+            and type(row["trial_id"]) is str and row["trial_id"] == trial
+            and type(row["disposition"]) is str and row["disposition"] in ("ATTEMPTED", "PRUNED"),
+            "LP03_SHARPE_LEDGER_ROW_ASSOCIATION")
+        value = binary(row["sharpe_binary64_bits"])
+        _native_require(-1.0 <= value <= 1.0, "LP03_SHARPE_LEDGER_TRIAL_DOMAIN")
+        receipt = row["synthetic_input_receipt_id"]
+        _native_require(type(receipt) is str and 0 < len(receipt) <= 128, "LP03_SHARPE_LEDGER_RECEIPT_BOUND")
+        _native_ident(receipt)
+        receipts.append(receipt); sharpes.append(value); statuses.append(row["disposition"])
+    receipt = moments["synthetic_moment_receipt_id"]
+    _native_require(type(receipt) is str and 0 < len(receipt) <= 128, "LP03_SHARPE_LEDGER_RECEIPT_BOUND")
+    _native_ident(receipt);receipts.append(receipt)
+    _native_require(len(set(receipts)) == len(receipts)
+        and set(receipts).isdisjoint(event["producer_receipt_id"] for event in events), "LP03_SHARPE_LEDGER_DUPLICATE_RECEIPT")
+    for association, event, binding in zip(associations, events, bindings, strict=True):
+        _native_require(isinstance(association, Mapping) and set(association) == {"binding_id", "packet_id", "producer_receipt_id"}
+            and dict(association) == dict(binding_id=binding.binding_id, packet_id=event["record_ref"],
+                producer_receipt_id=event["producer_receipt_id"]), "LP03_SHARPE_LEDGER_FIELD_ASSOCIATION")
+    count_name = "independent_equivalent_observations" if math_id == "MATH-17" else "candidate_independent_equivalent_observations"
+    estimate_name = "estimated_sharpe" if math_id == "MATH-17" else "candidate_estimated_sharpe"
+    kurtosis_name = "sample_non_excess_kurtosis" if math_id == "MATH-17" else "candidate_sample_non_excess_kurtosis"
+    _native_require(type(native[count_name]) is int and 2 <= native[count_name] <= 2**53
+        and type(moments["original_integer_support"]) is int and moments["original_integer_support"] == native[count_name]
+        and moments["integer_support_field"] == count_name and isinstance(moments["binary64_fields"], Mapping),
+        "LP03_SHARPE_LEDGER_ORIGINAL_INTEGER_SUPPORT")
+    scalar_names = tuple(binding.input_name for binding in bindings if binding.input_type == "float64")
+    _native_require(set(moments["binary64_fields"]) == set(scalar_names)
+        and all(type(native[name]) is float and isfinite(native[name]) for name in scalar_names)
+        and native[kurtosis_name] >= 1.0, "LP03_SHARPE_LEDGER_ORIGINAL_MOMENT_FIELDS")
+    for name in scalar_names:
+        value = binary(moments["binary64_fields"][name])
+        _native_require(struct.pack(">d", value) == struct.pack(">d", native[name]), "LP03_SHARPE_LEDGER_ORIGINAL_MOMENT_JOIN")
+    candidate = roster.index(ledger["candidate_trial_id"])
+    _native_require(statuses[candidate] == "ATTEMPTED"
+        and struct.pack(">d", sharpes[candidate]) == struct.pack(">d", native[estimate_name]),
+        "LP03_SHARPE_LEDGER_CANDIDATE_VALUE_JOIN")
+    if math_id == "MATH-18":
+        _native_require(type(native["complete_material_trial_sharpes"]) is tuple
+            and len(native["complete_material_trial_sharpes"]) == len(sharpes)
+            and all(type(value) is float and struct.pack(">d", value) == struct.pack(">d", expected)
+                for value, expected in zip(native["complete_material_trial_sharpes"], sharpes, strict=True))
+            and 1.0 < native["effective_independent_trial_count"] <= len(roster), "LP03_SHARPE_LEDGER_COMPLETE_TRIAL_VALUE_JOIN")
+    _native_require(all(type(end[name]) is int for name in ("trial_count", "final_original_index", "attempted_count", "pruned_count"))
+        and dict(end) == dict(candidate_universe_id=ledger["candidate_universe_id"], evidence_window_id=ledger["evidence_window_id"],
+            trial_count=len(roster), last_trial_id=roster[-1], final_original_index=len(roster)-1,
+            attempted_count=statuses.count("ATTEMPTED"), pruned_count=statuses.count("PRUNED")), "LP03_SHARPE_LEDGER_COMPLETE_END")
+    visible = ledger["publication_visibility_wall_ns"]
+    _native_require(type(visible) is int and 0 < visible <= min(frozen["consumer_decision_wall_ns"],
+        frozen["consumer_cutoff_wall_ns"], events[0]["native_clocks"]["as_of_time"]), "LP03_SHARPE_LEDGER_PUBLICATION_PIT")
+    _native_require(len(deterministic_json(ledger).encode("utf-8")) <= 32768, "LP03_SHARPE_LEDGER_BYTES")
+    return tuple(result)
+
+
+def _evidence_spa_loss_family_ledger_data_v1(event, *, decision_wall_ns, cutoff_wall_ns):
+    """Reconstruct original complete grid data; this cannot issue live custody."""
+    import struct
+    from math import isfinite
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import deterministic_json
+    values = _evidence_decode_source_values_v1(event)
+    _native_require(set(values) == {"candidate_loss_differentials", "material_trial_ledger"},
+        "LP03_SPA_LEDGER_SOURCE_FIELDS")
+    matrix, ledger = values["candidate_loss_differentials"], values["material_trial_ledger"]
+    _native_require(type(matrix) is tuple and 3 <= len(matrix) <= 4
+        and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+        and all(len(row) == len(matrix[0]) for row in matrix)
+        and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+        and isinstance(ledger, Mapping) and set(ledger) == {
+            "profile", "math_id", "implementation_id", "candidate_universe_id", "evidence_window_id", "benchmark_id",
+            "sign_convention", "origin", "value_provenance", "completeness_scope", "ordered_trial_ids",
+            "ordered_time_ids", "rows", "end_record", "publication_visibility_wall_ns"},
+        "LP03_SPA_LEDGER_ROSTER")
+    _native_require(ledger["profile"] == "DECLARED_FINITE_SOFTWARE_LOSS_FAMILY_LEDGER_V1"
+        and ledger["math_id"] == "MATH-16" and ledger["implementation_id"] == "MATH-16::2.0.0"
+        and ledger["origin"] == "SOFTWARE_CONFORMANCE"
+        and ledger["sign_convention"] == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+        and ledger["value_provenance"] == "SYNTHETIC_OWNER_RECORDED_LOSS_DIFFERENTIALS_ONLY"
+        and ledger["completeness_scope"] == "EXACT_PROSPECTIVELY_DECLARED_CANDIDATE_TIME_GRID_ONLY",
+        "LP03_SPA_LEDGER_ORIGIN_PROFILE")
+    roster, times, rows, end = (ledger[name] for name in ("ordered_trial_ids", "ordered_time_ids", "rows", "end_record"))
+    _native_require(type(roster) is tuple and type(times) is tuple and type(rows) is tuple
+        and len(roster) == len(rows) == len(matrix[0]) and len(times) == len(matrix)
+        and isinstance(end, Mapping) and set(end) == {"candidate_universe_id", "evidence_window_id", "benchmark_id",
+            "trial_count", "observation_count", "cell_count", "last_trial_id", "final_original_candidate_index",
+            "last_time_id", "final_original_time_index", "producer_receipt_id"}, "LP03_SPA_LEDGER_COMPLETE_END")
+    for value in (ledger["candidate_universe_id"], ledger["evidence_window_id"], ledger["benchmark_id"], *roster, *times):
+        _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_SPA_LEDGER_ID_BOUND")
+        _native_ident(value)
+    _native_require(len(set(roster)) == len(roster) and len(set(times)) == len(times)
+        and type(event["revision"]) is str and ledger["evidence_window_id"] == event["revision"],
+        "LP03_SPA_LEDGER_UNIVERSE_WINDOW")
+    receipts = []
+    for candidate, (trial, row) in enumerate(zip(roster, rows, strict=True)):
+        _native_require(isinstance(row, Mapping) and set(row) == {"original_candidate_index", "trial_id", "observations"}
+            and type(row["original_candidate_index"]) is int and row["original_candidate_index"] == candidate
+            and type(row["trial_id"]) is str and row["trial_id"] == trial
+            and type(row["observations"]) is tuple and len(row["observations"]) == len(times),
+            "LP03_SPA_LEDGER_COLUMN_ASSOCIATION")
+        for position, (tick, cell) in enumerate(zip(times, row["observations"], strict=True)):
+            _native_require(isinstance(cell, Mapping) and set(cell) == {
+                "original_time_index", "time_id", "synthetic_input_receipt_id", "differential_binary64_bits"}
+                and type(cell["original_time_index"]) is int and cell["original_time_index"] == position
+                and type(cell["time_id"]) is str and cell["time_id"] == tick
+                and type(cell["differential_binary64_bits"]) is str
+                and cell["differential_binary64_bits"] == struct.pack(">d", matrix[position][candidate]).hex(),
+                "LP03_SPA_LEDGER_CELL_ASSOCIATION")
+            receipt = cell["synthetic_input_receipt_id"]
+            _native_require(type(receipt) is str and 0 < len(receipt) <= 128
+                and receipt != event["producer_receipt_id"], "LP03_SPA_LEDGER_RECEIPT_BOUND")
+            _native_ident(receipt)
+            receipts.append(receipt)
+    _native_require(len(set(receipts)) == len(receipts)
+        and all(type(end[name]) is int for name in ("trial_count", "observation_count", "cell_count",
+            "final_original_candidate_index", "final_original_time_index"))
+        and dict(end) == dict(candidate_universe_id=ledger["candidate_universe_id"],
+            evidence_window_id=ledger["evidence_window_id"], benchmark_id=ledger["benchmark_id"],
+            trial_count=len(roster), observation_count=len(times), cell_count=len(roster)*len(times),
+            last_trial_id=roster[-1], final_original_candidate_index=len(roster)-1,
+            last_time_id=times[-1], final_original_time_index=len(times)-1, producer_receipt_id=event["producer_receipt_id"]),
+        "LP03_SPA_LEDGER_COMPLETE_END")
+    visible = ledger["publication_visibility_wall_ns"]
+    _native_require(type(visible) is int and type(decision_wall_ns) is int and type(cutoff_wall_ns) is int
+        and 0 < cutoff_wall_ns <= decision_wall_ns
+        and 0 < visible <= min(decision_wall_ns, cutoff_wall_ns, event["native_clocks"]["as_of_time"]),
+        "LP03_SPA_LEDGER_PUBLICATION_PIT")
+    _native_require(len(deterministic_json(ledger).encode("utf-8")) <= 32768, "LP03_SPA_LEDGER_BYTES")
+    return matrix, ledger
+
+
+def _evidence_spa_source_slices_v1(payload):
+    """Closed original family and six policy slices; no source authority."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1, _parse_typed
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns"}
+        and frozen["association_profile"] == "ORIGINAL_DECLARED_SOFTWARE_LOSS_FAMILY_AND_SPA_POLICY"
+        and frozen["row_identity_profile"] == "COMPLETE_DECLARED_CANDIDATE_TIME_GRID_NO_EMPIRICAL_UNIVERSE_CLAIM"
+        and type(frozen["consumer_decision_wall_ns"]) is int and type(frozen["consumer_cutoff_wall_ns"]) is int
+        and 0 < frozen["consumer_cutoff_wall_ns"] <= frozen["consumer_decision_wall_ns"]
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 7,
+        "LP03_SPA_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-16"]
+    _native_require(tuple(row.input_name for row in bindings) == (
+        "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha", "recenter_variant"),
+        "LP03_SPA_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_SPA_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        expected_fields = ("candidate_loss_differentials", "material_trial_ledger") if binding.input_name == "loss_differentials" else (binding.exact_field_path,)
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,) and tuple(event["values"]) == expected_fields
+            and type(event["revision"]) is str, "LP03_SPA_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 7
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_SPA_LEDGER_POLICY_ASSOCIATION")
+    _, ledger = _evidence_spa_loss_family_ledger_data_v1(events[0],
+        decision_wall_ns=frozen["consumer_decision_wall_ns"], cutoff_wall_ns=frozen["consumer_cutoff_wall_ns"])
+    sign = _parse_typed(_evidence_decode_source_values_v1(events[1])[bindings[1].exact_field_path], bindings[1])
+    _native_require(type(sign) is str and sign == ledger["sign_convention"], "LP03_SPA_ORIGINAL_ORIENTATION_JOIN")
+    variant = _parse_typed(_evidence_decode_source_values_v1(events[6])[bindings[6].exact_field_path], bindings[6])
+    _native_require(type(variant) is str and variant == "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD", "LP03_SPA_ORIGINAL_VARIANT_JOIN")
+    return tuple(result)
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceSPAValueV1:
+    statistic: float
+    p_value: float
+    reject: bool
+    candidate_means: tuple[float, ...]
+    long_run_variances: tuple[float, ...]
+    consistent_valid_columns: tuple[bool, ...]
+    simulated_statistics: tuple[float, ...]
+    recenter_variant: str
+
+    def __post_init__(self):
+        from math import isfinite
+        _native_require(type(self.candidate_means) is tuple and 1 <= len(self.candidate_means) <= 2
+            and type(self.long_run_variances) is type(self.consistent_valid_columns) is tuple
+            and len(self.long_run_variances) == len(self.consistent_valid_columns) == len(self.candidate_means)
+            and type(self.simulated_statistics) is tuple and 1 <= len(self.simulated_statistics) <= 4
+            and all(type(value) is float and isfinite(value) for value in (
+                self.statistic, self.p_value, *self.candidate_means, *self.long_run_variances, *self.simulated_statistics))
+            and self.statistic >= 0.0 and 0.0 < self.p_value <= 1.0
+            and all(value >= 0.0 for value in (*self.long_run_variances, *self.simulated_statistics))
+            and all(type(value) is bool for value in self.consistent_valid_columns) and type(self.reject) is bool
+            and type(self.recenter_variant) is str and self.recenter_variant == "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD",
+            "LP03_SPA_PROJECTION_TYPED_RECORD")
+
+
+def _evidence_spa_value_v1(value):
+    """All eight original output fields, preserving every column disposition."""
+    if type(value) is _EvidenceSPAValueV1:
+        _EvidenceSPAValueV1.__post_init__(value)
+        return value
+    _native_require(type(value) is dict and len(value) == 8 and all(type(key) is str for key in value)
+        and set(value) == {"statistic", "p_value", "reject", "candidate_means", "long_run_variances",
+            "consistent_valid_columns", "simulated_statistics", "recenter_variant"}, "LP03_SPA_PROJECTION_FIELDS")
+    means, variances, valid, simulated = (value[name] for name in (
+        "candidate_means", "long_run_variances", "consistent_valid_columns", "simulated_statistics"))
+    _native_require(all(type(items) in (tuple, list) for items in (means, variances, valid, simulated))
+        and 1 <= len(means) == len(variances) == len(valid) <= 2 and 1 <= len(simulated) <= 4,
+        "LP03_SPA_PROJECTION_LAYOUT_CAPACITY")
+    return _EvidenceSPAValueV1(**dict(value, candidate_means=tuple(means), long_run_variances=tuple(variances),
+        consistent_valid_columns=tuple(valid), simulated_statistics=tuple(simulated)))
+
+
+def _evidence_spa_projection_mapping_v1(value):
+    value = _evidence_spa_value_v1(value)
+    return MappingProxyType({member.name: getattr(value, member.name) for member in dataclass_fields(_EvidenceSPAValueV1)})
+
+
+def _evidence_loss_family_ledger_data_v1(event, *, decision_wall_ns, cutoff_wall_ns):
+    """Reconstruct original complete grid data; this cannot issue live custody."""
+    import struct
+    from math import isfinite
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import deterministic_json
+    values = _evidence_decode_source_values_v1(event)
+    _native_require(set(values) == {"candidate_loss_differentials", "material_trial_ledger"},
+        "LP03_REALITY_LEDGER_SOURCE_FIELDS")
+    matrix, ledger = values["candidate_loss_differentials"], values["material_trial_ledger"]
+    _native_require(type(matrix) is tuple and 2 <= len(matrix) <= 4
+        and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+        and all(len(row) == len(matrix[0]) for row in matrix)
+        and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+        and isinstance(ledger, Mapping) and set(ledger) == {
+            "profile", "math_id", "implementation_id", "candidate_universe_id", "evidence_window_id", "benchmark_id",
+            "sign_convention", "origin", "value_provenance", "completeness_scope", "ordered_trial_ids",
+            "ordered_time_ids", "rows", "end_record", "publication_visibility_wall_ns"},
+        "LP03_REALITY_LEDGER_ROSTER")
+    _native_require(ledger["profile"] == "DECLARED_FINITE_SOFTWARE_LOSS_FAMILY_LEDGER_V1"
+        and ledger["math_id"] == "MATH-15" and ledger["implementation_id"] == "MATH-15::2.0.0"
+        and ledger["origin"] == "SOFTWARE_CONFORMANCE"
+        and ledger["sign_convention"] == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+        and ledger["value_provenance"] == "SYNTHETIC_OWNER_RECORDED_LOSS_DIFFERENTIALS_ONLY"
+        and ledger["completeness_scope"] == "EXACT_PROSPECTIVELY_DECLARED_CANDIDATE_TIME_GRID_ONLY",
+        "LP03_REALITY_LEDGER_ORIGIN_PROFILE")
+    roster, times, rows, end = (ledger[name] for name in ("ordered_trial_ids", "ordered_time_ids", "rows", "end_record"))
+    _native_require(type(roster) is tuple and type(times) is tuple and type(rows) is tuple
+        and len(roster) == len(rows) == len(matrix[0]) and len(times) == len(matrix)
+        and isinstance(end, Mapping) and set(end) == {"candidate_universe_id", "evidence_window_id", "benchmark_id",
+            "trial_count", "observation_count", "cell_count", "last_trial_id", "final_original_candidate_index",
+            "last_time_id", "final_original_time_index", "producer_receipt_id"}, "LP03_REALITY_LEDGER_COMPLETE_END")
+    for value in (ledger["candidate_universe_id"], ledger["evidence_window_id"], ledger["benchmark_id"], *roster, *times):
+        _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_REALITY_LEDGER_ID_BOUND")
+        _native_ident(value)
+    _native_require(len(set(roster)) == len(roster) and len(set(times)) == len(times)
+        and type(event["revision"]) is str and ledger["evidence_window_id"] == event["revision"],
+        "LP03_REALITY_LEDGER_UNIVERSE_WINDOW")
+    receipts = []
+    for candidate, (trial, row) in enumerate(zip(roster, rows, strict=True)):
+        _native_require(isinstance(row, Mapping) and set(row) == {"original_candidate_index", "trial_id", "observations"}
+            and type(row["original_candidate_index"]) is int and row["original_candidate_index"] == candidate
+            and type(row["trial_id"]) is str and row["trial_id"] == trial
+            and type(row["observations"]) is tuple and len(row["observations"]) == len(times),
+            "LP03_REALITY_LEDGER_COLUMN_ASSOCIATION")
+        for position, (tick, cell) in enumerate(zip(times, row["observations"], strict=True)):
+            _native_require(isinstance(cell, Mapping) and set(cell) == {
+                "original_time_index", "time_id", "synthetic_input_receipt_id", "differential_binary64_bits"}
+                and type(cell["original_time_index"]) is int and cell["original_time_index"] == position
+                and type(cell["time_id"]) is str and cell["time_id"] == tick
+                and type(cell["differential_binary64_bits"]) is str
+                and cell["differential_binary64_bits"] == struct.pack(">d", matrix[position][candidate]).hex(),
+                "LP03_REALITY_LEDGER_CELL_ASSOCIATION")
+            receipt = cell["synthetic_input_receipt_id"]
+            _native_require(type(receipt) is str and 0 < len(receipt) <= 128
+                and receipt != event["producer_receipt_id"], "LP03_REALITY_LEDGER_RECEIPT_BOUND")
+            _native_ident(receipt)
+            receipts.append(receipt)
+    _native_require(len(set(receipts)) == len(receipts)
+        and all(type(end[name]) is int for name in ("trial_count", "observation_count", "cell_count",
+            "final_original_candidate_index", "final_original_time_index"))
+        and dict(end) == dict(candidate_universe_id=ledger["candidate_universe_id"],
+            evidence_window_id=ledger["evidence_window_id"], benchmark_id=ledger["benchmark_id"],
+            trial_count=len(roster), observation_count=len(times), cell_count=len(roster)*len(times),
+            last_trial_id=roster[-1], final_original_candidate_index=len(roster)-1,
+            last_time_id=times[-1], final_original_time_index=len(times)-1, producer_receipt_id=event["producer_receipt_id"]),
+        "LP03_REALITY_LEDGER_COMPLETE_END")
+    visible = ledger["publication_visibility_wall_ns"]
+    _native_require(type(visible) is int and type(decision_wall_ns) is int and type(cutoff_wall_ns) is int
+        and 0 < cutoff_wall_ns <= decision_wall_ns
+        and 0 < visible <= min(decision_wall_ns, cutoff_wall_ns, event["native_clocks"]["as_of_time"]),
+        "LP03_REALITY_LEDGER_PUBLICATION_PIT")
+    _native_require(len(deterministic_json(ledger).encode("utf-8")) <= 32768, "LP03_REALITY_LEDGER_BYTES")
+    return matrix, ledger
+
+
+def _evidence_reality_check_source_slices_v1(payload):
+    """Closed original family and five policy slices; no source authority."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1, _parse_typed
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns"}
+        and frozen["association_profile"] == "ORIGINAL_DECLARED_SOFTWARE_LOSS_FAMILY_AND_REALITY_CHECK_POLICY"
+        and frozen["row_identity_profile"] == "COMPLETE_DECLARED_CANDIDATE_TIME_GRID_NO_EMPIRICAL_UNIVERSE_CLAIM"
+        and type(frozen["consumer_decision_wall_ns"]) is int and type(frozen["consumer_cutoff_wall_ns"]) is int
+        and 0 < frozen["consumer_cutoff_wall_ns"] <= frozen["consumer_decision_wall_ns"]
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 6,
+        "LP03_REALITY_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-15"]
+    _native_require(tuple(row.input_name for row in bindings) == (
+        "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha"),
+        "LP03_REALITY_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_REALITY_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        expected_fields = ("candidate_loss_differentials", "material_trial_ledger") if binding.input_name == "loss_differentials" else (binding.exact_field_path,)
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,) and tuple(event["values"]) == expected_fields
+            and type(event["revision"]) is str, "LP03_REALITY_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 6
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_REALITY_LEDGER_POLICY_ASSOCIATION")
+    _, ledger = _evidence_loss_family_ledger_data_v1(events[0],
+        decision_wall_ns=frozen["consumer_decision_wall_ns"], cutoff_wall_ns=frozen["consumer_cutoff_wall_ns"])
+    sign = _parse_typed(_evidence_decode_source_values_v1(events[1])[bindings[1].exact_field_path], bindings[1])
+    _native_require(type(sign) is str and sign == ledger["sign_convention"], "LP03_REALITY_ORIGINAL_ORIENTATION_JOIN")
+    return tuple(result)
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceRealityCheckValueV1:
+    statistic: float
+    p_value: float
+    reject: bool
+    candidate_means: tuple[float, ...]
+    simulated_statistics: tuple[float, ...]
+    recenter_policy: str
+
+    def __post_init__(self):
+        from math import isfinite
+        _native_require(type(self.candidate_means) is tuple and 1 <= len(self.candidate_means) <= 2
+            and type(self.simulated_statistics) is tuple and 1 <= len(self.simulated_statistics) <= 4
+            and all(type(value) is float and isfinite(value) for value in (
+                self.statistic, self.p_value, *self.candidate_means, *self.simulated_statistics))
+            and self.statistic >= 0.0 and 0.0 < self.p_value <= 1.0
+            and all(value >= 0.0 for value in self.simulated_statistics) and type(self.reject) is bool
+            and type(self.recenter_policy) is str
+            and self.recenter_policy == "CENTER_EACH_COMPLETE_MATERIAL_CANDIDATE_AT_ITS_SAMPLE_MEAN",
+            "LP03_REALITY_PROJECTION_TYPED_RECORD")
+
+
+def _evidence_reality_check_value_v1(value):
+    """All six original output fields, without recomputation or scalar selection."""
+    if type(value) is _EvidenceRealityCheckValueV1:
+        _EvidenceRealityCheckValueV1.__post_init__(value)
+        return value
+    _native_require(type(value) is dict and len(value) == 6 and all(type(key) is str for key in value)
+        and set(value) == {"statistic", "p_value", "reject", "candidate_means", "simulated_statistics", "recenter_policy"},
+        "LP03_REALITY_PROJECTION_FIELDS")
+    means, simulated = value["candidate_means"], value["simulated_statistics"]
+    _native_require(type(means) in (tuple, list) and 1 <= len(means) <= 2
+        and type(simulated) in (tuple, list) and 1 <= len(simulated) <= 4, "LP03_REALITY_PROJECTION_LAYOUT_CAPACITY")
+    return _EvidenceRealityCheckValueV1(**dict(value, candidate_means=tuple(means), simulated_statistics=tuple(simulated)))
+
+
+def _evidence_reality_check_projection_mapping_v1(value):
+    value = _evidence_reality_check_value_v1(value)
+    return MappingProxyType({member.name: getattr(value, member.name) for member in dataclass_fields(_EvidenceRealityCheckValueV1)})
+
+
+def _evidence_bootstrap_source_slices_v1(payload):
+    """Closed original ordered-series/bootstrap-policy data, never live custody."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices"}
+        and frozen["association_profile"] == "SHARED_ORIGINAL_ORDERED_SERIES_AND_BOOTSTRAP_POLICY_CONTEXT"
+        and frozen["row_identity_profile"] == "ORDERED_SYNTHETIC_SERIES_NO_EMPIRICAL_DEPENDENCE_CLAIM"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 6,
+        "LP03_BOOTSTRAP_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-14"]
+    _native_require(tuple(row.input_name for row in bindings) == ("series", "expected_block_length", "seed", "replicates", "confidence", "interval_method"),
+        "LP03_BOOTSTRAP_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_BOOTSTRAP_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and tuple(event["values"]) == (binding.exact_field_path,)
+            and type(event["revision"]) in (int, str), "LP03_BOOTSTRAP_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 6
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_BOOTSTRAP_DATASET_POLICY_ASSOCIATION")
+    return tuple(result)
+
+
+def _evidence_wilson_source_slices_v1(payload):
+    """Closed original count/confidence-policy data, never live custody."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices"}
+        and frozen["association_profile"] == "SHARED_ORIGINAL_COUNTS_AND_CONFIDENCE_POLICY_CONTEXT"
+        and frozen["row_identity_profile"] == "AGGREGATE_SYNTHETIC_BERNOULLI_COUNTS_NO_TRIAL_OBSERVATIONS"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 3,
+        "LP03_WILSON_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-11"]
+    _native_require(tuple(row.input_name for row in bindings) == ("successes", "trials", "confidence"),
+        "LP03_WILSON_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_WILSON_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and tuple(event["values"]) == (binding.exact_field_path,)
+            and type(event["revision"]) in (int, str), "LP03_WILSON_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 3
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_WILSON_DATASET_POLICY_ASSOCIATION")
+    return tuple(result)
+
+
+def _evidence_calibration_source_slices_v1(payload):
+    """Closed original forecast/outcome/bin-policy data, never live custody."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "row_identity_profile", "source_slices"}
+        and frozen["association_profile"] == "SHARED_ORIGINAL_DATASET_AND_BIN_POLICY_CONTEXT"
+        and frozen["row_identity_profile"] == "ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 4,
+        "LP03_CALIBRATION_SOURCE_ROSTER")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-10"]
+    _native_require(tuple(row.input_name for row in bindings) == ("probabilities", "outcomes", "bin_policy", "bin_count"),
+        "LP03_CALIBRATION_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_CALIBRATION_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and tuple(event["values"]) == (binding.exact_field_path,)
+            and type(event["revision"]) in (int, str), "LP03_CALIBRATION_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 4
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_CALIBRATION_DATASET_POLICY_ASSOCIATION")
+    return tuple(result)
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceBootstrapValueV1:
+    sample_mean: float
+    lower: float
+    upper: float
+    bootstrap_distribution: tuple[float, ...]
+    seed: int
+    replicates: int
+    expected_block_length: float
+    interval_method: str
+
+    def __post_init__(self):
+        from math import isfinite
+        _native_require(type(self.bootstrap_distribution) is tuple and 1 <= len(self.bootstrap_distribution) <= 4
+            and all(type(value) is float and isfinite(value) for value in (
+                self.sample_mean, self.lower, self.upper, self.expected_block_length, *self.bootstrap_distribution))
+            and type(self.seed) is int and self.seed.bit_length() <= 256
+            and type(self.replicates) is int and self.replicates == len(self.bootstrap_distribution)
+            and type(self.interval_method) is str and self.interval_method == "PERCENTILE_TYPE7"
+            and self.lower <= self.upper and 1.0 <= self.expected_block_length <= 8.0,
+            "LP03_BOOTSTRAP_PROJECTION_TYPED_RECORD")
+
+
+def _evidence_bootstrap_value_v1(value):
+    """Closed complete eight-member raw projection; no bootstrap is rerun."""
+    if type(value) is _EvidenceBootstrapValueV1:
+        _EvidenceBootstrapValueV1.__post_init__(value)
+        return value
+    _native_require(type(value) is dict and len(value) == 8 and all(type(key) is str for key in value)
+        and set(value) == {"sample_mean", "lower", "upper", "bootstrap_distribution", "seed", "replicates",
+            "expected_block_length", "interval_method"}, "LP03_BOOTSTRAP_PROJECTION_FIELDS")
+    distribution = value["bootstrap_distribution"]
+    _native_require(type(distribution) in (tuple, list) and 1 <= len(distribution) <= 4,
+        "LP03_BOOTSTRAP_PROJECTION_LAYOUT_CAPACITY")
+    return _EvidenceBootstrapValueV1(**dict(value, bootstrap_distribution=tuple(distribution)))
+
+
+def _evidence_bootstrap_projection_mapping_v1(value):
+    value = _evidence_bootstrap_value_v1(value)
+    return MappingProxyType({member.name: getattr(value, member.name) for member in dataclass_fields(_EvidenceBootstrapValueV1)})
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceMultipleTestingRowV1:
+    original_index: int
+    adjusted_p: float
+    rejected: bool
+
+    def __post_init__(self):
+        from math import isfinite
+        _native_require(type(self.original_index) is int and 0 <= self.original_index < 32
+                        and type(self.adjusted_p) is float and isfinite(self.adjusted_p)
+                        and 0.0 <= self.adjusted_p <= 1.0 and type(self.rejected) is bool,
+                        "LP03_MULTIPLE_PROJECTION_ROW_TYPES")
+
+
+@dataclass(frozen=True, slots=True)
+class _EvidenceMultipleTestingValueV1:
+    rows: tuple[_EvidenceMultipleTestingRowV1, ...]
+    correction: float
+    largest_rank: int
+
+    def __post_init__(self):
+        from math import isfinite
+        _native_require(type(self.rows) is tuple and 0 < len(self.rows) <= 32
+                        and type(self.correction) is float and isfinite(self.correction)
+                        and 1.0 <= self.correction <= len(self.rows)
+                        and type(self.largest_rank) is int and 0 <= self.largest_rank <= len(self.rows),
+                        "LP03_MULTIPLE_PROJECTION_TYPES")
+        rejected = 0
+        for index, row in enumerate(self.rows):
+            _native_require(type(row) is _EvidenceMultipleTestingRowV1, "LP03_MULTIPLE_PROJECTION_ROW_FIELDS")
+            _EvidenceMultipleTestingRowV1.__post_init__(row)
+            _native_require(row.original_index == index, "LP03_MULTIPLE_PROJECTION_ROW_ORDER")
+            rejected += int(row.rejected)
+        _native_require(rejected == self.largest_rank, "LP03_MULTIPLE_PROJECTION_REJECTION_COUNT")
+
+
+def _evidence_multiple_testing_value_v1(value, *, math_id):
+    """Closed indexed result data; no source, execution or FDR authority.
+
+    Only native input dictionaries enter reconstruction. Retained values use
+    exact frozen dataclasses, whose native tuple/leaf fields are checked again
+    before traversal. No proxy to an arbitrary mapping can enter this profile.
+    """
+    _native_require(type(math_id) is str and math_id in ("MATH-12", "MATH-13"), "LP03_MULTIPLE_PROJECTION_FIELDS")
+    if type(value) is _EvidenceMultipleTestingValueV1:
+        result = value
+        _EvidenceMultipleTestingValueV1.__post_init__(result)
+    else:
+        _native_require(type(value) is dict and len(value) == 3 and all(type(name) is str for name in value)
+                        and set(value) == {"rows", "correction", "largest_rank"}, "LP03_MULTIPLE_PROJECTION_FIELDS")
+        rows = value["rows"]
+        _native_require(type(rows) in (tuple, list) and 0 < len(rows) <= 32
+                        and 7 + 7 * len(rows) <= 4096 and 128 + 128 * len(rows) <= 65536,
+                        "LP03_MULTIPLE_PROJECTION_LAYOUT_CAPACITY")
+        frozen = []
+        for row in rows:
+            _native_require(type(row) is dict and len(row) == 3 and all(type(name) is str for name in row)
+                            and set(row) == {"original_index", "adjusted_p", "rejected"}, "LP03_MULTIPLE_PROJECTION_ROW_FIELDS")
+            frozen.append(_EvidenceMultipleTestingRowV1(**row))
+        result = _EvidenceMultipleTestingValueV1(tuple(frozen), value["correction"], value["largest_rank"])
+    _native_require(math_id != "MATH-12" or result.correction == 1.0, "LP03_MULTIPLE_PROJECTION_BH_CORRECTION")
+    return result
+
+
+def _evidence_multiple_testing_ledger_data_v1(event, *, math_id, decision_wall_ns, cutoff_wall_ns):
+    """Reconstruct the complete declared synthetic ledger, never original custody."""
+    import struct
+    from math import isfinite
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import deterministic_json
+    values = _evidence_decode_source_values_v1(event)
+    _native_require(set(values) == {"trial_p_values", "material_trial_ledger"}, "LP03_MULTIPLE_LEDGER_SOURCE_FIELDS")
+    ps, ledger = values["trial_p_values"], values["material_trial_ledger"]
+    _native_require(type(ps) is tuple and 0 < len(ps) <= 32
+                    and all(type(p) is float and isfinite(p) and 0.0 <= p <= 1.0 for p in ps)
+                    and isinstance(ledger, Mapping) and set(ledger) == {
+                        "profile", "math_id", "implementation_id", "candidate_universe_id", "evidence_window_id",
+                        "origin", "p_value_provenance", "completeness_scope", "ordered_trial_ids", "rows", "end_record",
+                        "publication_visibility_wall_ns"}, "LP03_MULTIPLE_LEDGER_ROSTER")
+    _native_require(ledger["profile"] == "DECLARED_FINITE_SOFTWARE_TRIAL_LEDGER_V1"
+                    and ledger["math_id"] == math_id and ledger["implementation_id"] == math_id + "::1.1R1"
+                    and ledger["origin"] == "SOFTWARE_CONFORMANCE"
+                    and ledger["p_value_provenance"] == "SYNTHETIC_OWNER_RECORDED_INPUTS_ONLY"
+                    and ledger["completeness_scope"] == "EXACT_PROSPECTIVELY_DECLARED_SOFTWARE_ROSTER_ONLY",
+                    "LP03_MULTIPLE_LEDGER_ORIGIN_PROFILE")
+    roster, rows, end = ledger["ordered_trial_ids"], ledger["rows"], ledger["end_record"]
+    _native_require(type(roster) is tuple and type(rows) is tuple and len(roster) == len(rows) == len(ps)
+                    and isinstance(end, Mapping) and set(end) == {"candidate_universe_id", "evidence_window_id",
+                        "trial_count", "last_trial_id", "final_original_index", "producer_receipt_id"},
+                    "LP03_MULTIPLE_LEDGER_COMPLETE_END")
+    for value in (ledger["candidate_universe_id"], ledger["evidence_window_id"], *roster):
+        _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_MULTIPLE_LEDGER_ID_BOUND")
+        _native_ident(value)
+    _native_require(len(set(roster)) == len(roster)
+                    and ledger["evidence_window_id"] == event["revision"], "LP03_MULTIPLE_LEDGER_UNIVERSE_WINDOW")
+    receipts = []
+    for index, (trial, row, p) in enumerate(zip(roster, rows, ps, strict=True)):
+        _native_require(isinstance(row, Mapping) and set(row) == {
+            "original_index", "trial_id", "synthetic_input_receipt_id", "p_value_binary64_bits"},
+            "LP03_MULTIPLE_LEDGER_ROW_FIELDS")
+        _native_require(type(row["original_index"]) is int and row["original_index"] == index
+                        and type(row["trial_id"]) is str and row["trial_id"] == trial
+                        and type(row["p_value_binary64_bits"]) is str
+                        and row["p_value_binary64_bits"] == struct.pack(">d", p).hex(), "LP03_MULTIPLE_LEDGER_ROW_ASSOCIATION")
+        receipt = row["synthetic_input_receipt_id"]
+        _native_require(type(receipt) is str and 0 < len(receipt) <= 128, "LP03_MULTIPLE_LEDGER_RECEIPT_BOUND")
+        _native_ident(receipt)
+        receipts.append(receipt)
+    _native_require(len(set(receipts)) == len(receipts)
+                    and type(end["trial_count"]) is int and type(end["final_original_index"]) is int
+                    and dict(end) == dict(candidate_universe_id=ledger["candidate_universe_id"],
+                        evidence_window_id=ledger["evidence_window_id"], trial_count=len(roster), last_trial_id=roster[-1],
+                        final_original_index=len(roster)-1, producer_receipt_id=event["producer_receipt_id"]),
+                    "LP03_MULTIPLE_LEDGER_COMPLETE_END")
+    visible = ledger["publication_visibility_wall_ns"]
+    _native_require(type(visible) is int and type(decision_wall_ns) is int and type(cutoff_wall_ns) is int
+                    and 0 < cutoff_wall_ns <= decision_wall_ns
+                    and 0 < visible <= min(decision_wall_ns, cutoff_wall_ns, event["native_clocks"]["as_of_time"]),
+                    "LP03_MULTIPLE_LEDGER_PUBLICATION_PIT")
+    _native_require(len(deterministic_json(ledger).encode("utf-8")) <= 32768, "LP03_MULTIPLE_LEDGER_BYTES")
+    return ps, ledger
+
+
+def _evidence_multiple_testing_source_slices_v1(payload):
+    """Closed original declared-ledger/q-policy data, never live custody."""
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(isinstance(frozen, Mapping) and set(frozen) == {
+        "association_profile", "math_id", "source_slices", "consumer_decision_wall_ns", "consumer_cutoff_wall_ns"}
+        and frozen["association_profile"] == "ORIGINAL_DECLARED_SOFTWARE_TRIAL_LEDGER_AND_Q_POLICY"
+        and frozen["math_id"] in ("MATH-12", "MATH-13")
+        and type(frozen["consumer_decision_wall_ns"]) is int and type(frozen["consumer_cutoff_wall_ns"]) is int
+        and 0 < frozen["consumer_cutoff_wall_ns"] <= frozen["consumer_decision_wall_ns"]
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 2,
+        "LP03_MULTIPLE_SOURCE_ROSTER")
+    math_id = frozen["math_id"]
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(tuple(row.input_name for row in bindings) == ("p_values", "q"), "LP03_MULTIPLE_BINDING_ORDER")
+    result = []
+    for body, binding in zip(frozen["source_slices"], bindings, strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_MULTIPLE_SINGLE_SOURCE_SLICE")
+        event = part.reconstructed_canonical_events[0]
+        expected_fields = ("material_trial_ledger", "trial_p_values") if binding.input_name == "p_values" else (binding.exact_field_path,)
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,) and tuple(event["values"]) == expected_fields
+            and type(event["revision"]) is str, "LP03_MULTIPLE_BINDING_SOURCE_JOIN")
+        result.append(part)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 2
+        and all(type(event[name]) is type(events[0][name]) and deterministic_json(event[name]) == deterministic_json(events[0][name])
+            for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version", "revision")),
+        "LP03_MULTIPLE_LEDGER_POLICY_ASSOCIATION")
+    _evidence_multiple_testing_ledger_data_v1(events[0], math_id=math_id,
+        decision_wall_ns=frozen["consumer_decision_wall_ns"], cutoff_wall_ns=frozen["consumer_cutoff_wall_ns"])
+    return tuple(result)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceDependencyExecutionRecordV1(EvidenceRecordHeaderV1):
+    """Original executed dependency data, never pre-decision availability."""
+    kind: str = field(default="DEPENDENCY_EXECUTION", init=False)
+    attempt_ref: str
+    lane: EvidenceLaneV1
+    execution_context_ref: str
+    producer_raw_receipt_ref: str
+    consumer_raw_receipt_ref: str
+    producer_invocation_contract: Mapping[str, object]
+    consumer_invocation_contract: Mapping[str, object]
+    chain_artifact_json: str
+    invocation_measurement: Mapping[str, object]
+    publication_ref: EvidencePublicationRefV1
+
+    def __post_init__(self):
+        from .evidence_execution import _worker_probability_edge_result_v1, _worker_edge_json_data_v1
+        from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+        from .latency_policy import _evidence_invocation_measurement_v1
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("attempt_ref","execution_context_ref","producer_raw_receipt_ref","consumer_raw_receipt_ref"):
+            _native_ident(getattr(self,name))
+        _native_require(type(self.lane) is EvidenceLaneV1 and type(self.publication_ref) is EvidencePublicationRefV1
+            and self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and self.record_id == self.attempt_ref + "::CONVERSION"
+            and self.producer_raw_receipt_ref != self.consumer_raw_receipt_ref
+            and self.record_id not in (self.producer_raw_receipt_ref,self.consumer_raw_receipt_ref),
+            "LP03_DEPENDENCY_EXECUTION_SCOPE")
+        for name in ("producer_invocation_contract","consumer_invocation_contract"):
+            object.__setattr__(self,name,_evidence_frozen_data_v1(getattr(self,name)))
+        measured = _evidence_invocation_measurement_v1(self.invocation_measurement)
+        object.__setattr__(self,"invocation_measurement",measured)
+        _wire, artifact = _worker_edge_json_data_v1(self.chain_artifact_json,maximum_bytes=65536)
+        _native_require(type(artifact) is dict and "consumer_output_json" in artifact and "execution_clock_limits" in artifact,
+                        "LP03_DEPENDENCY_EXECUTION_ARTIFACT")
+        artifact = _worker_probability_edge_result_v1(dict(
+            invocation_contract=self.consumer_invocation_contract,
+            producer_invocation_contract=self.producer_invocation_contract,
+            numeric_context_policy_ref=LP03_DECIMAL_CONTEXT_POLICY_REF_V1,
+            chain_artifact_json=self.chain_artifact_json,raw_output_json=artifact["consumer_output_json"],
+            invocation_measurement=measured),attempt_ref=self.attempt_ref)
+        _receipt_wire, receipt = _worker_edge_json_data_v1(artifact["conversion_receipt_json"],maximum_bytes=65536)
+        _native_require(receipt["receipt_id"] == self.record_id
+            and receipt["execution_context"]["context_id"] == self.execution_context_ref
+            and measured["clock_domain_id"] == self.clock_domain_id
+            and measured["completed"][0] <= self.created_wall_ns,
+            "LP03_DEPENDENCY_EXECUTION_ORIGINAL_CONTEXT_AND_TIME")
+
+    @classmethod
+    def from_canonical_mapping(cls,value):
+        data = _evidence_header_decode_v1(cls,value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_,
+                        "LP03_DEPENDENCY_EXECUTION_LANE")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["publication_ref"] = EvidencePublicationRefV1.from_canonical_mapping(data["publication_ref"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceHeldOutFoldScoreRecordV1(EvidenceRecordHeaderV1):
+    """One original supported scorer invocation for a prescribed held-out split."""
+
+    kind: str = field(default="HELD_OUT_FOLD_SCORE", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    topology_math_id: str
+    topology_raw_ref: str
+    fold_or_split_ordinal: int
+    original_trace_source_ref: EvidenceRecordRefV1
+    original_outcome_source_ref: EvidenceRecordRefV1
+    scorer_math_id: str
+    scorer_implementation_id: str
+    scorer_raw_schema_ref: str
+    scorer_raw_receipt_ref: str
+    scorer_output_unit: str
+    scorer_measurement_basis: str
+    training_membership_receipt_ref: str
+    evaluation_horizon_ref: str
+    ordered_sample_receipt_rows: tuple[Mapping[str, object], ...]
+    original_scorer_raw_json: str
+    scorer_invocation_measurement: Mapping[str, object]
+
+    def __post_init__(self):
+        from .latency_policy import _evidence_invocation_measurement_v1
+        from .serialization import deterministic_json, _evidence_frozen_data_v1
+        from .specification import decode_evidence_raw_output_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE and type(self.lane) is EvidenceLaneV1
+            and type(self.topology_math_id) is str and self.topology_math_id in ("MATH-20","MATH-21")
+            and type(self.scorer_math_id) is str and self.scorer_math_id in ("MATH-08","MATH-09"),
+            "LP03_HELD_OUT_SCORE_RECORD_PROFILE")
+        _native_require(type(self.fold_or_split_ordinal) is int and 0<=self.fold_or_split_ordinal<6
+            and (self.topology_math_id=="MATH-21" or self.fold_or_split_ordinal<4),
+            "LP03_HELD_OUT_SCORE_ORDINAL")
+        _native_require(type(self.original_trace_source_ref) is type(self.original_outcome_source_ref) is EvidenceRecordRefV1
+            and self.original_trace_source_ref!=self.original_outcome_source_ref,"LP03_HELD_OUT_SCORE_SOURCE_ROSTER")
+        for name in ("attempt_ref","topology_raw_ref","scorer_raw_receipt_ref","training_membership_receipt_ref","evaluation_horizon_ref"):
+            _native_ident(getattr(self,name))
+        _native_require(self.topology_raw_ref!=self.scorer_raw_receipt_ref and
+            self.scorer_implementation_id==self.scorer_math_id+"::1.1R1"
+            and self.scorer_raw_schema_ref==self.scorer_math_id+"::OUTPUT","LP03_HELD_OUT_SCORE_ORIGINAL_SCORER_PIN")
+        expected=("squared probability error","PER_SAMPLE_SQUARED_PROBABILITY") if self.scorer_math_id=="MATH-08" else (
+            "nats/sample","per_sample_natural_log_loss")
+        _native_require((self.scorer_output_unit,self.scorer_measurement_basis)==expected,
+            "LP03_HELD_OUT_SCORE_BASIS")
+        rows=_evidence_frozen_data_v1(self.ordered_sample_receipt_rows)
+        _native_require(type(rows) is tuple and 0<len(rows)<=8,"LP03_HELD_OUT_SCORE_SAMPLE_IDENTITIES")
+        for row in rows:
+            _native_require(isinstance(row,Mapping) and set(row) == {
+                "sample_id", "prediction_receipt_ref", "label_receipt_ref",
+                "prediction_available_wall_ns", "outcome_available_wall_ns"},
+                "LP03_HELD_OUT_SCORE_SAMPLE_RECEIPTS")
+            for key in ("sample_id", "prediction_receipt_ref", "label_receipt_ref"):
+                _native_ident(row[key])
+            _public_counter_v1(row["prediction_available_wall_ns"], allow_zero=False)
+            _public_counter_v1(row["outcome_available_wall_ns"], allow_zero=False)
+            _native_require(row["prediction_available_wall_ns"] < row["outcome_available_wall_ns"],
+                "LP03_HELD_OUT_SCORE_SAMPLE_CHRONOLOGY")
+        _native_require(all(len({row[key] for row in rows})==len(rows) for key in
+            ("sample_id","prediction_receipt_ref","label_receipt_ref"))
+            and {row["prediction_receipt_ref"] for row in rows}.isdisjoint(row["label_receipt_ref"] for row in rows),
+            "LP03_HELD_OUT_SCORE_DUPLICATE_SAMPLE_OR_RECEIPT")
+        _native_require(type(self.original_scorer_raw_json) is str and 0<len(self.original_scorer_raw_json)<=65536,
+            "LP03_HELD_OUT_SCORE_RAW_WIRE")
+        raw=decode_evidence_raw_output_v1(self.scorer_math_id,self.original_scorer_raw_json.encode("utf-8","strict"),
+            maximum_bytes=65536,maximum_nodes=4096)
+        _native_require(deterministic_json(raw)==self.original_scorer_raw_json and len(raw["per_observation"])==len(rows),
+            "LP03_HELD_OUT_SCORE_RAW_SAMPLE_COUNT")
+        measured=_evidence_invocation_measurement_v1(self.scorer_invocation_measurement)
+        _native_require(measured["outcome"]=="SUCCESS" and measured["clock_domain_id"]==self.clock_domain_id,
+            "LP03_HELD_OUT_SCORE_NATIVE_MEASUREMENT")
+        object.__setattr__(self,"ordered_sample_receipt_rows",rows)
+        object.__setattr__(self,"scorer_invocation_measurement",measured)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data=_evidence_header_decode_v1(cls,value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_,
+            "LP03_HELD_OUT_SCORE_LANE")
+        data["lane"]=EvidenceLaneV1(data["lane"])
+        for name in ("original_trace_source_ref","original_outcome_source_ref"):
+            data[name]=EvidenceRecordRefV1.from_canonical_mapping(data[name])
+        data["ordered_sample_receipt_rows"]=_evidence_tuple_decode_v1(data["ordered_sample_receipt_rows"])
+        return cls(**data)
+
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceHeldOutCpcvPathScoreRecordV1(EvidenceRecordHeaderV1):
+    """Exact path average over the original prescribed score receipts."""
+
+    kind: str = field(default="HELD_OUT_CPCV_PATH_SCORE", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    topology_raw_ref: str
+    path_ordinal: int
+    ordered_fold_score_refs: tuple[str, ...]
+    ordered_sample_ids: tuple[str, ...]
+    ordered_original_score_bits: tuple[str, ...]
+    exact_average: Mapping[str, str]
+    aggregation_method: str
+
+    def __post_init__(self):
+        from fractions import Fraction
+        from math import isfinite
+        import struct
+        from .serialization import _evidence_frozen_data_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE and type(self.lane) is EvidenceLaneV1
+            and type(self.path_ordinal) is int and 0<=self.path_ordinal<3
+            and self.aggregation_method=="MEAN_COMPLETE_PATH_SAMPLE_SCORES","LP03_CPCV_PATH_SCORE_PROFILE")
+        _native_ident(self.attempt_ref)
+        _native_ident(self.topology_raw_ref)
+        _public_refs_v1(self.ordered_fold_score_refs)
+        _public_refs_v1(self.ordered_sample_ids)
+        _native_require(1<=len(self.ordered_fold_score_refs)<=4 and 2<=len(self.ordered_sample_ids)<=8
+            and type(self.ordered_original_score_bits) is tuple
+            and len(self.ordered_original_score_bits)==len(self.ordered_sample_ids),
+            "LP03_CPCV_PATH_SCORE_COMPLETE_ROSTER")
+        points=[]
+        for text in self.ordered_original_score_bits:
+            _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}",text) is not None,
+                "LP03_CPCV_PATH_SCORE_BINARY64")
+            value=struct.unpack(">d",bytes.fromhex(text))[0]
+            _native_require(isfinite(value) and value>=0,"LP03_CPCV_PATH_SCORE_BINARY64")
+            points.append(Fraction(value))
+        expected=sum(points,Fraction(0))/len(points)
+        average=_evidence_frozen_data_v1(self.exact_average)
+        _native_require(average=={"numerator":str(expected.numerator),"denominator":str(expected.denominator)},
+            "LP03_CPCV_PATH_SCORE_EXACT_MEAN")
+        object.__setattr__(self,"exact_average",average)
+
+    @classmethod
+    def from_canonical_mapping(cls,value):
+        data=_evidence_header_decode_v1(cls,value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_,
+            "LP03_CPCV_PATH_SCORE_LANE")
+        data["lane"]=EvidenceLaneV1(data["lane"])
+        for name in ("ordered_fold_score_refs","ordered_sample_ids","ordered_original_score_bits"):
+            data[name]=_evidence_tuple_decode_v1(data[name])
+        return cls(**data)
+
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceRecordedDrGroupMeasurementRecordV1(EvidenceRecordHeaderV1):
+    """Complete ordered equal-weight groups of original recorded DR scores."""
+
+    kind: str = field(default="DR_GROUP_MEASUREMENT", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    original_estimator_ref: str
+    ordered_input_row_ids: tuple[str, ...]
+    group_members: tuple[tuple[str, ...], ...]
+    group_means: tuple[Mapping[str, object], ...]
+    original_group_weight: str
+    weighting_rule: str
+    original_raw_json: str
+    reward_unit: str
+    reward_basis: str
+
+    def __post_init__(self):
+        from fractions import Fraction
+        from .context import exact_decimal
+        from .serialization import _evidence_frozen_data_v1
+        from .specification import decode_evidence_raw_output_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and type(self.lane) is EvidenceLaneV1
+            and self.weighting_rule == "EQUAL_WEIGHT_COMPLETE_EQUAL_SIZE_ORDERED_GROUPS",
+            "LP03_DR_GROUP_MEASUREMENT_PROFILE")
+        for value in (self.attempt_ref, self.original_estimator_ref, self.reward_unit, self.reward_basis):
+            _native_ident(value)
+        _public_refs_v1(self.ordered_input_row_ids)
+        weight = exact_decimal(self.original_group_weight)
+        _native_require(type(self.original_group_weight) is str and str(weight) == self.original_group_weight
+            and weight > 0, "LP03_DR_GROUP_ORIGINAL_WEIGHT")
+        ids, groups = self.ordered_input_row_ids, self.group_members
+        _native_require(type(groups) is tuple and 0 < len(groups) <= len(ids) <= 64
+            and all(type(group) is tuple and 0 < len(group) == len(groups[0]) for group in groups),
+            "LP03_DR_GROUP_COMPLETE_EQUAL_SIZE")
+        for group in groups:
+            _public_refs_v1(group)
+        order = {name: index for index, name in enumerate(ids)}
+        roster = tuple(name for group in groups for name in group)
+        _native_require(len(roster) == len(ids) and set(roster) == set(ids),
+            "LP03_DR_GROUP_ORIGINAL_COVERAGE")
+        _native_require(all(tuple(sorted(group, key=order.__getitem__)) == group for group in groups),
+            "LP03_DR_GROUP_ORIGINAL_ROW_ORDER")
+        _native_require(type(self.original_raw_json) is str and 0 < len(self.original_raw_json) <= 65536,
+            "LP03_DR_GROUP_RAW_WIRE")
+        raw = decode_evidence_raw_output_v1("MATH-22", self.original_raw_json.encode("utf-8", "strict"),
+            maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(len(raw["row_values"]) == len(ids) and raw["clipping_applied"] is False,
+            "LP03_DR_GROUP_ORIGINAL_RAW_ROSTER")
+        known = _evidence_frozen_data_v1(self.group_means)
+        expected = []
+        for ordinal, group in enumerate(groups,1):
+            ratio = sum((Fraction(raw["row_values"][order[name]]) for name in group), Fraction()) / len(group)
+            expected.append(dict(ordinal=ordinal, mean=dict(numerator=str(ratio.numerator), denominator=str(ratio.denominator))))
+        _native_require(type(known) is tuple and tuple(expected) == known, "LP03_DR_GROUP_ORIGINAL_RATIONAL_MEANS")
+        object.__setattr__(self, "group_means", known)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_,
+            "LP03_DR_GROUP_MEASUREMENT_LANE")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["ordered_input_row_ids"] = _evidence_tuple_decode_v1(data["ordered_input_row_ids"])
+        data["group_members"] = tuple(_evidence_tuple_decode_v1(group)
+            for group in _evidence_tuple_decode_v1(data["group_members"]))
+        data["group_means"] = _evidence_tuple_decode_v1(data["group_means"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceRecordedDrUncertaintyRecordV1(EvidenceRecordHeaderV1):
+    """Conditional uncertainty attached to one retained MATH-22 estimator."""
+
+    kind: str = field(default="UNCERTAINTY", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    original_estimator_ref: str
+    original_logged_source_ref: EvidenceRecordRefV1
+    original_policy_source_ref: EvidenceRecordRefV1
+    group_measurement_ref: str | EvidenceAbsenceV1
+    target: str
+    weighting_rule: str
+    method_ref: str
+    interval_exact_rationals: Mapping[str, object] | EvidenceAbsenceV1
+    error_budget_ref: str | EvidenceAbsenceV1
+    assumptions_refs: tuple[EvidenceRecordRefV1, ...]
+    numeric_certificate_json: str
+    availability_disposition: str
+    unavailable_reasons: tuple[str, ...]
+    native_measurement: Mapping[str, object]
+
+    def __post_init__(self):
+        from fractions import Fraction
+        from .latency_policy import _evidence_invocation_measurement_v1
+        from .serialization import _evidence_frozen_data_v1, _native_strict_json, deterministic_json
+        from .specification import decode_evidence_raw_output_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and type(self.lane) is EvidenceLaneV1 and self.target == "MEAN_CONDITIONAL_RECORDED_DR_SCORE"
+            and self.weighting_rule == "EQUAL_WEIGHT_COMPLETE_EQUAL_SIZE_ORDERED_GROUPS"
+            and self.method_ref == "CONDITIONAL_GROUP_MEAN_OUTWARD_64_128_V1",
+            "LP03_DR_UNCERTAINTY_RECORD_PROFILE")
+        for value in (self.attempt_ref, self.original_estimator_ref):
+            _native_ident(value)
+        _native_require(type(self.original_logged_source_ref) is type(self.original_policy_source_ref) is EvidenceRecordRefV1
+            and self.original_logged_source_ref != self.original_policy_source_ref
+            and type(self.assumptions_refs) is tuple and len(self.assumptions_refs) <= 32
+            and all(type(ref) is EvidenceRecordRefV1 for ref in self.assumptions_refs)
+            and len(set(self.assumptions_refs)) == len(self.assumptions_refs),
+            "LP03_DR_UNCERTAINTY_ORIGINAL_RECORD_REFS")
+        measured = _evidence_invocation_measurement_v1(self.native_measurement)
+        _native_require(measured["outcome"] == "SUCCESS" and measured["clock_domain_id"] == self.clock_domain_id
+            and measured["completed"][0] <= self.created_wall_ns, "LP03_DR_UNCERTAINTY_NATIVE_MEASUREMENT")
+        text = self.numeric_certificate_json
+        _native_require(type(text) is str and 0 < len(text) <= 65536, "LP03_DR_UNCERTAINTY_CERTIFICATE_WIRE")
+        raw = text.encode("utf-8", "strict")
+        certificate = _native_strict_json(raw, max_bytes=65536, max_nodes=4096, binary64_numbers=True)
+        _native_require(type(certificate) is dict and set(certificate) == {
+                "profile", "disposition", "target", "reasons", "original_raw", "original_policy", "original_input",
+                "group_means", "arithmetic", "interval", "source_admission", "measurement_model_uncertainty"}
+            and certificate["profile"] == "RECORDED_DR_UNCERTAINTY_DATA_V1" and certificate["target"] == self.target
+            and certificate["source_admission"] == certificate["measurement_model_uncertainty"] == "NOT_ESTABLISHED_BY_DATA_PROCEDURE"
+            and deterministic_json(certificate).encode("utf-8") == raw,
+            "LP03_DR_UNCERTAINTY_CERTIFICATE_PROFILE")
+        estimator_raw = deterministic_json(certificate["original_raw"]).encode("utf-8")
+        estimator = decode_evidence_raw_output_v1("MATH-22", estimator_raw, maximum_bytes=65536, maximum_nodes=1024)
+        _native_require(type(certificate["reasons"]) is list and tuple(certificate["reasons"]) == self.unavailable_reasons,
+            "LP03_DR_UNCERTAINTY_REASON_ROSTER")
+        _public_refs_v1(self.unavailable_reasons, allow_empty=True)
+        if self.availability_disposition == "UNCERTAINTY_UNAVAILABLE":
+            _native_require(bool(self.unavailable_reasons) and certificate["disposition"] == "UNCERTAINTY_UNAVAILABLE"
+                and certificate["group_means"] == [] and certificate["arithmetic"] is certificate["interval"] is None
+                and all(type(value) is EvidenceAbsenceV1 and value.reason == "UNCERTAINTY_UNAVAILABLE"
+                    for value in (self.group_measurement_ref, self.interval_exact_rationals, self.error_budget_ref)),
+                "LP03_DR_UNCERTAINTY_UNAVAILABLE_CANNOT_CLAIM_INTERVAL")
+        else:
+            _native_require(self.availability_disposition == "ORIGINAL_CONDITIONAL_RECORDED_SCORE_INTERVAL"
+                and certificate["disposition"] == "CONDITIONAL_DATA_CALCULATION" and not self.unavailable_reasons
+                and len(self.assumptions_refs) == 6 and isinstance(self.interval_exact_rationals, Mapping)
+                and type(certificate["interval"]) is dict
+                and certificate["interval"]["profile"] == self.method_ref,
+                "LP03_DR_UNCERTAINTY_POSITIVE_COMPLETE")
+            _native_ident(self.group_measurement_ref)
+            _native_ident(self.error_budget_ref)
+            interval = _evidence_frozen_data_v1(self.interval_exact_rationals)
+            _native_require(set(interval) == {"lower", "upper"}
+                and all(interval[key] == certificate["interval"][key] for key in interval),
+                "LP03_DR_UNCERTAINTY_INTERVAL_SOURCE_JOIN")
+
+            def exact(value):
+                _native_require(isinstance(value, Mapping) and set(value) == {"numerator", "denominator"},
+                    "LP03_DR_UNCERTAINTY_RATIONAL_FIELDS")
+                numerator, denominator = value["numerator"], value["denominator"]
+                _native_require(type(numerator) is type(denominator) is str
+                    and max(len(numerator), len(denominator)) <= 2048
+                    and re.fullmatch(r"-?(?:0|[1-9][0-9]*)", numerator) is not None
+                    and re.fullmatch(r"[1-9][0-9]*", denominator) is not None,
+                    "LP03_DR_UNCERTAINTY_RATIONAL_WIRE")
+                result = Fraction(int(numerator), int(denominator))
+                _native_require((str(result.numerator), str(result.denominator)) == (numerator, denominator),
+                    "LP03_DR_UNCERTAINTY_RATIONAL_CANONICAL")
+                return result
+
+            arithmetic = certificate["arithmetic"]
+            _native_require(type(arithmetic) is dict and set(arithmetic) == {
+                "row_mean", "represented_estimator", "estimator_minus_row_mean"},
+                "LP03_DR_UNCERTAINTY_ORIGINAL_ARITHMETIC")
+            rows = estimator["row_values"]
+            _native_require(0 < len(rows) <= 256, "LP03_DR_UNCERTAINTY_ORIGINAL_SCORE_COUNT")
+            row_mean = sum(map(Fraction, rows), Fraction()) / len(rows)
+            represented_estimator = Fraction(estimator["doubly_robust_estimate"])
+            _native_require(exact(arithmetic["row_mean"]) == row_mean
+                and exact(arithmetic["represented_estimator"]) == represented_estimator
+                and exact(arithmetic["estimator_minus_row_mean"]) == represented_estimator - row_mean
+                and exact(interval["lower"]) <= row_mean <= exact(interval["upper"]),
+                "LP03_DR_UNCERTAINTY_ORIGINAL_ESTIMATOR_JOIN")
+            object.__setattr__(self, "interval_exact_rationals", interval)
+        object.__setattr__(self, "native_measurement", measured)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_,
+            "LP03_DR_UNCERTAINTY_LANE")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        for name in ("original_logged_source_ref", "original_policy_source_ref"):
+            data[name] = EvidenceRecordRefV1.from_canonical_mapping(data[name])
+        data["assumptions_refs"] = tuple(EvidenceRecordRefV1.from_canonical_mapping(row)
+            for row in _evidence_tuple_decode_v1(data["assumptions_refs"]))
+        data["unavailable_reasons"] = _evidence_tuple_decode_v1(data["unavailable_reasons"])
+        for name in ("group_measurement_ref", "interval_exact_rationals", "error_budget_ref"):
+            if type(data[name]) is dict and data[name].get("state") == "ABSENT_WITH_REASON":
+                data[name] = EvidenceAbsenceV1.from_canonical_mapping(data[name])
+        return cls(**data)
+
+
+def _evidence_heldout_projection_value_v1(value, math_id):
+    """Keep the original topology together with the complete score receipt roster."""
+    from math import isfinite
+    from .serialization import _evidence_frozen_data_v1
+    score_key="fold_score_refs" if math_id=="MATH-20" else "path_score_refs"
+    _native_require(type(value) in (dict,MappingProxyType) and len(value)==4 and set(value)=={
+        "topology","topology_receipt_ref",score_key,"coverage_disposition"}
+        and value["coverage_disposition"]=="COMPLETE_ORIGINAL_HELD_OUT_SCORES",
+        "LP03_HELD_OUT_PROJECTION_COMPLETE_PROFILE")
+    _native_ident(value["topology_receipt_ref"])
+    raw,refs=value["topology"],value[score_key]
+    _native_require(type(raw) in (list,tuple) and type(refs) in (list,tuple)
+        and len(raw)==len(refs) and (2 if math_id=="MATH-20" else 1)<=len(raw)<=(4 if math_id=="MATH-20" else 3),
+        "LP03_HELD_OUT_PROJECTION_COMPLETE_SCORE_ROSTER")
+    refs=tuple(refs)
+    _public_refs_v1(refs)
+    topology=[]
+    for ordinal,row in enumerate(raw):
+        if math_id=="MATH-20":
+            names=("test_sample_ids","train_sample_ids","purged_sample_ids","embargoed_sample_ids")
+            _native_require(type(row) in (dict,MappingProxyType) and len(row)==6 and set(row)=={
+                *names,"merged_test_intervals","fold_id"} and type(row["fold_id"]) is int and row["fold_id"]==ordinal,
+                "LP03_HELD_OUT_PROJECTED_FOLD_FIELDS")
+            folded={}
+            joined=set()
+            for name in names:
+                members=row[name]
+                _native_require(type(members) in (list,tuple) and len(members)<=8,
+                    "LP03_HELD_OUT_PROJECTED_FOLD_MEMBERSHIP")
+                members=tuple(members)
+                _public_refs_v1(members,allow_empty=name!="test_sample_ids")
+                _native_require(joined.isdisjoint(members),"LP03_HELD_OUT_PROJECTED_FOLD_MEMBERSHIP")
+                joined.update(members)
+                folded[name]=members
+            boundaries=row["merged_test_intervals"]
+            _native_require(type(boundaries) in (list,tuple) and 0<len(boundaries)<=len(folded["test_sample_ids"]),
+                "LP03_HELD_OUT_PROJECTED_FOLD_BOUNDARIES")
+            intervals=[]
+            for interval in boundaries:
+                _native_require(type(interval) in (list,tuple) and len(interval)==2
+                    and all(type(coord) is float and isfinite(coord) for coord in interval)
+                    and interval[0]<interval[1] and (not intervals or intervals[-1][1]<interval[0]),
+                    "LP03_HELD_OUT_PROJECTED_FOLD_BOUNDARIES")
+                intervals.append(tuple(interval))
+            topology.append(MappingProxyType(dict(folded,fold_id=ordinal,merged_test_intervals=tuple(intervals))))
+        else:
+            data=_evidence_frozen_data_v1(row)
+            _native_require(isinstance(data,Mapping) and set(data)=={"path_id","split_ids","test_group_partition"}
+                and type(data["path_id"]) is int and data["path_id"]==ordinal
+                and type(data["split_ids"]) is type(data["test_group_partition"]) is tuple
+                and 0<len(data["split_ids"])==len(data["test_group_partition"])<=4
+                and all(type(index) is int and 0<=index<6 for index in data["split_ids"]),
+                "LP03_HELD_OUT_PROJECTED_PATH_FIELDS")
+            groups=[]
+            for part in data["test_group_partition"]:
+                _native_require(type(part) is tuple and 1<=len(part)<=2 and all(type(index) is int and 0<=index<4 for index in part),
+                    "LP03_HELD_OUT_PROJECTED_PATH_PARTITION")
+                groups.extend(part)
+            _native_require(len(set(groups))==len(groups) and len(set(data["split_ids"]))==len(data["split_ids"]),
+                "LP03_HELD_OUT_PROJECTED_PATH_PARTITION")
+            topology.append(data)
+    return MappingProxyType(dict(value,topology=tuple(topology),**{score_key:refs}))
+
+
+
+_LP03_OPE_POINT_PROJECTION_PROFILES_V1 = MappingProxyType({
+    "MATH-23": ("inverse_propensity_score_estimate", "ips_value", "ORIGINAL_RECORDED_IPS_POINT_ESTIMATE", "MATH-23::1.1.0"),
+    "MATH-24": ("self_normalized_ips_estimate", "snips_value", "ORIGINAL_ALIGNED_SNIPS_POINT_ESTIMATE", "MATH-24::1.1.0"),
+    "MATH-25": ("$", "switch_value_and_selected_tau", "ORIGINAL_NESTED_SWITCH_POINT_ESTIMATE", "MATH-25::2.0.0"),
+})
+
+
+def _evidence_recorded_ope_point_projection_v1(math_id, projected):
+    """Durable projection of the original point coordinate or complete switch record."""
+    from math import isfinite
+    from .serialization import deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    _native_require(math_id in _LP03_OPE_POINT_PROJECTION_PROFILES_V1, "LP03_OPE_POINT_PROJECTION_MATH")
+    if math_id in ("MATH-23", "MATH-24"):
+        _native_require(type(projected) is float and isfinite(projected), "LP03_OPE_POINT_EXACT_BINARY64")
+        return projected
+    _native_require(type(projected) in (dict, MappingProxyType), "LP03_SWITCH_PROJECTION_COMPLETE_RECORD")
+    raw = deterministic_json(projected).encode("utf-8")
+    data = decode_evidence_raw_output_v1(math_id, raw, maximum_bytes=65536, maximum_nodes=4096)
+    _native_require(len(data["outer_fold_results"]) <= 8 and len(data["held_out_row_values"]) <= 64
+        and all(len(row["criteria"]) <= 16 for row in data["outer_fold_results"]),
+        "LP03_SWITCH_PROJECTION_FINITE_FOLD_AND_THRESHOLD_SCOPE")
+    _native_require(deterministic_json(data).encode("utf-8") == raw, "LP03_SWITCH_PROJECTION_ORIGINAL_WIRE")
+    return data
+
+
+_LP03_ANALYTIC_CONVERSION_UNAVAILABLE_V1 = frozenset({
+    "LP03_NUMERICAL_BINARY64_UNREPRESENTABLE",
+    "LP03_NUMERICAL_FINITE_ROUNDING_CELL_REQUIRED",
+    "LP03_NUMERICAL_NEAREST_EVEN_CELL_UNPROVEN",
+    "LP03_NUMERICAL_EXACT_INPUT_DOMAIN",
+    "LP03_NUMERICAL_INPUT_BITS_EXHAUSTED",
+    "LP03_NUMERICAL_WORK_BITS_EXHAUSTED",
+    "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED",
+    "LP03_NUMERICAL_SERIALIZATION_UNREPRESENTABLE",
+    "LP03_NUMERICAL_OPERATION_FAILED",
+})
+
+
+def _evidence_analytic_conversion_outcome_v1(work, text, *, math_id, unit, basis):
+    """Retain the exact conversion wire or a closed numerical failure."""
+    from .context import _native_reference_reason
+    from .errors import ContractValidationError
+    from .parameter_policy import certify_evidence_binary64_v1
+    from .serialization import deterministic_json
+
+    try:
+        with work:
+            decimal = work.parse_decimal_v1(text)
+            certificate = certify_evidence_binary64_v1(decimal, math_id=math_id, unit=unit, basis=basis, work=work)
+        return deterministic_json(certificate)
+    except ContractValidationError as error:
+        reason = _native_reference_reason(error, _LP03_ANALYTIC_CONVERSION_UNAVAILABLE_V1)
+        if reason is None or work.state != "FAILED" or work.failure != reason:
+            raise
+        return EvidenceAbsenceV1(reason)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceAnalyticBinary64ConversionRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="NUMERICAL_CONVERSION", init=False)
+    math_id: str
+    original_raw_receipt_ref: str
+    original_decimal_text: str
+    original_input_weights_ref_or_absence: EvidenceRecordRefV1 | EvidenceAbsenceV1
+    output_field: str
+    output_unit: str
+    measurement_basis: str
+    certificate_json_or_absence: str | EvidenceAbsenceV1
+    numerical_work_limits: Mapping[str, int]
+    numerical_work_consumption: Mapping[str, int]
+    native_measurement: Mapping[str, object]
+
+    def __post_init__(self):
+        from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+        from .latency_policy import _evidence_invocation_measurement_v1
+        from .parameter_policy import _EvidenceNumericalWorkV1
+        from .serialization import _evidence_frozen_data_v1
+
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and self.math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37"),
+            "LP03_ANALYTIC_CONVERSION_ORIGIN_AND_PROFILE")
+        for value in (self.original_raw_receipt_ref, self.output_unit, self.measurement_basis):
+            _native_ident(value)
+        projection = EVIDENCE_PROJECTION_CONTRACTS_V1[self.math_id]
+        _native_require(projection.selection == "CERTIFIED" and projection.original_field == self.output_field
+            and projection.basis_requirement == self.measurement_basis
+            and self.causation_ref == self.original_raw_receipt_ref and self.source_lineage_refs[0] == self.original_raw_receipt_ref,
+            "LP03_ANALYTIC_CONVERSION_ORIGINAL_FIELD_SCOPE")
+        refs = self.original_input_weights_ref_or_absence
+        _native_require((type(refs) is EvidenceRecordRefV1 and len(self.source_lineage_refs) > 1
+            and refs.record_id == self.source_lineage_refs[1]) if self.math_id == "MATH-29"
+            else type(refs) is EvidenceAbsenceV1 and refs.reason == "NO_INPUT_WEIGHTS_FOR_SELECTED_FORMULA",
+            "LP03_ANALYTIC_CONVERSION_ORIGINAL_WEIGHT_REF")
+        limits = _evidence_frozen_data_v1(self.numerical_work_limits)
+        consumed = _evidence_frozen_data_v1(self.numerical_work_consumption)
+        maxima = {"max_input_bits": 4096, "max_work_bits": 65536, "max_serialized_bytes": 1048576}
+        _native_require(isinstance(limits, Mapping) and set(limits) == set(maxima)
+            and all(type(limits[key]) is int and 0 < limits[key] <= maximum for key, maximum in maxima.items()),
+            "LP03_ANALYTIC_CONVERSION_ORIGINAL_NUMERICAL_LIMITS")
+        sample = _evidence_invocation_measurement_v1(self.native_measurement)
+        certificate = self.certificate_json_or_absence
+        available = type(certificate) is str
+        _native_require(sample["outcome"] == ("SUCCESS" if available else "FAILED")
+            and sample["clock_domain_id"] == self.clock_domain_id
+            and sample["completed"][0] == self.created_wall_ns, "LP03_ANALYTIC_CONVERSION_ORIGINAL_MEASUREMENT")
+        _native_require(type(self.original_decimal_text) is str and 0 < len(self.original_decimal_text) <= 4096
+            and (0 < len(certificate) <= 65536 if available else type(certificate) is EvidenceAbsenceV1
+                and certificate.reason in _LP03_ANALYTIC_CONVERSION_UNAVAILABLE_V1), "LP03_ANALYTIC_CONVERSION_WIRE")
+        work = _EvidenceNumericalWorkV1(limits, retained_input_capacity=1)
+        produced = _evidence_analytic_conversion_outcome_v1(work, self.original_decimal_text,
+            math_id=self.math_id, unit=self.output_unit, basis=self.measurement_basis)
+        _native_require(produced == certificate and consumed == work.consumed,
+            "LP03_ANALYTIC_CONVERSION_ORIGINAL_CELL_AND_CHARGE")
+        object.__setattr__(self, "numerical_work_limits", limits)
+        object.__setattr__(self, "numerical_work_consumption", consumed)
+        object.__setattr__(self, "native_measurement", sample)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        weights = data["original_input_weights_ref_or_absence"]
+        data["original_input_weights_ref_or_absence"] = (
+            EvidenceAbsenceV1.from_canonical_mapping(weights)
+            if type(weights) is dict and weights.get("state") == "ABSENT_WITH_REASON"
+            else EvidenceRecordRefV1.from_canonical_mapping(weights))
+        certificate = data["certificate_json_or_absence"]
+        if type(certificate) is dict:
+            data["certificate_json_or_absence"] = EvidenceAbsenceV1.from_canonical_mapping(certificate)
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceValueProjectionRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="VALUE_PROJECTION", init=False)
+    original_raw_receipt_ref: str
+    original_raw_schema_ref: str
+    original_implementation_ref: str
+    measured_run_ref: str
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    field_selections: tuple[tuple[str, str], ...]
+    evidence_projection_schema_ref: str
+    projected_value: str | float | tuple[float, float] | _EvidenceBootstrapValueV1 | _EvidenceMultipleTestingValueV1 | EvidenceAbsenceV1
+    output_unit: str
+    output_basis: str
+    numerical_conversion_ref_or_absence: str | EvidenceAbsenceV1
+    supplementary_measurement_refs: tuple[str, ...]
+    publication_ref: EvidencePublicationRefV1
+
+    def __post_init__(self):
+        from .context import exact_decimal
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("original_raw_receipt_ref", "original_raw_schema_ref", "original_implementation_ref", "measured_run_ref",
+                     "attempt_ref", "evidence_projection_schema_ref", "output_basis"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.lane) is EvidenceLaneV1 and type(self.publication_ref) is EvidencePublicationRefV1,
+                        "LP03_PROJECTION_LANE_AND_INERT_PUBLICATION")
+        _native_require(type(self.field_selections) is tuple and len(self.field_selections) == 1
+                        and type(self.field_selections[0]) is tuple and len(self.field_selections[0]) == 2
+                        and all(type(value) is str for value in self.field_selections[0]),
+                        "LP03_PROJECTION_NATIVE_FIELD_SELECTION")
+        for value in self.field_selections[0]:
+            _native_ident(value)
+        if self.original_raw_schema_ref == "MATH-03::OUTPUT":
+            _native_ident(self.output_unit)
+            _native_require(type(self.field_selections) is tuple and self.field_selections == (("$", "mid"),)
+                            and self.original_implementation_ref == "MATH-03::1.1R1"
+                            and self.evidence_projection_schema_ref == "QTT_LP03_MATH_03_MID_PROJECTION_V1_5",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is str and str(exact_decimal(self.projected_value)) == self.projected_value,
+                            "LP03_PROJECTION_EXACT_DECIMAL")
+        elif self.original_raw_schema_ref in ("MATH-06::OUTPUT","MATH-07::OUTPUT"):
+            from .context import decimal_context_v1
+            from decimal import localcontext
+            math_id=self.original_raw_schema_ref.split("::")[0]
+            _native_require(self.field_selections == (("expected_net_cash","expected_net_cash"),)
+                and self.original_implementation_ref == math_id+"::2.0.0"
+                and self.evidence_projection_schema_ref == "LP03::"+math_id+"::PROJECTION_V1"
+                and self.output_basis == "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE"
+                and type(self.output_unit) is str and len(self.output_unit) == 3
+                and self.output_unit.isascii() and self.output_unit.isalpha() and self.output_unit.isupper(),
+                "LP03_CASHFLOW_PROJECTION_ORIGINAL_PROFILE")
+            _native_require(type(self.projected_value) is str and 0 < len(self.projected_value) <= 128,
+                "LP03_CASHFLOW_PROJECTION_EXACT_DECIMAL")
+            with localcontext(decimal_context_v1()):
+                _native_require(str(exact_decimal(self.projected_value)) == self.projected_value,
+                    "LP03_CASHFLOW_PROJECTION_EXACT_DECIMAL")
+        elif self.original_raw_schema_ref in ("MATH-01::OUTPUT", "MATH-04::OUTPUT", "MATH-05::OUTPUT"):
+            from .context import decimal_context_v1
+            from decimal import localcontext
+            math_id = self.original_raw_schema_ref.split("::")[0]
+            descriptor = _LP03_MARKET_METRIC_PROFILES_V1[math_id]
+            _native_ident(self.output_unit)
+            _native_require(self.field_selections == ((descriptor[1], descriptor[0]),)
+                            and self.original_implementation_ref == math_id + "::1.1R1"
+                            and self.evidence_projection_schema_ref == "LP03::" + math_id + "::PROJECTION_V1"
+                            and self.output_basis == descriptor[3]
+                            and (self.output_unit == descriptor[2] if math_id != "MATH-04" else
+                                len(self.output_unit) == 12 and self.output_unit[3:] == "/CONTRACT"
+                                and self.output_unit[:3].isascii() and self.output_unit[:3].isalpha() and self.output_unit[:3].isupper()),
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is str and 0 < len(self.projected_value) <= 4096,
+                            "LP03_PROJECTION_EXACT_DECIMAL")
+            with localcontext(decimal_context_v1()):
+                _native_require(str(exact_decimal(self.projected_value)) == self.projected_value,
+                                "LP03_PROJECTION_EXACT_DECIMAL")
+        elif self.original_raw_schema_ref == "MATH-02::OUTPUT":
+            from math import isfinite
+            _native_require(self.field_selections == (("$","edge"),)
+                and self.original_implementation_ref == "MATH-02::1.1R1"
+                and self.evidence_projection_schema_ref == "LP03::MATH-02::PROJECTION_V1"
+                and type(self.output_unit) is str and self.output_unit == "probability points" and self.output_basis == "MODEL_MINUS_MARKET_SAME_SNAPSHOT"
+                and type(self.projected_value) is float and isfinite(self.projected_value)
+                and -1.0 <= self.projected_value <= 1.0, "LP03_EDGE_PROJECTION_ORIGINAL_BINARY64")
+        elif self.original_raw_schema_ref == "MATH-08::OUTPUT":
+            from math import isfinite
+            _native_require(type(self.field_selections) is tuple
+                            and self.field_selections == (("mean_brier_score", "brier_score"),)
+                            and self.original_implementation_ref == "MATH-08::1.1R1"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-08::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "squared probability error"
+                            and self.output_basis == "PER_SAMPLE_SQUARED_PROBABILITY",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is float and isfinite(self.projected_value)
+                            and 0 <= self.projected_value <= 2, "LP03_PROJECTION_EXACT_BINARY64")
+        elif self.original_raw_schema_ref == "MATH-09::OUTPUT":
+            from math import isfinite
+            _native_require(type(self.field_selections) is tuple and self.field_selections == (("mean_log_loss", "log_loss"),)
+                            and self.original_implementation_ref == "MATH-09::1.1R1"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-09::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "nats/sample"
+                            and self.output_basis == "per_sample_natural_log_loss",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is float and isfinite(self.projected_value)
+                            and self.projected_value >= 0, "LP03_PROJECTION_EXACT_BINARY64")
+        elif self.original_raw_schema_ref in ("MATH-36::OUTPUT", "MATH-39::OUTPUT", "LP03::MATH-32::RAW_V1", "LP03::MATH-33::RAW_V1", "LP03::MATH-35::RAW_V1", "LP03::MATH-38::RAW_V1", "LP03::MATH-40::RAW_V1", "LP03::MATH-41::RAW_V1", "LP03::MATH-42::RAW_V1", "LP03::MATH-43::RAW_V1", "LP03::MATH-44::RAW_V1", "LP03::MATH-45::RAW_V1"):
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+            from .implementation_registry import _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1
+            from .serialization import _evidence_frozen_data_v1
+
+            math_id = self.original_raw_schema_ref.split("::")[0 if self.original_raw_schema_ref.endswith("::OUTPUT") else 1]
+            rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            _native_ident(self.output_unit)
+            _native_require(self.original_implementation_ref == _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[math_id].implementation_id
+                and self.evidence_projection_schema_ref == rule.schema_id
+                and self.field_selections == ((rule.original_field, rule.output_name),)
+                and self.output_basis == rule.basis_requirement, "LP03_PRIVATE_EXECUTION_PROJECTION_ORIGINAL_SCHEMA")
+            if math_id == "MATH-45":
+                data = _evidence_frozen_data_v1(self.projected_value)
+                _native_require(isinstance(data, Mapping) and set(data) == {"decision", "lcb_net", "raw_gate", "no_order_authority"}
+                    and type(data["raw_gate"]) is bool and data["no_order_authority"] is True
+                    and type(data["lcb_net"]) is str and str(exact_decimal(data["lcb_net"])) == data["lcb_net"]
+                    and (exact_decimal(data["lcb_net"]) > 0) is data["raw_gate"]
+                    and data["decision"] == ("POSITIVE_NET_LCB" if data["raw_gate"] else "NONPOSITIVE_NET_LCB"),
+                    "LP03_PRIVATE_EXECUTION_ORIGINAL_NO_TRADE_GATE")
+                object.__setattr__(self, "projected_value", data)
+            elif math_id == "MATH-36" or math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1:
+                from .specification import decode_evidence_raw_output_v1
+                from .serialization import deterministic_json
+
+                if math_id == "MATH-36":
+                    data = _evidence_frozen_data_v1(self.projected_value)
+                    wire = deterministic_json(data).encode("utf-8", "strict")
+                    decode_evidence_raw_output_v1(math_id, wire, maximum_bytes=4096, maximum_nodes=16)
+                else:
+                    _native_require(self.output_unit == _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_UNITS_V1[math_id],
+                        "LP03_EXECUTION_BINARY64_PROJECTED_ORIGINAL_UNIT")
+                    if math_id == "MATH-44":
+                        raw = self.projected_value
+                        _native_require(type(raw) in (list, tuple) and 0 < len(raw) <= 16,
+                            "LP03_EXECUTION_BINARY64_PROJECTED_MATRIX_DIMENSIONS")
+                        size = len(raw)
+                        _native_require(all(type(row) in (list, tuple) and len(row) == size for row in raw),
+                            "LP03_EXECUTION_BINARY64_PROJECTED_MATRIX_DIMENSIONS")
+                        data = tuple(tuple(row) for row in raw)
+                    else:
+                        data = self.projected_value
+                    wire = deterministic_json(data).encode("utf-8", "strict")
+                    decode_evidence_raw_output_v1(math_id, wire, maximum_bytes=16384, maximum_nodes=512)
+                object.__setattr__(self, "projected_value", data)
+            else:
+                _native_require(type(self.projected_value) is str and str(exact_decimal(self.projected_value)) == self.projected_value,
+                    "LP03_PRIVATE_EXECUTION_ORIGINAL_DECIMAL_PROJECTION")
+        elif self.original_raw_schema_ref in ("LP03::MATH-50::RAW_V1", "LP03::MATH-51::RAW_V1", "LP03::MATH-52::RAW_V1"):
+            from decimal import localcontext
+            from .context import decimal_context_v1
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+            from .implementation_registry import _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1
+            from .quantum_benchmark import QuantumClassicalNoTradeComparisonV1, QuantumTraceValidationReceiptV1
+            from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+
+            math_id = self.original_raw_schema_ref.split("::")[1]
+            rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            trace = math_id in ("MATH-50", "MATH-51")
+            expected_type = QuantumTraceValidationReceiptV1 if trace else QuantumClassicalNoTradeComparisonV1
+            _native_require(self.original_implementation_ref == _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[math_id].implementation_id
+                and self.evidence_projection_schema_ref == rule.schema_id
+                and self.field_selections == ((rule.original_field, rule.output_name),)
+                and self.output_basis == rule.basis_requirement
+                and self.output_unit == _LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1[math_id]
+                and type(self.input_lock_ref) is str,
+                "LP03_QUANTUM_ORIGINAL_PROJECTION_SCHEMA")
+            wire = deterministic_json(self.projected_value)
+            data = _evidence_canonical_object_v1(wire.encode("utf-8", "strict"), max_bytes=65536)
+            with localcontext(decimal_context_v1()):
+                receipt = expected_type.from_canonical_mapping(data)
+            _native_require(receipt.input_lock_id == self.input_lock_ref and deterministic_json(receipt) == wire
+                and (not trace or receipt.math_spec_id == math_id)
+                and self.supplementary_measurement_refs == (
+                    (self.original_raw_receipt_ref.removesuffix("::RAW")+"::QUANTUM_TRACE",) if trace else ()),
+                "LP03_QUANTUM_ORIGINAL_PROJECTION_LOCK_AND_ROSTER")
+            object.__setattr__(self, "projected_value", _evidence_frozen_data_v1(data))
+        elif self.original_raw_schema_ref in ("LP03::MATH-29::RAW_V1", "LP03::MATH-30::RAW_V1", "LP03::MATH-31::RAW_V1", "LP03::MATH-37::RAW_V1"):
+            from math import isfinite
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+            from .implementation_registry import _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1
+
+            math_id = self.original_raw_schema_ref.split("::")[1]
+            projection = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            implementation = _LP03_COMPLETE_IMPLEMENTATION_CONTRACTS_V1[math_id].implementation_id
+            _native_ident(self.output_unit)
+            _native_require(self.original_implementation_ref == implementation
+                and self.evidence_projection_schema_ref == projection.schema_id
+                and self.field_selections == ((projection.original_field, projection.output_name),)
+                and self.output_basis == projection.basis_requirement
+                and (type(self.projected_value) is float and isfinite(self.projected_value)
+                    or type(self.projected_value) is EvidenceAbsenceV1
+                    and self.projected_value.reason == "NUMERICAL_CONVERSION_UNAVAILABLE"),
+                "LP03_ANALYTIC_PROJECTION_ORIGINAL_SCHEMA")
+        elif self.original_raw_schema_ref in ("MATH-23::OUTPUT", "MATH-24::OUTPUT", "MATH-25::OUTPUT"):
+            math_id = self.original_raw_schema_ref.split("::")[0]
+            field, metric, basis, implementation = _LP03_OPE_POINT_PROJECTION_PROFILES_V1[math_id]
+            _native_require(self.original_implementation_ref == implementation
+                and self.evidence_projection_schema_ref == f"LP03::{math_id}::PROJECTION_V1"
+                and self.field_selections == ((field, metric),) and self.output_basis == basis,
+                "LP03_OPE_POINT_PROJECTION_ORIGINAL_SCHEMA")
+            _native_ident(self.output_unit)
+            object.__setattr__(self, "projected_value", _evidence_recorded_ope_point_projection_v1(math_id, self.projected_value))
+        elif self.original_raw_schema_ref == "MATH-22::OUTPUT":
+            from math import isfinite
+
+            _native_require(self.original_implementation_ref == "MATH-22::1.1.0"
+                and self.evidence_projection_schema_ref == "LP03::MATH-22::PROJECTION_V1"
+                and self.field_selections == (("doubly_robust_estimate", "dr_value_and_uncertainty"),)
+                and self.output_basis == "MEAN_CONDITIONAL_RECORDED_DR_SCORE",
+                "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_ident(self.output_unit)
+            _native_require(type(self.projected_value) in (dict, MappingProxyType), "LP03_DR_PROJECTION_ORIGINAL_ESTIMATOR")
+            result = _native_obj(dict(self.projected_value), ("estimate", "raw_result_ref", "uncertainty_ref", "uncertainty_target"))
+            _native_require(result["raw_result_ref"] == self.original_raw_receipt_ref
+                and type(result["estimate"]) is float and isfinite(result["estimate"])
+                and result["uncertainty_target"] == self.output_basis,
+                "LP03_DR_PROJECTION_ORIGINAL_ESTIMATOR")
+            _native_ident(result["uncertainty_ref"])
+            refs = self.supplementary_measurement_refs
+            _native_require(type(refs) is tuple and 1 <= len(refs) <= 2 and refs[-1] == result["uncertainty_ref"],
+                "LP03_DR_PROJECTION_ORIGINAL_UNCERTAINTY")
+            object.__setattr__(self, "projected_value", MappingProxyType(dict(result)))
+        elif self.original_raw_schema_ref in ("MATH-20::OUTPUT","MATH-21::OUTPUT"):
+            math_id=self.original_raw_schema_ref.split("::")[0]
+            fold=math_id=="MATH-20"
+            _native_require(self.original_implementation_ref==math_id+"::2.0.0"
+                and self.evidence_projection_schema_ref==f"LP03::{math_id}::PROJECTION_V1"
+                and self.field_selections==((("folds","split_indices") if fold else ("paths","cpcv_paths")),)
+                and type(self.output_unit) is str and self.output_unit in ("squared probability error","nats/sample")
+                and self.output_basis==("PURGED_FOLD_SCORE_DISTRIBUTION" if fold else "COMBINATORIAL_PURGED_PATH_SCORE_DISTRIBUTION"),
+                "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            projected=_evidence_heldout_projection_value_v1(self.projected_value,math_id)
+            refs=self.supplementary_measurement_refs
+            _native_require(type(refs) is tuple and (refs==projected["fold_score_refs"] if fold else
+                len(projected["path_score_refs"])<len(refs)<=9
+                and refs[-len(projected["path_score_refs"]):]==projected["path_score_refs"]),
+                "LP03_HELD_OUT_PROJECTION_SUPPLEMENTARY_RECEIPTS")
+            _native_require(projected["topology_receipt_ref"]==self.original_raw_receipt_ref,
+                "LP03_HELD_OUT_PROJECTION_ORIGINAL_TOPOLOGY_REF")
+            object.__setattr__(self,"projected_value",projected)
+        elif self.original_raw_schema_ref == "MATH-19::OUTPUT":
+            _native_require(self.field_selections == (("[probability_of_backtest_overfitting,S,split_count,logits,splits]", "pbo_receipt"),)
+                and self.original_implementation_ref == "MATH-19::2.0.0"
+                and self.evidence_projection_schema_ref == "LP03::MATH-19::PROJECTION_V1"
+                and type(self.output_unit) is str and self.output_unit == "mixed; member-specific"
+                and self.output_basis == "probability_of_backtest_overfitting", "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            object.__setattr__(self, "projected_value", _evidence_cscv_result_v1(self.projected_value))
+        elif self.original_raw_schema_ref in ("MATH-17::OUTPUT", "MATH-18::OUTPUT"):
+            from math import isfinite
+            math_id = self.original_raw_schema_ref.split("::")[0]
+            metric, field, implementation, basis = _LP03_SHARPE_PROJECTION_PROFILES_V1[math_id]
+            _native_require(self.field_selections == ((field, metric),)
+                            and self.original_implementation_ref == implementation
+                            and self.evidence_projection_schema_ref == f"LP03::{math_id}::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "probability"
+                            and self.output_basis == basis, "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is float and isfinite(self.projected_value)
+                            and 0.0 <= self.projected_value <= 1.0, "LP03_SHARPE_PROJECTION_TYPED_PROBABILITY")
+        elif self.original_raw_schema_ref == "MATH-16::OUTPUT":
+            _native_require(self.field_selections == (("[statistic,p_value,reject,candidate_means,long_run_variances,consistent_valid_columns,simulated_statistics,recenter_variant]", "spa_receipt"),)
+                and self.original_implementation_ref == "MATH-16::2.0.0"
+                and self.evidence_projection_schema_ref == "LP03::MATH-16::PROJECTION_V1"
+                and type(self.output_unit) is str and self.output_unit == "mixed; member-specific"
+                and self.output_basis == "studentized_loss_differential_spa_p_value", "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is _EvidenceSPAValueV1, "LP03_SPA_PROJECTION_TYPED_RECORD")
+            _EvidenceSPAValueV1.__post_init__(self.projected_value)
+        elif self.original_raw_schema_ref == "MATH-15::OUTPUT":
+            _native_require(self.field_selections == (("[statistic,p_value,reject,candidate_means,simulated_statistics,recenter_policy]", "reality_check_receipt"),)
+                and self.original_implementation_ref == "MATH-15::2.0.0"
+                and self.evidence_projection_schema_ref == "LP03::MATH-15::PROJECTION_V1"
+                and type(self.output_unit) is str and self.output_unit == "mixed; member-specific"
+                and self.output_basis == "benchmark_candidate_loss_differential_p_value",
+                "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is _EvidenceRealityCheckValueV1, "LP03_REALITY_PROJECTION_TYPED_RECORD")
+            _EvidenceRealityCheckValueV1.__post_init__(self.projected_value)
+        elif self.original_raw_schema_ref == "MATH-14::OUTPUT":
+            _native_require(self.field_selections == (("[sample_mean,lower,upper,bootstrap_distribution,seed,replicates,expected_block_length,interval_method]", "bootstrap_distribution_and_interval"),)
+                and self.original_implementation_ref == "MATH-14::2.0.0"
+                and self.evidence_projection_schema_ref == "LP03::MATH-14::PROJECTION_V1"
+                and type(self.output_unit) is str and self.output_unit == "statistic_unit"
+                and self.output_basis == "bootstrap_statistic_distribution_and_interval",
+                "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is _EvidenceBootstrapValueV1, "LP03_BOOTSTRAP_PROJECTION_TYPED_RECORD")
+            _EvidenceBootstrapValueV1.__post_init__(self.projected_value)
+        elif self.original_raw_schema_ref == "MATH-11::OUTPUT":
+            from math import isfinite
+            _native_require(self.field_selections == (("[lower,upper]", "interval"),)
+                            and self.original_implementation_ref == "MATH-11::1.1R1"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-11::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "probability"
+                            and self.output_basis == "lower_upper_probability_interval",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is tuple and len(self.projected_value) == 2
+                            and all(type(item) is float and isfinite(item) for item in self.projected_value)
+                            and 0.0 <= self.projected_value[0] <= self.projected_value[1] <= 1.0,
+                            "LP03_WILSON_PROJECTION_TYPED_INTERVAL")
+        elif self.original_raw_schema_ref in ("MATH-12::OUTPUT", "MATH-13::OUTPUT"):
+            math_id = self.original_raw_schema_ref.split("::")[0]
+            _native_require(self.field_selections == (("$", "rejections_and_adjusted_p"),)
+                            and self.original_implementation_ref == math_id + "::1.1R1"
+                            and self.evidence_projection_schema_ref == "LP03::" + math_id + "::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "probability"
+                            and self.output_basis == "adjusted_p_and_rejection_mask",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            object.__setattr__(self, "projected_value", _evidence_multiple_testing_value_v1(self.projected_value, math_id=math_id))
+        elif self.original_raw_schema_ref == "MATH-10::OUTPUT":
+            from math import isfinite
+            _native_require(type(self.field_selections) is tuple and self.field_selections == (("expected_calibration_error", "ece"),)
+                            and self.original_implementation_ref == "MATH-10::2.0.0"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-10::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "probability"
+                            and self.output_basis == "absolute_calibration_gap",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is float and isfinite(self.projected_value)
+                            and 0 <= self.projected_value <= 1, "LP03_PROJECTION_EXACT_BINARY64")
+        elif self.original_raw_schema_ref == "LP03::MATH-27::RAW_V1":
+            from .context import decimal_context_v1
+            from decimal import localcontext
+            _native_require(self.field_selections == (("raw_fraction", "full_kelly_fraction"),)
+                            and self.original_implementation_ref == "qku/economic_math.py::MATH-27::ST12C-CURRENTIZED-1.0"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-27::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "fraction_of_approved_risk_capital"
+                            and self.output_basis == "wealth_fraction", "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is str and 0 < len(self.projected_value) <= 4096,
+                            "LP03_PROJECTION_EXACT_DECIMAL")
+            with localcontext(decimal_context_v1()):
+                _native_require(str(exact_decimal(self.projected_value)) == self.projected_value,
+                                "LP03_PROJECTION_EXACT_DECIMAL")
+        elif self.original_raw_schema_ref == "LP03::MATH-28::RAW_V1":
+            from .context import decimal_context_v1
+            from decimal import localcontext
+            _native_require(self.field_selections == (("$", "bounded_fraction"),)
+                            and self.original_implementation_ref == "qku/economic_math.py::MATH-28::ST12C-CURRENTIZED-1.0"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-28::PROJECTION_V1"
+                            and type(self.output_unit) is str and self.output_unit == "fraction_of_approved_risk_capital"
+                            and self.output_basis == "bounded_fractional_wealth_fraction", "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is str and 0 < len(self.projected_value) <= 4096,
+                            "LP03_PROJECTION_EXACT_DECIMAL")
+            with localcontext(decimal_context_v1()):
+                _native_require(str(exact_decimal(self.projected_value)) == self.projected_value
+                                and 0 <= exact_decimal(self.projected_value) <= 1,
+                                "LP03_PROJECTION_EXACT_DECIMAL")
+        elif self.original_raw_schema_ref == "LP03::MATH-26::RAW_V1":
+            from .context import decimal_context_v1
+            from decimal import localcontext
+            _native_ident(self.output_unit)
+            _native_require(self.field_selections == (("$", "evi"),)
+                            and self.original_implementation_ref == "qku/economic_math.py::MATH-26::ST12C-CURRENTIZED-1.0"
+                            and self.evidence_projection_schema_ref == "LP03::MATH-26::PROJECTION_V1"
+                            and self.output_basis == "EXPECTED_VALUE_OF_INFORMATION_PER_DECISION",
+                            "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+            _native_require(type(self.projected_value) is str and 0 < len(self.projected_value) <= 4096,
+                            "LP03_PROJECTION_EXACT_DECIMAL")
+            with localcontext(decimal_context_v1()):
+                _native_require(str(exact_decimal(self.projected_value)) == self.projected_value,
+                                "LP03_PROJECTION_EXACT_DECIMAL")
+        else:
+            _native_require(False, "LP03_PROJECTION_PROFILE_UNAVAILABLE")
+        _public_refs_v1(self.supplementary_measurement_refs, allow_empty=True)
+        _native_require((not self.supplementary_measurement_refs or self.original_raw_schema_ref in (
+            "MATH-20::OUTPUT", "MATH-21::OUTPUT", "MATH-22::OUTPUT", "LP03::MATH-50::RAW_V1", "LP03::MATH-51::RAW_V1"))
+                        , "LP03_PROJECTION_SUPPLEMENTARY_MEASUREMENT_ROSTER")
+        conversion_ref = self.numerical_conversion_ref_or_absence
+        if self.original_raw_schema_ref in ("LP03::MATH-29::RAW_V1", "LP03::MATH-30::RAW_V1", "LP03::MATH-31::RAW_V1", "LP03::MATH-37::RAW_V1"):
+            _native_ident(conversion_ref)
+        else:
+            _native_require(type(conversion_ref) is EvidenceAbsenceV1
+                and conversion_ref.reason == "IDENTITY_NO_NUMERICAL_CONVERSION", "LP03_PROJECTION_IDENTITY_CONVERSION")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_, "LP03_PROJECTION_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["field_selections"] = tuple(_evidence_tuple_decode_v1(row) for row in _evidence_tuple_decode_v1(data["field_selections"]))
+        data["supplementary_measurement_refs"] = _evidence_tuple_decode_v1(data["supplementary_measurement_refs"])
+        data["numerical_conversion_ref_or_absence"] = _evidence_absence_or_ref_v1(data["numerical_conversion_ref_or_absence"])
+        data["publication_ref"] = EvidencePublicationRefV1.from_canonical_mapping(data["publication_ref"])
+        if data["original_raw_schema_ref"] in ("LP03::MATH-29::RAW_V1", "LP03::MATH-30::RAW_V1", "LP03::MATH-31::RAW_V1", "LP03::MATH-37::RAW_V1") and type(data["projected_value"]) is dict:
+            data["projected_value"] = EvidenceAbsenceV1.from_canonical_mapping(data["projected_value"])
+        if data["original_raw_schema_ref"] == "MATH-16::OUTPUT":
+            data["projected_value"] = _evidence_spa_value_v1(data["projected_value"])
+        if data["original_raw_schema_ref"] == "MATH-15::OUTPUT":
+            data["projected_value"] = _evidence_reality_check_value_v1(data["projected_value"])
+        if data["original_raw_schema_ref"] == "MATH-14::OUTPUT":
+            data["projected_value"] = _evidence_bootstrap_value_v1(data["projected_value"])
+        if data["original_raw_schema_ref"] == "MATH-11::OUTPUT":
+            data["projected_value"] = _evidence_tuple_decode_v1(data["projected_value"])
+        if data["original_raw_schema_ref"] == "LP03::MATH-44::RAW_V1":
+            matrix = data["projected_value"]
+            _native_require(type(matrix) is list and all(type(row) is list for row in matrix),
+                "LP03_ARRAY_ENCODING")
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidencePublicationRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="PUBLICATION", init=False)
+    lane: EvidenceLaneV1
+    fence_ref: str
+    underlying_store_id: str
+    underlying_record_refs: tuple[str, ...]
+    underlying_transaction_ref: str
+    original_grant_ref: str
+    publication_purpose: str
+    successful_commit_return_observation: Mapping[str, object]
+    independent_readback_observation: Mapping[str, object]
+    publication_observation: Mapping[str, object]
+    original_witness_refs: EvidenceAbsenceV1
+    storage_qualification: str
+    ambiguity_state: str
+
+    def __post_init__(self):
+        from .latency_policy import _evidence_storage_observation_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        EvidencePublicationRefV1(self.underlying_store_id, self.record_id)
+        _native_require(type(self.lane) is EvidenceLaneV1, "LP03_PUBLICATION_LANE")
+        for name in ("underlying_transaction_ref", "original_grant_ref", "publication_purpose", "storage_qualification", "fence_ref"):
+            _native_ident(getattr(self, name))
+        _public_refs_v1(self.underlying_record_refs)
+        _native_require(len(self.underlying_record_refs) <= 4096 and self.record_id not in self.underlying_record_refs
+                        and self.publication_purpose == "EVIDENCE_LANE_REGISTRATION_V1"
+                        and self.ambiguity_state == "ORIGINAL_DATA_COMMIT_AND_READBACK_OBSERVED"
+                        and type(self.original_witness_refs) is EvidenceAbsenceV1
+                        and self.original_witness_refs.reason == "NO_HISTORICAL_PUBLICATION_WITNESS",
+                        "LP03_PUBLICATION_SELECTED_PROFILE")
+        names = ("successful_commit_return_observation", "independent_readback_observation", "publication_observation")
+        for name in names:
+            object.__setattr__(self, name, _evidence_storage_observation_v1(getattr(self, name)))
+        commit, readback, publication = tuple(getattr(self, name) for name in names)
+        _native_require(all(row["clock_domain_id"] == self.clock_domain_id for row in (commit, readback, publication))
+                        and all(commit[name] == readback[name] == publication[name]
+                            for name in ("boot_identity_ref", "process_identity_ref", "clock_declarations"))
+                        and all(commit[name] <= readback[name] <= publication[name]
+                            for name in ("wall_ns", "monotonic_ns", "process_cpu_ns"))
+                        and self.created_wall_ns == publication["wall_ns"], "LP03_PUBLICATION_OBSERVATION_ORDER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_, "LP03_PUBLICATION_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["underlying_record_refs"] = _evidence_tuple_decode_v1(data["underlying_record_refs"])
+        data["original_witness_refs"] = EvidenceAbsenceV1.from_canonical_mapping(data["original_witness_refs"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceLaneRegistrationRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="LANE_REGISTRATION", init=False)
+    lane: EvidenceLaneV1
+    attempt_ref: str
+    terminal_receipt_ref: str
+    original_result_ref: str
+    original_store_id: str
+    result_slot: str
+    common_plan_refs: tuple[str, ...]
+    accepted_publication_ref: EvidencePublicationRefV1
+    all_metric_projection_refs: tuple[str, ...]
+    incomplete_reasons: tuple[str, ...]
+
+    def __post_init__(self):
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(type(self.lane) is EvidenceLaneV1 and type(self.accepted_publication_ref) is EvidencePublicationRefV1,
+                        "LP03_LANE_REGISTRATION_TYPES")
+        for name in ("attempt_ref", "terminal_receipt_ref", "original_result_ref", "original_store_id", "result_slot"):
+            _native_ident(getattr(self, name))
+        for name in ("common_plan_refs", "all_metric_projection_refs"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_LANE_REGISTRATION_EMPTY_CLOSURE")
+        _public_refs_v1(self.incomplete_reasons, allow_empty=True)
+        _native_require(self.accepted_publication_ref.store_id == self.original_store_id
+                        and self.result_slot.startswith("ST12F-" + self.lane.value + "-CONTRACT::"),
+                        "LP03_LANE_REGISTRATION_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        _native_require(type(data["lane"]) is str and data["lane"] in EvidenceLaneV1._value2member_map_, "LP03_REGISTRATION_LANE_ENCODING")
+        data["lane"] = EvidenceLaneV1(data["lane"])
+        data["accepted_publication_ref"] = EvidencePublicationRefV1.from_canonical_mapping(data["accepted_publication_ref"])
+        for name in ("common_plan_refs", "all_metric_projection_refs", "incomplete_reasons"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidencePipelineConformanceV1(EvidenceRecordHeaderV1):
+    """Versioned software outcome; this record never establishes empirical acceptance."""
+
+    kind: str = field(default="CONFORMANCE", init=False)
+    replay_attempt_ref: str
+    paper_attempt_ref: str
+    replay_registration_ref: str
+    paper_registration_ref: str
+    comparison_ref: str
+    exercised_binding_ids: tuple[str, ...]
+    expected_unavailable_binding_ids: tuple[str, ...]
+    observed_unavailable_dispositions: tuple[tuple[str, str], ...]
+    independent_conformance_review_ref: str | EvidenceAbsenceV1
+    receiver_ack_refs: tuple[tuple[str, str], ...] | EvidenceAbsenceV1
+    terminal_state: str
+
+    def __post_init__(self):
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE,
+                        "LP03_CONFORMANCE_ORIGIN_REQUIRED")
+        for name in ("replay_attempt_ref", "paper_attempt_ref", "replay_registration_ref", "paper_registration_ref", "comparison_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(self.replay_attempt_ref != self.paper_attempt_ref
+                        and self.replay_registration_ref != self.paper_registration_ref,
+                        "LP03_CONFORMANCE_DISTINCT_LANES_REQUIRED")
+        _public_refs_v1(self.exercised_binding_ids)
+        _public_refs_v1(self.expected_unavailable_binding_ids, allow_empty=True)
+        _evidence_pins_v1(self.observed_unavailable_dispositions, allow_empty=True)
+        _native_require(not set(self.exercised_binding_ids).intersection(self.expected_unavailable_binding_ids)
+                        and tuple(row[0] for row in self.observed_unavailable_dispositions) == self.expected_unavailable_binding_ids,
+                        "LP03_CONFORMANCE_UNAVAILABLE_ROSTER")
+        _native_require(self.terminal_state in ("INCOMPLETE", "READY_FOR_REVIEW", "REVIEWED_FOR_DELIVERY", "REJECTED", "PASS_SOFTWARE_CONFORMANCE"),
+                        "LP03_CONFORMANCE_STATE")
+        review, acks = self.independent_conformance_review_ref, self.receiver_ack_refs
+        if type(review) is EvidenceAbsenceV1:
+            _native_require(review.reason == "INDEPENDENT_REVIEW_PENDING" and self.terminal_state in ("INCOMPLETE", "READY_FOR_REVIEW", "REJECTED"),
+                            "LP03_CONFORMANCE_REVIEW_REQUIRED")
+        else:
+            _native_ident(review)
+        if type(acks) is EvidenceAbsenceV1:
+            _native_require(acks.reason == "RECEIVER_ACKNOWLEDGEMENTS_PENDING" and self.terminal_state != "PASS_SOFTWARE_CONFORMANCE",
+                            "LP03_CONFORMANCE_ACKS_REQUIRED")
+        else:
+            _evidence_pins_v1(acks, allow_empty=True)
+            _native_require(set(row[0] for row in acks) <= {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"}, "LP03_CONFORMANCE_ACK_OWNERS")
+        if self.terminal_state == "READY_FOR_REVIEW":
+            _native_require(type(review) is EvidenceAbsenceV1 and type(acks) is EvidenceAbsenceV1,
+                            "LP03_CONFORMANCE_READY_HAS_FUTURE_DEPENDENCY")
+        if self.terminal_state == "PASS_SOFTWARE_CONFORMANCE":
+            _native_require(type(review) is str and len(acks) == 4
+                            and {row[0] for row in acks} == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"},
+                            "LP03_CONFORMANCE_COMPLETE_ACK_ROSTER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        for name in ("exercised_binding_ids", "expected_unavailable_binding_ids"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        data["observed_unavailable_dispositions"] = _evidence_tuple_decode_v1(data["observed_unavailable_dispositions"], _evidence_tuple_decode_v1)
+        data["independent_conformance_review_ref"] = _evidence_absence_or_ref_v1(data["independent_conformance_review_ref"])
+        acks = data["receiver_ack_refs"]
+        data["receiver_ack_refs"] = (EvidenceAbsenceV1.from_canonical_mapping(acks) if type(acks) is dict
+            else _evidence_tuple_decode_v1(acks, _evidence_tuple_decode_v1))
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class _EvidenceIndependentReviewBodyV1(EvidenceRecordHeaderV1):
+    """Pure unsigned review schema, shared by admission to signing and readback."""
+    kind: str = field(default="REVIEW", init=False)
+    original_candidate_store: str
+    original_candidate_ref: str
+    original_candidate_version: str
+    reviewer_admission_ref: str
+    producer_refs: tuple[str, ...]
+    observed_metric_refs: tuple[str, ...]
+    independent_method_refs: tuple[str, ...]
+    decision: str
+    limitations: tuple[str, ...]
+    checked_at: Mapping[str, object]
+    expiry: int
+    original_commit_observation: Mapping[str, object]
+    original_readback_observation: Mapping[str, object]
+
+    def __post_init__(self):
+        from .latency_policy import _evidence_storage_observation_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("original_candidate_store", "original_candidate_ref", "reviewer_admission_ref"):
+            _native_ident(getattr(self, name))
+        for name in ("producer_refs", "observed_metric_refs", "independent_method_refs", "limitations"):
+            _public_refs_v1(getattr(self, name))
+            _native_require(bool(getattr(self, name)), "LP03_REVIEW_EMPTY_ROSTER")
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE and self.original_candidate_version == "R0"
+                        and self.producing_owner == "INDEPENDENT_EVIDENCE_REVIEW"
+                        and self.producing_principal not in self.producer_refs
+                        and self.decision in ("PASS_SOFTWARE_CONFORMANCE", "REJECTED", "DEFERRED"),
+                        "LP03_REVIEW_SELECTED_SCOPE_OR_SEPARATION")
+        _public_counter_v1(self.expiry, allow_zero=False)
+        for name in ("checked_at", "original_commit_observation", "original_readback_observation"):
+            object.__setattr__(self, name, _evidence_storage_observation_v1(getattr(self, name)))
+        _native_require(self.created_wall_ns == self.checked_at["wall_ns"] < self.expiry
+                        and self.checked_at["clock_domain_id"] == self.clock_domain_id
+                        and self.original_candidate_ref.endswith("::CONFORMANCE:R0"), "LP03_REVIEW_ORIGINAL_CANDIDATE_JOIN")
+        first, second = self.original_commit_observation, self.original_readback_observation
+        _native_require(all(first[name] == second[name] == self.checked_at[name]
+                            for name in ("clock_domain_id", "process_identity_ref", "boot_identity_ref", "clock_declarations"))
+                        and all(first[name] <= second[name] <= self.checked_at[name]
+                            for name in ("wall_ns", "monotonic_ns", "process_cpu_ns")), "LP03_REVIEW_ORIGINAL_OBSERVATION_ORDER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        for name in ("producer_refs", "observed_metric_refs", "independent_method_refs", "limitations"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceIndependentReviewRecordV1(_EvidenceIndependentReviewBodyV1):
+    reviewer_decision_signature: EvidenceSignedMessageV1
+
+    def __post_init__(self):
+        from .serialization import _evidence_canonical_object_v1, deterministic_json
+        _EvidenceIndependentReviewBodyV1.__post_init__(self)
+        _native_require(type(self.reviewer_decision_signature) is EvidenceSignedMessageV1, "LP03_REVIEW_DECISION_SIGNATURE_TYPE")
+        signed = EvidenceAuthorizationMessageV1.from_canonical_mapping(_evidence_canonical_object_v1(
+            self.reviewer_decision_signature.canonical_message.encode("utf-8")))
+        unsigned = {member.name: getattr(self, member.name) for member in dataclass_fields(_EvidenceIndependentReviewBodyV1)}
+        _native_require(signed.kind is EvidenceMessageKindV1.REVIEW_DECISION
+                        and deterministic_json(signed.payload["record_body"]) == deterministic_json(unsigned),
+                        "LP03_REVIEW_SIGNED_RECORD_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["reviewer_decision_signature"] = EvidenceSignedMessageV1.from_canonical_mapping(data["reviewer_decision_signature"])
+        for name in ("producer_refs", "observed_metric_refs", "independent_method_refs", "limitations"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceReviewAdmissionPayloadV1:
+    grant_ref: str
+    original_owner_envelope_ref: str
+    candidate_ref: EvidenceRecordRefV1
+    candidate_version: str
+    reviewer_principal: str
+    review_store_id: str
+    protocol_ref: str
+    input_lock_ref: str
+    origin: EvidenceOriginV1
+    generation: int
+    source_purpose: str
+    limits: Mapping[str, object]
+    deadline: EvidenceProcessDeadlineV1
+    expiry: int
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1
+        for name in ("grant_ref", "original_owner_envelope_ref", "reviewer_principal", "review_store_id", "protocol_ref", "input_lock_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.candidate_ref) is EvidenceRecordRefV1 and self.candidate_version == "R0"
+                        and self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and self.source_purpose == "EVIDENCE_INDEPENDENT_REVIEW_V1"
+                        and type(self.deadline) is EvidenceProcessDeadlineV1, "LP03_REVIEW_ADMISSION_SCOPE")
+        _public_counter_v1(self.generation, allow_zero=True)
+        _public_counter_v1(self.expiry, allow_zero=False)
+        limits = self.limits
+        _native_require(isinstance(limits, Mapping) and set(limits) == {
+            "maximum_delivery_attempts", "maximum_wall_ns", "maximum_input_reads", "maximum_input_bytes",
+            "maximum_persistent_operations", "maximum_persistent_bytes", "exclusive_expiry_wall_ns", "required_receiver_ids"},
+            "LP03_REVIEW_LIMIT_FIELDS")
+        for name, value in limits.items():
+            if name != "required_receiver_ids":
+                _public_counter_v1(value, allow_zero=False)
+        _public_refs_v1(limits["required_receiver_ids"])
+        _native_require(len(limits["required_receiver_ids"]) == 4
+                        and set(limits["required_receiver_ids"]) == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"}
+                        and self.expiry <= limits["exclusive_expiry_wall_ns"], "LP03_REVIEW_LIMIT_SCOPE")
+        object.__setattr__(self, "limits", _evidence_frozen_data_v1(limits))
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+        data["candidate_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["candidate_ref"])
+        data["deadline"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline"])
+        _native_require(data["origin"] == EvidenceOriginV1.SOFTWARE_CONFORMANCE.value, "LP03_REVIEW_ADMISSION_ORIGIN")
+        data["origin"] = EvidenceOriginV1(data["origin"])
+        _native_require(isinstance(data["limits"], Mapping) and "required_receiver_ids" in data["limits"], "LP03_REVIEW_LIMIT_FIELDS")
+        data["limits"] = {**data["limits"], "required_receiver_ids": _evidence_tuple_decode_v1(data["limits"]["required_receiver_ids"])}
+        return cls(**data)
+
+
+def _evidence_multiple_testing_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the original ordered multiple-testing profile.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf, copysign
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1, _evidence_decode_source_values_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_MULTIPLE_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    bound = calculation["registration_bound_proof"]
+    _native_require(isinstance(bound, Mapping) and type(bound.get("math_id")) is str
+        and bound["math_id"] in ("MATH-12", "MATH-13"), "LP03_MULTIPLE_REVIEW_MATH_ID")
+    math_id = bound["math_id"]
+    _native_require(calculation["method"] == "ORDERED_MULTIPLE_TESTING_FROM_ORIGINAL_DECLARED_LEDGER_AND_Q_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_" + math_id.replace("-", "_") + "_CLOSURE_ONLY",
+                        "DECLARED_SOFTWARE_TRIAL_UNIVERSE_ONLY_NO_EMPIRICAL_FDR", "ORDERED_BINARY64_NEAREST_EVEN_WITH_DERIVED_HARMONIC_FSUM", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_MULTIPLE_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_MULTIPLE_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(counters[0]["log_series_terms"] == 0
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_MULTIPLE_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_MULTIPLE_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_MULTIPLE_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_MULTIPLE_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "hypothesis_count", "fixed_lower", "fixed_upper", "bound_scope",
+        "correction_lower", "correction_upper", "rank_upper", "result_direction", "rejection_rule", "arithmetic_requirement"))
+    _native_require(bound["math_id"] == math_id and bound["profile"] == "DECLARED_MULTIPLE_ADJUSTED_COORDINATE_ENCLOSURE_V1"
+        and type(bound["hypothesis_count"]) is type(bound["rank_upper"]) is int
+        and 0 < bound["hypothesis_count"] == bound["rank_upper"] <= 32
+        and bound["bound_scope"] == "ADJUSTED_P_COORDINATES_ONLY" and bound["result_direction"] == "CONTROL"
+        and bound["rejection_rule"] == "ORIGINAL_THRESHOLD_MAXIMUM_RANK_PREFIX_NOT_ADJUSTED_P_COMPARISON"
+        and bound["arithmetic_requirement"] == "ORDERED_NEAREST_EVEN_WITH_INDEPENDENT_HARMONIC_SUM_PROOF"
+        and rational(bound["fixed_lower"]) == 0 and rational(bound["fixed_upper"]) == rational(bound["correction_lower"]) == 1
+        and rational(bound["correction_upper"]) == bound["hypothesis_count"], "LP03_MULTIPLE_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_MULTIPLE_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_MULTIPLE_REVIEW_LANE_ROSTER")
+    common, charged_bytes = [], 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload_json", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "probability" and lane["basis"] == "adjusted_p_and_rejection_mask",
+                        "LP03_MULTIPLE_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_MULTIPLE_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 2, "LP03_MULTIPLE_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(s["store_id"], s["record_id"]) for s in sources}) == 2, "LP03_MULTIPLE_REVIEW_SOURCE_ROSTER")
+        source_payload_raw = text_bytes(lane["original_source_payload_json"])
+        source_payload = _native_strict_json(source_payload_raw, max_bytes=65536, max_nodes=4096)
+        parts = _evidence_multiple_testing_source_slices_v1(source_payload)
+        _native_require(deterministic_json(source_payload).encode("ascii") == source_payload_raw
+            and source_payload["math_id"] == math_id, "LP03_MULTIPLE_REVIEW_SOURCE_CANONICAL_JOIN")
+        _native_require(deterministic_json(sources) == deterministic_json(tuple(dict(store_id=part.original_record_refs[0].store_id,
+            record_id=part.original_record_refs[0].record_id) for part in parts)), "LP03_MULTIPLE_REVIEW_SOURCE_REFERENCE_JOIN")
+        source_values = tuple(_evidence_decode_source_values_v1(part.reconstructed_canonical_events[0]) for part in parts)
+        native_inputs = dict(p_values=source_values[0]["trial_p_values"], q=source_values[1]["formula_policies['" + math_id + "'].q"])
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "sorted_source_indices", "rounding_cells",
+            "forward_thresholds", "reverse_adjustments", "summary"))
+        _native_require(proof["profile"] == "ORDERED_BINARY64_BH_BY_NEAREST_EVEN_V1"
+            and proof["intermediate_observation_scope"] == "ALL_INTERMEDIATES_AND_HARMONIC_FSUM_ARE_DERIVED_NOT_OBSERVED",
+            "LP03_MULTIPLE_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("math_id", "hypothesis_count", "largest_rank", "correction_bits", "rejected_original_indices_json",
+            "typed_input_json", "original_raw_json", "preregistered_raw_json", "projected_value_json"))
+        input_raw, raw_raw = text_bytes(summary["typed_input_json"]), text_bytes(summary["original_raw_json"])
+        inputs = decode_evidence_public_invocation_inputs_v1(math_id, input_raw, maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1(math_id, raw_raw, maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(summary["math_id"] == math_id and summary["original_raw_json"] == summary["preregistered_raw_json"]
+            and input_raw == deterministic_json(inputs).encode("ascii") == deterministic_json(native_inputs).encode("ascii")
+            and raw_raw == deterministic_json(raw).encode("ascii"), "LP03_MULTIPLE_REVIEW_ORIGINAL_INPUT_RAW_JOIN")
+        ps, q = inputs["p_values"], inputs["q"]
+        n = len(ps)
+        _native_require(type(ps) is tuple and 0 < n <= 32 and type(q) is float and isfinite(q) and 0.0 < q < 1.0
+            and all(type(p) is float and isfinite(p) and 0.0 <= p <= 1.0 for p in ps)
+            and type(summary["hypothesis_count"]) is int and summary["hypothesis_count"] == bound["hypothesis_count"] == n,
+            "LP03_MULTIPLE_REVIEW_INPUT_DOMAIN")
+        order = tuple(sorted(range(n), key=lambda index: (ps[index], index)))
+        _native_require(type(proof["sorted_source_indices"]) is tuple
+            and all(type(index) is int for index in proof["sorted_source_indices"]) and proof["sorted_source_indices"] == order,
+            "LP03_MULTIPLE_REVIEW_STABLE_INDEX_ORDER")
+        cells = proof["rounding_cells"]
+        _native_require(type(cells) is tuple and len(cells) == (6*n if math_id == "MATH-12" else 7*n+1)
+            and type(proof["forward_thresholds"]) is type(proof["reverse_adjustments"]) is tuple
+            and len(proof["forward_thresholds"]) == len(proof["reverse_adjustments"]) == n,
+            "LP03_MULTIPLE_REVIEW_COMPLETE_ORDERED_PROOF")
+        cursor = 0
+        def rounded(value, operation, negative_zero=False):
+            nonlocal cursor
+            row = cells[cursor]; cursor += 1
+            fields(row, ("operation", "exact_result", "candidate_bits", "tie_rule"))
+            candidate = -0.0 if value == 0 and negative_zero else float(value)
+            _native_require(type(row["candidate_bits"]) is str and row["candidate_bits"] == bits(candidate)
+                and row["operation"] == operation and row["tie_rule"] == "NEAREST_EVEN"
+                and rational(row["exact_result"]) == value, "LP03_MULTIPLE_REVIEW_ROUNDING_CELL_JOIN")
+            lower = (Fraction.from_float(nextafter(candidate, -inf)) + Fraction.from_float(candidate))/2
+            upper = (Fraction.from_float(candidate) + Fraction.from_float(nextafter(candidate, inf)))/2
+            even = int(row["candidate_bits"], 16) % 2 == 0
+            _native_require((lower < value or lower == value and even) and (value < upper or value == upper and even),
+                            "LP03_MULTIPLE_REVIEW_NEAREST_EVEN_CELL")
+            return candidate
+        def multiply(a, b, label):
+            return rounded(Fraction.from_float(a)*Fraction.from_float(b), label, copysign(1, a) != copysign(1, b))
+        def divide(a, b, label):
+            return rounded(Fraction.from_float(a)/Fraction.from_float(b), label, copysign(1, a) != copysign(1, b))
+        correction = 1.0
+        if math_id == "MATH-13":
+            terms = tuple(divide(1.0, float(rank), "HARMONIC_TERM::"+str(rank)) for rank in range(1, n+1))
+            correction = rounded(sum(map(Fraction.from_float, terms), Fraction()), "DERIVED_UNOBSERVED_HARMONIC_FSUM")
+        largest = 0
+        for rank, index in enumerate(order, 1):
+            numerator = multiply(float(rank), q, "THRESHOLD_NUMERATOR::"+str(rank))
+            denominator = multiply(float(n), correction, "THRESHOLD_DENOMINATOR::"+str(rank))
+            threshold = divide(numerator, denominator, "THRESHOLD_DIVISION::"+str(rank))
+            satisfied = ps[index] <= threshold
+            if satisfied: largest = rank
+            expected = dict(rank=rank, original_index=index, satisfies_threshold=int(satisfied),
+                derived_threshold_bits=bits(threshold), largest_rank_prefix=largest)
+            _native_require(deterministic_json(proof["forward_thresholds"][rank-1]) == deterministic_json(expected),
+                            "LP03_MULTIPLE_REVIEW_THRESHOLD_PREFIX")
+        rejected = tuple(sorted(order[:largest])); running = 1.0; adjusted = [None]*n
+        for ordinal, rank in enumerate(range(n, 0, -1)):
+            index = order[rank-1]
+            first = multiply(ps[index], float(n), "ADJUSTMENT_COUNT::"+str(rank))
+            second = multiply(first, correction, "ADJUSTMENT_CORRECTION::"+str(rank))
+            candidate = divide(second, float(rank), "ADJUSTMENT_DIVISION::"+str(rank))
+            chosen = 0 if running <= candidate else 1
+            if chosen: running = candidate
+            clamped = 0 if 1.0 <= running else 1
+            adjusted[index] = 1.0 if clamped == 0 else running
+            expected = dict(rank=rank, original_index=index, running_selected_index=chosen,
+                clamp_selected_index=clamped, derived_adjusted_bits=bits(adjusted[index]))
+            _native_require(deterministic_json(proof["reverse_adjustments"][ordinal]) == deterministic_json(expected),
+                            "LP03_MULTIPLE_REVIEW_REVERSE_PREFIX")
+        _native_require(cursor == len(cells) and type(summary["largest_rank"]) is int
+            and summary["largest_rank"] == raw["largest_rank"] == largest and raw["rejected_original_indices"] == rejected
+            and summary["correction_bits"] == bits(correction) == bits(raw["correction"])
+            and tuple(map(bits, raw["adjusted_p_values"])) == tuple(map(bits, adjusted))
+            and summary["rejected_original_indices_json"] == deterministic_json(rejected), "LP03_MULTIPLE_REVIEW_RAW_RESULT_JOIN")
+        projected = _evidence_multiple_testing_value_v1(dict(rows=[dict(original_index=i, adjusted_p=p, rejected=i in rejected)
+            for i,p in enumerate(adjusted)], correction=correction, largest_rank=largest), math_id=math_id)
+        _native_require(summary["projected_value_json"] == lane["projected_value_json"] == deterministic_json(projected),
+                        "LP03_MULTIPLE_REVIEW_INDEXED_PROJECTION_JOIN")
+        fragments = (*cells, *proof["forward_thresholds"], *proof["reverse_adjustments"], summary)
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(len(deterministic_json(fragment).encode("utf-8")) for fragment in fragments)
+        # Original source facts agree across lanes; the independently observed
+        # access clocks stay in their complete lane-local payloads above.
+        common.append((sources, tuple(part.reconstructed_canonical_events for part in parts),
+            source_payload["consumer_decision_wall_ns"], source_payload["consumer_cutoff_wall_ns"],
+            summary["typed_input_json"], summary["original_raw_json"],
+            lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2, "LP03_MULTIPLE_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_bootstrap_mt_words_v1(seed, count):
+    """Bounded integer source-model verification, never an RNG observation.
+
+    CPython's absolute-integer/little-endian seed words and MT19937 extraction.
+    This checks signed data without Random, producer calls or original work.
+    """
+    _native_require(type(seed) is int and seed.bit_length() <= 256 and type(count) is int and 1 <= count <= 128,
+                    "LP03_BOOTSTRAP_REVIEW_MT_DOMAIN")
+    mask = (1 << 32) - 1
+    absolute = abs(seed)
+    keys = tuple((absolute >> (32 * index)) & mask for index in range(max(1, (absolute.bit_length() + 31) // 32)))
+    state = [19650218]
+    for index in range(1, 624):
+        previous = state[-1]
+        state.append((1812433253 * (previous ^ (previous >> 30)) + index) & mask)
+    index = 1
+    for ordinal in range(624):
+        previous = state[index - 1]
+        state[index] = ((state[index] ^ ((previous ^ (previous >> 30)) * 1664525))
+                        + keys[ordinal % len(keys)] + ordinal % len(keys)) & mask
+        index += 1
+        if index == 624:
+            state[0], index = state[-1], 1
+    for _ in range(623):
+        previous = state[index - 1]
+        state[index] = ((state[index] ^ ((previous ^ (previous >> 30)) * 1566083941)) - index) & mask
+        index += 1
+        if index == 624:
+            state[0], index = state[-1], 1
+    state[0] = 1 << 31
+    for index in range(624):
+        combined = (state[index] & 0x80000000) | (state[(index + 1) % 624] & 0x7fffffff)
+        state[index] = state[(index + 397) % 624] ^ (combined >> 1) ^ (0x9908b0df if combined & 1 else 0)
+    result = []
+    for value in state[:count]:
+        value ^= value >> 11
+        value ^= (value << 7) & 0x9d2c5680
+        value ^= (value << 15) & 0xefc60000
+        value ^= value >> 18
+        result.append(value)
+    return tuple(result)
+
+
+def _evidence_dr_review_source_capsule_v1(source):
+    """Share only bytes that are identical across both independent lanes."""
+    from .serialization import deterministic_json
+
+    source_slices = (source["original_logged_input_slice"], source["original_policy_slice"],
+        *source["original_assumption_slices"])
+    capsule = dict(profile=source["profile"], decision_wall_ns=source["decision_wall_ns"],
+        cutoff_wall_ns=source["cutoff_wall_ns"], source_slices=tuple(
+            {name: value for name, value in item.items() if name != "access_wall_ns"} for item in source_slices))
+    return deterministic_json(capsule), tuple(item["access_wall_ns"] for item in source_slices)
+
+
+def _evidence_dr_restore_review_source_v1(capsule, access_wall_ns, raw_ref):
+    """Add each lane's exact original access observations and raw receipt."""
+    _native_require(type(capsule) is dict and set(capsule) == {
+        "profile", "decision_wall_ns", "cutoff_wall_ns", "source_slices"}
+        and type(capsule["source_slices"]) is list and 2 <= len(capsule["source_slices"]) <= 8
+        and type(access_wall_ns) is tuple and len(access_wall_ns) == len(capsule["source_slices"])
+        and all(type(item) is dict and "access_wall_ns" not in item for item in capsule["source_slices"]),
+        "LP03_DR_SIGNED_ORIGINAL_SOURCE_CAPSULE")
+    for clock in access_wall_ns:
+        _public_counter_v1(clock)
+    parts = tuple(dict(item, access_wall_ns=clock)
+        for item, clock in zip(capsule["source_slices"], access_wall_ns, strict=True))
+    return dict(profile=capsule["profile"], decision_wall_ns=capsule["decision_wall_ns"],
+        cutoff_wall_ns=capsule["cutoff_wall_ns"], estimator_original_raw_ref=raw_ref,
+        original_logged_input_slice=parts[0], original_policy_slice=parts[1], original_assumption_slices=parts[2:])
+
+
+_LP03_OPE_POINT_REVIEW_LIMITATIONS_V1 = (
+    "ORIGINAL_RECORDED_POINT_ESTIMATE_SOFTWARE_CONFORMANCE_ONLY",
+    "NO_POLICY_VALUE_OR_STATISTICAL_UNCERTAINTY_AUTHORITY",
+)
+
+
+def _evidence_independent_private_analytic_calculation_v1(math_id, inputs, *, raw_json, certificate_json, work, unit, basis):
+    """Independently reconstruct the original value and verify its binary64 cell."""
+    from decimal import Context, Decimal, FloatOperation, ROUND_HALF_EVEN
+    from math import isfinite
+    import struct
+
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+    from .serialization import _native_strict_json, deterministic_json
+
+    projection = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    raw = _native_strict_json(raw_json.encode("utf-8"), max_bytes=65536, max_nodes=4096)
+    raw_text = raw if projection.original_field == "$" else raw[projection.original_field]
+    wire = _native_strict_json(certificate_json.encode("utf-8"), max_bytes=65536, max_nodes=128, binary64_numbers=True)
+
+    def source(value):
+        return work._exact_private_execution_decimal_v1(work._parse_private_execution_decimal_v1(str(value)))
+
+    def rationals(values):
+        return tuple(source(value) for value in values)
+
+    def rational_wire(value):
+        return dict(numerator=str(value.numerator), denominator=str(value.denominator))
+
+    arithmetic = Context(prec=34, rounding=ROUND_HALF_EVEN)
+    arithmetic.traps[FloatOperation] = True
+
+    def decimal_step(operation, *operands):
+        # Each admitted operand is finite. Bound coefficient and exponent
+        # alignment before a context step can allocate its intermediate.
+        digits = tuple(value.as_tuple() for value in operands)
+        width = sum(len(value.digits) for value in digits)
+        extent = max(abs(value.exponent) for value in digits)
+        work._bits(4 * (width + extent) + 256)
+        work._consumed["integer_operations"] += 1
+        result = operation(*operands)
+        work._require(type(result) is Decimal and result.is_finite(),
+            "LP03_ANALYTIC_INDEPENDENT_DECIMAL34_STEP")
+        return result
+
+    def decimal_sum(terms):
+        total = Decimal(0)
+        for term in terms:
+            total = decimal_step(arithmetic.add, total, term)
+        return total
+
+    with work:
+        zero, one, two = (work._fraction(value) for value in (0, 1, 2))
+        if math_id == "MATH-29":
+            weights = rationals(inputs["weights"])
+            means = rationals(inputs["expected_returns"])
+            matrix = tuple(rationals(row) for row in inputs["covariance"])
+            aversion, cost = source(inputs["risk_aversion"]), source(inputs["transaction_cost"])
+            n = len(weights)
+            work._require(0 < n <= 64 and len(means) == len(matrix) == n
+                and all(len(row) == n for row in matrix) and aversion >= zero and cost >= zero,
+                "LP03_ANALYTIC_INDEPENDENT_PORTFOLIO_SCOPE")
+            symmetric = tuple(tuple(work._divide(work._add(matrix[i][j], matrix[j][i]), two) for j in range(n))
+                for i in range(n))
+            mean, variance = zero, zero
+            for i, weight in enumerate(weights):
+                mean = work._add(mean, work._multiply(weight, means[i]))
+                for j, shifted_weight in enumerate(weights):
+                    variance = work._add(variance, work._multiply(work._multiply(weight, symmetric[i][j]), shifted_weight))
+            exact_unrounded = work._subtract(work._subtract(mean, work._divide(work._multiply(aversion, variance), two)), cost)
+            original_weights, original_means, original_covariance = (
+                inputs["weights"], inputs["expected_returns"], inputs["covariance"])
+            decimal_mean = decimal_sum(decimal_step(arithmetic.multiply, weight, expected)
+                for weight, expected in zip(original_weights, original_means, strict=True))
+            decimal_matrix = tuple(tuple(decimal_step(arithmetic.divide,
+                decimal_step(arithmetic.add, entry, original_covariance[j][i]), Decimal(2))
+                for j, entry in enumerate(row)) for i, row in enumerate(original_covariance))
+            active = list(range(n))
+            reduced = {(i, j): decimal_matrix[i][j] for i in active for j in active}
+            pivots = []
+            while active:
+                work._require(all(reduced[i, i] >= 0 for i in active), "LP03_ANALYTIC_INDEPENDENT_COVARIANCE_PSD")
+                offset = next((index for index, i in enumerate(active) if reduced[i, i] > 0), None)
+                if offset is None:
+                    work._require(all(value == 0 for value in reduced.values()), "LP03_ANALYTIC_INDEPENDENT_COVARIANCE_PSD")
+                    break
+                active[0], active[offset] = active[offset], active[0]
+                pivot = active.pop(0)
+                diagonal = reduced[pivot, pivot]
+                pivots.append((pivot, str(diagonal)))
+                result = {}
+                for i in active:
+                    for j in active:
+                        product = decimal_step(arithmetic.multiply, reduced[i, pivot], reduced[pivot, j])
+                        correction = decimal_step(arithmetic.divide, product, diagonal)
+                        result[i, j] = decimal_step(arithmetic.subtract, reduced[i, j], correction)
+                reduced = result
+
+            def variance_terms():
+                for i, row in enumerate(decimal_matrix):
+                    for j, member in enumerate(row):
+                        weighted = decimal_step(arithmetic.multiply, original_weights[i], member)
+                        yield decimal_step(arithmetic.multiply, weighted, original_weights[j])
+
+            decimal_variance = decimal_sum(variance_terms())
+            work._require(decimal_variance >= 0, "LP03_ANALYTIC_INDEPENDENT_PORTFOLIO_VARIANCE")
+            penalty = decimal_step(arithmetic.multiply, inputs["risk_aversion"], decimal_variance)
+            penalty = decimal_step(arithmetic.divide, penalty, Decimal(2))
+            discounted = decimal_step(arithmetic.subtract, decimal_mean, penalty)
+            rounded = decimal_step(arithmetic.subtract, discounted, inputs["transaction_cost"])
+            components = dict(exact_expected_return=rational_wire(mean), exact_portfolio_variance=rational_wire(variance),
+                exact_unrounded_utility=rational_wire(exact_unrounded), decimal34_expected_return=str(decimal_mean),
+                decimal34_portfolio_variance=str(decimal_variance), decimal34_penalty=str(penalty),
+                risk_aversion=rational_wire(aversion), transaction_cost=rational_wire(cost),
+                decimal34_covariance_pivots=tuple(pivots), covariance_check="ORIGINAL_DECIMAL34_SCHUR_PSD")
+        elif math_id in ("MATH-30", "MATH-31"):
+            confidence = source(inputs["alpha"])
+            losses = rationals(inputs["losses"])
+            work._require(losses and zero < confidence < one, "LP03_ANALYTIC_INDEPENDENT_LOSS_SCOPE")
+            # Rank with the original exact Decimal values. Multiplying the
+            # requested tail by N gives full row count and remaining mass.
+            order = sorted(range(len(losses)), key=inputs["losses"].__getitem__, reverse=True)
+            tail_size = work._multiply(work._subtract(one, confidence), work._fraction(len(losses)))
+            whole, leftover = divmod(tail_size.numerator, tail_size.denominator)
+            total = zero
+            for i in order[:whole]:
+                total = work._add(total, losses[i])
+            if leftover:
+                total = work._add(total, work._multiply(work._fraction(leftover, tail_size.denominator), losses[order[whole]]))
+            exact_average = work._divide(total, tail_size)
+            mass = decimal_step(arithmetic.divide, Decimal(1), Decimal(len(losses)))
+            required = decimal_step(arithmetic.subtract, Decimal(1), inputs["alpha"])
+            remaining = required
+            weighted = Decimal(0)
+            contributions = []
+            for index in order:
+                if remaining == 0:
+                    break
+                used = min(mass, remaining)
+                contribution = decimal_step(arithmetic.multiply, inputs["losses"][index], used)
+                weighted = decimal_step(arithmetic.add, weighted, contribution)
+                remaining = decimal_step(arithmetic.subtract, remaining, used)
+                contributions.append((index, str(used), str(contribution)))
+            work._require(remaining == 0 and bool(contributions), "LP03_ANALYTIC_INDEPENDENT_DECIMAL34_TAIL")
+            rounded = decimal_step(arithmetic.divide, weighted, required)
+            upper_breakpoint = contributions[-1][0]
+            if math_id == "MATH-30":
+                work._require(raw["value_at_risk"] == str(inputs["losses"][upper_breakpoint])
+                    and raw["confidence"] == str(inputs["alpha"]), "LP03_ANALYTIC_INDEPENDENT_TAIL_RECORD")
+            components = dict(confidence=rational_wire(confidence), exact_fractional_tail_size=rational_wire(tail_size),
+                original_loss_order=tuple(order), upper_breakpoint_index=upper_breakpoint,
+                exact_unrounded_tail=rational_wire(exact_average), decimal34_observation_mass=str(mass),
+                decimal34_weighted_tail=str(weighted), decimal34_tail_contributions=tuple(contributions))
+        else:
+            artifact = inputs["artifact"]
+            work._require(math_id == "MATH-37" and artifact.probability is not None,
+                "LP03_ANALYTIC_INDEPENDENT_ORIGINAL_ARTIFACT")
+            rounded = artifact.probability
+            value = source(rounded)
+            work._require(work._compare(zero, value) <= 0 and work._compare(value, one) <= 0,
+                "LP03_ANALYTIC_INDEPENDENT_ORIGINAL_ARTIFACT_RANGE")
+            components = dict(calibration_receipt_ref=artifact.calibration_receipt_ref, artifact_id=artifact.artifact_id,
+                artifact_version=artifact.artifact_version, feature_snapshot_ref=artifact.feature_snapshot_ref,
+                feature_schema_ref=artifact.feature_schema_ref, scope_ref=artifact.scope_ref,
+                horizon_seconds=artifact.horizon_seconds)
+        work._require(raw_text == str(rounded), "LP03_ANALYTIC_INDEPENDENT_ORIGINAL_VALUE")
+        exact = source(raw_text)
+        analytic = wire["analytic_value"]
+        work._require(type(analytic) is float and isfinite(analytic) and (exact == zero or analytic != 0.0),
+            "LP03_ANALYTIC_INDEPENDENT_BINARY64_DOMAIN")
+        # The encoded neighbor computation is independent of the projection
+        # owner's host conversion and nextafter implementation.
+        packed = struct.pack(">d", analytic)
+        integer = int.from_bytes(packed, "big")
+        sign = 1 << 63
+        work._require(integer != sign, "LP03_ANALYTIC_INDEPENDENT_SIGNED_ZERO")
+        if integer == 0:
+            low_bits, high_bits = sign + 1, 1
+        elif integer & sign:
+            low_bits, high_bits = integer + 1, integer - 1
+        else:
+            low_bits, high_bits = integer - 1, integer + 1
+        low_num, high_num = (struct.unpack(">d", bits.to_bytes(8, "big"))[0] for bits in (low_bits, high_bits))
+        work._require(isfinite(low_num) and isfinite(high_num), "LP03_ANALYTIC_INDEPENDENT_FINITE_ADJACENT_VALUES")
+        prior, center, following = (work._binary64_ratio(x) for x in (low_num, analytic, high_num))
+        low_mid = work._divide(work._add(prior, center), two)
+        high_mid = work._divide(work._add(center, following), two)
+        low_order, high_order = work._compare(exact, low_mid), work._compare(exact, high_mid)
+        even = integer & 1 == 0
+        work._require((low_order > 0 or low_order == 0 and even) and (high_order < 0 or high_order == 0 and even),
+            "LP03_ANALYTIC_INDEPENDENT_NEAREST_EVEN_CELL")
+        order = work._compare(exact, center)
+        low, high = (prior, center) if order < 0 else (center, following) if order > 0 else (center, center)
+        error = work._subtract(center, exact)
+        verified = dict(profile="EXACT_TO_BINARY64_CELL_V1", math_id=math_id, unit=unit, basis=basis,
+            exact_source=rational_wire(exact), analytic_value=analytic, signed_error=rational_wire(error),
+            enclosing_lower=rational_wire(low), enclosing_upper=rational_wire(high))
+        work._require(deterministic_json(verified) == certificate_json, "LP03_ANALYTIC_INDEPENDENT_ORIGINAL_CERTIFICATE")
+        return dict(original_decimal_text=raw_text, original_analytic_binary64_bits=packed.hex(),
+            exact_lower_cell_boundary=rational_wire(low_mid), exact_upper_cell_boundary=rational_wire(high_mid),
+            original_scope_and_arithmetic=components)
+
+
+_LP03_PRIVATE_EXECUTION_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "ORIGINAL_PRIVATE_EXECUTION_SOURCES_ONLY",
+    "EXACT_DECIMAL_ORIGINAL_QUANTITY_AND_BASIS",
+    "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+_LP03_PRIVATE_BINARY64_EXECUTION_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "ORIGINAL_PRIVATE_EXECUTION_SOURCES_ONLY",
+    "EXACT_REPRESENTED_BINARY64_VALUES_WITH_ORIGINAL_UNIT_AND_BASIS",
+    "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+
+def _evidence_private_execution_review_capacity_v1(math_id):
+    return {"MATH-32": 12, "MATH-33": 6, "MATH-35": 10, "MATH-36": 256, "MATH-38": 260, "MATH-39": 64, "MATH-40": 6, "MATH-41": 4, "MATH-42": 8, "MATH-43": 4, "MATH-44": 4, "MATH-45": 8}[math_id]
+
+
+def _evidence_independent_quantum_raw_v1(math_id, original, *, work):
+    """Recheck selected original economics and trace arithmetic without invoking the producer."""
+    from decimal import Decimal
+    from .context import decimal_context_v1
+
+    context = decimal_context_v1()
+
+    def admit(value):
+        retained = work._parse_private_execution_decimal_v1(str(value))
+        work._exact_private_execution_decimal_v1(retained)
+        return retained
+
+    def apply(operation, *args):
+        metadata = tuple(value.as_tuple() for value in args)
+        width = sum(len(row.digits) + abs(row.exponent) for row in metadata)
+        work._bits(4 * width + 256)
+        work._consumed["integer_operations"] += 1
+        return operation(*args)
+
+    with work:
+        if math_id == "MATH-52":
+            quantum = original["quantum_receipt"]
+            classical = original["strongest_classical_receipt"]
+            no_trade = original["no_trade_receipt"]
+            alternatives = (no_trade, classical, quantum.as_comparator())
+            ranks = []
+            for priority, receipt in enumerate(alternatives):
+                utility, resource, latency = (admit(getattr(receipt, name)) for name in
+                    ("conservative_utility", "resource_use", "latency"))
+                work._require(receipt.comparison_basis == quantum.comparison_basis and resource >= 0 and latency >= 0,
+                    "LP03_QUANTUM_REVIEW_ORIGINAL_COMPARISON_BASIS")
+                order = (not (receipt.feasible and not receipt.hard_veto), apply(context.minus, utility),
+                    resource, latency, priority, receipt.deterministic_tie_break)
+                ranks.append((order, utility, receipt.comparator_class))
+            winner = min(ranks)[2]
+            return dict(delta_quantum_vs_classical=apply(context.subtract, ranks[2][1], ranks[1][1]),
+                delta_quantum_vs_no_trade=apply(context.subtract, ranks[2][1], ranks[0][1]),
+                winner=winner, quantum_advantage_claim_allowed=False)
+
+        work._require(math_id in ("MATH-50", "MATH-51"), "LP03_QUANTUM_REVIEW_ORIGINAL_SELECTED_MATH")
+        trace = original["trace"]
+        qaoa = math_id == "MATH-50"
+        key_field = "candidate_id" if qaoa else "parameter_point_id"
+        work._require(0 < len(trace.points) <= 128, "LP03_QUANTUM_REVIEW_ORIGINAL_TRACE_BOUND")
+        feasible = []
+        total_weight = Decimal(0)
+        weighted_cost = Decimal(0)
+        for point in trace.points:
+            utility = admit(point.original_economic_utility)
+            key = getattr(point, key_field)
+            if point.original_model_feasible:
+                economic_rank = apply(context.minus, utility) if trace.objective_sense == "MAXIMIZE" else utility
+                feasible.append((economic_rank, key, utility, point))
+            if qaoa:
+                weight, cost = (admit(getattr(point, name)) for name in ("trace_weight", "locked_cost"))
+                work._require(weight >= 0, "LP03_QUANTUM_REVIEW_ORIGINAL_TRACE_WEIGHT")
+                total_weight = apply(context.add, total_weight, weight)
+                weighted_cost = apply(context.add, weighted_cost, apply(context.multiply, weight, cost))
+        work._require(bool(feasible) and (not qaoa or total_weight == Decimal(1)),
+            "LP03_QUANTUM_REVIEW_ORIGINAL_TRACE_FEASIBILITY")
+        rank = min(feasible, key=lambda row: row[:2])
+        _, key, utility, selected = rank
+        work._require(key == (trace.selected_candidate_id if qaoa else trace.selected_point_id),
+            "LP03_QUANTUM_REVIEW_ORIGINAL_TRACE_SELECTION")
+        result = dict(original_economic_objective=utility, selected_candidate_id=key,
+            selected_original_model_feasible=True, effect_call_count=0)
+        if qaoa:
+            result["trace_expected_locked_cost"] = weighted_cost
+        else:
+            result.update(trace_expectation=admit(selected.expectation), variance=admit(selected.variance))
+        return result
+
+
+_LP03_QUANTUM_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "ORIGINAL_PREEXISTING_SYNTHETIC_TRACE_AND_ECONOMIC_COMPARATORS_ONLY",
+    "TRACE_VALIDATION_AND_SAME_BASIS_COMPARISON_ONLY", "NO_QPU_OR_QUANTUM_ADVANTAGE_CLAIM",
+    "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+
+def _evidence_original_quantum_review_calculation_v1(calculation, body):
+    """Rederive exact measured trace or comparator custody from a detached signed proof."""
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1, IndependentEvidenceReviewV1
+    from .evidence_execution import _evidence_original_quantum_constructor_result_v1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .quantum_benchmark import QuantumEconomicBasisV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    def fields(value, roster, reason):
+        _native_require(isinstance(value, Mapping) and set(value) == set(roster), reason)
+
+    def wire(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536, "LP03_QUANTUM_REVIEW_SIGNED_WIRE")
+        raw = value.encode("utf-8", "strict")
+        _native_require(len(raw) <= 65536, "LP03_QUANTUM_REVIEW_SIGNED_WIRE")
+        return raw
+
+    fields(calculation, ("method", "math_id", "lane_calculations", "independent_registration_proof",
+        "registration_numerical_consumption", "original_numerical_limits", "review_numerical_limits",
+        "numerical_consumption_before_final_encoding"), "LP03_QUANTUM_REVIEW_SIGNED_FIELDS")
+    math_id = calculation["math_id"]
+    _native_require(math_id in _LP03_ORIGINAL_QUANTUM_EXECUTION_IDS_V1
+        and body.limitations == _LP03_QUANTUM_REVIEW_LIMITATIONS_V1
+        and calculation["method"] == "ORIGINAL_MEASURED_QUANTUM_CONSTRUCTOR_REVIEW_V1",
+        "LP03_QUANTUM_REVIEW_SIGNED_PROFILE")
+    rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    registered = calculation["independent_registration_proof"]
+    fields(registered, ("profile", "math_id", "original_source_refs", "ordered_coordinate_ids", "quantity_scope_ref",
+        "horizon_ref", "unit", "basis", "original_input_weights_ref_or_absence", "claim_bounds",
+        "declared_raw_projection_field", "metric", "expected_raw_record_json", "original_quantum_source_material_sha256",
+        "original_economic_basis", "trace_origin", "original_lock_id", "original_quantum_lock", "original_review_bound_field"),
+        "LP03_QUANTUM_REVIEW_SIGNED_REGISTRATION_FIELDS")
+    scalar_field = {"MATH-50": "trace_expected_locked_cost", "MATH-51": "trace_expectation",
+        "MATH-52": "delta_quantum_vs_no_trade"}[math_id]
+    _native_require((registered["profile"], registered["math_id"], registered["basis"],
+        registered["declared_raw_projection_field"], registered["metric"], registered["original_review_bound_field"])
+        == ("ORIGINAL_QUANTUM_CONSTRUCTOR_ADMISSION_V1", math_id, rule.basis_requirement,
+            rule.original_field, rule.output_name, scalar_field)
+        and registered["original_input_weights_ref_or_absence"] == "NO_INPUT_WEIGHTS_FOR_SELECTED_FORMULA"
+        and registered["trace_origin"] == "PREEXISTING_SYNTHETIC_TRACE_CONFORMANCE"
+        and registered["original_lock_id"] == body.input_lock_ref,
+        "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_REGISTRATION")
+    basis = QuantumEconomicBasisV1.from_canonical_mapping(registered["original_economic_basis"])
+    lock_pins = _evidence_quantum_original_lock_pins_v1(registered["original_quantum_lock"], basis=basis)
+    _native_require(basis.input_lock_id == body.input_lock_ref and lock_pins["scenario_set_ref"] == body.scenario_plan_ref,
+        "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_LOCK_PINS")
+    limits, remaining = (calculation[key] for key in ("original_numerical_limits", "review_numerical_limits"))
+    maxima = dict(max_input_bits=4096, max_work_bits=65536, max_serialized_bytes=1048576)
+    for bound in (limits, remaining):
+        fields(bound, maxima, "LP03_QUANTUM_REVIEW_SIGNED_NUMERICAL_BOUNDS")
+        _native_require(all(type(bound[key]) is int and 0 < bound[key] <= cap for key,cap in maxima.items()),
+            "LP03_QUANTUM_REVIEW_SIGNED_NUMERICAL_BOUNDS")
+    work = _EvidenceNumericalWorkV1(remaining, retained_input_capacity=768)
+    used, before = (calculation[key] for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"))
+    for counters in (used, before):
+        fields(counters, work.consumed, "LP03_QUANTUM_REVIEW_SIGNED_WORK_FIELDS")
+        for amount in counters.values():
+            _public_counter_v1(amount, allow_zero=True)
+    _native_require(limits["max_input_bits"] == remaining["max_input_bits"]
+        and limits["max_work_bits"] == remaining["max_work_bits"]
+        and used["serialized_bytes"] == len(deterministic_json(registered).encode("utf-8"))
+        and remaining["max_serialized_bytes"] == limits["max_serialized_bytes"] - used["serialized_bytes"],
+        "LP03_QUANTUM_REVIEW_SIGNED_NUMERICAL_REMAINDER")
+    bounds = registered["claim_bounds"]
+    _native_require(type(bounds) is tuple and len(bounds) == 2, "LP03_QUANTUM_REVIEW_SIGNED_CLAIM_BOUND")
+    expected = decode_evidence_raw_output_v1(math_id, wire(registered["expected_raw_record_json"]),
+        maximum_bytes=65536, maximum_nodes=4096)
+    _native_require(deterministic_json(expected) == registered["expected_raw_record_json"],
+        "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_RAW")
+    registration_work = _EvidenceNumericalWorkV1(limits, retained_input_capacity=3)
+    with registration_work:
+        lower, upper = (registration_work._exact(registration_work.parse_decimal_v1(text)) for text in bounds)
+        selected = registration_work._exact_private_execution_decimal_v1(
+            registration_work._parse_private_execution_decimal_v1(str(expected[scalar_field])))
+        registration_work._require(registration_work._compare(lower, upper) < 0
+            and registration_work._compare(lower, selected) <= 0 and registration_work._compare(selected, upper) <= 0,
+            "LP03_QUANTUM_REVIEW_SIGNED_CLAIM_BOUND")
+    registered_data = _evidence_canonical_object_v1(wire(deterministic_json(registered)), max_bytes=65536)
+    IndependentEvidenceReviewV1._charge_brier_review_artifact_v1(registered_data, work=registration_work)
+    _native_require(dict(used) == dict(registration_work.consumed), "LP03_QUANTUM_REVIEW_SIGNED_REGISTRATION_CHARGE")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == len(body.observed_metric_refs) == 2,
+        "LP03_QUANTUM_REVIEW_SIGNED_PAIRED_LANES")
+    identities, processes = set(), set()
+    for lane, name, projection_ref in zip(lanes, ("REPLAY", "PAPER"), body.observed_metric_refs, strict=True):
+        fields(lane, ("lane", "raw_ref", "projection_ref", "event_segment_ref", "original_source_payload_json",
+            "original_raw_json", "constructor_json", "trace_control_ref_or_absence", "native_invocation",
+            "baseline_ref", "baseline_amount", "posted_debit", "posted_credit"),
+            "LP03_QUANTUM_REVIEW_SIGNED_LANE_FIELDS")
+        current = (lane["raw_ref"], lane["projection_ref"], lane["event_segment_ref"])
+        _public_refs_v1(current)
+        _native_ident(lane["baseline_ref"])
+        _native_require(lane["lane"] == name and lane["projection_ref"] == projection_ref and identities.isdisjoint(current)
+            and lane["trace_control_ref_or_absence"] == (lane["raw_ref"].removesuffix("::RAW")+"::QUANTUM_TRACE"
+                if math_id != "MATH-52" else "ORIGINAL_COMPARISON_DURABLE_COMPUTATION_ONLY")
+            and type(lane["baseline_amount"]) is str and lane["baseline_amount"] == lane["posted_credit"] == lane["posted_debit"],
+            "LP03_QUANTUM_REVIEW_SIGNED_LANE_SCOPE")
+        identities.update(current)
+        native = _evidence_invocation_measurement_v1(lane["native_invocation"])
+        _native_require(native["outcome"] == "SUCCESS" and native["clock_domain_id"] == body.clock_domain_id
+            and native["completed"][0] <= body.created_wall_ns, "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_CLOCK")
+        processes.add(native["process_identity_ref"])
+        source = _evidence_canonical_object_v1(wire(lane["original_source_payload_json"]), max_bytes=65536)
+        parts, values, scope = _evidence_original_quantum_sources_v1(source, math_id=math_id)
+        _native_require(_evidence_original_execution_source_material_digest_v1(source, parts)
+                == registered["original_quantum_source_material_sha256"]
+            and tuple(part.original_record_refs[0].record_id for part in parts) == registered["original_source_refs"]
+            and scope["original_lock_id"] == registered["original_lock_id"]
+            and set(_evidence_quantum_source_epochs_v1(parts)) <= set(lock_pins["source_epoch_pairs"])
+            and scope["origin_profile"] == registered["trace_origin"]
+            and deterministic_json(scope["original_economic_basis"]) == deterministic_json(registered["original_economic_basis"])
+            and all(scope[key]==registered[key] for key in ("unit","basis","quantity_scope_ref","horizon_ref","ordered_coordinate_ids"))
+            and all(source["decision_wall_ns"] <= part.access_wall_ns <= native["started"][0] for part in parts),
+            "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_SOURCE")
+        _evidence_original_quantum_constructor_result_v1(math_id, lane["original_raw_json"], lane["constructor_json"],
+            maximum_bytes=65536, input_lock_ref=registered["original_lock_id"], original_values=values)
+        result = _evidence_independent_quantum_raw_v1(math_id, values, work=work)
+        _native_require(deterministic_json(result) == lane["original_raw_json"] == registered["expected_raw_record_json"],
+            "LP03_QUANTUM_REVIEW_SIGNED_ORIGINAL_RAW")
+    final_bytes = len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(len(processes)==2 and dict(before)==dict(work.consumed)
+        and work.consumed["serialized_bytes"]+final_bytes<=remaining["max_serialized_bytes"],
+        "LP03_QUANTUM_REVIEW_SIGNED_COMPLETE_NUMERICAL_CHARGE")
+
+
+def _evidence_private_execution_review_calculation_v1(calculation, body):
+    """Rebuild the original execution records and independent Decimal certificate."""
+    from hashlib import sha256
+
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+    def fields(value, roster, reason):
+        _native_require(isinstance(value, Mapping) and set(value) == set(roster), reason)
+
+    def wire(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536, "LP03_PRIVATE_EXECUTION_SIGNED_WIRE")
+        encoded = value.encode("utf-8", "strict")
+        _native_require(len(encoded) <= 65536, "LP03_PRIVATE_EXECUTION_SIGNED_WIRE")
+        return encoded
+
+    fields(calculation, ("method", "math_id", "lane_calculations", "independent_registration_proof",
+        "registration_numerical_consumption", "original_numerical_limits", "review_numerical_limits",
+        "numerical_consumption_before_final_encoding"), "LP03_PRIVATE_EXECUTION_SIGNED_CALCULATION_FIELDS")
+    math_id = calculation["math_id"]
+    binary64 = math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1
+    method = calculation["method"]
+    supported = ("ORIGINAL_PRIVATE_EXECUTION_BINARY64_REVIEW_V1", "ORIGINAL_PRIVATE_EXECUTION_BINARY64_REVIEW_V2") if binary64 else (
+        "ORIGINAL_PRIVATE_EXECUTION_DECIMAL_REVIEW_V1",)
+    _native_require(math_id in _LP03_ORIGINAL_PRIVATE_EXECUTION_IDS_V1
+        and body.limitations == (_LP03_PRIVATE_BINARY64_EXECUTION_REVIEW_LIMITATIONS_V1 if binary64
+            else _LP03_PRIVATE_EXECUTION_REVIEW_LIMITATIONS_V1)
+        and method in supported, "LP03_PRIVATE_EXECUTION_SIGNED_PROFILE")
+    rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    registered = calculation["independent_registration_proof"]
+    fields(registered, ("profile", "math_id", "original_source_refs", "ordered_coordinate_ids", "quantity_scope_ref",
+        "horizon_ref", "unit", "basis", "original_input_weights_ref_or_absence", "claim_bounds",
+        "declared_raw_projection_field", "metric", "expected_raw_record_json",
+        *(("original_queue_source_material_sha256",) if math_id == "MATH-39" else
+          ("original_binary_book_source_material_sha256",) if math_id == "MATH-36" else
+          ("original_binary64_source_material_sha256",) if math_id in _LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1 else ())),
+        "LP03_PRIVATE_EXECUTION_SIGNED_REGISTRATION_FIELDS")
+    _native_require(registered["profile"] == "ORIGINAL_PRIVATE_EXECUTION_ADMISSION_V1"
+        and registered["original_input_weights_ref_or_absence"] == "NO_INPUT_WEIGHTS_FOR_SELECTED_FORMULA"
+        and (registered["math_id"], registered["basis"], registered["declared_raw_projection_field"], registered["metric"])
+        == (math_id, rule.basis_requirement, rule.original_field, rule.output_name),
+        "LP03_PRIVATE_EXECUTION_SIGNED_REGISTRATION_PROFILE")
+    limits, remaining = (calculation[key] for key in ("original_numerical_limits", "review_numerical_limits"))
+    maxima = dict(max_input_bits=4096, max_work_bits=65536, max_serialized_bytes=1048576)
+    for budget in (limits, remaining):
+        fields(budget, maxima, "LP03_PRIVATE_EXECUTION_SIGNED_NUMERICAL_LIMITS")
+        _native_require(all(type(budget[key]) is int and 0 < budget[key] <= cap for key, cap in maxima.items()),
+            "LP03_PRIVATE_EXECUTION_SIGNED_NUMERICAL_LIMITS")
+    work = _EvidenceNumericalWorkV1(remaining, retained_input_capacity=_evidence_private_execution_review_capacity_v1(math_id))
+    used, before = (calculation[key] for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"))
+    for counters in (used, before):
+        fields(counters, work.consumed, "LP03_PRIVATE_EXECUTION_SIGNED_NUMERICAL_COUNTERS")
+        for amount in counters.values():
+            _public_counter_v1(amount, allow_zero=True)
+    _native_require(limits["max_input_bits"] == remaining["max_input_bits"]
+        and limits["max_work_bits"] == remaining["max_work_bits"]
+        and used["serialized_bytes"] == len(deterministic_json(registered).encode("utf-8"))
+        and remaining["max_serialized_bytes"] == limits["max_serialized_bytes"] - used["serialized_bytes"],
+        "LP03_PRIVATE_EXECUTION_SIGNED_NUMERICAL_REMAINDER")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == len(body.observed_metric_refs) == 2,
+        "LP03_PRIVATE_EXECUTION_SIGNED_PAIRED_LANES")
+    identities, processes = set(), set()
+    common = None
+    for lane, name, projection_ref in zip(lanes, ("REPLAY", "PAPER"), body.observed_metric_refs, strict=True):
+        fields(lane, ("lane", "raw_ref", "projection_ref", "event_segment_ref", "original_source_payload_json",
+            "original_raw_json", "projected_json", "native_invocation", "independent_arithmetic_sha256",
+            "original_authority_sha256", "baseline_ref", "baseline_amount", "posted_debit", "posted_credit"),
+            "LP03_PRIVATE_EXECUTION_SIGNED_LANE_FIELDS")
+        current = tuple(lane[key] for key in ("raw_ref", "projection_ref", "event_segment_ref"))
+        _public_refs_v1(current)
+        _native_ident(lane["baseline_ref"])
+        _native_require(lane["lane"] == name and lane["projection_ref"] == projection_ref and identities.isdisjoint(current)
+            and type(lane["baseline_amount"]) is str and lane["baseline_amount"] == lane["posted_credit"] == lane["posted_debit"],
+            "LP03_PRIVATE_EXECUTION_SIGNED_LANE_BINDING")
+        identities.update(current)
+        native = _evidence_invocation_measurement_v1(lane["native_invocation"])
+        _native_require(native["outcome"] == "SUCCESS" and native["clock_domain_id"] == body.clock_domain_id
+            and native["completed"][0] <= body.created_wall_ns, "LP03_PRIVATE_EXECUTION_SIGNED_ORIGINAL_CLOCK")
+        processes.add(native["process_identity_ref"])
+        original = _evidence_canonical_object_v1(wire(lane["original_source_payload_json"]))
+        parts, values, scope = _evidence_original_private_inputs_v1(original, math_id=math_id)
+        if math_id in ("MATH-36", "MATH-39", *_LP03_ORIGINAL_PRIVATE_BINARY64_EXECUTION_IDS_V1):
+            material = _evidence_original_execution_source_material_digest_v1(original, parts)
+            material_field = ("original_queue_source_material_sha256" if math_id == "MATH-39"
+                else "original_binary_book_source_material_sha256" if math_id == "MATH-36"
+                else "original_binary64_source_material_sha256")
+            _native_require(material == registered[material_field],
+                "LP03_QUEUE_SIGNED_REGISTERED_SOURCE_MATERIAL" if math_id == "MATH-39"
+                else "LP03_BINARY_BOOK_SIGNED_REGISTERED_SOURCE_MATERIAL" if math_id == "MATH-36"
+                else "LP03_BINARY64_SIGNED_REGISTERED_SOURCE_MATERIAL")
+        else:
+            material = deterministic_json(tuple(part.reconstructed_canonical_events[0] for part in parts))
+        if common is None:
+            common = material
+        _native_require(material == common
+            and tuple(part.original_record_refs[0].record_id for part in parts) == registered["original_source_refs"]
+            and all(scope[key] == registered[key] for key in ("unit", "basis", "quantity_scope_ref", "horizon_ref", "ordered_coordinate_ids"))
+            and all(original["decision_wall_ns"] <= part.access_wall_ns <= native["started"][0] for part in parts)
+            and sha256(deterministic_json(scope["exact_original_authority"]).encode("utf-8")).hexdigest() == lane["original_authority_sha256"],
+            "LP03_PRIVATE_EXECUTION_SIGNED_ORIGINAL_SOURCE")
+        if math_id == "MATH-36":
+            _evidence_original_binary_book_bounds_v1(registered["claim_bounds"], values, work=work)
+        result, arithmetic = _evidence_independent_decimal_execution_v1(math_id, values, work=work,
+            authority=scope["exact_original_authority"], charge_original_binary64_inputs=method == "ORIGINAL_PRIVATE_EXECUTION_BINARY64_REVIEW_V2")
+        presentation = (dict(lcb_net=result["lcb_net"], raw_gate=result["trade_gate"],
+            no_order_authority=True, decision=arithmetic["decision"]) if math_id == "MATH-45"
+            else result["amount_after_rounding"] if math_id == "MATH-35" else result)
+        diagnostic = "LP03_PRIVATE_EXECUTION_SIGNED_ORIGINAL_ARITHMETIC"
+        _native_require(deterministic_json(result) == lane["original_raw_json"] == registered["expected_raw_record_json"]
+            and sha256(deterministic_json(arithmetic).encode("utf-8")).hexdigest() == lane["independent_arithmetic_sha256"],
+            diagnostic)
+        if deterministic_json(presentation) != lane["projected_json"]:
+            raise ContractValidationError(ReasonCode.EVIDENCE_PROJECTION_MISMATCH, diagnostic)
+    final_bytes = len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(len(processes)==2 and dict(before)==dict(work.consumed)
+        and work.consumed["serialized_bytes"]+final_bytes<=remaining["max_serialized_bytes"],
+        "LP03_PRIVATE_EXECUTION_SIGNED_COMPLETE_NUMERICAL_CHARGE")
+
+
+_LP03_ANALYTIC_REVIEW_LIMITATIONS_V1 = (
+    "SOFTWARE_CONFORMANCE_ONLY", "ORIGINAL_PRIVATE_ANALYTIC_INPUTS_ONLY",
+    "CERTIFIED_ANALYTIC_CONVERSION_WITH_EXACT_DECIMAL_RAW_CUSTODY",
+    "NO_PORTFOLIO_OPTIMIZATION_OR_MODEL_TRAINING_AUTHORITY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED",
+)
+
+
+def _evidence_private_analytic_review_calculation_v1(calculation, body):
+    """Validate the signed original source, raw receipt and exact-cell result."""
+    from hashlib import sha256
+
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+    def fields(value, roster, reason):
+        _native_require(isinstance(value, Mapping) and set(value) == set(roster), reason)
+
+    def wire(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536, "LP03_ANALYTIC_SIGNED_ORIGINAL_WIRE")
+        encoded = value.encode("utf-8", "strict")
+        _native_require(len(encoded) <= 65536, "LP03_ANALYTIC_SIGNED_ORIGINAL_WIRE")
+        return encoded
+
+    fields(calculation, ("method", "math_id", "lane_calculations", "independent_registration_proof",
+        "registration_numerical_consumption", "original_numerical_limits", "review_numerical_limits",
+        "numerical_consumption_before_final_encoding"), "LP03_ANALYTIC_SIGNED_CALCULATION_FIELDS")
+    math_id = calculation["math_id"]
+    _native_require(math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37")
+        and body.limitations == _LP03_ANALYTIC_REVIEW_LIMITATIONS_V1, "LP03_ANALYTIC_SIGNED_PROFILE")
+    projection = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    registered = calculation["independent_registration_proof"]
+    fields(registered, ("profile", "math_id", "original_source_refs", "ordered_coordinate_ids",
+        "quantity_scope_ref", "horizon_ref", "unit", "basis", "original_input_weights_ref_or_absence",
+        "claim_bounds", "declared_raw_projection_field", "metric", "conversion_work_limits",
+        "expected_raw_record_json", "expected_analytic_binary64_bits"), "LP03_ANALYTIC_SIGNED_REGISTRATION_FIELDS")
+    _native_require(registered["profile"] == "ORIGINAL_PRIVATE_ANALYTIC_ADMISSION_V1"
+        and (registered["math_id"], registered["basis"], registered["declared_raw_projection_field"], registered["metric"])
+        == (math_id, projection.basis_requirement, projection.original_field, projection.output_name),
+        "LP03_ANALYTIC_SIGNED_REGISTERED_TARGET")
+    limits, remaining = (calculation[name] for name in ("original_numerical_limits", "review_numerical_limits"))
+    maxima = dict(max_input_bits=4096, max_work_bits=65536, max_serialized_bytes=1048576)
+    for profile in (limits, remaining, registered["conversion_work_limits"]):
+        fields(profile, maxima, "LP03_ANALYTIC_SIGNED_NUMERICAL_FIELDS")
+        _native_require(all(type(profile[name]) is int and 0 < profile[name] <= cap for name, cap in maxima.items()),
+            "LP03_ANALYTIC_SIGNED_NUMERICAL_LIMITS")
+    _public_refs_v1(registered["ordered_coordinate_ids"])
+    coordinate_count = len(registered["ordered_coordinate_ids"])
+    _native_require(coordinate_count <= 64, "LP03_ANALYTIC_SIGNED_COORDINATE_BOUND")
+    capacity = 2 * (coordinate_count * coordinate_count + 2 * coordinate_count + 3) if math_id == "MATH-29" else 2 * (coordinate_count + 3)
+    work = _EvidenceNumericalWorkV1(remaining, retained_input_capacity=capacity)
+    consumed, before_final = (calculation[name] for name in (
+        "registration_numerical_consumption", "numerical_consumption_before_final_encoding"))
+    for counters in (consumed, before_final):
+        fields(counters, work.consumed, "LP03_ANALYTIC_SIGNED_NUMERICAL_CONSUMPTION")
+        for amount in counters.values():
+            _public_counter_v1(amount, allow_zero=True)
+    _native_require(limits["max_input_bits"] == remaining["max_input_bits"]
+        and limits["max_work_bits"] == remaining["max_work_bits"]
+        and consumed["serialized_bytes"] == len(deterministic_json(registered).encode("utf-8"))
+        and remaining["max_serialized_bytes"] == limits["max_serialized_bytes"] - consumed["serialized_bytes"],
+        "LP03_ANALYTIC_SIGNED_NUMERICAL_REMAINING")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == len(body.observed_metric_refs) == 2,
+        "LP03_ANALYTIC_SIGNED_PAIRED_LANES")
+    processes, record_refs = set(), set()
+    source_events = None
+    for lane, name, observed_ref in zip(lanes, ("REPLAY", "PAPER"), body.observed_metric_refs, strict=True):
+        fields(lane, ("lane", "raw_ref", "projection_ref", "conversion_ref", "event_segment_ref",
+            "original_source_payload_json", "raw_output_json", "original_binary64_bits", "certificate_json",
+            "conversion_record_json", "native_invocation", "independent_proof_sha256",
+            "baseline_ref", "baseline_amount", "posted_debit", "posted_credit"), "LP03_ANALYTIC_SIGNED_LANE_FIELDS")
+        current = tuple(lane[key] for key in ("raw_ref", "projection_ref", "conversion_ref", "event_segment_ref"))
+        _public_refs_v1(current)
+        _native_ident(lane["baseline_ref"])
+        _native_require(record_refs.isdisjoint(current) and lane["lane"] == name and lane["projection_ref"] == observed_ref
+            and type(lane["baseline_amount"]) is str and lane["posted_debit"] == lane["posted_credit"] == lane["baseline_amount"],
+            "LP03_ANALYTIC_SIGNED_LANE_REFS_AND_BASELINE")
+        record_refs.update(current)
+        native = _evidence_invocation_measurement_v1(lane["native_invocation"])
+        original = _evidence_canonical_object_v1(wire(lane["original_source_payload_json"]))
+        parts, inputs, scope = _evidence_analytic_private_sources_v1(original, math_id=math_id)
+        material = deterministic_json(tuple(part.reconstructed_canonical_events[0] for part in parts))
+        if source_events is None:
+            source_events = material
+        _native_require(material == source_events and tuple(part.original_record_refs[0].record_id for part in parts)
+            == registered["original_source_refs"]
+            and all(scope[key] == registered[key] for key in ("unit", "basis", "quantity_scope_ref", "horizon_ref", "ordered_coordinate_ids"))
+            and all(original["decision_wall_ns"] <= part.access_wall_ns <= native["started"][0] for part in parts),
+            "LP03_ANALYTIC_SIGNED_ORIGINAL_SCOPE")
+        conversion_raw = wire(lane["conversion_record_json"])
+        conversion = EvidenceAnalyticBinary64ConversionRecordV1.from_canonical_mapping(_evidence_canonical_object_v1(conversion_raw))
+        clock = conversion.native_measurement
+        _native_require(deterministic_json(conversion).encode("utf-8") == conversion_raw
+            and (conversion.math_id, conversion.original_raw_receipt_ref, conversion.record_id) == (math_id, lane["raw_ref"], lane["conversion_ref"])
+            and conversion.certificate_json_or_absence == lane["certificate_json"]
+            and conversion.numerical_work_limits == registered["conversion_work_limits"]
+            and native["outcome"] == clock["outcome"] == "SUCCESS"
+            and native["clock_domain_id"] == clock["clock_domain_id"] == body.clock_domain_id
+            and native["boot_identity_ref"] == clock["boot_identity_ref"]
+            and native["process_identity_ref"] != clock["process_identity_ref"]
+            and native["completed"][0] <= clock["started"][0] <= clock["completed"][0] <= body.created_wall_ns,
+            "LP03_ANALYTIC_SIGNED_ORIGINAL_CONVERSION_AND_CLOCK")
+        processes.add(native["process_identity_ref"])
+        if math_id == "MATH-29":
+            _native_require(conversion.original_input_weights_ref_or_absence == parts[0].original_record_refs[0]
+                and registered["original_input_weights_ref_or_absence"] == parts[0].original_record_refs[0].record_id,
+                "LP03_ANALYTIC_SIGNED_ORIGINAL_INPUT_WEIGHT_REF")
+        else:
+            _native_require(registered["original_input_weights_ref_or_absence"] == "NO_INPUT_WEIGHTS_FOR_SELECTED_FORMULA",
+                "LP03_ANALYTIC_SIGNED_ORIGINAL_INPUT_WEIGHT_REF")
+        wire(lane["raw_output_json"])
+        wire(lane["certificate_json"])
+        result = _evidence_independent_private_analytic_calculation_v1(math_id, inputs,
+            raw_json=lane["raw_output_json"], certificate_json=lane["certificate_json"], work=work,
+            unit=scope["unit"], basis=scope["basis"])
+        _native_require(result["original_decimal_text"] == conversion.original_decimal_text
+            and result["original_analytic_binary64_bits"] == lane["original_binary64_bits"]
+            == registered["expected_analytic_binary64_bits"]
+            and lane["raw_output_json"] == registered["expected_raw_record_json"]
+            and sha256(deterministic_json(result).encode("utf-8")).hexdigest() == lane["independent_proof_sha256"],
+            "LP03_ANALYTIC_SIGNED_ORIGINAL_EXACT_VALUE")
+    final_bytes = len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(len(processes) == 2 and dict(before_final) == dict(work.consumed)
+        and work.consumed["serialized_bytes"] + final_bytes <= remaining["max_serialized_bytes"],
+        "LP03_ANALYTIC_SIGNED_COMPLETE_NUMERICAL_CHARGE")
+
+
+def _evidence_recorded_ope_point_review_calculation_v1(calculation, body):
+    """Validate the two exact results and their independent recomputation."""
+    from hashlib import sha256
+    from .evidence import IndependentEvidenceReviewV1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    def exact(value, names, diagnostic):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), diagnostic)
+
+    def wire(text):
+        _native_require(type(text) is str and 0 < len(text) <= 65536, "LP03_OPE_POINT_SIGNED_WIRE")
+        result = text.encode("utf-8", "strict")
+        _native_require(len(result) <= 65536, "LP03_OPE_POINT_SIGNED_WIRE")
+        return result
+
+    exact(calculation, ("method", "math_id", "lane_calculations", "original_policy_value_authority",
+        "independent_registration_proof", "registration_numerical_consumption", "original_numerical_limits",
+        "review_numerical_limits", "numerical_consumption_before_final_encoding"), "LP03_OPE_POINT_SIGNED_FIELDS")
+    math_id = calculation["math_id"]
+    _native_require(type(math_id) is str and math_id in _LP03_OPE_POINT_PROJECTION_PROFILES_V1
+        and calculation["method"] == "ORIGINAL_RECORDED_OPE_POINT_ESTIMATOR_REVIEW_V1"
+        and calculation["original_policy_value_authority"] == "ABSENT_SOFTWARE_CONFORMANCE_ONLY"
+        and body.limitations == _LP03_OPE_POINT_REVIEW_LIMITATIONS_V1, "LP03_OPE_POINT_SIGNED_PROFILE")
+    field, metric, basis, _ = _LP03_OPE_POINT_PROJECTION_PROFILES_V1[math_id]
+    limits = calculation["original_numerical_limits"]
+    remaining = calculation["review_numerical_limits"]
+    registered = calculation["independent_registration_proof"]
+    used = calculation["registration_numerical_consumption"]
+    before_final = calculation["numerical_consumption_before_final_encoding"]
+    keys = ("max_input_bits", "max_work_bits", "max_serialized_bytes")
+    exact(limits, keys, "LP03_OPE_POINT_SIGNED_NUMERICAL_FIELDS")
+    exact(remaining, keys, "LP03_OPE_POINT_SIGNED_NUMERICAL_FIELDS")
+    maxima = (4096, 65536, 1048576)
+    _native_require(all(type(limits[key]) is type(remaining[key]) is int and 0 < remaining[key] <= limits[key] <= maximum
+        for key, maximum in zip(keys, maxima, strict=True))
+        and limits["max_input_bits"] == remaining["max_input_bits"] and limits["max_work_bits"] == remaining["max_work_bits"],
+        "LP03_OPE_POINT_SIGNED_NUMERICAL_LIMITS")
+    work = _EvidenceNumericalWorkV1(dict(remaining), retained_input_capacity=6)
+    for counters in (used, before_final):
+        exact(counters, tuple(work.consumed), "LP03_OPE_POINT_SIGNED_CONSUMED_FIELDS")
+        for value in counters.values():
+            _public_counter_v1(value, allow_zero=True)
+    _native_require(used["serialized_bytes"] == len(deterministic_json(registered).encode("utf-8"))
+        and remaining["max_serialized_bytes"] == limits["max_serialized_bytes"] - used["serialized_bytes"],
+        "LP03_OPE_POINT_SIGNED_REMAINING_NUMERICAL_BYTES")
+    exact(registered, ("profile", "math_id", "original_source_refs", "ordered_original_row_ids",
+        "original_fit_receipt_refs", "original_output_basis", "claim_bounds", "declared_raw_projection_field",
+        "metric", "effect_authority_ref"), "LP03_OPE_POINT_SIGNED_REGISTRATION_FIELDS")
+    _native_require(registered["profile"] == "ORIGINAL_RECORDED_OPE_POINT_ADMISSION_V1"
+        and registered["math_id"] == math_id and registered["metric"] == metric and registered["original_output_basis"] == basis
+        and registered["declared_raw_projection_field"] == field
+        and registered["effect_authority_ref"] == "ABSENT_SOFTWARE_CONFORMANCE_ONLY", "LP03_OPE_POINT_SIGNED_REGISTRATION_PROFILE")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == len(body.observed_metric_refs) == 2,
+        "LP03_OPE_POINT_SIGNED_PAIRED_LANES")
+    ids, processes = set(), set()
+    common = None
+    for position, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"), strict=True)):
+        exact(lane, ("lane", "raw_ref", "projection_ref", "event_segment_ref", "original_source_payload_json",
+            "raw_output_json", "exact_projection_json", "native_observation", "independent_proof_sha256",
+            "baseline_ref", "baseline_amount", "posted_debit", "posted_credit"), "LP03_OPE_POINT_SIGNED_LANE_FIELDS")
+        current = tuple(lane[key] for key in ("raw_ref", "projection_ref", "event_segment_ref"))
+        for ref in (*current, lane["baseline_ref"]):
+            _native_ident(ref)
+        _native_require(len(set(current)) == len(current) and ids.isdisjoint(current) and lane["lane"] == name
+            and lane["projection_ref"] == body.observed_metric_refs[position]
+            and type(lane["posted_debit"]) is type(lane["baseline_amount"]) is str
+            and lane["posted_debit"] == lane["posted_credit"],
+            "LP03_OPE_POINT_SIGNED_DISTINCT_REFS")
+        ids.update(current)
+        observed = _evidence_invocation_measurement_v1(lane["native_observation"])
+        _native_require(observed["outcome"] == "SUCCESS" and observed["clock_domain_id"] == body.clock_domain_id
+            and observed["completed"][0] <= body.created_wall_ns, "LP03_OPE_POINT_SIGNED_ORIGINAL_CLOCK")
+        processes.add(observed["process_identity_ref"])
+        source = _evidence_canonical_object_v1(wire(lane["original_source_payload_json"]))
+        parts, inputs, ordered, fit = _evidence_recorded_ope_source_data_v1(source, math_id=math_id)
+        retained = deterministic_json(tuple(part.reconstructed_canonical_events[0] for part in parts))
+        if common is None:
+            common = retained
+        _native_require(retained == common
+            and tuple(part.original_record_refs[0].record_id for part in parts) == registered["original_source_refs"]
+            and ordered == registered["ordered_original_row_ids"]
+            and tuple(row["nuisance_prediction_receipt_ref"] for row in fit) == registered["original_fit_receipt_refs"]
+            and all(source["consumer_decision_wall_ns"] <= part.access_wall_ns <= observed["started"][0] for part in parts),
+            "LP03_OPE_POINT_SIGNED_SOURCE_JOIN")
+        raw = wire(lane["raw_output_json"])
+        output = decode_evidence_raw_output_v1(math_id, raw, maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(lane["exact_projection_json"] == deterministic_json(output if field == "$" else output[field]),
+            "LP03_OPE_POINT_SIGNED_ORIGINAL_PROJECTION")
+        result = IndependentEvidenceReviewV1._bounded_review_recorded_ope_v1(
+            math_id, deterministic_json(inputs).encode("utf-8"), raw, raw, work=work)
+        _native_require(sha256(deterministic_json(result).encode("utf-8")).hexdigest() == lane["independent_proof_sha256"],
+            "LP03_OPE_POINT_SIGNED_ORIGINAL_ARITHMETIC")
+        with work:
+            debit, credit, baseline = tuple(work._exact(work.parse_decimal_v1(lane[name]))
+                for name in ("posted_debit", "posted_credit", "baseline_amount"))
+            work._require(work._compare(debit, credit) == work._compare(credit, baseline) == 0,
+                "LP03_REVIEW_BALANCED_BASELINE_MISMATCH")
+    folded = work.consumed["serialized_bytes"]
+    final_bytes = len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(len(processes) == 2 and dict(before_final) == dict(work.consumed)
+        and folded + final_bytes <= remaining["max_serialized_bytes"], "LP03_OPE_POINT_SIGNED_COMPLETE_NUMERICAL_CHARGE")
+
+
+def _evidence_recorded_dr_review_calculation_v1(calculation, body):
+    """Validate the signed original estimator and conditional-score proof."""
+    from hashlib import sha256
+    from .evidence import IndependentEvidenceReviewV1
+    from .evidence_execution import measure_dr_score_uncertainty_v1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+
+    def exact(value, names, diagnostic):
+        _native_require(isinstance(value,Mapping) and set(value)==set(names),diagnostic)
+
+    def wire(text):
+        _native_require(type(text) is str and 0<len(text)<=65536,"LP03_DR_SIGNED_WIRE")
+        result=text.encode("utf-8","strict")
+        _native_require(len(result)<=65536,"LP03_DR_SIGNED_WIRE")
+        return result
+
+    exact(calculation,("method","math_id","target","lane_calculations","original_policy_value_authority",
+        "original_source_capsule_json","independent_registration_proof","registration_numerical_consumption","original_numerical_limits",
+        "review_numerical_limits","numerical_consumption_before_final_encoding"),"LP03_DR_SIGNED_CALCULATION_FIELDS")
+    target="MEAN_CONDITIONAL_RECORDED_DR_SCORE"
+    _native_require(calculation["method"]=="ORIGINAL_RECORDED_DR_ESTIMATOR_AND_CONDITIONAL_SCORE_INTERVAL"
+        and calculation["math_id"]=="MATH-22" and calculation["target"]==target
+        and calculation["original_policy_value_authority"]=="ABSENT_SOFTWARE_CONFORMANCE_ONLY"
+        and body.limitations==_LP03_DR_REVIEW_LIMITATIONS_V1,"LP03_DR_SIGNED_CALCULATION_PROFILE")
+    limits=calculation["original_numerical_limits"]
+    remaining=calculation["review_numerical_limits"]
+    registration=calculation["independent_registration_proof"]
+    used=calculation["registration_numerical_consumption"]
+    before_final=calculation["numerical_consumption_before_final_encoding"]
+    keys=("max_input_bits","max_work_bits","max_serialized_bytes")
+    exact(limits,keys,"LP03_DR_SIGNED_NUMERICAL_FIELDS")
+    exact(remaining,keys,"LP03_DR_SIGNED_NUMERICAL_FIELDS")
+    work=_EvidenceNumericalWorkV1(dict(max_input_bits=4096,max_work_bits=65536,max_serialized_bytes=1048576),
+        retained_input_capacity=134)
+    for counters in (used,before_final):
+        exact(counters,tuple(work.consumed),"LP03_DR_SIGNED_CONSUMED_FIELDS")
+        for value in counters.values():
+            _public_counter_v1(value,allow_zero=True)
+    _native_require(all(type(limits[key]) is type(remaining[key]) is int and 0<remaining[key]<=limits[key] for key in keys)
+        and limits["max_input_bits"]==remaining["max_input_bits"] and limits["max_work_bits"]==remaining["max_work_bits"]
+        and used["serialized_bytes"]==len(deterministic_json(registration).encode("utf-8"))
+        and remaining["max_serialized_bytes"]==limits["max_serialized_bytes"]-used["serialized_bytes"],
+        "LP03_DR_SIGNED_REMAINING_NUMERICAL_BYTES")
+    lanes=calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes)==len(body.observed_metric_refs)==2,
+        "LP03_DR_SIGNED_PAIRED_LANES")
+    ids,processes=set(),set()
+    capsule = _evidence_canonical_object_v1(wire(calculation["original_source_capsule_json"]))
+    for position,(lane,name) in enumerate(zip(lanes,("REPLAY","PAPER"),strict=True)):
+        exact(lane,("lane","event_segment_ref","original_raw_ref","projection_ref","group_measurement_ref","uncertainty_ref",
+            "original_source_access_wall_ns","original_source_payload_sha256","original_estimator_json","recorded_score_certificate_json",
+            "native_uncertainty_observation","independent_estimator_derivation_sha256","baseline_ref","posted_debit","posted_credit"),
+            "LP03_DR_SIGNED_LANE_FIELDS")
+        current=tuple(lane[key] for key in ("event_segment_ref","original_raw_ref","projection_ref","group_measurement_ref","uncertainty_ref"))
+        for ref in (*current,lane["baseline_ref"]):
+            _native_ident(ref)
+        _native_require(len(set(current))==len(current) and ids.isdisjoint(current)
+            and lane["projection_ref"]==body.observed_metric_refs[position]
+            and lane["lane"]==name and lane["posted_debit"]==lane["posted_credit"],
+            "LP03_DR_SIGNED_LANE_ORIGINAL_REFS")
+        ids.update(current)
+        observation=_evidence_invocation_measurement_v1(lane["native_uncertainty_observation"])
+        _native_require(observation["outcome"]=="SUCCESS" and observation["clock_domain_id"]==body.clock_domain_id
+            and observation["completed"][0]<=body.created_wall_ns,"LP03_DR_SIGNED_NATIVE_OBSERVATION")
+        processes.add(observation["process_identity_ref"])
+        source = _evidence_dr_restore_review_source_v1(capsule, lane["original_source_access_wall_ns"], lane["original_raw_ref"])
+        _native_require(sha256(deterministic_json(source).encode("utf-8")).hexdigest() == lane["original_source_payload_sha256"],
+            "LP03_DR_SIGNED_ORIGINAL_SOURCE_HASH")
+        parts,inputs,policy,policy_json,original_fit_after_first_label=_evidence_dr_original_source_data_v1(source,original_raw_ref=lane["original_raw_ref"])
+        _native_require(len(parts)==8 and not original_fit_after_first_label
+            and all(source["decision_wall_ns"]<=part.access_wall_ns<=observation["started"][0] for part in parts),
+            "LP03_DR_SIGNED_PAIRED_ORIGINAL_SOURCE_JOIN")
+        exact(registration,("profile","declared_disposition","original_source_refs","target","ordered_original_row_ids",
+            "claim_bounds","group_bounds","error_allocation","bound_and_error_allocation_ref"),"LP03_DR_SIGNED_REGISTRATION_FIELDS")
+        _native_require(registration["profile"]=="ORIGINAL_RECORDED_DR_UNCERTAINTY_ADMISSION_V1"
+            and registration["declared_disposition"]=="ORIGINAL_CONDITIONAL_RECORDED_SCORE_INTERVAL"
+            and registration["target"]==target and registration["ordered_original_row_ids"]==policy["row_ids"]
+            and registration["original_source_refs"]==tuple(part.original_record_refs[0].record_id for part in parts)
+            and registration["claim_bounds"]==registration["group_bounds"]==(policy["group_lower"],policy["group_upper"])
+            and registration["error_allocation"]==policy["alpha"]
+            and registration["bound_and_error_allocation_ref"]==policy["group_bound_proof_ref"],
+            "LP03_DR_SIGNED_ORIGINAL_BOUND_AND_ERROR_POLICY")
+        typed=deterministic_json(inputs).encode("utf-8")
+        actual=wire(lane["original_estimator_json"])
+        derived=IndependentEvidenceReviewV1._bounded_review_recorded_ope_v1("MATH-22",typed,actual,actual,work=work)
+        certificate=measure_dr_score_uncertainty_v1(actual,input_json=typed,policy_json=policy_json,maximum_input_bytes=65536,
+            maximum_input_nodes=4096,maximum_output_bytes=65536,maximum_output_nodes=4096,work=work)
+        _native_require(certificate==wire(lane["recorded_score_certificate_json"])
+            and sha256(deterministic_json(derived).encode("utf-8")).hexdigest()==lane["independent_estimator_derivation_sha256"]
+            and b'"disposition":"CONDITIONAL_DATA_CALCULATION"' in certificate,
+            "LP03_DR_SIGNED_ORIGINAL_ARITHMETIC")
+    folded=work.consumed["serialized_bytes"]
+    size=len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(len(processes)==2 and before_final["serialized_bytes"]==folded
+        and folded+size<=remaining["max_serialized_bytes"],"LP03_DR_SIGNED_COMPLETE_NUMERICAL_CHARGE")
+
+
+def _evidence_heldout_review_calculation_v1(calculation, body):
+    """Reconstruct the bounded signed projection from its original sources and scores."""
+    from fractions import Fraction
+    from hashlib import sha256
+    import struct
+    from .evidence import IndependentEvidenceReviewV1
+    from .evidence_execution import _prepare_evidence_heldout_scorer_inputs_v1
+    from .implementation_registry import resolve_evidence_invocation_v1
+    from .latency_policy import _evidence_invocation_measurement_v1
+    from .parameter_policy import _EvidenceNumericalWorkV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    def exact(value, expected, diagnostic):
+        _native_require(isinstance(value, Mapping) and set(value) == set(expected), diagnostic)
+
+    def wire(text):
+        _native_require(type(text) is str and 0 < len(text) <= 65536, "LP03_HELD_OUT_SIGNED_WIRE")
+        result = text.encode("utf-8", "strict")
+        _native_require(len(result) <= 65536, "LP03_HELD_OUT_SIGNED_WIRE")
+        return result
+
+    exact(calculation, ("method", "topology_math_id", "scorer_math_id", "scorer_pin", "topology_raw_json",
+        "original_source_payload_json", "lane_calculations", "registration_bound_proof",
+        "registration_numerical_consumption", "original_numerical_limits", "review_numerical_limits",
+        "numerical_consumption_before_final_encoding", "result"), "LP03_HELD_OUT_SIGNED_FIELDS")
+    math_id, scorer_id = calculation["topology_math_id"], calculation["scorer_math_id"]
+    compact = calculation["method"] == "ORIGINAL_TOPOLOGY_AND_COMPLETE_HELD_OUT_SCORING_COMPACT_V1"
+    _native_require((not compact or math_id == "MATH-21")
+        and math_id in ("MATH-20", "MATH-21") and scorer_id in ("MATH-08", "MATH-09")
+        and body.limitations == _LP03_HELD_OUT_REVIEW_LIMITATIONS_V1
+        and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION",
+        "LP03_HELD_OUT_SIGNED_PROFILE")
+    pin = calculation["scorer_pin"]
+    _native_require(type(pin) is tuple and len(pin) == 3 and all(type(value) is str for value in pin),
+        "LP03_HELD_OUT_SIGNED_PIN")
+    scorer = resolve_evidence_invocation_v1(scorer_id, implementation_pin=pin[0], specification_pin=pin[1],
+        resource_policy_ref=pin[2], origin=body.origin)
+    limits, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    keys = ("max_input_bits", "max_work_bits", "max_serialized_bytes")
+    exact(limits, keys, "LP03_HELD_OUT_SIGNED_ORIGINAL_BUDGET")
+    exact(remaining, keys, "LP03_HELD_OUT_SIGNED_REMAINING_BUDGET")
+    template = _EvidenceNumericalWorkV1({"max_input_bits": 4096, "max_work_bits": 65536,
+        "max_serialized_bytes": 1048576}, retained_input_capacity=0)
+    used = calculation["registration_numerical_consumption"]
+    before_final = calculation["numerical_consumption_before_final_encoding"]
+    for counters in (used, before_final):
+        exact(counters, template.consumed.keys(),
+            "LP03_HELD_OUT_SIGNED_CONSUMPTION")
+        for value in counters.values():
+            _public_counter_v1(value, allow_zero=True)
+    _native_require(all(type(limits[name]) is type(remaining[name]) is int and 0 < remaining[name] <= limits[name] for name in keys)
+        and limits["max_input_bits"] == remaining["max_input_bits"]
+        and limits["max_work_bits"] == remaining["max_work_bits"]
+        and remaining["max_serialized_bytes"] == limits["max_serialized_bytes"] - used["serialized_bytes"]
+        and before_final["serialized_bytes"] <= remaining["max_serialized_bytes"],
+        "LP03_HELD_OUT_SIGNED_CUMULATIVE_BUDGET")
+    source_json = wire(calculation["original_source_payload_json"])
+    source = _evidence_canonical_object_v1(source_json)
+    parts, inputs, trace = _evidence_heldout_source_data_v1(source)
+    _native_require(source["topology_math_id"] == math_id and source["scorer_math_id"] == scorer_id,
+        "LP03_HELD_OUT_SIGNED_SOURCE_PROFILE")
+    refs = tuple(dict(store_id=part.original_record_refs[0].store_id, record_id=part.original_record_refs[0].record_id)
+        for part in parts)
+    topology_wire = wire(calculation["topology_raw_json"])
+    topology = decode_evidence_raw_output_v1(math_id, topology_wire, maximum_bytes=65536, maximum_nodes=4096)
+    topology_proof = IndependentEvidenceReviewV1._bounded_review_fold_topology_v1(math_id,
+        deterministic_json(inputs).encode("utf-8"), topology_wire, work=template)
+    digest = sha256(deterministic_json(topology_proof).encode("utf-8")).hexdigest()
+    prepared = _prepare_evidence_heldout_scorer_inputs_v1(topology_math_id=math_id, topology_raw_json=topology_wire,
+        scored_trace=trace, scorer_contract=scorer, maximum_input_bytes=65536, maximum_nodes=4096)
+    bound = calculation["registration_bound_proof"]
+    exact(bound, ("profile", "topology", "topology_math_id", "scorer_math_id", "declared_fold_count",
+        "ordered_source_refs", "prediction_trace_receipt_ref", "outcome_label_receipt_ref",
+        "model_id", "model_version", "fixed_lower", "fixed_upper"), "LP03_HELD_OUT_SIGNED_BOUND")
+    _native_require(bound["profile"] == "ORIGINAL_HELD_OUT_SCORING_ADMISSION_V1"
+        and deterministic_json(bound["topology"]) == deterministic_json(topology_proof) and bound["topology_math_id"] == math_id and bound["scorer_math_id"] == scorer_id
+        and bound["declared_fold_count"] == len(prepared)
+        and bound["ordered_source_refs"] == tuple(ref["record_id"] for ref in refs)
+        and bound["prediction_trace_receipt_ref"] == parts[-2].reconstructed_canonical_events[0]["producer_receipt_id"]
+        and bound["outcome_label_receipt_ref"] == parts[-1].reconstructed_canonical_events[0]["producer_receipt_id"]
+        and bound["model_id"] == trace["prediction_model_id"] and bound["model_version"] == trace["prediction_model_version"]
+        and (bound["fixed_lower"], bound["fixed_upper"]) == ("0", "4" if scorer_id == "MATH-08" else "1074"),
+        "LP03_HELD_OUT_SIGNED_ORIGINAL_BOUND")
+    _native_require(used["serialized_bytes"] == template.consumed["serialized_bytes"] + len(deterministic_json(bound).encode("utf-8")),
+        "LP03_HELD_OUT_SIGNED_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_HELD_OUT_SIGNED_PAIRED_LANES")
+    native_processes, durable_refs = set(), set()
+    for index, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"), strict=True)):
+        exact(lane, ("lane", "event_segment_ref", "raw_ref", "projection_ref", "source_record_refs",
+            "source_access_wall_ns", "topology_derivation_sha256", "topology_invocation", "fold_scores",
+            "path_scores", "posted_debit", "posted_credit", "baseline_ref"), "LP03_HELD_OUT_SIGNED_LANE_FIELDS")
+        _native_require(lane["lane"] == name and lane["projection_ref"] == body.observed_metric_refs[index]
+            and lane["source_record_refs"] == refs and lane["topology_derivation_sha256"] == digest
+            and lane["posted_debit"] == lane["posted_credit"], "LP03_HELD_OUT_SIGNED_LANE_JOIN")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref"):
+            _native_ident(lane[key])
+        access = lane["source_access_wall_ns"]
+        measured = _evidence_invocation_measurement_v1(lane["topology_invocation"])
+        _native_require(type(access) is tuple and len(access) == len(parts)
+            and all(type(value) is int and source["consumer_decision_wall_ns"] <= value <= measured["started"][0]
+                for value in access)
+            and (index > 0 or access == tuple(part.access_wall_ns for part in parts))
+            and measured["outcome"] == "SUCCESS" and measured["clock_domain_id"] == body.clock_domain_id
+            and measured["completed"][0] <= body.created_wall_ns,
+            "LP03_HELD_OUT_SIGNED_SOURCE_ACCESS")
+        native_processes.add(measured["process_identity_ref"])
+
+        rows, paths = lane["fold_scores"], lane["path_scores"]
+        _native_require(type(rows) is type(paths) is tuple and len(rows) == len(prepared)
+            and len(paths) == len(topology.get("paths", ())), "LP03_HELD_OUT_SIGNED_COMPLETE_ROSTER")
+        values = []
+        clock_fields = ("clock_domain_id", "process_identity_ref", "boot_identity_ref", "clock_declarations")
+        for row, (ordinal, training, expected_refs, input_wire) in zip(rows, prepared, strict=True):
+            common_fields = ("ordinal", "fold_score_ref", "raw_score_ref", "original_raw_json", "derivation_sha256")
+            lineage_fields = (("lineage_sha256", "scorer_observation") if compact
+                else ("training_receipt_ref", "sample_receipts", "scorer_invocation"))
+            exact(row, (*common_fields, *lineage_fields), "LP03_HELD_OUT_SIGNED_SCORE_FIELDS")
+            _native_require(type(row["ordinal"]) is int and row["ordinal"] == ordinal, "LP03_HELD_OUT_SIGNED_FOLD_ORDER")
+            for key in ("fold_score_ref", "raw_score_ref"):
+                _native_ident(row[key])
+            if compact:
+                expected_lineage = sha256(deterministic_json(dict(
+                    training_receipt_ref=training, sample_receipts=expected_refs)).encode("utf-8")).hexdigest()
+                _native_require(row["lineage_sha256"] == expected_lineage, "LP03_HELD_OUT_SIGNED_TRAINING_AND_SAMPLES")
+                clocks = row["scorer_observation"]
+                exact(clocks, ("started", "completed", "duration_ns", "cpu_ns"), "LP03_CPCV_SIGNED_SCORER_CLOCK_FIELDS")
+                shared = {key: measured[key] for key in clock_fields}
+                current = _evidence_invocation_measurement_v1(dict(shared, outcome="SUCCESS", **clocks))
+            else:
+                _native_require(row["training_receipt_ref"] == training and row["sample_receipts"] == expected_refs,
+                    "LP03_HELD_OUT_SIGNED_TRAINING_AND_SAMPLES")
+                current = _evidence_invocation_measurement_v1(row["scorer_invocation"])
+            _native_require(current["outcome"] == "SUCCESS" and all(current[k] == measured[k]
+                for k in ("process_identity_ref", "clock_domain_id", "boot_identity_ref"))
+                and all(a <= b for a,b in zip(measured["completed"], current["started"], strict=True))
+                and current["completed"][0] <= body.created_wall_ns,
+                "LP03_HELD_OUT_SIGNED_SCORER_CLOCK_CHAIN")
+            measured = current
+            actual = wire(row["original_raw_json"])
+            score = decode_evidence_raw_output_v1(scorer_id, actual, maximum_bytes=65536, maximum_nodes=4096)
+            mean = score["mean_brier_score" if scorer_id == "MATH-08" else "mean_log_loss"]
+            if index == 0:
+                review = (IndependentEvidenceReviewV1._bounded_review_brier_v1 if scorer_id == "MATH-08"
+                    else IndependentEvidenceReviewV1._bounded_review_log_loss_v1)
+                proved = review(input_wire, actual, actual, mean, work=template)
+                _native_require(row["derivation_sha256"] == sha256(deterministic_json(proved).encode("utf-8")).hexdigest(),
+                    "LP03_HELD_OUT_SIGNED_SCORE_ARITHMETIC")
+            else:
+                first = lanes[0]["fold_scores"][ordinal]
+                _native_require(row["original_raw_json"] == first["original_raw_json"]
+                    and row["derivation_sha256"] == first["derivation_sha256"],
+                    "LP03_HELD_OUT_SIGNED_PAIRED_ARITHMETIC")
+            values.append(tuple((receipt["sample_id"], point) for receipt,point in
+                zip(expected_refs, score["per_observation"], strict=True)))
+        all_samples = {name for cohort in values for name,_ in cohort}
+        for path, original in zip(paths, topology.get("paths", ()), strict=True):
+            exact(path, ("record_id", "ordinal", "fold_refs", "sample_ids", "score_bits", "exact_average"),
+                "LP03_HELD_OUT_SIGNED_PATH_FIELDS")
+            _native_ident(path["record_id"])
+            ids = original["split_ids"]
+            samples = tuple(item for i in ids for item in values[i])
+            names = tuple(name for name,_ in samples)
+            average = sum((Fraction(point) for _,point in samples), Fraction()) / len(samples)
+            _native_require(type(path["ordinal"]) is int and path["ordinal"] == original["path_id"]
+                and len(names) == len(all_samples) and set(names) == all_samples and path["sample_ids"] == names
+                and path["score_bits"] == tuple(struct.pack(">d", point).hex() for _,point in samples)
+                and path["fold_refs"] == tuple(rows[i]["fold_score_ref"] for i in ids)
+                and path["exact_average"] == dict(numerator=str(average.numerator), denominator=str(average.denominator)),
+                "LP03_HELD_OUT_SIGNED_PATH_SCORER_JOIN")
+        current_refs = {lane["raw_ref"], lane["projection_ref"], lane["event_segment_ref"],
+            *(path["record_id"] for path in paths), *(row["fold_score_ref"] for row in rows),
+            *(row["raw_score_ref"] for row in rows)}
+        _native_require(len(current_refs) == 3 + len(paths) + 2 * len(rows) and durable_refs.isdisjoint(current_refs),
+            "LP03_HELD_OUT_SIGNED_DISTINCT_DURABLE_REFS")
+        durable_refs.update(current_refs)
+    _native_require(len(native_processes) == 2, "LP03_HELD_OUT_SIGNED_DISTINCT_NATIVE_LANES")
+    # Each lane independently produced the same proof fragments. The signed
+    # decoder derives the common proofs once and verifies the exact dual charge.
+    expected_prefix = 2 * template.consumed["serialized_bytes"]
+    calculation_size = len(deterministic_json(calculation).encode("utf-8"))
+    _native_require(before_final["serialized_bytes"] == expected_prefix
+        and expected_prefix + calculation_size <= remaining["max_serialized_bytes"],
+        "LP03_HELD_OUT_SIGNED_COMPLETE_BYTE_JOIN")
+
+
+def _evidence_cscv_review_calculation_v1(calculation, body):
+    """Validate complete signed CSCV data and its bounded arithmetic joins."""
+    from fractions import Fraction
+    from itertools import combinations
+    from math import inf, isfinite, nextafter
+    import struct
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import deterministic_json, _native_strict_json
+    from .specification import decode_evidence_raw_output_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_CSCV_REVIEW_SIGNED_FIELDS")
+
+    def bits(value):
+        return struct.pack(">d", value).hex()
+
+    def wire(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536, "LP03_CSCV_REVIEW_SIGNED_WIRE")
+        return value.encode("utf-8")
+
+    fields(calculation, ("method", "math_id", "lane_calculations", "registration_bound_proof",
+        "registration_numerical_consumption", "original_numerical_limits", "review_numerical_limits",
+        "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "ORDERED_CSCV_FROM_ORIGINAL_MATRIX_AND_GROUP_POLICY"
+        and calculation["math_id"] == "MATH-19" and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+        and body.limitations == _LP03_CSCV_REVIEW_LIMITATIONS_V1, "LP03_CSCV_REVIEW_SIGNED_PROFILE")
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "groups", "observation_count", "strategy_count", "projected_probability_bits",
+        "fixed_lower", "fixed_upper", "bound_scope", "result_direction", "arithmetic_requirement", "statistical_authority"))
+    _native_require(bound["profile"] == "DECLARED_CSCV_PROBABILITY_CODOMAIN_V1" and bound["math_id"] == "MATH-19"
+        and bound["fixed_lower"] == {"numerator": "0", "denominator": "1"}
+        and bound["fixed_upper"] == {"numerator": "1", "denominator": "1"}
+        and bound["bound_scope"] == "PROBABILITY_OF_BACKTEST_OVERFITTING_COORDINATE_ONLY"
+        and bound["result_direction"] == "LOWER_IS_BETTER"
+        and bound["arithmetic_requirement"] == "ORDERED_BINARY64_COMPLETE_CSCV_SPLIT_AND_LOG_MODEL"
+        and bound["statistical_authority"] == "NO_EMPIRICAL_OVERFITTING_OR_GENERALIZATION_CERTIFICATION",
+        "LP03_CSCV_REVIEW_BOUND_PROFILE")
+
+    original, limited = (calculation[key] for key in ("original_numerical_limits", "review_numerical_limits"))
+    for value in (original, limited):
+        fields(value, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for item in value.values():
+            _public_counter_v1(item, allow_zero=False)
+    reg, review = (calculation[key] for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"))
+    for counts, parses in ((reg,2),(review,8)):
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for item in counts.values():
+            _public_counter_v1(item, allow_zero=True)
+        _native_require(counts["random_draws"] == counts["square_roots"] == 0
+            and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == parses
+            and 0 < counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_CSCV_REVIEW_COUNTER_PROFILE")
+    _native_require(reg["log_series_terms"] == 0
+        and reg["serialized_bytes"] == len(wire(deterministic_json(bound)))
+        and limited["max_input_bits"] == original["max_input_bits"] and limited["max_work_bits"] == original["max_work_bits"]
+        and limited["max_serialized_bytes"] == original["max_serialized_bytes"] - reg["serialized_bytes"]
+        and review["serialized_bytes"] + len(wire(deterministic_json(calculation))) <= limited["max_serialized_bytes"],
+        "LP03_CSCV_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_CSCV_REVIEW_LANE_ROSTER")
+    common, derived_log_terms = [], 0
+    # Bound log of each reachable represented odds value in fixed-point
+    # integers, independently of the measured review's range reduction. CSCV
+    # rank and roster bounds imply 1/4 <= |odds| <= 5, and |z| <= 2/3.
+    logarithm_bounds = {}
+    def log_bounds(odds):
+        key = bits(odds)
+        if key in logarithm_bounds:
+            return logarithm_bounds[key]
+        ratio = Fraction(odds)
+        argument = abs((ratio - 1) / (ratio + 1))
+        _native_require(argument <= Fraction(2,3), "LP03_CSCV_REVIEW_SIGNED_LOG_DOMAIN")
+        scale = 1 << 320
+        def roundup(num, den):
+            return (num + den - 1) // den
+        left = (argument.numerator * scale) // argument.denominator
+        right = roundup(argument.numerator * scale, argument.denominator)
+        square_left = left * left // scale
+        square_right = roundup(right * right, scale)
+        lower = upper = 0
+        for index in range(128):
+            odd = 2 * index + 1
+            lower += 2 * left // odd
+            upper += roundup(2 * right, odd)
+            left = left * square_left // scale
+            right = roundup(right * square_right, scale)
+        upper += roundup(2 * right * scale, 257 * (scale - square_right))
+        result = (lower,upper) if odds > 1 else (-upper,-lower)
+        logarithm_bounds[key] = result
+        return result
+
+    for lane, name in zip(lanes, ("REPLAY", "PAPER"), strict=True):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "mixed; member-specific"
+            and lane["basis"] == "probability_of_backtest_overfitting" and lane["posted_debit"] == lane["posted_credit"],
+            "LP03_CSCV_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref","raw_ref","projection_ref","baseline_ref","posted_debit","posted_credit"):
+            _native_ident(lane[key])
+        source_payload = lane["original_source_payload"]
+        parts = _evidence_cscv_source_slices_v1(source_payload)
+        refs = tuple(dict(store_id=part.original_record_refs[0].store_id, record_id=part.original_record_refs[0].record_id)
+            for part in parts)
+        _native_require(refs == lane["source_record_refs"], "LP03_CSCV_REVIEW_SOURCE_REFERENCE_JOIN")
+        native = {binding.input_name: _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])[binding.exact_field_path]
+            for part,binding in zip(parts, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-19"], strict=True)}
+        matrix, strategies, groups = (native[key] for key in ("performance_matrix", "strategy_ids", "S"))
+        _native_require(all(type(bound[key]) is int for key in ("groups","observation_count","strategy_count"))
+            and (groups,len(matrix),len(strategies)) == tuple(bound[key] for key in ("groups","observation_count","strategy_count")),
+            "LP03_CSCV_REVIEW_BOUND_SOURCE_JOIN")
+        proof = lane["proof"]
+        fields(proof, ("profile","contiguous_blocks","splits","unfavorable_splits","probability_bits","typed_input_json",
+            "raw_json","expected_json","intermediate_observation_scope","statistical_authority"))
+        _native_require(proof["profile"] == "ORDERED_BINARY64_CSCV_LOG_MODEL_CONFORMANCE_V1"
+            and proof["intermediate_observation_scope"] == "DERIVED_ORDERED_CSCV_ARITHMETIC_ONLY"
+            and proof["statistical_authority"] == "NO_EMPIRICAL_OVERFITTING_OR_GENERALIZATION_CERTIFICATION"
+            and proof["typed_input_json"] == deterministic_json(native), "LP03_CSCV_REVIEW_PROOF_PROFILE")
+        raw = _evidence_cscv_result_v1(decode_evidence_raw_output_v1("MATH-19", wire(proof["raw_json"]),
+            maximum_bytes=65536, maximum_nodes=4096))
+        projected = _evidence_cscv_result_v1(_native_strict_json(wire(lane["projected_value_json"]),
+            max_bytes=65536, max_nodes=4096, binary64_numbers=True))
+        _native_require(proof["raw_json"] == proof["expected_json"] == lane["projected_value_json"]
+            == deterministic_json(raw) == deterministic_json(projected)
+            and raw["S"] == groups and proof["probability_bits"] == bound["projected_probability_bits"]
+            == bits(raw["probability_of_backtest_overfitting"]), "LP03_CSCV_REVIEW_RAW_AND_PROJECTED_RECORD_JOIN")
+        width = len(matrix) // groups
+        blocks = tuple(tuple(range(index*width,(index+1)*width)) for index in range(groups))
+        roster = tuple(combinations(range(groups),groups//2))
+        _native_require(deterministic_json(proof["contiguous_blocks"]) == deterministic_json(blocks)
+            and type(proof["splits"]) is tuple and len(proof["splits"]) == len(roster),
+            "LP03_CSCV_REVIEW_COMPLETE_SPLIT_ROSTER")
+
+        def means(indices):
+            sums = tuple(float(sum((Fraction(matrix[index][column]) for index in indices), Fraction()))
+                for column in range(len(strategies)))
+            return sums, tuple(float(Fraction(value)/len(indices)) for value in sums)
+
+        for row, raw_row, train_groups in zip(proof["splits"], raw["splits"], roster, strict=True):
+            fields(row, ("train_groups","train_rows","test_rows","training_cells","testing_cells","winner_column",
+                "lower_count","tie_count","rank_bits","relative_rank_bits","complement_bits","odds_bits","logit_bits",
+                "dyadic_log_interval","fraction_bits"))
+            training = tuple(index for group in train_groups for index in blocks[group])
+            testing = tuple(index for group in range(groups) if group not in train_groups for index in blocks[group])
+            _native_require(all(deterministic_json(row[key]) == deterministic_json(expected) for key,expected in
+                (("train_groups",train_groups),("train_rows",training),("test_rows",testing))), "LP03_CSCV_REVIEW_SPLIT_GROUP_JOIN")
+            stage_means=[]
+            for key,indices in (("training_cells",training),("testing_cells",testing)):
+                totals,values=means(indices)
+                expected=tuple((bits(total),bits(value)) for total,value in zip(totals,values,strict=True))
+                _native_require(row[key] == expected,"LP03_CSCV_REVIEW_SIGNED_MEAN_JOIN")
+                stage_means.append(values)
+            train_values,test_values=stage_means
+            winner=min(range(len(strategies)),key=lambda index:(-train_values[index],strategies[index]))
+            lower=sum(value < test_values[winner] for value in test_values)
+            equal=sum(value == test_values[winner] for value in test_values)
+            rank=float(Fraction(2*lower+equal+1,2))
+            fraction=float(Fraction(rank)/(len(strategies)+1))
+            complement=float(1-Fraction(fraction))
+            odds=float(Fraction(fraction)/Fraction(complement))
+            logit=raw_row["logit"]
+            _native_require(all(type(row[key]) is int for key in ("winner_column","lower_count","tie_count"))
+                and (row["winner_column"],row["lower_count"],row["tie_count"]) == (winner,lower,equal)
+                and raw_row["is_winner_strategy_id"] == strategies[winner]
+                and row["rank_bits"] == bits(rank) == bits(raw_row["oos_midrank_worst_1_best_n"])
+                and row["relative_rank_bits"] == bits(fraction) == bits(raw_row["relative_rank"])
+                and row["complement_bits"] == bits(complement) and row["odds_bits"] == bits(odds)
+                and row["logit_bits"] == bits(logit) and (odds>1.0)==(logit>0.0) and (odds<1.0)==(logit<0.0),
+                "LP03_CSCV_REVIEW_SIGNED_SPLIT_COORDINATES")
+            enclosure=row["dyadic_log_interval"]
+            _native_require(type(enclosure) is tuple and len(enclosure)==2 and all(type(item) is int for item in enclosure)
+                and -(2**130) <= enclosure[0] <= enclosure[1] <= 2**130
+                and type(row["fraction_bits"]) is int and row["fraction_bits"] == 128,
+                "LP03_CSCV_REVIEW_SIGNED_LOG_ENCLOSURE")
+            if odds==1.0:
+                _native_require(enclosure==(0,0) and row["logit_bits"]=="0000000000000000", "LP03_CSCV_REVIEW_SIGNED_ZERO_LOG")
+            else:
+                derived_log_terms+=128
+                log_low, log_high = log_bounds(odds)
+                _native_require(enclosure[0] << 192 <= log_low <= log_high <= enclosure[1] << 192,
+                    "LP03_CSCV_REVIEW_SIGNED_LOG_SOURCE_JOIN")
+                before,after=(nextafter(logit,direction) for direction in (-inf,inf))
+                _native_require(isfinite(before) and isfinite(after),"LP03_CSCV_REVIEW_SIGNED_LOG_ENCLOSURE")
+                lower_midpoint=(Fraction(before)+Fraction(logit))/2
+                upper_midpoint=(Fraction(after)+Fraction(logit))/2
+                lo,hi=(Fraction(value,2**128) for value in enclosure)
+                even=int(row["logit_bits"],16)&1==0
+                _native_require((lower_midpoint<lo or lower_midpoint==lo and even)
+                    and (hi<upper_midpoint or hi==upper_midpoint and even),
+                    "LP03_CSCV_REVIEW_SIGNED_LOG_CELL")
+        _native_require(type(proof["unfavorable_splits"]) is int and proof["unfavorable_splits"] ==
+            sum(row["logit"]<=0.0 for row in raw["splits"]), "LP03_CSCV_REVIEW_UNFAVORABLE_SPLIT_COUNT")
+        stable_sources=dict(source_payload,source_slices=tuple({key:value for key,value in source.items() if key!="access_wall_ns"}
+            for source in source_payload["source_slices"]))
+        common.append((refs,stable_sources,proof,lane["baseline_ref"],lane["posted_debit"]))
+    _native_require(review["log_series_terms"] == derived_log_terms and common[0] == common[1]
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and all(lanes[0][key] != lanes[1][key] for key in ("event_segment_ref","raw_ref","projection_ref")),
+        "LP03_CSCV_REVIEW_SIGNED_LANE_JOIN")
+
+
+
+def _evidence_sharpe_review_calculation_v1(calculation, body):
+    """Validate the signed transcript and its joins to the original Sharpe source data."""
+    import struct
+    from math import isfinite
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1, _parse_typed
+    from .serialization import deterministic_json, _native_strict_json
+    from .specification import decode_evidence_raw_output_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_SHARPE_REVIEW_SIGNED_FIELDS")
+
+    def bits(value):
+        return struct.pack(">d", value).hex()
+
+    def number(text):
+        _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}", text) is not None, "LP03_SHARPE_REVIEW_BITS")
+        value = struct.unpack(">d", bytes.fromhex(text))[0]
+        _native_require(isfinite(value), "LP03_SHARPE_REVIEW_FINITE_BITS")
+        return value
+
+    def wire(text):
+        _native_require(type(text) is str and 0 < len(text) <= 65536 and text.isascii(), "LP03_SHARPE_REVIEW_WIRE")
+        return text.encode("ascii")
+
+    def enclosure(value, *, may_be_negative):
+        lo, hi = value["lower_numerator"], value["upper_numerator"]
+        _native_require(type(lo) is type(hi) is type(value["fraction_bits"]) is int and value["fraction_bits"] == 128
+            and (-(2**148) if may_be_negative else 0) <= lo <= hi <= (2**148 if may_be_negative else 2**129),
+            "LP03_SHARPE_REVIEW_DYADIC_ENCLOSURE")
+
+    fields(calculation, ("method", "math_id", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    math_id = calculation["math_id"]
+    _native_require(calculation["method"] == "ORDERED_SHARPE_FROM_ORIGINAL_COMPLETE_LEDGER_AND_MOMENTS"
+        and type(math_id) is str and math_id in _LP03_SHARPE_PROJECTION_PROFILES_V1
+        and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION", "LP03_SHARPE_REVIEW_SIGNED_PROFILE")
+    _native_require(body.limitations == _LP03_SHARPE_REVIEW_LIMITATIONS_V1, "LP03_SHARPE_REVIEW_SIGNED_LIMITATIONS")
+    metric, field, _, basis = _LP03_SHARPE_PROJECTION_PROFILES_V1[math_id]
+    deflated = math_id == "MATH-18"
+    binding_roster = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    count_name = "candidate_independent_equivalent_observations" if deflated else "independent_equivalent_observations"
+
+    original, remaining = (calculation[key] for key in ("original_numerical_limits", "review_numerical_limits"))
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(counts["random_draws"] == 0
+            and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+            and 0 < counts["peak_preflight_bits"] <= original["max_work_bits"]
+            and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons", "rational_normalizations", "serialized_bytes")),
+            "LP03_SHARPE_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "original_integer_support", "integer_support_field", "scalar_input_bits_json",
+        "complete_material_trial_bits_json", "expected_raw_bits_json", "fixed_lower", "fixed_upper", "bound_scope",
+        "result_direction", "projection_field", "arithmetic_requirement", "statistical_authority"))
+    _native_require(bound["profile"] == "DECLARED_SHARPE_PROJECTED_PROBABILITY_CODOMAIN_V1"
+        and bound["math_id"] == math_id and bound["projection_field"] == metric
+        and bound["integer_support_field"] == count_name and type(bound["original_integer_support"]) is int
+        and 2 <= bound["original_integer_support"] <= 2**53
+        and bound["fixed_lower"] == {"numerator": "0", "denominator": "1"}
+        and bound["fixed_upper"] == {"numerator": "1", "denominator": "1"}
+        and bound["bound_scope"] == "PROJECTED_PSR_OR_DSR_PROBABILITY_ONLY"
+        and bound["result_direction"] == "HIGHER_IS_BETTER"
+        and bound["arithmetic_requirement"] == "ORDERED_BINARY64_SHARPE_ERFC_SOURCE_MODEL_WITH_ALL_RAW_COORDINATES_REVIEWED"
+        and bound["statistical_authority"] == "NO_EMPIRICAL_INDEPENDENCE_TRIAL_SUPPORT_OR_CONFIDENCE_CERTIFICATION",
+        "LP03_SHARPE_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8"))
+        and counters[0]["log_series_terms"] == counters[0]["square_roots"] == 0
+        and remaining["max_input_bits"] == original["max_input_bits"] and remaining["max_work_bits"] == original["max_work_bits"]
+        and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+        and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+        "LP03_SHARPE_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_SHARPE_REVIEW_LANE_ROSTER")
+    common = []
+    for lane, name in zip(lanes, ("REPLAY", "PAPER"), strict=True):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "probability" and lane["basis"] == basis
+            and lane["posted_debit"] == lane["posted_credit"], "LP03_SHARPE_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        payload = lane["original_source_payload"]
+        parts = _evidence_sharpe_source_slices_v1(payload)
+        refs = tuple(dict(store_id=part.original_record_refs[0].store_id, record_id=part.original_record_refs[0].record_id) for part in parts)
+        _native_require(payload["math_id"] == math_id and lane["source_record_refs"] == refs, "LP03_SHARPE_REVIEW_SOURCE_REFERENCE_JOIN")
+        inputs = {}
+        for part, binding in zip(parts, binding_roster, strict=True):
+            source = _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])
+            inputs[binding.input_name] = _parse_typed(source[binding.exact_field_path], binding)
+        proof = lane["proof"]
+        shared_keys = ("profile", "intermediate_observation_scope", "statistical_authority", "model_provenance",
+            "declared_support_maximum", "declared_erfc_argument_magnitude_maximum", "erfc_enclosure", "summary")
+        fields(proof, (*shared_keys, "declared_complete_trial_capacity", "declared_trial_sharpe_magnitude_maximum",
+            "inverse_certificates", "log_certificates", "cell_candidates") if deflated else (*shared_keys, "cells"))
+        _native_require(proof["profile"] == ("ORDERED_BINARY64_DSR_AS241_ERFC_MODEL_CONFORMANCE_V1" if deflated
+                else "ORDERED_BINARY64_PSR_ERFC_MODEL_CONFORMANCE_V1")
+            and proof["intermediate_observation_scope"] == ("ALL_FSUM_POW_SQRT_AS241_ERFC_AND_ARITHMETIC_STAGES_DERIVED_NOT_OBSERVED"
+                if deflated else "ALL_SQRT_ERFC_AND_ARITHMETIC_STAGES_DERIVED_NOT_OBSERVED")
+            and proof["model_provenance"] == ("CPYTHON_V3_14_6_DSR_AS241_ERFC_SOURCE_MODEL_NOT_LIBM_BINARY_ATTESTATION"
+                if deflated else "CPYTHON_V3_14_6_NORMALDIST_ERFC_SOURCE_MODEL_NOT_LIBM_BINARY_ATTESTATION")
+            and proof["statistical_authority"] == "NO_INDEPENDENCE_SUPPORT_OR_STATISTICAL_COVERAGE_CERTIFICATION"
+            and type(proof["declared_support_maximum"]) is int and proof["declared_support_maximum"] == 2**53
+            and type(proof["declared_erfc_argument_magnitude_maximum"]) is int and proof["declared_erfc_argument_magnitude_maximum"] == 2,
+            "LP03_SHARPE_REVIEW_TRANSCRIPT_PROFILE")
+        summary = proof["summary"]
+        summary_keys = ("independent_equivalent_observations", "count_minus_one", "score_bits", "probability_bits",
+            "typed_input_json", "original_raw_json", "preregistered_raw_json")
+        fields(summary, (*summary_keys, "effective_trial_count_bits", "complete_trial_count") if deflated else summary_keys)
+        raw = decode_evidence_raw_output_v1(math_id, wire(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        projected = _native_strict_json(wire(lane["projected_value_json"]), max_bytes=128, max_nodes=2, binary64_numbers=True)
+        trials = inputs["complete_material_trial_sharpes"] if deflated else ()
+        _native_require(summary["typed_input_json"] == deterministic_json(inputs)
+            and summary["original_raw_json"] == summary["preregistered_raw_json"] == deterministic_json(raw)
+            and type(projected) is float and isfinite(projected) and 0.0 <= projected <= 1.0
+            and lane["projected_value_json"] == deterministic_json(projected)
+            and bits(projected) == summary["probability_bits"] == bits(raw[field])
+            and type(summary["independent_equivalent_observations"]) is int and type(summary["count_minus_one"]) is int
+            and summary["independent_equivalent_observations"] == bound["original_integer_support"] == inputs[count_name]
+            and summary["count_minus_one"] == inputs[count_name] - 1
+            and bound["scalar_input_bits_json"] == deterministic_json(tuple((binding.input_name, bits(inputs[binding.input_name]))
+                for binding in binding_roster if binding.input_type == "float64"))
+            and bound["complete_material_trial_bits_json"] == deterministic_json(tuple(bits(value) for value in trials))
+            and bound["expected_raw_bits_json"] == deterministic_json(tuple((key, bits(value)) for key, value in raw.items())),
+            "LP03_SHARPE_REVIEW_RAW_PROJECTION_AND_INPUT_JOIN")
+
+        erfc = proof["erfc_enclosure"]
+        fields(erfc, ("argument_bits", "derived_erfc_bits", "lower_numerator", "upper_numerator", "fraction_bits",
+            "branch", "integral_terms", "machin_terms_per_series", "sqrt_fraction_bits", "interpretation"))
+        enclosure(erfc, may_be_negative=False)
+        argument, erfc_value = number(erfc["argument_bits"]), number(erfc["derived_erfc_bits"])
+        small = abs(argument) <= 2**-60
+        _native_require(abs(argument) <= 2 and 0 < erfc_value < 2
+            and all(type(erfc[key]) is int for key in ("integral_terms", "machin_terms_per_series", "sqrt_fraction_bits"))
+            and erfc["machin_terms_per_series"] == 64 and erfc["sqrt_fraction_bits"] == 128
+            and erfc["interpretation"] == "DERIVED_UNOBSERVED_ERFC_SOURCE_MODEL_CELL"
+            and (erfc["branch"], erfc["integral_terms"]) == (("SMALL_ARGUMENT", 0) if small else ("EXP_INTEGRAL_64", 64))
+            and bits(0.5 * erfc_value) == summary["probability_bits"], "LP03_SHARPE_REVIEW_ERFC_TRANSCRIPT")
+        if deflated:
+            cells, inverse, logs = (proof[key] for key in ("cell_candidates", "inverse_certificates", "log_certificates"))
+            _native_require(type(cells) is tuple and 32 <= len(cells) <= 128
+                and type(inverse) is tuple and len(inverse) == 2 and type(logs) is tuple and len(logs) <= 2
+                and type(summary["complete_trial_count"]) is type(proof["declared_complete_trial_capacity"])
+                    is type(proof["declared_trial_sharpe_magnitude_maximum"]) is int
+                and proof["declared_complete_trial_capacity"] == 5 and proof["declared_trial_sharpe_magnitude_maximum"] == 1
+                and summary["complete_trial_count"] == len(trials)
+                and summary["effective_trial_count_bits"] == bits(inputs["effective_independent_trial_count"]),
+                "LP03_DSR_REVIEW_SIGNED_LAYOUT")
+            for cell in cells:
+                number(cell)
+            _native_require(cells[-1] == summary["probability_bits"] and cells[-2] == erfc["argument_bits"]
+                and cells[-5] == summary["score_bits"] and cells[-17] == bits(raw["expected_maximum_sharpe_threshold"])
+                and cells[1] == bits(raw["trial_mean_sharpe"]) and cells[5 + 2 * len(trials)] == bits(raw["trial_sharpe_variance"]),
+                "LP03_DSR_REVIEW_SIGNED_CELL_JOIN")
+            tails = 0
+            for row, call in zip(inverse, ("Q1", "Q2"), strict=True):
+                fields(row, ("call", "probability_bits", "q_bits", "branch", "result_bits", "interpretation"))
+                p, q = number(row["probability_bits"]), number(row["q_bits"])
+                number(row["result_bits"])
+                _native_require(row["call"] == call and 0 < p < 1 and bits(p - 0.5) == bits(q)
+                    and row["interpretation"] == "DERIVED_AS241_SOURCE_MODEL_NOT_EXACT_QUANTILE"
+                    and (row["branch"] == "CENTRAL" if abs(q) <= 0.425 else row["branch"] in ("TAIL_LE_FIVE", "TAIL_GT_FIVE")),
+                    "LP03_DSR_REVIEW_SIGNED_INVERSE_TRANSCRIPT")
+                tails += int(row["branch"] != "CENTRAL")
+            _native_require(len(logs) == tails, "LP03_DSR_REVIEW_SIGNED_LOG_ROSTER")
+            previous = -1
+            for row in logs:
+                fields(row, ("position", "input_bits", "candidate_bits", "lower_numerator", "upper_numerator",
+                    "fraction_bits", "terms_per_series"))
+                enclosure(row, may_be_negative=True)
+                _native_require(type(row["position"]) is int and previous < row["position"] < len(cells) - 16
+                    and type(row["terms_per_series"]) is int and row["terms_per_series"] == 64
+                    and 0 < number(row["input_bits"]) < 1 and row["candidate_bits"] == cells[row["position"]],
+                    "LP03_DSR_REVIEW_SIGNED_LOG_TRANSCRIPT")
+                previous = row["position"]
+        else:
+            cells = proof["cells"]
+            operations = (("SKEW_ESTIMATE", "MUL"), ("ONE_MINUS_SKEW", "SUB"), ("KURTOSIS_MINUS_ONE", "SUB"),
+                ("KURTOSIS_QUARTER", "DIV"), ("KURTOSIS_ESTIMATE", "MUL"), ("KURTOSIS_ESTIMATE2", "MUL"),
+                ("DENOMINATOR_SQUARED", "ADD"), ("ESTIMATE_DIFFERENCE", "SUB"), ("SUPPORT_SQRT", "SQRT"),
+                ("SCORE_NUMERATOR", "MUL"), ("DENOMINATOR_SQRT", "SQRT"), ("ZSCORE", "DIV"),
+                ("CDF_LOCATION_MINUS", "SUB"), ("CDF_SIGMA_SQRT2", "MUL"), ("CDF_ERFC_ARGUMENT", "DIV"), ("CDF_HALF", "MUL"))
+            _native_require(type(cells) is tuple and len(cells) == len(operations), "LP03_SHARPE_REVIEW_SIGNED_LAYOUT")
+            for row, (operation, kind) in zip(cells, operations, strict=True):
+                fields(row, ("operation", "kind", "left", "right", "candidate"))
+                _native_require(row["operation"] == operation and row["kind"] == kind, "LP03_SHARPE_REVIEW_SIGNED_CELL_ORDER")
+                for key in ("left", "right", "candidate"):
+                    number(row[key])
+            _native_require(cells[-1]["candidate"] == summary["probability_bits"] and cells[-1]["right"] == erfc["derived_erfc_bits"]
+                and cells[-2]["candidate"] == erfc["argument_bits"]
+                and cells[-5]["candidate"] == summary["score_bits"] == bits(raw["z_score"]),
+                "LP03_SHARPE_REVIEW_SIGNED_CELL_JOIN")
+        stable_sources = dict(payload, source_slices=tuple(
+            {key: value for key, value in source.items() if key != "access_wall_ns"}
+            for source in payload["source_slices"]))
+        common.append((refs, stable_sources, proof, lane["baseline_ref"], lane["posted_debit"], lane["projected_value_json"]))
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and all(lanes[0][key] != lanes[1][key] for key in ("event_segment_ref", "raw_ref", "projection_ref")),
+        "LP03_SHARPE_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+
+def _evidence_spa_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the original complete-family SPA source model.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1, _evidence_decode_source_values_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_SPA_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "ORDERED_SPA_FROM_ORIGINAL_COMPLETE_FAMILY_AND_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_16_CLOSURE_ONLY",
+                        "COMPLETE_FAMILY_MODEL_ONLY_NO_EMPIRICAL_UNIVERSE_OR_SIGNIFICANCE_CERTIFICATION",
+                        "FORMULA_INTERMEDIATES_DERIVED_REVIEW_REPLAY_RETURNS_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_SPA_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require((retained != 2 or counts["log_series_terms"] == counts["square_roots"] == 0)
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_SPA_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(all(counters[0][name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_SPA_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_SPA_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_SPA_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_SPA_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def number(text):
+        _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}", text) is not None,
+                        "LP03_SPA_REVIEW_BITS")
+        value = struct.unpack(">d", bytes.fromhex(text))[0]
+        _native_require(isfinite(value), "LP03_SPA_REVIEW_FINITE_CELL")
+        return value
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "observations", "candidates", "seed", "replicates", "block_bits", "alpha_bits",
+        "fixed_lower", "fixed_upper", "bound_scope", "result_direction", "arithmetic_requirement", "statistical_authority"))
+    _native_require(bound["profile"] == "DECLARED_NORMALIZED_SPA_BINARY64_COORDINATE_ENCLOSURE_V1" and bound["math_id"] == "MATH-16"
+        and all(type(bound[key]) is int for key in ("observations", "candidates", "seed", "replicates"))
+        and 3 <= bound["observations"] <= 4 and 1 <= bound["candidates"] <= 2 and 1 <= bound["replicates"] <= 4
+        and bound["observations"] * bound["replicates"] <= 16 and bound["seed"].bit_length() <= 256
+        and 1.0 <= number(bound["block_bits"]) <= bound["observations"] and 0.0 < number(bound["alpha_bits"]) < 1.0
+        and rational(bound["fixed_lower"]) == -(2**540) and rational(bound["fixed_upper"]) == 2**540
+        and bound["bound_scope"] == "ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS" and bound["result_direction"] == "RECORD"
+        and bound["arithmetic_requirement"] == "ORDERED_BINARY64_MT19937_SPA_STUDENTIZATION_LOG_LOG_PLUS_ONE"
+        and bound["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION", "LP03_SPA_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_SPA_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_SPA_REVIEW_LANE_ROSTER")
+    common, charged_bytes, replay_draws = [], 0, 0
+    derived_sqrts, derived_log_terms = 0, 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "mixed; member-specific"
+            and lane["basis"] == "studentized_loss_differential_spa_p_value", "LP03_SPA_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_SPA_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 7, "LP03_SPA_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(source["store_id"], source["record_id"]) for source in sources}) == 7,
+                        "LP03_SPA_REVIEW_SOURCE_ROSTER")
+        # Full original native source data remains inside the already bounded
+        # signed artifact. No reference, clock, right or source value is elided.
+        source_payload = lane["original_source_payload"]
+        parts = _evidence_spa_source_slices_v1(source_payload)
+        _native_require(deterministic_json(sources) == deterministic_json(tuple(dict(store_id=part.original_record_refs[0].store_id,
+                record_id=part.original_record_refs[0].record_id) for part in parts)), "LP03_SPA_REVIEW_SOURCE_REFERENCE_JOIN")
+        from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+        from .input_resolver import _parse_typed
+        native_inputs = {}
+        for part, binding in zip(parts, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-16"], strict=True):
+            values = _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])
+            native_inputs[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "replay_observation_scope", "statistical_authority",
+            "model_provenance", "draws", "indices", "oriented_matrix_bits", "consistency_threshold_bits",
+            "cell_candidates", "log_certificates", "summary"))
+        _native_require(proof["profile"] == "ORDERED_MT19937_HANSEN_SPA_COMPACT_CELLS_MODEL_V1"
+            and proof["intermediate_observation_scope"] == "ALL_FORMULA_INDICES_AND_ARITHMETIC_DERIVED_NOT_OBSERVED"
+            and proof["replay_observation_scope"] == "ORIGINAL_REVIEW_REPLAY_METHOD_RETURNS_ONLY"
+            and proof["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"
+            and proof["model_provenance"] == "CPYTHON_RANDOM_INTEGER_SEED_AND_DERIVED_LIBM_CELLS_NOT_COMPILER_BINARY_ATTESTATION",
+            "LP03_SPA_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("statistic_bits", "p_value_bits", "reject_flag", "seed", "replicates", "observations", "candidates",
+            "exceedances", "typed_input_json", "original_raw_json", "preregistered_raw_json", "environment_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-16", text_bytes(summary["typed_input_json"]),
+            maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-16", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        environment = EvidenceEnvironmentIdentityV1.from_canonical_mapping(
+            _native_strict_json(text_bytes(summary["environment_json"]), max_bytes=8192, max_nodes=4096))
+        _native_require(deterministic_json(environment) == summary["environment_json"]
+            and summary["original_raw_json"] == summary["preregistered_raw_json"]
+            and deterministic_json(inputs) == deterministic_json(native_inputs)
+            and deterministic_json(inputs) == summary["typed_input_json"], "LP03_SPA_REVIEW_ORIGINAL_INPUT_JOIN")
+        matrix, sign, seed, reps, block, alpha, variant = (inputs[key] for key in (
+            "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha", "recenter_variant"))
+        _native_require(type(matrix) is tuple and 3 <= len(matrix) <= 4
+            and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+            and all(len(row) == len(matrix[0]) for row in matrix)
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+            and type(sign) is str and sign == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(matrix)
+            and type(seed) is type(reps) is type(summary["seed"]) is type(summary["replicates"]) is int
+            and seed.bit_length() <= 256 and 1 <= reps <= 4 and len(matrix) * reps <= 16
+            and type(summary["observations"]) is type(summary["candidates"]) is int
+            and type(alpha) is float and isfinite(alpha) and 0.0 < alpha < 1.0
+            and type(variant) is str and variant == "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD"
+            and seed == summary["seed"] == bound["seed"] and reps == summary["replicates"] == bound["replicates"]
+            and len(matrix) == summary["observations"] == bound["observations"]
+            and len(matrix[0]) == summary["candidates"] == bound["candidates"]
+            and bits(block) == bound["block_bits"] and bits(alpha) == bound["alpha_bits"], "LP03_SPA_REVIEW_TYPED_BOUND_JOIN")
+        n, candidates = len(matrix), len(matrix[0])
+        m = candidates
+        cells, draws, certificates = proof["cell_candidates"], proof["draws"], proof["log_certificates"]
+        maximum_cells = candidates * (2 + 2*n + 5 + 15*(n-1) + n*(n-1)//2 + 10) + reps*(1+7*candidates) + 1
+        _native_require(type(cells) is tuple and 1 <= len(cells) <= maximum_cells <= 213
+            and type(draws) is tuple and 1 <= len(draws) <= 64
+            and type(certificates) is tuple and len(certificates) <= 2*candidates, "LP03_SPA_REVIEW_COMPLETE_TRANSCRIPT")
+        for row in draws:
+            fields(row, ("ordinal", "method", "width", "value", "comparison", "disposition", "replicate", "position"))
+            _native_require(all(type(row[key]) is int for key in ("ordinal", "width", "value", "replicate", "position"))
+                and type(row["method"]) is str and row["method"] in ("GETRANDBITS", "RANDOM_U53")
+                and type(row["comparison"]) is type(row["disposition"]) is str,
+                "LP03_SPA_REVIEW_DRAW_TYPES")
+        words = _evidence_bootstrap_mt_words_v1(seed, sum(1 if row["method"] == "GETRANDBITS" else 2 for row in draws)) if draws else ()
+        cell_cursor, draw_cursor, word_cursor, log_cursor = 0, 0, 0, 0
+        def take(label, kind, *operands):
+            nonlocal cell_cursor, log_cursor, derived_sqrts, derived_log_terms
+            _native_require(type(label) is str and len(label) <= 32 and cell_cursor < len(cells)
+                and 1 <= len(operands) <= 4, "LP03_SPA_REVIEW_CELL_ORDER")
+            position = cell_cursor
+            candidate = number(cells[cell_cursor]); cell_cursor += 1
+            xs = tuple(Fraction.from_float(value) for value in operands)
+            before, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+            _native_require(isfinite(before) and isfinite(following), "LP03_SPA_REVIEW_FINITE_CELL")
+            actual = Fraction.from_float(candidate)
+            low, high = (Fraction.from_float(before) + actual) / 2, (actual + Fraction.from_float(following)) / 2
+            even = int(bits(candidate), 16) & 1 == 0
+            if kind == "SQRT":
+                derived_sqrts += 1
+                _native_require(len(xs) == 1 and 0 <= xs[0] <= 32, "LP03_SPA_REVIEW_SQRT_DOMAIN")
+                if xs[0] == 0:
+                    _native_require(bits(candidate) == "0000000000000000", "LP03_SPA_REVIEW_ZERO_ROOT")
+                else:
+                    _native_require(candidate > 0 and low >= 0
+                        and (low * low < xs[0] or low * low == xs[0] and even)
+                        and (xs[0] < high * high or xs[0] == high * high and even),
+                        "LP03_SPA_REVIEW_SQUARED_MIDPOINT_CELL")
+            elif kind == "LOG":
+                _native_require(len(xs) == 1 and 1 < xs[0] <= 4 and log_cursor < len(certificates),
+                    "LP03_SPA_REVIEW_LOG_DOMAIN")
+                certificate = certificates[log_cursor]; log_cursor += 1
+                fields(certificate, ("position", "input_bits", "terms", "candidate"))
+                terms = 64 if operands[0] >= 2.0 else 16
+                _native_require(type(certificate["position"]) is type(certificate["terms"]) is int
+                    and certificate["position"] == position and certificate["terms"] == terms
+                    and type(certificate["input_bits"]) is type(certificate["candidate"]) is str
+                    and certificate["input_bits"] == bits(operands[0]) and certificate["candidate"] == bits(candidate),
+                    "LP03_SPA_REVIEW_LOG_CERTIFICATE_JOIN")
+                # Fixed 16/64-term positive atanh expansion. All operands are
+                # one already-proven binary64 value in (1,4]; neither a claimed
+                # term count nor a caller-provided exponent controls allocation.
+                z = (xs[0] - 1) / (xs[0] + 1)
+                square, power, total = z * z, z, Fraction(0)
+                for index in range(terms):
+                    total += power / (2 * index + 1)
+                    power *= square
+                lower = 2 * total
+                upper = lower + 2 * power / ((2 * terms + 1) * (1 - square))
+                _native_require(low < lower <= upper < high, "LP03_SPA_REVIEW_LOG_ENCLOSURE_CELL")
+                derived_log_terms += terms
+            else:
+                if kind == "FSUM":
+                    exact = sum(xs, Fraction(0))
+                elif kind == "POW":
+                    _native_require(len(xs) == 2 and 0 <= xs[0] <= 1 and xs[1].denominator == 1
+                        and 1 <= xs[1].numerator <= 3, "LP03_SPA_REVIEW_INTEGER_POWER_DOMAIN")
+                    exact = xs[0] ** xs[1].numerator
+                else:
+                    _native_require(kind in ("ADD", "SUB", "MUL", "DIV") and len(xs) == 2,
+                        "LP03_SPA_REVIEW_CELL_KIND")
+                    if kind == "ADD": exact = xs[0] + xs[1]
+                    elif kind == "SUB": exact = xs[0] - xs[1]
+                    elif kind == "MUL": exact = xs[0] * xs[1]
+                    else:
+                        _native_require(xs[1] != 0, "LP03_SPA_REVIEW_CELL_DENOMINATOR")
+                        exact = xs[0] / xs[1]
+                _native_require((exact > low or exact == low and even) and (exact < high or exact == high and even),
+                    "LP03_SPA_REVIEW_NEAREST_EVEN_CELL")
+                if candidate == 0.0:
+                    signs = tuple(int(bits(value), 16) >> 63 == 1 for value in operands)
+                    negative = exact < 0 if exact != 0 else ((signs[0] != signs[1]) if kind in ("MUL", "DIV") else (
+                        kind in ("ADD", "SUB") and all(value == 0 for value in operands)
+                        and signs[0] and (signs[1] if kind == "ADD" else not signs[1])))
+                    _native_require(bits(candidate) == ("8000000000000000" if negative else "0000000000000000"),
+                        "LP03_SPA_REVIEW_ZERO_SIGN")
+            return candidate
+
+        def draw(kind, replicate, position, threshold):
+            nonlocal draw_cursor, word_cursor
+            _native_require(draw_cursor < len(draws), "LP03_SPA_REVIEW_DRAW_ORDER")
+            row = draws[draw_cursor]
+            width = n.bit_length() if kind == "GETRANDBITS" else 53
+            _native_require(row["ordinal"] == draw_cursor and row["method"] == kind and row["width"] == width
+                and row["replicate"] == replicate and row["position"] == position
+                and row["comparison"] == (str(n) if kind == "GETRANDBITS" else bits(threshold)),
+                "LP03_SPA_REVIEW_DRAW_REQUEST_JOIN")
+            _native_require(word_cursor + (1 if kind == "GETRANDBITS" else 2) <= len(words),
+                "LP03_SPA_REVIEW_WORD_ORDER")
+            if kind == "GETRANDBITS":
+                value = words[word_cursor] >> (32 - width); word_cursor += 1
+                actual = value
+                disposition = "SELECTED" if actual < n else "REJECTED"
+            else:
+                value = ((words[word_cursor] >> 5) << 26) | (words[word_cursor + 1] >> 6); word_cursor += 2
+                actual = value / 2**53
+                disposition = "RESTART" if actual < threshold else "CONTINUE"
+            _native_require(row["value"] == value and row["disposition"] == disposition,
+                "LP03_SPA_REVIEW_MT_RETURN_JOIN")
+            draw_cursor += 1
+            return actual
+        def pick(replicate, position, threshold):
+            while True:
+                index = draw("GETRANDBITS", replicate, position, threshold)
+                if index < n: return index
+        columns=[[row[j] for row in matrix] for j in range(m)]
+        def mean(label,values):return take(label+'_MEAN','DIV',take(label+'_SUM','FSUM',*values),float(n))
+        means=[mean('C'+str(j),column) for j,column in enumerate(columns)]
+        variances=[]
+        for j,column in enumerate(columns):
+            prefix='V'+str(j);center=mean(prefix,column)
+            demeaned=[take(prefix+'_D'+str(i),'SUB',v,center) for i,v in enumerate(column)]
+            restart=take(prefix+'_RESTART','DIV',1.0,block)
+            variance=take(prefix+'_VAR0','DIV',take(prefix+'_SQSUM','FSUM',*(take(prefix+'_S'+str(i),'MUL',v,v) for i,v in enumerate(demeaned))),float(n))
+            for lag in range(1,n):
+                tag=prefix+'_L'+str(lag)
+                weight=take(tag+'_W','ADD',
+                    take(tag+'_LEFT','MUL',take(tag+'_COMPLEMENT','SUB',1.0,take(tag+'_FRACTION0','DIV',float(lag),float(n))),take(tag+'_POWER0','POW',take(tag+'_BASE0','SUB',1.0,restart),float(lag))),
+                    take(tag+'_RIGHT','MUL',take(tag+'_FRACTION1','DIV',float(lag),float(n)),take(tag+'_POWER1','POW',take(tag+'_BASE1','SUB',1.0,restart),float(n-lag))))
+                covariance=take(tag+'_COV','DIV',take(tag+'_COVSUM','FSUM',*(take(tag+'_P'+str(i),'MUL',demeaned[i],demeaned[i+lag]) for i in range(n-lag))),float(n))
+                variance=take(tag+'_VAR','ADD',variance,take(tag+'_CONTRIB','MUL',take(tag+'_TWOW','MUL',2.0,weight),covariance))
+            variances.append(max(0.0,variance))
+        valid=[];standardized=[];thresholds=[]
+        for j,(center,variance) in enumerate(zip(means,variances)):
+            tag='T'+str(j)
+            if variance<=0:
+                _native_require(center <= 0.0, 'LP03_SPA_REVIEW_POSITIVE_MEAN_ZERO_VARIANCE')
+                valid.append(False);standardized.append(None);thresholds.append(None);continue
+            twice_variance_per_observation=take(tag+'_TWOVAR','MUL',take(tag+'_VARPER','DIV',variance,float(n)),2.0)
+            inner_log=take(tag+'_LOG_N','LOG',float(n));outer_log=take(tag+'_LOG_LOG_N','LOG',inner_log)
+            threshold=-take(tag+'_ROOT_THRESHOLD','SQRT',take(tag+'_THRESHOLD_PRODUCT','MUL',twice_variance_per_observation,outer_log))
+            thresholds.append(bits(threshold));valid.append(center>=threshold)
+            standardized.append(take(tag+'_STANDARDIZED','DIV',take(tag+'_PRODUCT','MUL',take(tag+'_ROOT_N','SQRT',float(n)),center),take(tag+'_ROOT_VAR','SQRT',variance)))
+        statistic=max(0.0,max((v for v in standardized if v is not None),default=0.0))
+        recentered=[center if flag else 0.0 for center,flag in zip(means,valid)]
+        indices=[];simulated=[]
+        for rep in range(reps):
+            tag='R'+str(rep);threshold=take(tag+'_RESTART','DIV',1.0,block)
+            current=pick(rep,0,threshold);sample=[current]
+            for pos in range(1,n):
+                current=pick(rep,pos,threshold) if draw('RANDOM_U53',rep,pos,threshold)<threshold else (current+1)%n
+                sample.append(current)
+            indices.append(sample);statistics=[]
+            for j,(column,center,variance) in enumerate(zip(columns,recentered,variances)):
+                if variance<=0:continue
+                label=tag+'_C'+str(j)
+                root=take(label+'_ROOT_N','SQRT',float(n))
+                sampled=take(label+'_MEAN','DIV',take(label+'_SUM','FSUM',*(column[i] for i in sample)),float(n))
+                numerator=take(label+'_NUM','MUL',root,take(label+'_CENTER','SUB',sampled,center))
+                statistics.append(take(label+'_STAT','DIV',numerator,take(label+'_ROOT_VAR','SQRT',variance)))
+            simulated.append(max(0.0,max(statistics,default=0.0)))
+        exceedances=sum(value>=statistic for value in simulated)
+        probability=take('PLUS_ONE_P_VALUE','DIV',float(1+exceedances),float(reps+1))
+        result=dict(statistic=statistic,p_value=probability,reject=probability<=alpha,candidate_means=means,
+            long_run_variances=variances,consistent_valid_columns=valid,simulated_statistics=simulated,recenter_variant=variant)
+        _native_require(type(proof["indices"]) is tuple and all(type(row) is tuple for row in proof["indices"])
+            and type(proof["oriented_matrix_bits"]) is tuple and all(type(row) is tuple for row in proof["oriented_matrix_bits"])
+            and type(proof["consistency_threshold_bits"]) is tuple
+            and all(value is None or type(value) is str for value in proof["consistency_threshold_bits"])
+            and all(type(value) is int for row in proof["indices"] for value in row)
+            and type(summary["exceedances"]) is type(summary["reject_flag"]) is int
+            and cell_cursor == len(cells) and log_cursor == len(certificates)
+            and draw_cursor == len(draws) and word_cursor == len(words)
+            and proof["indices"] == tuple(tuple(row) for row in indices)
+            and proof["oriented_matrix_bits"] == tuple(tuple(bits(value) for value in row) for row in matrix)
+            and proof["consistency_threshold_bits"] == tuple(thresholds)
+            and (summary["statistic_bits"], summary["p_value_bits"]) == (bits(statistic), bits(probability))
+            and summary["exceedances"] == exceedances and summary["reject_flag"] == int(result["reject"])
+            and 0.0 <= statistic <= 2**540 and 0.0 < probability <= 1.0
+            and all(-1.0 <= value <= 1.0 for value in means)
+            and all(0.0 <= value <= 32.0 for value in variances)
+            and all(0.0 <= value <= 2**540 for value in simulated)
+            and deterministic_json(result) == deterministic_json(raw) == summary["original_raw_json"]
+            and lane["projected_value_json"] == summary["original_raw_json"], "LP03_SPA_REVIEW_COMPLETE_OUTPUT_JOIN")
+        replay_draws += len(draws)
+        fragments = tuple(dict(position=index, candidate=value) for index, value in enumerate(cells))
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(
+            len(deterministic_json(fragment).encode("utf-8")) for fragment in (*draws, *fragments, *certificates, summary))
+        common.append((source_payload["consumer_decision_wall_ns"], source_payload["consumer_cutoff_wall_ns"],
+            sources, tuple(part.reconstructed_canonical_events for part in parts), summary["typed_input_json"],
+            summary["original_raw_json"], summary["environment_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+        and counters[1]["random_draws"] == replay_draws and counters[1]["square_roots"] == derived_sqrts
+        and counters[1]["log_series_terms"] == derived_log_terms
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2, "LP03_SPA_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+
+def _evidence_reality_check_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the original complete-family reality-check source model.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1, _evidence_decode_source_values_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_REALITY_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "ORDERED_REALITY_CHECK_FROM_ORIGINAL_COMPLETE_FAMILY_AND_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_15_CLOSURE_ONLY",
+                        "COMPLETE_FAMILY_MODEL_ONLY_NO_EMPIRICAL_UNIVERSE_OR_SIGNIFICANCE_CERTIFICATION",
+                        "FORMULA_INTERMEDIATES_DERIVED_REVIEW_REPLAY_RETURNS_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_REALITY_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(counts["log_series_terms"] == 0 and counts["square_roots"] == (0 if retained == 2 else 2)
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_REALITY_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(all(counters[0][name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_REALITY_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_REALITY_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_REALITY_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_REALITY_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def number(text):
+        _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}", text) is not None,
+                        "LP03_REALITY_REVIEW_BITS")
+        value = struct.unpack(">d", bytes.fromhex(text))[0]
+        _native_require(isfinite(value), "LP03_REALITY_REVIEW_FINITE_CELL")
+        return value
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "observations", "candidates", "seed", "replicates", "block_bits", "alpha_bits",
+        "fixed_lower", "fixed_upper", "bound_scope", "result_direction", "arithmetic_requirement", "statistical_authority"))
+    _native_require(bound["profile"] == "DECLARED_NORMALIZED_REALITY_CHECK_COORDINATE_ENCLOSURE_V1" and bound["math_id"] == "MATH-15"
+        and all(type(bound[key]) is int for key in ("observations", "candidates", "seed", "replicates"))
+        and 2 <= bound["observations"] <= 4 and 1 <= bound["candidates"] <= 2 and 1 <= bound["replicates"] <= 4
+        and bound["observations"] * bound["replicates"] <= 16 and bound["seed"].bit_length() <= 256
+        and 1.0 <= number(bound["block_bits"]) <= bound["observations"] and 0.0 < number(bound["alpha_bits"]) < 1.0
+        and rational(bound["fixed_lower"]) == -4 and rational(bound["fixed_upper"]) == 4
+        and bound["bound_scope"] == "ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS" and bound["result_direction"] == "RECORD"
+        and bound["arithmetic_requirement"] == "ORDERED_BINARY64_MT19937_COMPLETE_FAMILY_CENTERING_PLUS_ONE"
+        and bound["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION", "LP03_REALITY_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_REALITY_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_REALITY_REVIEW_LANE_ROSTER")
+    common, charged_bytes, replay_draws = [], 0, 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "mixed; member-specific"
+            and lane["basis"] == "benchmark_candidate_loss_differential_p_value", "LP03_REALITY_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_REALITY_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 6, "LP03_REALITY_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(source["store_id"], source["record_id"]) for source in sources}) == 6,
+                        "LP03_REALITY_REVIEW_SOURCE_ROSTER")
+        # Full original native source data remains inside the already bounded
+        # signed artifact. No reference, clock, right or source value is elided.
+        source_payload = lane["original_source_payload"]
+        parts = _evidence_reality_check_source_slices_v1(source_payload)
+        _native_require(deterministic_json(sources) == deterministic_json(tuple(dict(store_id=part.original_record_refs[0].store_id,
+                record_id=part.original_record_refs[0].record_id) for part in parts)), "LP03_REALITY_REVIEW_SOURCE_REFERENCE_JOIN")
+        from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+        from .input_resolver import _parse_typed
+        native_inputs = {}
+        for part, binding in zip(parts, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-15"], strict=True):
+            values = _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])
+            native_inputs[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+        proof = lane["proof"]
+        fields(proof, ("profile", "branch", "intermediate_observation_scope", "replay_observation_scope", "statistical_authority",
+            "model_provenance", "draws", "indices", "oriented_matrix_bits", "observed_selected_column",
+            "replicate_selected_columns", "cells", "summary"))
+        _native_require(proof["profile"] == "ORDERED_MT19937_WHITE_REALITY_CHECK_MODEL_V1"
+            and proof["intermediate_observation_scope"] == "ALL_FORMULA_INDICES_AND_ARITHMETIC_DERIVED_NOT_OBSERVED"
+            and proof["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"
+            and proof["model_provenance"] == "CPYTHON_RANDOM_INTEGER_SEED_GETRANDBITS_RANDOM_MODEL_NOT_COMPILER_BINARY_ATTESTATION",
+            "LP03_REALITY_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("statistic_bits", "p_value_bits", "reject_flag", "seed", "replicates", "observations", "candidates",
+            "threshold_bits", "exceedances", "typed_input_json", "original_raw_json", "preregistered_raw_json", "environment_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-15", text_bytes(summary["typed_input_json"]),
+            maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-15", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        environment = EvidenceEnvironmentIdentityV1.from_canonical_mapping(
+            _native_strict_json(text_bytes(summary["environment_json"]), max_bytes=8192, max_nodes=4096))
+        _native_require(deterministic_json(environment) == summary["environment_json"]
+            and summary["original_raw_json"] == summary["preregistered_raw_json"]
+            and deterministic_json(inputs) == deterministic_json(native_inputs)
+            and deterministic_json(inputs) == summary["typed_input_json"], "LP03_REALITY_REVIEW_ORIGINAL_INPUT_JOIN")
+        matrix, sign, seed, reps, block, alpha = (inputs[key] for key in (
+            "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha"))
+        _native_require(type(matrix) is tuple and 2 <= len(matrix) <= 4
+            and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+            and all(len(row) == len(matrix[0]) for row in matrix)
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+            and type(sign) is str and sign == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(matrix)
+            and type(seed) is type(reps) is type(summary["seed"]) is type(summary["replicates"]) is int
+            and seed.bit_length() <= 256 and 1 <= reps <= 4 and len(matrix) * reps <= 16
+            and type(summary["observations"]) is type(summary["candidates"]) is int
+            and type(alpha) is float and isfinite(alpha) and 0.0 < alpha < 1.0
+            and seed == summary["seed"] == bound["seed"] and reps == summary["replicates"] == bound["replicates"]
+            and len(matrix) == summary["observations"] == bound["observations"]
+            and len(matrix[0]) == summary["candidates"] == bound["candidates"]
+            and bits(block) == bound["block_bits"] and bits(alpha) == bound["alpha_bits"], "LP03_REALITY_REVIEW_TYPED_BOUND_JOIN")
+        n, candidates = len(matrix), len(matrix[0])
+        cells, draws = proof["cells"], proof["draws"]
+        _native_require(type(cells) is tuple and 1 <= len(cells) <= 3*candidates + 1 + 4*candidates*reps + 2
+            and type(draws) is tuple and len(draws) <= 64, "LP03_REALITY_REVIEW_COMPLETE_TRANSCRIPT")
+        for row in draws:
+            fields(row, ("ordinal", "method", "width", "value", "comparison", "disposition", "replicate", "position"))
+            _native_require(all(type(row[key]) is int for key in ("ordinal", "width", "value", "replicate", "position"))
+                and type(row["method"]) is str and row["method"] in ("GETRANDBITS", "RANDOM_U53")
+                and type(row["comparison"]) is type(row["disposition"]) is str,
+                "LP03_REALITY_REVIEW_DRAW_TYPES")
+        words = _evidence_bootstrap_mt_words_v1(seed, sum(1 if row["method"] == "GETRANDBITS" else 2 for row in draws)) if draws else ()
+        cell_cursor, draw_cursor, word_cursor = 0, 0, 0
+        def take(label, kind, *operands):
+            nonlocal cell_cursor
+            _native_require(cell_cursor < len(cells), "LP03_REALITY_REVIEW_CELL_ORDER")
+            row = cells[cell_cursor]; cell_cursor += 1
+            fields(row, ("operation", "kind", "operands_json", "candidate"))
+            _native_require(row["operation"] == label and row["kind"] == kind
+                and row["operands_json"] == deterministic_json(tuple(bits(value) for value in operands)),
+                "LP03_REALITY_REVIEW_CELL_OPERANDS")
+            candidate = number(row["candidate"])
+            xs = tuple(Fraction.from_float(value) for value in operands)
+            before, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+            _native_require(isfinite(before) and isfinite(following), "LP03_REALITY_REVIEW_FINITE_CELL")
+            actual = Fraction.from_float(candidate)
+            low, high = (Fraction.from_float(before) + actual) / 2, (actual + Fraction.from_float(following)) / 2
+            even = int(bits(candidate), 16) & 1 == 0
+            if kind == "SQRT":
+                _native_require(len(xs) == 1 and xs[0] in (2, 3, 4) and candidate > 0 and low > 0
+                    and (low * low < xs[0] or low * low == xs[0] and even)
+                    and (xs[0] < high * high or xs[0] == high * high and even),
+                    "LP03_REALITY_REVIEW_SQUARED_MIDPOINT_CELL")
+            else:
+                if kind == "FSUM": exact = sum(xs, Fraction(0))
+                elif kind == "SUB": exact = xs[0] - xs[1]
+                elif kind == "MUL": exact = xs[0] * xs[1]
+                else:
+                    _native_require(kind == "DIV" and xs[1] != 0, "LP03_REALITY_REVIEW_CELL_KIND")
+                    exact = xs[0] / xs[1]
+                _native_require((exact > low or exact == low and even) and (exact < high or exact == high and even),
+                    "LP03_REALITY_REVIEW_NEAREST_EVEN_CELL")
+                if candidate == 0.0:
+                    signs = tuple(int(bits(value), 16) >> 63 == 1 for value in operands)
+                    negative = exact < 0 if exact != 0 else ((signs[0] != signs[1]) if kind in ("MUL", "DIV") else (
+                        kind == "SUB" and all(value == 0 for value in operands) and signs[0] and not signs[1]))
+                    _native_require(bits(candidate) == ("8000000000000000" if negative else "0000000000000000"),
+                        "LP03_REALITY_REVIEW_ZERO_SIGN")
+            return candidate
+        def draw(kind, replicate, position):
+            nonlocal draw_cursor, word_cursor
+            _native_require(draw_cursor < len(draws), "LP03_REALITY_REVIEW_DRAW_ORDER")
+            row = draws[draw_cursor]
+            width = n.bit_length() if kind == "GETRANDBITS" else 53
+            _native_require(row["ordinal"] == draw_cursor and row["method"] == kind and row["width"] == width
+                and row["replicate"] == replicate and row["position"] == position
+                and row["comparison"] == (str(n) if kind == "GETRANDBITS" else bits(threshold)),
+                "LP03_REALITY_REVIEW_DRAW_REQUEST_JOIN")
+            _native_require(word_cursor + (1 if kind == "GETRANDBITS" else 2) <= len(words),
+                "LP03_REALITY_REVIEW_WORD_ORDER")
+            if kind == "GETRANDBITS":
+                value = words[word_cursor] >> (32 - width); word_cursor += 1
+                actual = value
+                disposition = "SELECTED" if actual < n else "REJECTED"
+            else:
+                value = ((words[word_cursor] >> 5) << 26) | (words[word_cursor + 1] >> 6); word_cursor += 2
+                actual = value / 2**53
+                disposition = "RESTART" if actual < threshold else "CONTINUE"
+            _native_require(row["value"] == value and row["disposition"] == disposition,
+                "LP03_REALITY_REVIEW_MT_RETURN_JOIN")
+            draw_cursor += 1
+            return actual
+        def pick(replicate, position):
+            while True:
+                index = draw("GETRANDBITS", replicate, position)
+                if index < n: return index
+        columns = tuple(tuple(row[index] for row in matrix) for index in range(candidates))
+        means = tuple(take("MEAN_" + str(index), "DIV",
+            take("SUM_" + str(index), "FSUM", *column), float(n)) for index, column in enumerate(columns))
+        root = take("SQRT_N", "SQRT", float(n))
+        observed = tuple(take("OBSERVED_" + str(index), "MUL", root, value) for index, value in enumerate(means))
+        def maximum(values):
+            value, index = 0.0, -1
+            for candidate, number_value in enumerate(values):
+                if number_value > value:
+                    value, index = number_value, candidate
+            return value, index
+        statistic, observed_column = maximum(observed)
+        indices, simulated, selected = [], [], []
+        all_zero = all(value == 0.0 for row in matrix for value in row)
+        if all_zero:
+            _native_require(proof["branch"] == "ALL_ZERO_NO_RNG_CONSTRUCTION"
+                and proof["replay_observation_scope"] == "NO_REPLAY_CONSTRUCTED" and not draws
+                and summary["threshold_bits"] == "NOT_EVALUATED", "LP03_REALITY_REVIEW_ALL_ZERO_BRANCH")
+            simulated = [0.0] * reps
+            p_value, exceedances = 1.0, -1
+        else:
+            _native_require(proof["branch"] == "COMPLETE_FAMILY_CENTERED_STATIONARY_REPLAY"
+                and proof["replay_observation_scope"] == "ORIGINAL_REVIEW_REPLAY_METHOD_RETURNS_ONLY" and bool(draws),
+                "LP03_REALITY_REVIEW_COMPLETE_FAMILY_BRANCH")
+            threshold = take("RESTART_THRESHOLD", "DIV", 1.0, block)
+            _native_require(summary["threshold_bits"] == bits(threshold), "LP03_REALITY_REVIEW_THRESHOLD_JOIN")
+            exceedances = 0
+            for replicate in range(reps):
+                current = pick(replicate, 0); row = [current]
+                for position in range(1, n):
+                    current = pick(replicate, position) if draw("RANDOM_U53", replicate, position) < threshold else (current + 1) % n
+                    row.append(current)
+                indices.append(tuple(row))
+                statistics = []
+                prefix = "REPLICATE_" + str(replicate)
+                for column, center in enumerate(means):
+                    total = take(prefix + "_SUM_" + str(column), "FSUM", *(matrix[index][column] for index in row))
+                    mean = take(prefix + "_MEAN_" + str(column), "DIV", total, float(n))
+                    recentered = take(prefix + "_CENTER_" + str(column), "SUB", mean, center)
+                    statistics.append(take(prefix + "_STATISTIC_" + str(column), "MUL", root, recentered))
+                value, column = maximum(statistics)
+                simulated.append(value); selected.append(column)
+                exceedances += value >= statistic
+            p_value = take("PLUS_ONE_P_VALUE", "DIV", float(1 + exceedances), float(reps + 1))
+        result = dict(statistic=statistic, p_value=p_value, reject=p_value <= alpha, candidate_means=means,
+            simulated_statistics=tuple(simulated), recenter_policy="CENTER_EACH_COMPLETE_MATERIAL_CANDIDATE_AT_ITS_SAMPLE_MEAN")
+        _native_require(type(proof["indices"]) is tuple and all(type(row) is tuple for row in proof["indices"])
+            and type(proof["oriented_matrix_bits"]) is tuple and all(type(row) is tuple for row in proof["oriented_matrix_bits"])
+            and type(proof["observed_selected_column"]) is int
+            and type(proof["replicate_selected_columns"]) is tuple
+            and all(type(value) is int for value in proof["replicate_selected_columns"])
+            and all(type(value) is int for row in proof["indices"] for value in row)
+            and type(summary["exceedances"]) is type(summary["reject_flag"]) is int
+            and cell_cursor == len(cells) and draw_cursor == len(draws) and word_cursor == len(words)
+            and proof["indices"] == tuple(indices)
+            and proof["oriented_matrix_bits"] == tuple(tuple(bits(value) for value in row) for row in matrix)
+            and proof["observed_selected_column"] == observed_column and proof["replicate_selected_columns"] == tuple(selected)
+            and (summary["statistic_bits"], summary["p_value_bits"]) == (bits(statistic), bits(p_value))
+            and summary["exceedances"] == exceedances and summary["reject_flag"] == int(result["reject"])
+            and 0.0 <= statistic <= 2.0 and 0.0 < p_value <= 1.0
+            and all(-1.0 <= value <= 1.0 for value in means) and all(0.0 <= value <= 4.0 for value in simulated)
+            and deterministic_json(result) == deterministic_json(raw) == summary["original_raw_json"]
+            and lane["projected_value_json"] == summary["original_raw_json"], "LP03_REALITY_REVIEW_COMPLETE_OUTPUT_JOIN")
+        replay_draws += len(draws)
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(
+            len(deterministic_json(fragment).encode("utf-8")) for fragment in (*draws, *cells, summary))
+        common.append((source_payload["consumer_decision_wall_ns"], source_payload["consumer_cutoff_wall_ns"],
+            sources, tuple(part.reconstructed_canonical_events for part in parts), summary["typed_input_json"],
+            summary["original_raw_json"], summary["environment_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+        and counters[1]["random_draws"] == replay_draws
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2, "LP03_REALITY_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_bootstrap_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the original ordered stationary-bootstrap source model.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1, _evidence_decode_source_values_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_BOOTSTRAP_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "ORDERED_STATIONARY_BOOTSTRAP_FROM_ORIGINAL_SERIES_AND_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_14_CLOSURE_ONLY",
+                        "BOOTSTRAP_MODEL_ONLY_NO_COVERAGE_OR_EMPIRICAL_CERTIFICATION",
+                        "FORMULA_INTERMEDIATES_DERIVED_REVIEW_REPLAY_RETURNS_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_BOOTSTRAP_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots"))
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_BOOTSTRAP_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(all(counters[0][name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_BOOTSTRAP_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_BOOTSTRAP_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_BOOTSTRAP_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_BOOTSTRAP_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def number(text):
+        _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}", text) is not None,
+                        "LP03_BOOTSTRAP_REVIEW_BITS")
+        value = struct.unpack(">d", bytes.fromhex(text))[0]
+        _native_require(isfinite(value), "LP03_BOOTSTRAP_REVIEW_FINITE_CELL")
+        return value
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "series_count", "seed", "replicates", "block_bits", "confidence_bits",
+        "fixed_lower", "fixed_upper", "bound_scope", "result_direction", "arithmetic_requirement", "statistical_authority"))
+    _native_require(bound["profile"] == "DECLARED_NORMALIZED_STATIONARY_BOOTSTRAP_ENCLOSURE_V1" and bound["math_id"] == "MATH-14"
+        and type(bound["series_count"]) is type(bound["seed"]) is type(bound["replicates"]) is int
+        and 2 <= bound["series_count"] <= 8 and 1 <= bound["replicates"] <= 4
+        and bound["series_count"] * bound["replicates"] <= 16 and bound["seed"].bit_length() <= 256
+        and 1.0 <= number(bound["block_bits"]) <= bound["series_count"]
+        and 0.0 < number(bound["confidence_bits"]) < 1.0
+        and rational(bound["fixed_lower"]) == -1 and rational(bound["fixed_upper"]) == 1
+        and bound["bound_scope"] == "ALL_MEAN_AND_INTERVAL_COORDINATES" and bound["result_direction"] == "RECORD"
+        and bound["arithmetic_requirement"] == "ORDERED_BINARY64_MT19937_STATIONARY_TYPE7"
+        and bound["statistical_authority"] == "NO_COVERAGE_OR_EMPIRICAL_CERTIFICATION", "LP03_BOOTSTRAP_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_BOOTSTRAP_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_BOOTSTRAP_REVIEW_LANE_ROSTER")
+    common, charged_bytes, replay_draws = [], 0, 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "statistic_unit"
+            and lane["basis"] == "bootstrap_statistic_distribution_and_interval", "LP03_BOOTSTRAP_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_BOOTSTRAP_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 6, "LP03_BOOTSTRAP_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(source["store_id"], source["record_id"]) for source in sources}) == 6,
+                        "LP03_BOOTSTRAP_REVIEW_SOURCE_ROSTER")
+        # Full original native source data remains inside the already bounded
+        # signed artifact. No reference, clock, right or source value is elided.
+        source_payload = lane["original_source_payload"]
+        parts = _evidence_bootstrap_source_slices_v1(source_payload)
+        _native_require(deterministic_json(sources) == deterministic_json(tuple(dict(store_id=part.original_record_refs[0].store_id,
+                record_id=part.original_record_refs[0].record_id) for part in parts)), "LP03_BOOTSTRAP_REVIEW_SOURCE_REFERENCE_JOIN")
+        from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+        from .input_resolver import _parse_typed
+        native_inputs = {}
+        for part, binding in zip(parts, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-14"], strict=True):
+            values = _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])
+            native_inputs[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "replay_observation_scope", "statistical_authority",
+            "model_provenance", "draws", "indices", "stable_order", "percentile_indices", "cells", "summary"))
+        _native_require(proof["profile"] == "ORDERED_MT19937_STATIONARY_BOOTSTRAP_TYPE7_MODEL_V1"
+            and proof["intermediate_observation_scope"] == "ALL_FORMULA_INDICES_AND_ARITHMETIC_DERIVED_NOT_OBSERVED"
+            and proof["replay_observation_scope"] == "ORIGINAL_REVIEW_REPLAY_METHOD_RETURNS_ONLY"
+            and proof["statistical_authority"] == "NO_COVERAGE_OR_EMPIRICAL_CERTIFICATION"
+            and proof["model_provenance"] == "CPYTHON_RANDOM_INTEGER_SEED_GETRANDBITS_RANDOM_MODEL_NOT_COMPILER_BINARY_ATTESTATION",
+            "LP03_BOOTSTRAP_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("sample_mean_bits", "lower_bits", "upper_bits", "seed", "replicates", "threshold_bits",
+            "typed_input_json", "original_raw_json", "preregistered_raw_json", "environment_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-14", text_bytes(summary["typed_input_json"]),
+            maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-14", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        environment = EvidenceEnvironmentIdentityV1.from_canonical_mapping(
+            _native_strict_json(text_bytes(summary["environment_json"]), max_bytes=8192, max_nodes=4096))
+        _native_require(deterministic_json(environment) == summary["environment_json"]
+            and summary["original_raw_json"] == summary["preregistered_raw_json"]
+            and deterministic_json(inputs) == deterministic_json(native_inputs)
+            and deterministic_json(inputs) == summary["typed_input_json"], "LP03_BOOTSTRAP_REVIEW_ORIGINAL_INPUT_JOIN")
+        values, block, seed, reps, confidence, method = (inputs[key] for key in (
+            "series", "expected_block_length", "seed", "replicates", "confidence", "interval_method"))
+        _native_require(type(values) is tuple and 2 <= len(values) <= 8
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for value in values)
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(values)
+            and type(seed) is type(reps) is type(summary["seed"]) is type(summary["replicates"]) is int
+            and seed.bit_length() <= 256 and 1 <= reps <= 4 and len(values) * reps <= 16
+            and type(confidence) is float and isfinite(confidence) and 0.0 < confidence < 1.0
+            and type(method) is str and method == "PERCENTILE_TYPE7"
+            and seed == summary["seed"] == bound["seed"] and reps == summary["replicates"] == bound["replicates"]
+            and len(values) == bound["series_count"] and bits(block) == bound["block_bits"]
+            and bits(confidence) == bound["confidence_bits"], "LP03_BOOTSTRAP_REVIEW_TYPED_BOUND_JOIN")
+        n = len(values)
+        cells, draws = proof["cells"], proof["draws"]
+        _native_require(type(cells) is tuple and 1 <= len(cells) <= 26
+            and type(draws) is tuple and 1 <= len(draws) <= 64, "LP03_BOOTSTRAP_REVIEW_COMPLETE_TRANSCRIPT")
+        for row in draws:
+            fields(row, ("ordinal", "method", "width", "value", "comparison", "disposition", "replicate", "position"))
+            _native_require(all(type(row[key]) is int for key in ("ordinal", "width", "value", "replicate", "position"))
+                and type(row["method"]) is str and row["method"] in ("GETRANDBITS", "RANDOM_U53")
+                and type(row["comparison"]) is type(row["disposition"]) is str,
+                "LP03_BOOTSTRAP_REVIEW_DRAW_TYPES")
+        words = _evidence_bootstrap_mt_words_v1(seed, sum(1 if row["method"] == "GETRANDBITS" else 2 for row in draws))
+        cell_cursor, draw_cursor, word_cursor = 0, 0, 0
+        def take(label, kind, *operands):
+            nonlocal cell_cursor
+            _native_require(cell_cursor < len(cells), "LP03_BOOTSTRAP_REVIEW_CELL_ORDER")
+            row = cells[cell_cursor]; cell_cursor += 1
+            fields(row, ("operation", "kind", "operands_json", "candidate"))
+            _native_require(row["operation"] == label and row["kind"] == kind
+                and row["operands_json"] == deterministic_json(tuple(bits(value) for value in operands)),
+                "LP03_BOOTSTRAP_REVIEW_CELL_OPERANDS")
+            candidate = number(row["candidate"])
+            xs = tuple(Fraction.from_float(value) for value in operands)
+            if kind == "FSUM": exact = sum(xs, Fraction(0))
+            elif kind == "ADD": exact = xs[0] + xs[1]
+            elif kind == "SUB": exact = xs[0] - xs[1]
+            elif kind == "MUL": exact = xs[0] * xs[1]
+            else:
+                _native_require(kind == "DIV" and xs[1] != 0, "LP03_BOOTSTRAP_REVIEW_CELL_KIND")
+                exact = xs[0] / xs[1]
+            before, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+            _native_require(isfinite(before) and isfinite(following), "LP03_BOOTSTRAP_REVIEW_FINITE_CELL")
+            actual = Fraction.from_float(candidate)
+            low, high = (Fraction.from_float(before) + actual) / 2, (actual + Fraction.from_float(following)) / 2
+            even = int(bits(candidate), 16) & 1 == 0
+            _native_require((exact > low or exact == low and even) and (exact < high or exact == high and even),
+                            "LP03_BOOTSTRAP_REVIEW_NEAREST_EVEN_CELL")
+            if candidate == 0.0:
+                signs = tuple(bits(value).startswith("8") or int(bits(value), 16) >> 63 == 1 for value in operands)
+                negative = exact < 0 if exact != 0 else ((signs[0] != signs[1]) if kind in ("MUL", "DIV") else (
+                    kind == "ADD" and all(value == 0 for value in operands) and all(signs)
+                    or kind == "SUB" and all(value == 0 for value in operands) and signs[0] and not signs[1]))
+                _native_require(bits(candidate) == ("8000000000000000" if negative else "0000000000000000"),
+                                "LP03_BOOTSTRAP_REVIEW_ZERO_SIGN")
+            return candidate
+        threshold = take("RESTART_THRESHOLD", "DIV", 1.0, block)
+        _native_require(summary["threshold_bits"] == bits(threshold), "LP03_BOOTSTRAP_REVIEW_THRESHOLD_JOIN")
+        def draw(kind, replicate, position):
+            nonlocal draw_cursor, word_cursor
+            _native_require(draw_cursor < len(draws), "LP03_BOOTSTRAP_REVIEW_DRAW_ORDER")
+            row = draws[draw_cursor]
+            width = n.bit_length() if kind == "GETRANDBITS" else 53
+            _native_require(row["ordinal"] == draw_cursor and row["method"] == kind and row["width"] == width
+                and row["replicate"] == replicate and row["position"] == position
+                and row["comparison"] == (str(n) if kind == "GETRANDBITS" else bits(threshold)),
+                "LP03_BOOTSTRAP_REVIEW_DRAW_REQUEST_JOIN")
+            _native_require(word_cursor + (1 if kind == "GETRANDBITS" else 2) <= len(words),
+                "LP03_BOOTSTRAP_REVIEW_WORD_ORDER")
+            if kind == "GETRANDBITS":
+                value = words[word_cursor] >> (32 - width); word_cursor += 1
+                actual = value
+                disposition = "SELECTED" if actual < n else "REJECTED"
+            else:
+                value = ((words[word_cursor] >> 5) << 26) | (words[word_cursor + 1] >> 6); word_cursor += 2
+                actual = value / 2**53
+                disposition = "RESTART" if actual < threshold else "CONTINUE"
+            _native_require(row["value"] == value and row["disposition"] == disposition,
+                "LP03_BOOTSTRAP_REVIEW_MT_RETURN_JOIN")
+            draw_cursor += 1
+            return actual
+        def pick(replicate, position):
+            while True:
+                index = draw("GETRANDBITS", replicate, position)
+                if index < n: return index
+        indices, distribution = [], []
+        for replicate in range(reps):
+            current = pick(replicate, 0); row = [current]
+            for position in range(1, n):
+                current = pick(replicate, position) if draw("RANDOM_U53", replicate, position) < threshold else (current + 1) % n
+                row.append(current)
+            indices.append(tuple(row))
+            total = take("REPLICATE_SUM_" + str(replicate), "FSUM", *(values[index] for index in row))
+            distribution.append(take("REPLICATE_MEAN_" + str(replicate), "DIV", total, float(n)))
+        alpha = take("ALPHA", "DIV", take("CONFIDENCE_COMPLEMENT", "SUB", 1.0, confidence), 2.0)
+        sample_mean = take("SAMPLE_MEAN", "DIV", take("SAMPLE_SUM", "FSUM", *values), float(n))
+        upper_probability = take("UPPER_PROBABILITY", "SUB", 1.0, alpha)
+        order = tuple(sorted(range(reps), key=lambda index: distribution[index]))
+        selections = []
+        def percentile(prefix, probability):
+            position = take(prefix + "_POSITION", "MUL", probability, float(reps - 1))
+            exact_position = Fraction.from_float(position)
+            lower, remainder = divmod(exact_position.numerator, exact_position.denominator)
+            upper = lower if remainder == 0 else lower + 1
+            _native_require(0 <= lower <= upper < reps, "LP03_BOOTSTRAP_REVIEW_TYPE7_INDICES")
+            selections.append((lower, upper))
+            if lower == upper:return distribution[order[lower]]
+            weight = take(prefix + "_WEIGHT", "SUB", position, float(lower))
+            complement = take(prefix + "_COMPLEMENT", "SUB", 1.0, weight)
+            left = take(prefix + "_LEFT", "MUL", distribution[order[lower]], complement)
+            right = take(prefix + "_RIGHT", "MUL", distribution[order[upper]], weight)
+            return take(prefix + "_RESULT", "ADD", left, right)
+        lower, upper = percentile("LOWER", alpha), percentile("UPPER", upper_probability)
+        result = dict(sample_mean=sample_mean, lower=lower, upper=upper, bootstrap_distribution=tuple(distribution),
+            seed=seed, replicates=reps, expected_block_length=block, interval_method=method)
+        _native_require(cell_cursor == len(cells) and draw_cursor == len(draws) and word_cursor == len(words)
+            and proof["indices"] == tuple(indices) and proof["stable_order"] == order and proof["percentile_indices"] == tuple(selections)
+            and all(type(value) is int for row in proof["indices"] for value in row)
+            and all(type(value) is int for value in proof["stable_order"])
+            and all(type(value) is int for row in proof["percentile_indices"] for value in row)
+            and (summary["sample_mean_bits"], summary["lower_bits"], summary["upper_bits"]) == tuple(map(bits, (sample_mean, lower, upper)))
+            and all(-1 <= value <= 1 for value in (sample_mean, lower, upper, *distribution))
+            and lower <= upper and deterministic_json(result) == deterministic_json(raw) == summary["original_raw_json"]
+            and lane["projected_value_json"] == summary["original_raw_json"], "LP03_BOOTSTRAP_REVIEW_COMPLETE_OUTPUT_JOIN")
+        replay_draws += len(draws)
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(
+            len(deterministic_json(fragment).encode("utf-8")) for fragment in (*draws, *cells, summary))
+        common.append((sources, tuple(part.reconstructed_canonical_events for part in parts), summary["typed_input_json"],
+            summary["original_raw_json"], summary["environment_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+        and counters[1]["random_draws"] == replay_draws
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2, "LP03_BOOTSTRAP_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_wilson_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the original ordered AS241/Wilson source model.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1, _evidence_decode_source_values_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_WILSON_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "ORDERED_WILSON_FROM_ORIGINAL_COUNTS_AND_CONFIDENCE_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_11_CLOSURE_ONLY",
+                        "AS241_MODEL_ONLY_NO_EXACT_QUANTILE_OR_COVERAGE_CERTIFICATION",
+                        "ALL_INVERSE_NORMAL_AND_WILSON_STAGES_DERIVED_NOT_OBSERVED", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_WILSON_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(counts["random_draws"] == 0
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_WILSON_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(all(counters[0][name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_WILSON_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_WILSON_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_WILSON_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_WILSON_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def number(text):
+        _native_require(type(text) is str and re.fullmatch(r"[0-9a-f]{16}", text) is not None,
+                        "LP03_WILSON_REVIEW_BITS")
+        value = struct.unpack(">d", bytes.fromhex(text))[0]
+        _native_require(isfinite(value), "LP03_WILSON_REVIEW_FINITE_CELL")
+        return value
+    def certify(candidate, low, high, *, squared=False):
+        previous, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+        _native_require(isfinite(candidate) and isfinite(previous) and isfinite(following),
+                        "LP03_WILSON_REVIEW_FINITE_CELL")
+        actual = Fraction.from_float(candidate)
+        before = (Fraction.from_float(previous) + actual) / 2
+        after = (actual + Fraction.from_float(following)) / 2
+        even = int(bits(candidate), 16) & 1 == 0
+        _native_require(low <= high, "LP03_WILSON_REVIEW_ENCLOSURE_ORDER")
+        if squared:
+            _native_require(low >= 0 and candidate >= 0 and bits(candidate) != "8000000000000000"
+                and (before < 0 or low > before * before or low == before * before and even)
+                and (high < after * after or high == after * after and even), "LP03_WILSON_REVIEW_SQRT_CELL")
+        else:
+            _native_require((low > before or low == before and even) and (high < after or high == after and even),
+                            "LP03_WILSON_REVIEW_NEAREST_EVEN_CELL")
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "successes", "trials", "confidence", "confidence_bits", "fixed_lower", "fixed_upper",
+        "rounded_domain_confidence_minimum", "rounded_domain_confidence_maximum", "bound_scope", "result_direction",
+        "arithmetic_requirement", "statistical_authority"))
+    confidence = number(bound["confidence_bits"])
+    _native_require(bound["profile"] == "DECLARED_WILSON_ENDPOINT_ENCLOSURE_V1" and bound["math_id"] == "MATH-11"
+        and type(bound["successes"]) is type(bound["trials"]) is int and 0 <= bound["successes"] <= bound["trials"] <= 2**53
+        and bound["trials"] > 0 and rational(bound["confidence"]) == Fraction.from_float(confidence)
+        and rational(bound["rounded_domain_confidence_minimum"]) == Fraction(3, 2**54)
+        and rational(bound["rounded_domain_confidence_maximum"]) == 1 - Fraction(1, 2**52)
+        and Fraction(3, 2**54) <= Fraction.from_float(confidence) <= 1 - Fraction(1, 2**52)
+        and rational(bound["fixed_lower"]) == 0 and rational(bound["fixed_upper"]) == 1
+        and bound["bound_scope"] == "INTERVAL_ENDPOINTS_ONLY" and bound["result_direction"] == "INTERVAL"
+        and bound["arithmetic_requirement"] == "ORDERED_AS241_BINARY64_WITH_CERTIFIED_LOG_AND_SQRT_CELLS"
+        and bound["statistical_authority"] == "NO_EXACT_QUANTILE_OR_COVERAGE_CERTIFICATION", "LP03_WILSON_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_WILSON_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_WILSON_REVIEW_LANE_ROSTER")
+    common, charged_bytes, logarithms, square_roots = [], 0, 0, 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "original_source_payload_json", "source_record_refs", "proof", "raw_ref",
+            "projection_ref", "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "probability" and lane["basis"] == "lower_upper_probability_interval",
+                        "LP03_WILSON_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_WILSON_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 3, "LP03_WILSON_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(s["store_id"], s["record_id"]) for s in sources}) == 3, "LP03_WILSON_REVIEW_SOURCE_ROSTER")
+        source_raw = text_bytes(lane["original_source_payload_json"])
+        source_payload = _native_strict_json(source_raw, max_bytes=65536, max_nodes=4096)
+        parts = _evidence_wilson_source_slices_v1(source_payload)
+        _native_require(deterministic_json(source_payload).encode("ascii") == source_raw
+            and deterministic_json(sources) == deterministic_json(tuple(dict(store_id=part.original_record_refs[0].store_id,
+                record_id=part.original_record_refs[0].record_id) for part in parts)), "LP03_WILSON_REVIEW_SOURCE_REFERENCE_JOIN")
+        values = tuple(_evidence_decode_source_values_v1(part.reconstructed_canonical_events[0]) for part in parts)
+        native_inputs = dict(successes=values[0]["counts.successes"], trials=values[1]["counts.trials"],
+            confidence=values[2]["formula_policies['MATH-11'].confidence"])
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "statistical_authority", "model_provenance", "log_enclosure", "cells", "summary"))
+        _native_require(proof["profile"] == "AS241_ORDERED_BINARY64_WILSON_MODEL_CONFORMANCE_V1"
+            and proof["intermediate_observation_scope"] == "ALL_INVERSE_NORMAL_AND_WILSON_STAGES_DERIVED_NOT_OBSERVED"
+            and proof["statistical_authority"] == "NO_EXACT_QUANTILE_OR_COVERAGE_CERTIFICATION"
+            and proof["model_provenance"] == "CPYTHON_V3_14_6_AS241_SOURCE_MODEL_NOT_COMPILER_BINARY_ATTESTATION",
+            "LP03_WILSON_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("successes", "trials", "confidence_bits", "branch", "lower_selected_index", "upper_selected_index",
+            "lower_bits", "upper_bits", "typed_input_json", "original_raw_json", "preregistered_raw_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-11", text_bytes(summary["typed_input_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-11", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(summary["original_raw_json"] == summary["preregistered_raw_json"]
+            and type(inputs["successes"]) is type(inputs["trials"]) is type(summary["successes"]) is type(summary["trials"]) is int
+            and inputs["successes"] == summary["successes"] == bound["successes"]
+            and inputs["trials"] == summary["trials"] == bound["trials"]
+            and type(inputs["confidence"]) is float and isfinite(inputs["confidence"])
+            and bits(inputs["confidence"]) == summary["confidence_bits"] == bound["confidence_bits"]
+            and deterministic_json(native_inputs) == summary["typed_input_json"], "LP03_WILSON_REVIEW_ORIGINAL_INPUT_JOIN")
+        cells, cursor = proof["cells"], 0
+        _native_require(type(cells) is tuple and len(cells) == 58, "LP03_WILSON_REVIEW_CELL_ROSTER")
+        def take(label, kind, left, right):
+            nonlocal cursor, square_roots
+            _native_require(cursor < len(cells), "LP03_WILSON_REVIEW_CELL_ROSTER")
+            row = cells[cursor]; cursor += 1
+            fields(row, ("operation", "kind", "left", "right", "candidate"))
+            _native_require(row["operation"] == label and row["kind"] == kind
+                and row["left"] == bits(left) and row["right"] == bits(right)
+                and len(deterministic_json(row).encode("ascii")) <= 200, "LP03_WILSON_REVIEW_CELL_OPERAND_JOIN")
+            candidate = number(row["candidate"])
+            first, second = Fraction.from_float(left), Fraction.from_float(right)
+            if kind == "SQRT":
+                square_roots += 1
+                certify(candidate, first, first, squared=True)
+            else:
+                _native_require(kind != "DIV" or second != 0, "LP03_WILSON_REVIEW_DIVISION_DOMAIN")
+                exact = {"ADD": lambda: first + second, "SUB": lambda: first - second,
+                    "MUL": lambda: first * second, "DIV": lambda: first / second}[kind]()
+                certify(candidate, exact, exact)
+                # Exact zero in this fixed model has canonical positive sign.
+                _native_require(exact != 0 or row["candidate"] == "0000000000000000", "LP03_WILSON_REVIEW_ZERO_SIGN")
+            return candidate
+        def polynomial(prefix, coefficients, value):
+            result = coefficients[0]
+            for index, coefficient in enumerate(coefficients[1:], 1):
+                result = take(prefix + str(index) + "M", "MUL", result, value)
+                result = take(prefix + str(index) + "A", "ADD", result, coefficient)
+            return result
+        tail = take("CONF_COMPLEMENT", "SUB", 1.0, confidence)
+        half_tail = take("HALF_COMPLEMENT", "DIV", tail, 2.0)
+        probability = take("NORMAL_PROBABILITY", "SUB", 1.0, half_tail)
+        _native_require(0.5 < probability < 1.0, "LP03_WILSON_REVIEW_QUANTILE_DOMAIN")
+        q = take("AS241_Q", "SUB", probability, 0.5)
+        if q <= 0.425:
+            branch = "CENTRAL"
+            square = take("AS241_Q_SQUARED", "MUL", q, q)
+            r = take("AS241_CENTRAL_R", "SUB", 0.180625, square)
+            nc = (2.5090809287301226727e3, 3.3430575583588128105e4, 6.7265770927008700853e4, 4.5921953931549871457e4,
+                1.3731693765509461125e4, 1.9715909503065514427e3, 1.3314166789178437745e2, 3.3871328727963666080)
+            dc = (5.2264952788528545610e3, 2.8729085735721942674e4, 3.9307895800092710610e4, 2.1213794301586595867e4,
+                5.3941960214247511077e3, 6.8718700749205790830e2, 4.2313330701600911252e1, 1.0)
+            _native_require(proof["log_enclosure"] is None, "LP03_WILSON_REVIEW_CENTRAL_LOG_ABSENCE")
+        else:
+            r = take("AS241_TAIL_R", "SUB", 1.0, probability)
+            log = proof["log_enclosure"]
+            fields(log, ("input_bits", "candidate_bits", "lower", "upper", "terms", "interpretation"))
+            _native_require(log["input_bits"] == bits(r) and type(log["terms"]) is int and log["terms"] == 64
+                and log["interpretation"] == "DERIVED_ROUNDED_NEGATIVE_LOG", "LP03_WILSON_REVIEW_LOG_JOIN")
+            low, high = rational(log["lower"]), rational(log["upper"])
+            logarithm = number(log["candidate_bits"])
+            _native_require(0 < low <= high and logarithm > 0, "LP03_WILSON_REVIEW_LOG_DOMAIN")
+            # The original bounded review computed this enclosure. This signed
+            # decoder checks its cell and exact downstream use, without
+            # reconstructing live work or granting numerical/source authority.
+            certify(logarithm, low, high)
+            logarithms += 1
+            r = take("AS241_TAIL_SQRT", "SQRT", logarithm, 0.0)
+            if r <= 5.0:
+                branch = "TAIL_LE_FIVE"
+                r = take("AS241_TAIL_SHIFT", "SUB", r, 1.6)
+                nc = (7.74545014278341407640e-4, 2.27238449892691845833e-2, 2.41780725177450611770e-1, 1.27045825245236838258,
+                    3.64784832476320460504, 5.76949722146069140550, 4.63033784615654529590, 1.42343711074968357734)
+                dc = (1.05075007164441684324e-9, 5.47593808499534494600e-4, 1.51986665636164571966e-2, 1.48103976427480074590e-1,
+                    6.89767334985100004550e-1, 1.67638483018380384940, 2.05319162663775882187, 1.0)
+            else:
+                branch = "TAIL_GT_FIVE"
+                r = take("AS241_TAIL_SHIFT", "SUB", r, 5.0)
+                nc = (2.01033439929228813265e-7, 2.71155556874348757815e-5, 1.24266094738807843860e-3, 2.65321895265761230930e-2,
+                    2.96560571828504891230e-1, 1.78482653991729133580, 5.46378491116411436990e0, 6.65790464350110377720)
+                dc = (2.04426310338993978564e-15, 1.42151175831644588870e-7, 1.84631831751005468180e-5, 7.86869131145613259100e-4,
+                    1.48753612908506148525e-2, 1.36929880922735805310e-1, 5.99832206555887937690e-1, 1.0)
+        numerator = polynomial("N", nc, r)
+        if branch == "CENTRAL": numerator = take("AS241_NUM_Q", "MUL", numerator, q)
+        denominator = polynomial("D", dc, r)
+        normal = take("AS241_QUOTIENT", "DIV", numerator, denominator)
+        scaled = take("AS241_SCALE", "MUL", normal, 1.0)
+        z = take("AS241_LOCATION", "ADD", 0.0, scaled)
+        _native_require(z > 0 and summary["branch"] == branch, "LP03_WILSON_REVIEW_BRANCH_JOIN")
+        sf, nf = float(inputs["successes"]), float(inputs["trials"])
+        phat = take("WILSON_PHAT", "DIV", sf, nf)
+        z2 = take("WILSON_Z2", "MUL", z, z)
+        zn = take("WILSON_Z2_N", "DIV", z2, nf)
+        denominator = take("WILSON_DENOM", "ADD", 1.0, zn)
+        twice_n = take("WILSON_TWO_N", "MUL", 2.0, nf)
+        bias = take("WILSON_CENTER_BIAS", "DIV", z2, twice_n)
+        numerator = take("WILSON_CENTER_NUM", "ADD", phat, bias)
+        center = take("WILSON_CENTER", "DIV", numerator, denominator)
+        factor = take("WILSON_HALF_FACTOR", "DIV", z, denominator)
+        complement = take("WILSON_COMPLEMENT", "SUB", 1.0, phat)
+        variance = take("WILSON_VARIANCE", "MUL", phat, complement)
+        per_trial = take("WILSON_PER_TRIAL", "DIV", variance, nf)
+        four_n = take("WILSON_FOUR_N", "MUL", 4.0, nf)
+        four_n2 = take("WILSON_FOUR_N2", "MUL", four_n, nf)
+        adjusted = take("WILSON_ADJUSTMENT", "DIV", z2, four_n2)
+        radicand = take("WILSON_RADICAND", "ADD", per_trial, adjusted)
+        root = take("WILSON_SQRT", "SQRT", radicand, 0.0)
+        half = take("WILSON_HALF", "MUL", factor, root)
+        lower = take("WILSON_LOWER", "SUB", center, half)
+        upper = take("WILSON_UPPER", "ADD", center, half)
+        lower_index, upper_index = (0 if lower <= 0 else 1), (0 if upper >= 1 else 1)
+        endpoints = (0.0 if lower_index == 0 else lower, 1.0 if upper_index == 0 else upper)
+        _native_require(cursor == len(cells) and type(summary["lower_selected_index"]) is type(summary["upper_selected_index"]) is int
+            and (summary["lower_selected_index"], summary["upper_selected_index"]) == (lower_index, upper_index)
+            and (summary["lower_bits"], summary["upper_bits"]) == tuple(map(bits, endpoints))
+            and tuple(bits(raw[key]) for key in ("lower", "upper")) == tuple(map(bits, endpoints))
+            and 0 <= endpoints[0] <= endpoints[1] <= 1
+            and lane["projected_value_json"] == deterministic_json(endpoints), "LP03_WILSON_REVIEW_ENDPOINT_JOIN")
+        fragments = (*cells, summary) if proof["log_enclosure"] is None else (*cells, proof["log_enclosure"], summary)
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(len(deterministic_json(fragment).encode("utf-8")) for fragment in fragments)
+        # Lane access observations can differ; full original source facts cannot.
+        common.append((sources, tuple(part.reconstructed_canonical_events for part in parts),
+            summary["typed_input_json"], summary["original_raw_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+        and counters[1]["square_roots"] == square_roots and counters[1]["log_series_terms"] == logarithms * 128
+        and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2, "LP03_WILSON_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_calibration_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, for the exact-only original calibration profile.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks ordered arithmetic, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_CALIBRATION_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "EXACT_CALIBRATION_FROM_ORIGINAL_DATASET_AND_BIN_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_10_CLOSURE_ONLY",
+                        "EXACT_CALIBRATION_INTERMEDIATES_WITH_DERIVED_UNOBSERVED_SUMS", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_CALIBRATION_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_CALIBRATION_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(counters[0]["log_series_terms"] == 0
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_CALIBRATION_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_CALIBRATION_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_CALIBRATION_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_CALIBRATION_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def exact(value):
+        _native_require(Fraction.from_float(float(value)) == value, "LP03_CALIBRATION_REVIEW_NONEXACT_SIGNED_INTERMEDIATE")
+        return value
+    def observed(value, expected):
+        _native_require(type(value) is float and isfinite(value) and bits(value) == bits(float(expected)),
+                        "LP03_CALIBRATION_REVIEW_OBSERVED_JOIN")
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "observation_count", "requested_bin_count", "bin_policy", "fixed_lower", "fixed_upper", "exactness_requirement"))
+    _native_require(bound["profile"] == "DECLARED_EXACT_CALIBRATION_UNIT_ENCLOSURE_V1" and bound["math_id"] == "MATH-10"
+                    and bound["exactness_requirement"] == "ALL_NATIVE_INTERMEDIATES_EXACT_WITH_COMPLETE_DISJOINT_MEMBERSHIP"
+                    and type(bound["observation_count"]) is type(bound["requested_bin_count"]) is int
+                    and 0 < bound["observation_count"] <= 4096 and 0 < bound["requested_bin_count"] <= 4096
+                    and bound["bin_policy"] in ("EQUAL_WIDTH", "EQUAL_FREQUENCY_TYPE7_COLLAPSE_DUPLICATES")
+                    and rational(bound["fixed_lower"]) == 0 and rational(bound["fixed_upper"]) == 1,
+                    "LP03_CALIBRATION_REVIEW_BOUND_PROFILE")
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_CALIBRATION_REVIEW_REGISTRATION_BYTE_JOIN")
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_CALIBRATION_REVIEW_LANE_ROSTER")
+    common, charged_bytes = [], 0
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref",
+            "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "probability" and lane["basis"] == "absolute_calibration_gap",
+                        "LP03_CALIBRATION_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_CALIBRATION_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 4, "LP03_CALIBRATION_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id")); EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(s["store_id"], s["record_id"]) for s in sources}) == 4, "LP03_CALIBRATION_REVIEW_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "sorted_source_indices", "edge_calculations", "bin_calculations", "summary"))
+        _native_require(proof["profile"] == "EXACT_BINARY64_ORDERED_CALIBRATION_INTERMEDIATES_V1"
+                        and proof["intermediate_observation_scope"] == "SUMS_AND_INTERMEDIATE_ARITHMETIC_ARE_DERIVED_NOT_OBSERVED",
+                        "LP03_CALIBRATION_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("observation_count", "requested_bin_count", "effective_bin_count", "bin_policy", "expected_calibration_error",
+            "typed_input_json", "original_raw_json", "preregistered_raw_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-10", text_bytes(summary["typed_input_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-10", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(summary["original_raw_json"] == summary["preregistered_raw_json"], "LP03_CALIBRATION_REVIEW_RAW_EXPECTATION")
+        ps, ys, count, policy = (inputs[k] for k in ("probabilities", "outcomes", "bin_count", "bin_policy"))
+        _native_require(type(ps) is tuple and 0 < len(ps) <= 4096 and type(ys) is tuple and len(ys) == len(ps)
+                        and all(type(p) is float and isfinite(p) and 0 <= p <= 1 for p in ps)
+                        and all(type(y) is int and y in (0, 1) for y in ys)
+                        and type(count) is int and 0 < count <= 4096 and type(policy) is str
+                        and policy in ("EQUAL_WIDTH", "EQUAL_FREQUENCY_TYPE7_COLLAPSE_DUPLICATES")
+                        and (policy == "EQUAL_WIDTH" or count <= len(ps)), "LP03_CALIBRATION_REVIEW_TYPED_ROSTER")
+        n = len(ps)
+        _native_require(type(summary["observation_count"]) is type(summary["requested_bin_count"]) is type(summary["effective_bin_count"]) is int
+                        and summary["observation_count"] == bound["observation_count"] == n
+                        and summary["requested_bin_count"] == bound["requested_bin_count"] == count
+                        and summary["bin_policy"] == bound["bin_policy"] == raw["bin_policy"] == policy
+                        and type(raw["requested_bin_count"]) is int and raw["requested_bin_count"] == count,
+                        "LP03_CALIBRATION_REVIEW_POLICY_JOIN")
+        ps = tuple(Fraction.from_float(p) for p in ps)
+        order = tuple(sorted(range(n), key=lambda i: ps[i]))
+        _native_require(type(proof["sorted_source_indices"]) is tuple and all(type(i) is int for i in proof["sorted_source_indices"])
+                        and proof["sorted_source_indices"] == order, "LP03_CALIBRATION_REVIEW_STABLE_ORDER")
+        edge_records, bin_records = proof["edge_calculations"], proof["bin_calculations"]
+        _native_require(type(edge_records) is tuple and len(edge_records) == count + 1
+                        and type(bin_records) is tuple, "LP03_CALIBRATION_REVIEW_CALCULATION_ROSTER")
+        edges, fragments = [], [summary]
+        for index, record in enumerate(edge_records):
+            fields(record, ("edge_ordinal", "probability", "derived_edge") if policy == "EQUAL_WIDTH" else
+                ("edge_ordinal", "probability", "position", "lower_index", "upper_index", "lower_source_index", "upper_source_index",
+                    "weight", "complement", "first_product", "second_product", "derived_edge"))
+            q = exact(Fraction(index, count))
+            _native_require(type(record["edge_ordinal"]) is int and record["edge_ordinal"] == index and rational(record["probability"]) == q,
+                            "LP03_CALIBRATION_REVIEW_EDGE_ORDINAL")
+            if policy == "EQUAL_WIDTH":result = q
+            else:
+                position = exact(q * (n - 1)); lower = position.numerator // position.denominator
+                upper = lower if position.denominator == 1 else lower + 1
+                _native_require(all(type(record[k]) is int for k in ("lower_index", "upper_index", "lower_source_index", "upper_source_index"))
+                                and (record["lower_index"], record["upper_index"], record["lower_source_index"], record["upper_source_index"])
+                                == (lower, upper, order[lower], order[upper]), "LP03_CALIBRATION_REVIEW_TYPE7_INDICES")
+                if lower == upper:weight, complement, first, second = Fraction(0), Fraction(1), ps[order[lower]], Fraction(0)
+                else:
+                    weight = exact(position - lower); complement = exact(1 - weight)
+                    first = exact(ps[order[lower]] * complement); second = exact(ps[order[upper]] * weight)
+                result = exact(first + second)
+                _native_require(all(rational(record[k]) == value for k, value in dict(position=position, weight=weight,
+                    complement=complement, first_product=first, second_product=second).items()), "LP03_CALIBRATION_REVIEW_TYPE7_ARITHMETIC")
+            _native_require(rational(record["derived_edge"]) == result, "LP03_CALIBRATION_REVIEW_EDGE_VALUE")
+            edges.append(result); fragments.append(record)
+        if policy != "EQUAL_WIDTH":
+            edges[0], edges[-1] = Fraction(0), Fraction(1)
+            edges = list(dict.fromkeys(edges))
+        _native_require(len(edges) - 1 == summary["effective_bin_count"] == len(bin_records) == len(raw["bins"])
+                        and len(raw["effective_edges"]) == len(edges), "LP03_CALIBRATION_REVIEW_EFFECTIVE_ROSTER")
+        for actual, expected in zip(raw["effective_edges"], edges):observed(actual, expected)
+        total, memberships = Fraction(0), []
+        for ordinal, (left, right, record, actual) in enumerate(zip(edges, edges[1:], bin_records, raw["bins"])):
+            fields(record, ("arithmetic", "member_indices")); arith = record["arithmetic"]
+            inclusive = ordinal == len(edges) - 2
+            members = tuple(i for i, p in enumerate(ps) if left <= p < right or inclusive and left <= p <= right)
+            _native_require(type(record["member_indices"]) is tuple and all(type(i) is int for i in record["member_indices"])
+                            and record["member_indices"] == members and type(actual["bin_index"]) is type(actual["count"]) is int
+                            and actual["bin_index"] == ordinal and actual["count"] == len(members)
+                            and actual["right_inclusive"] is inclusive, "LP03_CALIBRATION_REVIEW_MEMBERSHIP")
+            observed(actual["left"], left); observed(actual["right"], right)
+            fields(arith, ("bin_index", "count", "state", "ordered_ece_prefix") if not members else
+                ("bin_index", "count", "state", "derived_probability_sum", "derived_outcome_sum", "mean_confidence",
+                    "empirical_frequency", "absolute_gap", "weight", "contribution", "ordered_ece_prefix"))
+            _native_require(type(arith["bin_index"]) is type(arith["count"]) is int and arith["bin_index"] == ordinal
+                            and arith["count"] == len(members), "LP03_CALIBRATION_REVIEW_BIN_COUNT")
+            if not members:
+                _native_require(arith["state"] == "EMPTY_ORIGINAL_BIN" and actual["mean_confidence"] is actual["empirical_frequency"]
+                    is actual["absolute_gap"] is None, "LP03_CALIBRATION_REVIEW_EMPTY_BIN")
+            else:
+                p_sum = exact(sum((ps[i] for i in members), Fraction(0))); y_sum = Fraction(sum(ys[i] for i in members))
+                confidence = exact(p_sum / len(members)); frequency = exact(y_sum / len(members))
+                gap = abs(exact(confidence - frequency)); weight = exact(Fraction(len(members), n))
+                contribution = exact(weight * gap); total = exact(total + contribution)
+                _native_require(arith["state"] == "NONEMPTY_ORIGINAL_BIN" and all(rational(arith[k]) == value for k, value in dict(
+                    derived_probability_sum=p_sum, derived_outcome_sum=y_sum, mean_confidence=confidence,
+                    empirical_frequency=frequency, absolute_gap=gap, weight=weight, contribution=contribution).items()),
+                    "LP03_CALIBRATION_REVIEW_BIN_ARITHMETIC")
+                for key, value in dict(mean_confidence=confidence, empirical_frequency=frequency, absolute_gap=gap).items():observed(actual[key], value)
+            _native_require(rational(arith["ordered_ece_prefix"]) == total, "LP03_CALIBRATION_REVIEW_ORDERED_PREFIX")
+            memberships.extend(members); fragments.append(arith)
+        _native_require(sorted(memberships) == list(range(n)) and rational(summary["expected_calibration_error"]) == total
+                        and 0 <= total <= 1, "LP03_CALIBRATION_REVIEW_COMPLETE_UNIT_BOUND")
+        observed(raw["expected_calibration_error"], total)
+        projected_raw = text_bytes(lane["projected_value_json"])
+        projected = _native_strict_json(projected_raw, max_bytes=128, max_nodes=1, binary64_numbers=True)
+        _native_require(type(projected) is float and projected_raw == deterministic_json(raw["expected_calibration_error"]).encode("ascii"),
+                        "LP03_CALIBRATION_REVIEW_PROJECTED_RAW_JOIN")
+        charged_bytes += len(deterministic_json(proof).encode("utf-8")) + sum(len(deterministic_json(fragment).encode("utf-8")) for fragment in fragments)
+        common.append((sources, summary["typed_input_json"], summary["original_raw_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["serialized_bytes"] == charged_bytes
+                    and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_CALIBRATION_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_log_loss_review_calculation_v1(calculation, body):
+    """Validate bounded signed proof data, without rerunning logarithm work.
+
+    The original review owns the numerical proof and its finite observations.
+    This decoder checks cells, identities, source values and cumulative charges;
+    decoded data cannot replace that original review or grant source authority.
+    """
+    import struct
+    from fractions import Fraction
+    from math import gcd, isfinite, nextafter, inf
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json, _native_strict_json
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_LOG_LOSS_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "RATIONAL_LOG_LOSS_FROM_ORIGINAL_DATASET_AND_CLIP_POLICY"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_09_CLOSURE_ONLY",
+                        "RATIONAL_LOG_ENCLOSURES_WITH_DERIVED_UNOBSERVED_SUMS", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_LOG_LOSS_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key, retained in (("registration_numerical_consumption", 2), ("numerical_consumption_before_final_encoding", 8)):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "integer_operations", "comparisons",
+                            "rational_normalizations", "serialized_bytes"))
+                        and counts["decimal_parse_attempts"] == counts["decimal_constructions"] == counts["retained_decimal_inputs"] == retained
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_LOG_LOSS_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(counters[0]["log_series_terms"] == 128
+                    and remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] + len(deterministic_json(calculation).encode("utf-8")) <= remaining["max_serialized_bytes"],
+                    "LP03_LOG_LOSS_REVIEW_CUMULATIVE_ALLOWANCE")
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for name in ("numerator", "denominator"):
+            text = value[name]
+            _native_require(type(text) is str and 0 < len(text) <= 4096
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if name == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_LOG_LOSS_REVIEW_RATIONAL_TEXT")
+        n, d = int(value["numerator"]), int(value["denominator"])
+        # The fixed text ceiling bounds allocation independently of claimed
+        # limits in signed data. No exponent or unbounded power is expanded.
+        _native_require(max(abs(n).bit_length(), d.bit_length()) <= min(16384, original["max_work_bits"])
+                        and gcd(n, d) == 1, "LP03_LOG_LOSS_REVIEW_RATIONAL_DOMAIN")
+        return Fraction(n, d)
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_LOG_LOSS_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def bits(value):
+        return struct.pack(">d", value).hex()
+    def cell(value, operation, *, exact=None, observed=None):
+        fields(value, ("operation", "candidate_bits", "candidate", "exact_lower", "exact_upper", "lower_midpoint", "upper_midpoint", "tie_rule"))
+        _native_require(value["operation"] == operation and value["tie_rule"] == "NEAREST_EVEN"
+                        and type(value["candidate_bits"]) is str and re.fullmatch(r"[0-9a-f]{16}", value["candidate_bits"]) is not None,
+                        "LP03_LOG_LOSS_REVIEW_CELL_PROFILE")
+        candidate = struct.unpack(">d", bytes.fromhex(value["candidate_bits"]))[0]
+        previous, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+        _native_require(isfinite(candidate) and isfinite(previous) and isfinite(following), "LP03_LOG_LOSS_REVIEW_CELL_FINITE")
+        actual = Fraction(*candidate.as_integer_ratio())
+        low, high = rational(value["exact_lower"]), rational(value["exact_upper"])
+        before = (Fraction(*previous.as_integer_ratio()) + actual) / 2
+        after = (Fraction(*following.as_integer_ratio()) + actual) / 2
+        even = int(value["candidate_bits"], 16) & 1 == 0
+        _native_require(rational(value["candidate"]) == actual and rational(value["lower_midpoint"]) == before
+                        and rational(value["upper_midpoint"]) == after and low <= high
+                        and (low > before or low == before and even) and (high < after or high == after and even)
+                        and (exact is None or low == high == exact)
+                        and (observed is None or bits(observed) == value["candidate_bits"]), "LP03_LOG_LOSS_REVIEW_CELL_JOIN")
+        return candidate, actual, low, high
+    bound = calculation["registration_bound_proof"]
+    fields(bound, ("profile", "math_id", "epsilon", "observation_count", "log_lower", "log_upper", "rounded_upper",
+        "fixed_lower", "fixed_upper", "rounding_enclosure"))
+    _native_require(counters[0]["serialized_bytes"] == len(deterministic_json(bound).encode("utf-8")),
+                    "LP03_LOG_LOSS_REVIEW_REGISTRATION_BYTE_JOIN")
+    _native_require(bound["profile"] == "DECLARED_CLIP_POLICY_LOG_LOSS_ENCLOSURE_V1" and bound["math_id"] == "MATH-09"
+                    and bound["rounding_enclosure"] == "THREE_TIMES_X_MULTIPLIED_BY_ONE_PLUS_2_POW_MINUS_52_PLUS_2_POW_MINUS_1074"
+                    and type(bound["observation_count"]) is int and 0 < bound["observation_count"] <= 4096,
+                    "LP03_LOG_LOSS_REVIEW_BOUND_PROFILE")
+    epsilon, lower, upper = (rational(bound[name]) for name in ("epsilon", "fixed_lower", "fixed_upper"))
+    log_low, log_high, rounded = (rational(bound[name]) for name in ("log_lower", "log_upper", "rounded_upper"))
+    _native_require(0 < epsilon < Fraction(1, 2) and lower == 0 and 0 < log_low <= log_high <= rounded <= upper,
+                    "LP03_LOG_LOSS_REVIEW_BOUND_DOMAIN")
+    # Three fixed, bounded consistency steps, not a fresh logarithm enclosure.
+    expected_bound = log_high
+    for _ in range(3):
+        _native_require(max(abs(expected_bound.numerator).bit_length(), expected_bound.denominator.bit_length()) + 1128 <= 32768,
+                        "LP03_LOG_LOSS_REVIEW_BOUND_ALLOCATION")
+        expected_bound = expected_bound * Fraction(2**52 + 1, 2**52) + Fraction(1, 2**1074)
+    _native_require(rounded == expected_bound, "LP03_LOG_LOSS_REVIEW_BOUND_ROUNDING_JOIN")
+    lanes, common, nonzero, charged_bytes = calculation["lane_calculations"], [], 0, 0
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_LOG_LOSS_REVIEW_LANE_ROSTER")
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref",
+            "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"))
+        _native_require(lane["lane"] == name and lane["unit"] == "nats/sample" and lane["basis"] == "per_sample_natural_log_loss",
+                        "LP03_LOG_LOSS_REVIEW_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_LOG_LOSS_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 3, "LP03_LOG_LOSS_REVIEW_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id"))
+            EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(len({(source["store_id"], source["record_id"]) for source in sources}) == 3,
+                        "LP03_LOG_LOSS_REVIEW_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "intermediate_observation_scope", "upper_clip_proof", "per_observation",
+            "derived_score_sum", "exact_row_count", "final_division", "summary"))
+        _native_require(proof["profile"] == "RATIONAL_LOG_ENCLOSURES_BINARY64_NEAREST_EVEN_V1"
+                        and proof["intermediate_observation_scope"] == "ROW_AND_SCORE_SUMS_ARE_DERIVED_NOT_OBSERVED",
+                        "LP03_LOG_LOSS_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("observation_count", "class_count", "epsilon", "upper_clip", "derived_rounded_sum", "mean_log_loss",
+            "typed_input_json", "original_raw_json", "preregistered_raw_json"))
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-09", text_bytes(summary["typed_input_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-09", text_bytes(summary["original_raw_json"]), maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(summary["original_raw_json"] == summary["preregistered_raw_json"], "LP03_LOG_LOSS_REVIEW_RAW_EXPECTATION")
+        rows, outcomes, count, classes = inputs["probability_rows"], inputs["outcome_indices"], summary["observation_count"], summary["class_count"]
+        observations = proof["per_observation"]
+        _native_require(type(count) is type(classes) is int and 0 < count <= 4096 and 2 <= classes <= 4096
+                        and type(rows) is tuple and type(outcomes) is tuple
+                        and type(inputs["clip_epsilon"]) is float and isfinite(inputs["clip_epsilon"])
+                        and count == bound["observation_count"] == len(rows) == len(outcomes) == len(raw["per_observation"])
+                        and type(observations) is tuple and len(observations) == count
+                        and all(type(row) is tuple and len(row) == classes
+                            and all(type(value) is float and 0 <= value <= 1 for value in row) for row in rows)
+                        and all(type(value) is int and 0 <= value < classes for value in outcomes)
+                        and rational(summary["epsilon"]) == epsilon == Fraction(*inputs["clip_epsilon"].as_integer_ratio()),
+                        "LP03_LOG_LOSS_REVIEW_PROOF_ROSTER")
+        fragments = (proof["upper_clip_proof"], proof["derived_score_sum"], proof["exact_row_count"],
+            proof["final_division"], summary)
+        charged_bytes += len(deterministic_json(proof).encode("utf-8"))
+        charged_bytes += sum(len(deterministic_json(fragment).encode("utf-8")) for fragment in fragments)
+        _clip_float, clip, _, _ = cell(proof["upper_clip_proof"], "DERIVED_ONE_MINUS_EPSILON", exact=1 - epsilon)
+        _native_require(rational(summary["upper_clip"]) == clip, "LP03_LOG_LOSS_REVIEW_CLIP_JOIN")
+        total = Fraction(0)
+        for ordinal, (row, outcome, observation, score) in enumerate(zip(rows, outcomes, observations, raw["per_observation"])):
+            fields(observation, ("selection", "derived_row_sum", "derived_row_difference", "logarithm"))
+            charged_bytes += sum(len(deterministic_json(fragment).encode("utf-8")) for fragment in observation.values())
+            selection = observation["selection"]
+            fields(selection, ("row_position", "outcome_index", "lower_selected_index", "upper_selected_index", "original_selected_bits", "clipped"))
+            probability = Fraction(*row[outcome].as_integer_ratio())
+            lower_index = 0 if probability >= epsilon else 1
+            chosen = probability if lower_index == 0 else epsilon
+            upper_index = 0 if chosen <= clip else 1
+            clipped = chosen if upper_index == 0 else clip
+            _native_require(all(type(selection[key]) is int for key in ("row_position", "outcome_index", "lower_selected_index", "upper_selected_index"))
+                            and (selection["row_position"], selection["outcome_index"], selection["lower_selected_index"], selection["upper_selected_index"])
+                            == (ordinal, outcome, lower_index, upper_index)
+                            and selection["original_selected_bits"] == bits(row[outcome]) and rational(selection["clipped"]) == clipped,
+                            "LP03_LOG_LOSS_REVIEW_SELECTION_JOIN")
+            exact_row = sum((Fraction(*value.as_integer_ratio()) for value in row), Fraction(0))
+            _, row_sum, _, _ = cell(observation["derived_row_sum"], "DERIVED_ROW_FSUM", exact=exact_row)
+            _, difference, _, _ = cell(observation["derived_row_difference"], "DERIVED_ROW_SUM_MINUS_ONE", exact=row_sum - 1)
+            _native_require(abs(difference) <= Fraction(classes, 2**49), "LP03_LOG_LOSS_REVIEW_SIMPLEX_JOIN")
+            _, actual, low, high = cell(observation["logarithm"], "OBSERVED_NEGATED_LOG", observed=score)
+            _native_require(lower <= actual <= upper and (bits(score) == "8000000000000000" and low == high == 0 if clipped == 1
+                            else actual > 0 and 0 < low <= high), "LP03_LOG_LOSS_REVIEW_LOG_SIGN_OR_BOUND")
+            nonzero += int(clipped != 1)
+            total += actual
+        sum_float, rounded_sum, _, _ = cell(proof["derived_score_sum"], "DERIVED_UNOBSERVED_SCORE_FSUM", exact=total)
+        _, rounded_count, _, _ = cell(proof["exact_row_count"], "DERIVED_EXACT_ROW_COUNT", exact=Fraction(count))
+        mean_float, mean, _, _ = cell(proof["final_division"], "DERIVED_FINAL_DIVISION", exact=rounded_sum / rounded_count,
+            observed=raw["mean_log_loss"])
+        _native_require(rounded_count == count and rational(summary["derived_rounded_sum"]) == rounded_sum
+                        and rational(summary["mean_log_loss"]) == mean and lower <= mean <= upper
+                        and (total != 0 or bits(sum_float) == bits(mean_float) == "0000000000000000"),
+                        "LP03_LOG_LOSS_REVIEW_SUM_MEAN_JOIN")
+        projected_raw = text_bytes(lane["projected_value_json"])
+        projected = _native_strict_json(projected_raw, max_bytes=128, max_nodes=1, binary64_numbers=True)
+        _native_require(type(projected) is float and projected_raw == deterministic_json(raw["mean_log_loss"]).encode("ascii"),
+                        "LP03_LOG_LOSS_REVIEW_PROJECTED_RAW_JOIN")
+        common.append((sources, summary["typed_input_json"], summary["original_raw_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1] and counters[1]["log_series_terms"] == 128 * nonzero
+                    and counters[1]["serialized_bytes"] == charged_bytes
+                    and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_LOG_LOSS_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_brier_review_calculation_v1(calculation, body):
+    """Closed signed data schema; original review custody remains separate.
+
+    Native binary64 values occur only inside canonical input/raw JSON text.
+    Rational members describe those exact values, not a second formula run.
+    """
+    import re
+    from math import gcd
+    from .input_resolver import decode_evidence_public_invocation_inputs_v1
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import _native_strict_json, deterministic_json
+    def fields(value, names, reason):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), reason)
+    fields(calculation, ("method", "lane_calculations", "numerical_consumption_before_final_encoding", "result"),
+           "LP03_BRIER_REVIEW_METHOD_FIELDS")
+    _native_require(calculation["method"] == "EXACT_RATIONAL_BRIER_WITH_BINARY64_INTERMEDIATE_PROOFS"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_08_CLOSURE_ONLY",
+                        "EXACT_BINARY64_INTERMEDIATES_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_BRIER_REVIEW_SIGNED_PROFILE")
+    counters = calculation["numerical_consumption_before_final_encoding"]
+    fields(counters, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+        "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+        "decimal_constructions", "integer_powers", "retained_decimal_inputs"), "LP03_BRIER_REVIEW_NUMERICAL_FIELDS")
+    for value in counters.values():
+        _public_counter_v1(value, allow_zero=True)
+    _native_require(all(counters[name] > 0 for name in ("integer_operations", "comparisons", "rational_normalizations",
+                        "peak_preflight_bits", "serialized_bytes", "input_values"))
+                    and all(counters[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws",
+                        "decimal_parse_attempts", "decimal_constructions", "integer_powers", "retained_decimal_inputs")),
+                    "LP03_BRIER_REVIEW_NUMERICAL_PROFILE")
+    def text_bytes(value):
+        _native_require(type(value) is str and 0 < len(value) <= 65536 and value.isascii(),
+                        "LP03_BRIER_REVIEW_CANONICAL_TEXT")
+        return value.encode("ascii")
+    def rational(value, *, maximum):
+        fields(value, ("numerator", "denominator"), "LP03_BRIER_REVIEW_RATIONAL_FIELDS")
+        for key in ("numerator", "denominator"):
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= 512
+                            and re.fullmatch(r"0|[1-9][0-9]*", text) is not None,
+                            "LP03_BRIER_REVIEW_RATIONAL_TEXT")
+        numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        _native_require(denominator > 0 and denominator.bit_length() <= 1075
+                        and denominator & (denominator - 1) == 0 and numerator.bit_length() <= 53
+                        and numerator <= maximum * denominator and gcd(numerator, denominator) == 1,
+                        "LP03_BRIER_REVIEW_RATIONAL_DOMAIN")
+        return numerator, denominator
+    lanes = calculation["lane_calculations"]
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_BRIER_REVIEW_METHOD_LANE_ROSTER")
+    common = []
+    for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref",
+            "projected_value_json", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"),
+            "LP03_BRIER_REVIEW_METHOD_LANE_FIELDS")
+        _native_require(lane["lane"] == name and lane["unit"] == "squared probability error"
+                        and lane["basis"] == "PER_SAMPLE_SQUARED_PROBABILITY", "LP03_BRIER_REVIEW_METHOD_LANE_PROFILE")
+        for key in ("event_segment_ref", "raw_ref", "projection_ref", "baseline_ref", "posted_debit", "posted_credit"):
+            _native_ident(lane[key])
+        _native_require(lane["posted_debit"] == lane["posted_credit"], "LP03_BRIER_REVIEW_POSTED_BALANCE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 2, "LP03_BRIER_REVIEW_METHOD_SOURCE_ROSTER")
+        for source in sources:
+            fields(source, ("store_id", "record_id"), "LP03_BRIER_REVIEW_METHOD_SOURCE_REF")
+            EvidenceRecordRefV1(source["store_id"], source["record_id"])
+        _native_require(sources[0] != sources[1], "LP03_BRIER_REVIEW_METHOD_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "row_identity", "per_observation", "summary"), "LP03_BRIER_REVIEW_PROOF_FIELDS")
+        _native_require(proof["profile"] == "EXACT_BINARY64_ORDERED_INTERMEDIATES_V1"
+                        and proof["row_identity"] == "ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS", "LP03_BRIER_REVIEW_PROOF_PROFILE")
+        summary = proof["summary"]
+        fields(summary, ("mean_brier_score", "observation_count", "class_count", "typed_input_json", "original_raw_json",
+            "preregistered_raw_json"), "LP03_BRIER_REVIEW_SUMMARY_FIELDS")
+        for key in ("observation_count", "class_count"):
+            _public_counter_v1(summary[key])
+        inputs = decode_evidence_public_invocation_inputs_v1("MATH-08", text_bytes(summary["typed_input_json"]),
+            maximum_bytes=65536, maximum_nodes=4096)
+        raw = decode_evidence_raw_output_v1("MATH-08", text_bytes(summary["original_raw_json"]),
+            maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(summary["original_raw_json"] == summary["preregistered_raw_json"], "LP03_BRIER_REVIEW_RAW_EXPECTATION")
+        rows, outcomes = inputs["probability_rows"], inputs["outcome_indices"]
+        observations, count, classes = proof["per_observation"], summary["observation_count"], summary["class_count"]
+        _native_require(type(observations) is tuple and type(rows) is tuple and type(outcomes) is tuple and classes >= 2
+                        and len(observations) == len(rows) == len(outcomes) == len(raw["per_observation"]) == count
+                        and all(type(row) is tuple and len(row) == classes
+                            and all(type(value) is float and 0 <= value <= 1 for value in row) for row in rows)
+                        and all(type(value) is int and 0 <= value < classes for value in outcomes),
+                        "LP03_BRIER_REVIEW_PROOF_ROSTER")
+        previous = (0, 1)
+        for index, row in enumerate(observations):
+            fields(row, ("row_position", "outcome_index", "score", "ordered_score_prefix"), "LP03_BRIER_REVIEW_ROW_FIELDS")
+            _native_require(type(row["row_position"]) is int and row["row_position"] == index
+                            and type(row["outcome_index"]) is int and row["outcome_index"] == outcomes[index],
+                            "LP03_BRIER_REVIEW_ROW_IDENTITY")
+            score = rational(row["score"], maximum=2)
+            _native_require(score == raw["per_observation"][index].as_integer_ratio(),
+                            "LP03_BRIER_REVIEW_RAW_RATIONAL_JOIN")
+            prefix = rational(row["ordered_score_prefix"], maximum=2 * (index + 1))
+            # Both admitted denominators are powers of two with <=1075 bits
+            # and both numerators have <=53 bits. These consistency joins have
+            # <=1129-bit intermediates before allocation; no Brier formula is
+            # rerun and no arithmetic-work authority is reconstructed.
+            denominator = max(previous[1], score[1])
+            numerator = previous[0] * (denominator // previous[1]) + score[0] * (denominator // score[1])
+            divisor = gcd(numerator, denominator)
+            _native_require(prefix == (numerator // divisor, denominator // divisor),
+                            "LP03_BRIER_REVIEW_PREFIX_JOIN")
+            previous = prefix
+        mean = rational(summary["mean_brier_score"], maximum=2)
+        _native_require(mean == raw["mean_brier_score"].as_integer_ratio(),
+                        "LP03_BRIER_REVIEW_RAW_RATIONAL_JOIN")
+        # count equals the bounded decoded roster length above (<=4096).
+        numerator = mean[0] * count
+        divisor = gcd(numerator, mean[1])
+        _native_require(previous == (numerator // divisor, mean[1] // divisor), "LP03_BRIER_REVIEW_PREFIX_MEAN_JOIN")
+        projected_raw = text_bytes(lane["projected_value_json"])
+        projected = _native_strict_json(projected_raw, max_bytes=128, max_nodes=1, binary64_numbers=True)
+        _native_require(type(projected) is float and projected_raw == deterministic_json(raw["mean_brier_score"]).encode("ascii"),
+                        "LP03_BRIER_REVIEW_PROJECTED_RAW_JOIN")
+        common.append((sources, summary["typed_input_json"], summary["original_raw_json"], lane["baseline_ref"], lane["posted_debit"]))
+    _native_require(common[0] == common[1]
+                    and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_BRIER_REVIEW_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_probability_edge_review_calculation_v1(calculation,body):
+    """Closed signed pair-proof data; this supplies no source or run authority."""
+    from fractions import Fraction
+    from math import isfinite,nextafter,inf,copysign
+    from types import SimpleNamespace
+    import struct
+    from .serialization import _native_strict_json,deterministic_json,_evidence_frozen_data_v1
+    from .evidence_execution import _worker_probability_edge_result_v1,_worker_edge_json_data_v1
+    from .input_resolver import _evidence_decode_source_values_v1,_extract
+    def fields(value,names):
+        _native_require(isinstance(value,Mapping) and set(value)==set(names),"LP03_EDGE_REVIEW_SIGNED_FIELDS")
+    fields(calculation,("method","producer_projection_policy","original_source_payload_json","lane_calculations","registration_bound_proof",
+        "registration_numerical_consumption","original_numerical_limits","review_numerical_limits",
+        "numerical_consumption_before_final_encoding","result"))
+    _native_require(calculation["method"]=="ORIGINAL_MARKET_CONVERSION_AND_BINARY64_EDGE_FROM_FOUR_SOURCES"
+        and calculation["producer_projection_policy"]=="RAW_IDENTITY_INTERNAL_DEPENDENCY_ONLY_NO_SEPARATE_METRIC"
+        and calculation["result"]=="BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+        and body.limitations==("SOFTWARE_CONFORMANCE_ONLY","SELECTED_MATH_01_MATH_02_CLOSURE_ONLY",
+            "NO_EMPIRICAL_PREDICTION_OR_CALIBRATION_CERTIFICATION","EXACT_DECIMAL_AND_DERIVED_BINARY64_CELLS_ONLY",
+            "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),"LP03_EDGE_REVIEW_SIGNED_PROFILE")
+    original=calculation["original_numerical_limits"]
+    fields(original,("max_input_bits","max_work_bits","max_serialized_bytes"))
+    for value in original.values():
+        _public_counter_v1(value,allow_zero=False)
+    def rational(value):
+        fields(value,("numerator","denominator"))
+        for key,text in value.items():
+            _native_require(type(text)is str and 0<len(text)<=4096
+                and re.fullmatch(r"0|-?[1-9][0-9]*" if key=="numerator" else r"[1-9][0-9]*",text)is not None
+                and 4*len(text)<=min(65536,original["max_work_bits"]),"LP03_EDGE_REVIEW_SIGNED_RATIO_BOUND")
+        try:
+            numerator,denominator=int(value["numerator"]),int(value["denominator"])
+        except ValueError:
+            _native_require(False,"LP03_EDGE_REVIEW_SIGNED_RATIO")
+        result=Fraction(numerator,denominator)
+        _native_require((result.numerator,result.denominator)==(numerator,denominator),"LP03_EDGE_REVIEW_SIGNED_RATIO")
+        return result
+    def bits(value):
+        _native_require(type(value)is float and isfinite(value),"LP03_EDGE_REVIEW_SIGNED_BINARY64")
+        return struct.pack(">d",value).hex()
+    def cell(exact,observed,summary):
+        # Operand sizes above and finite binary64 neighbors bound these fixed
+        # rational operations independently of a forged declared work ceiling.
+        represented=Fraction(*observed.as_integer_ratio())
+        previous,following=nextafter(observed,-inf),nextafter(observed,inf)
+        _native_require(isfinite(previous) and isfinite(following),"LP03_EDGE_REVIEW_SIGNED_FINITE_CELL")
+        lower=(Fraction(*previous.as_integer_ratio())+represented)/2
+        upper=(represented+Fraction(*following.as_integer_ratio()))/2
+        even=int(bits(observed),16)%2==0
+        _native_require((lower<exact or lower==exact and even) and (exact<upper or exact==upper and even)
+            and rational(summary["lower_midpoint"])==lower and rational(summary["upper_midpoint"])==upper
+            and type(summary["tie_flag"])is int and summary["tie_flag"]==int(exact in (lower,upper)),
+            "LP03_EDGE_REVIEW_SIGNED_ROUNDING_CELL")
+        return represented
+    bounds=calculation["registration_bound_proof"]
+    fields(bounds,("profile","declared_lower","declared_upper","original_model_probability",
+        "preregistered_consumer_expectation","market_bound_json","producer_expected_raw_json","consumer_expected_raw_json","scope"))
+    _native_require(bounds["profile"]=="DECLARED_SAME_SNAPSHOT_PROBABILITY_EDGE_ENCLOSURE_V1"
+        and bounds["scope"]=="DECLARED_SOFTWARE_DOMAIN_ONLY_NO_CALIBRATION_OR_EXECUTION_AUTHORITY"
+        and rational(bounds["declared_lower"])==-1 and rational(bounds["declared_upper"])==1,
+        "LP03_EDGE_REVIEW_SIGNED_BOUNDS")
+    _market_wire,market_bound=_worker_edge_json_data_v1(bounds["market_bound_json"],maximum_bytes=65536)
+    _producer_expected_wire,producer_expected=_worker_edge_json_data_v1(bounds["producer_expected_raw_json"],maximum_bytes=4096)
+    _edge_expected_wire,edge_expected=_worker_edge_json_data_v1(bounds["consumer_expected_raw_json"],maximum_bytes=128)
+    _native_require(type(producer_expected)is str and type(edge_expected)is float and isfinite(edge_expected)
+        and -1.0<=edge_expected<=1.0 and rational(bounds["preregistered_consumer_expectation"])==Fraction(*edge_expected.as_integer_ratio()),
+        "LP03_EDGE_REVIEW_SIGNED_EXPECTATION")
+    lanes=calculation["lane_calculations"]
+    _native_require(type(lanes)is tuple and len(lanes)==2,"LP03_EDGE_REVIEW_SIGNED_LANES")
+    _source_wire,source_payload=_worker_edge_json_data_v1(calculation["original_source_payload_json"],maximum_bytes=65536)
+    # The complete REPLAY payload is retained once. PAPER differs only in its
+    # separately retained actual access clocks; all other facts were joined.
+    original_sources=_evidence_probability_edge_chain_sources_v1(source_payload)
+    market_lanes=[];common=[]
+    for lane_index,(lane,name) in enumerate(zip(lanes,("REPLAY","PAPER"),strict=True)):
+        fields(lane,("lane","event_segment_ref","source_access_wall_ns","source_record_refs",
+            "producer_proof","conversion_proof","edge_proof","producer_raw_ref","dependency_execution_ref","chain_artifact_json",
+            "aggregate_measurement","producer_contract","consumer_contract","raw_ref","projection_ref","projected_value_json",
+            "unit","basis","baseline_ref","posted_debit","posted_credit"))
+        for key in ("event_segment_ref","producer_raw_ref","dependency_execution_ref","raw_ref","projection_ref","basis","baseline_ref"):
+            _native_ident(lane[key])
+        _native_require(lane["lane"]==name and type(lane["unit"])is str and lane["unit"]=="probability points"
+            and lane["basis"]=="MODEL_MINUS_MARKET_SAME_SNAPSHOT"
+            and lane["dependency_execution_ref"].endswith("::CONVERSION"),"LP03_EDGE_REVIEW_SIGNED_LANE")
+        attempt_ref=lane["dependency_execution_ref"][:-len("::CONVERSION")]
+        _native_ident(attempt_ref)
+        access_clocks=lane["source_access_wall_ns"]
+        _native_require(type(access_clocks)is tuple and len(access_clocks)==4,"LP03_EDGE_REVIEW_SIGNED_SOURCE_ACCESS")
+        for access in access_clocks:_public_counter_v1(access,allow_zero=True)
+        if lane_index==0:
+            _native_require(access_clocks==tuple(source.access_wall_ns for source in original_sources),
+                            "LP03_EDGE_REVIEW_SIGNED_ORIGINAL_SOURCE_ACCESS")
+        lane_source_payload=dict(source_payload,source_slices=[
+            dict(source,access_wall_ns=access)for source,access in zip(source_payload["source_slices"],access_clocks,strict=True)])
+        sources=_evidence_probability_edge_chain_sources_v1(lane_source_payload)
+        events=tuple(source.reconstructed_canonical_events[0]for source in sources)
+        expected_refs=tuple(dict(store_id=source.original_record_refs[0].store_id,record_id=source.original_record_refs[0].record_id)for source in sources)
+        _native_require(deterministic_json(lane["source_record_refs"])==deterministic_json(expected_refs),
+                        "LP03_EDGE_REVIEW_SIGNED_SOURCE_REFS")
+        edge_proof=lane["edge_proof"];conversion=lane["conversion_proof"];producer=lane["producer_proof"]
+        # Close every producer member before any nested indexing. The shared
+        # M01 validator below performs its complete semantic validation.
+        fields(producer,("profile","math_id","context","source_texts","declared_lower","declared_upper","steps","summary",
+            "original_raw_texts","preregistered_raw_texts","projected_text"))
+        fields(producer["summary"],("result","lower","upper"))
+        _native_require(type(producer["steps"])is tuple and len(producer["steps"])==1
+            and type(producer["source_texts"])is tuple and len(producer["source_texts"])==2
+            and all(type(row)is tuple and len(row)==2 and all(type(value)is str for value in row)for row in producer["source_texts"]),
+            "LP03_EDGE_REVIEW_SIGNED_PRODUCER_SHAPE")
+        fields(producer["steps"][0],("position","operation","exact","decimal_text","flags"))
+        fields(edge_proof,("profile","math_id","unit","basis","intermediate_observation_scope","authority_scope","summary"))
+        _native_require(edge_proof["profile"]=="REPRESENTED_BINARY64_MODEL_MINUS_MARKET_NEAREST_EVEN_V1"
+            and edge_proof["math_id"]=="MATH-02" and edge_proof["unit"]=="probability points"
+            and edge_proof["basis"]=="CALIBRATED_MODEL_MINUS_PAYOUT_NORMALIZED_MARKET_PROBABILITY"
+            and edge_proof["intermediate_observation_scope"]=="EXACT_DIFFERENCE_AND_ROUNDING_CELL_DERIVED_NOT_OBSERVED"
+            and edge_proof["authority_scope"]=="SOFTWARE_ARITHMETIC_MODEL_ONLY_NO_CALIBRATION_MARKET_SOURCE_OR_TRADING_AUTHORITY",
+            "LP03_EDGE_REVIEW_SIGNED_ARITHMETIC_PROFILE")
+        summary=edge_proof["summary"]
+        fields(summary,("model_bits","market_bits","exact_difference","candidate_bits","lower_midpoint","upper_midpoint",
+            "tie_flag","typed_input_json","original_raw_json","preregistered_raw_json"))
+        artifact=_worker_probability_edge_result_v1(dict(producer_invocation_contract=lane["producer_contract"],
+            invocation_contract=lane["consumer_contract"],chain_artifact_json=lane["chain_artifact_json"],
+            raw_output_json=summary["original_raw_json"],invocation_measurement=lane["aggregate_measurement"]),attempt_ref=attempt_ref)
+        _native_require("execution_clock_limits"in artifact
+            and max(access_clocks)<=lane["aggregate_measurement"]["started"][0],
+            "LP03_EDGE_REVIEW_SIGNED_CLOCK_LIMITS")
+        _consumer_wire,consumer=_worker_edge_json_data_v1(artifact["consumer_input_json"],maximum_bytes=65536)
+        _producer_wire,producer_inputs=_worker_edge_json_data_v1(artifact["producer_input_json"],maximum_bytes=65536)
+        _receipt_wire,receipt=_worker_edge_json_data_v1(artifact["conversion_receipt_json"],maximum_bytes=65536)
+        source_texts=(("contract_price",_extract(events[0]["values"],"market_state.contract_price")),
+            ("payout_per_winning_contract",_extract(events[1]["values"],"contract_semantics.payout_per_winning_contract")))
+        _native_require(producer_inputs==dict(source_texts)
+            and deterministic_json(producer["source_texts"])==deterministic_json(source_texts)
+            and artifact["producer_output_json"]==bounds["producer_expected_raw_json"]
+            and producer["original_raw_texts"]==producer["preregistered_raw_texts"]==(producer_expected,)
+            and producer["projected_text"]==producer_expected
+            and receipt["execution_context"]["context_id"]==events[0]["context_id"]
+            and receipt["execution_context"]["scope"]==dict(events[0]["scope"])
+            and receipt["execution_context"]["source_epoch_id"]==events[0]["source_epoch_id"]
+            and receipt["execution_context"]["input_version"]==events[0]["input_version"],
+            "LP03_EDGE_REVIEW_SIGNED_PRODUCER_SOURCE_JOIN")
+        from datetime import UTC,datetime,timedelta
+        snapshot_time=datetime(1970,1,1,tzinfo=UTC)+timedelta(microseconds=events[0]["native_clocks"]["as_of_time"]//1000)
+        expected_context=dict(context_id=events[0]["context_id"],as_of=snapshot_time.isoformat(),observed_at=snapshot_time.isoformat(),
+            source_epoch_id=events[0]["source_epoch_id"],input_version=events[0]["input_version"],
+            maximum_age=timedelta(microseconds=min(event["ttl_ns"]for event in events)//1000).total_seconds(),
+            scope=dict(events[0]["scope"]),binding_profile_version="3.4",parameter_policy_version="ST12F_PARAMETER_RESOURCE_ROW_V1",
+            implementation_versions=[dict(math_spec_id=contract["math_id"],implementation_id=contract["raw_implementation_id"])
+                for contract in (lane["producer_contract"],lane["consumer_contract"])],
+            dependency_graph_id="STACK::MATH-01::MATH-02::V3_4",dependency_graph_version="3.4")
+        _native_require(receipt["execution_context"]==expected_context
+            and artifact["execution_clock_limits"]["exclusive_expiry_wall_ns"]<=events[0]["values"]["contract_context"]["horizon_end_wall_ns"],
+            "LP03_EDGE_REVIEW_SIGNED_SNAPSHOT_HORIZON")
+        model_source=_evidence_decode_source_values_v1(events[2])["prediction.calibrated_probability"]
+        _native_require(bits(consumer["calibrated_model_probability"])==bits(model_source)
+            and rational(bounds["original_model_probability"])==Fraction(*model_source.as_integer_ratio())
+            and consumer["calibration_state"]==_evidence_decode_source_values_v1(events[3])["calibration_state"],
+            "LP03_EDGE_REVIEW_SIGNED_MODEL_SOURCE_JOIN")
+        fields(conversion,("profile","conversion_id","conversion_version","intermediate_observation_scope","authority_scope","summary"))
+        _native_require(conversion["profile"]=="COMPLETED_EXACT_MATH01_DECIMAL_TO_BINARY64_NEAREST_EVEN_V1"
+            and conversion["conversion_id"]=="CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1"
+            and conversion["conversion_version"]=="1.0.0"
+            and conversion["intermediate_observation_scope"]=="ROUNDING_CELL_DERIVED_FROM_RETAINED_INDEPENDENT_DECIMAL"
+            and conversion["authority_scope"]=="SOFTWARE_ARITHMETIC_ONLY_NO_SOURCE_CALIBRATION_OR_NATIVE_EXECUTION_AUTHORITY",
+            "LP03_EDGE_REVIEW_SIGNED_CONVERSION_PROFILE")
+        converted=conversion["summary"]
+        fields(converted,("original_context_step_ordinal","exact_source","represented","lower_midpoint","upper_midpoint",
+            "converted_bits","tie_flag","source_negative_zero_flag","producer_input_json","producer_raw_json",
+            "conversion_receipt_json","consumer_input_json"))
+        exact=rational(producer["summary"]["result"]);observed=receipt["converted_value"]
+        _native_require(type(converted["original_context_step_ordinal"])is int
+            and converted["original_context_step_ordinal"]==producer["steps"][-1]["position"]==lane_index
+            and rational(converted["exact_source"])==exact
+            and all(converted[name]==artifact[artifact_name] for name,artifact_name in (
+                ("producer_input_json","producer_input_json"),("producer_raw_json","producer_output_json"),
+                ("conversion_receipt_json","conversion_receipt_json"),("consumer_input_json","consumer_input_json")))
+            and converted["converted_bits"]==bits(observed)==bits(consumer["market_implied_probability"]),
+            "LP03_EDGE_REVIEW_SIGNED_CONVERSION_JOIN")
+        represented=cell(exact,observed,converted)
+        negative_zero=exact==0 and producer_expected.startswith("-")
+        _native_require(rational(converted["represented"])==represented
+            and type(converted["source_negative_zero_flag"])is int and converted["source_negative_zero_flag"]==int(negative_zero)
+            and (observed!=0.0 or (copysign(1.0,observed)<0.0)==negative_zero),
+            "LP03_EDGE_REVIEW_SIGNED_CONVERSION_ZERO")
+        left,right=consumer["calibrated_model_probability"],consumer["market_implied_probability"]
+        exact_difference=Fraction(*left.as_integer_ratio())-Fraction(*right.as_integer_ratio())
+        _raw_wire,raw=_worker_edge_json_data_v1(summary["original_raw_json"],maximum_bytes=128)
+        _projection_wire,projection=_worker_edge_json_data_v1(lane["projected_value_json"],maximum_bytes=128)
+        _native_require(summary["typed_input_json"]==artifact["consumer_input_json"]
+            and summary["model_bits"]==bits(left) and summary["market_bits"]==bits(right)
+            and summary["candidate_bits"]==bits(raw)==bits(edge_expected)==bits(projection)
+            and summary["original_raw_json"]==summary["preregistered_raw_json"]==bounds["consumer_expected_raw_json"]
+            and rational(summary["exact_difference"])==exact_difference,"LP03_EDGE_REVIEW_SIGNED_SUBTRACTION_JOIN")
+        cell(exact_difference,raw,summary)
+        if exact_difference==0:
+            negative=left==right==0.0 and copysign(1.0,left)<0.0 and copysign(1.0,right)>0.0
+            _native_require((copysign(1.0,raw)<0.0)==negative,"LP03_EDGE_REVIEW_SIGNED_DIFFERENCE_ZERO")
+        market_lanes.append(dict(lane=name,event_segment_ref=lane["event_segment_ref"],source_record_refs=expected_refs[:2],
+            proof=producer,raw_ref=lane["producer_raw_ref"],projection_ref=lane["projection_ref"],unit="probability",
+            basis="PAYOUT_NORMALIZED_CONTRACT_PRICE",price_currency=events[0]["values"]["contract_context"]["currency"],
+            snapshot_ref=events[0]["scope"]["input_snapshot_id"],baseline_ref=lane["baseline_ref"],
+            posted_debit=lane["posted_debit"],posted_credit=lane["posted_credit"]))
+        common.append((tuple(dict(event)for event in events),summary["typed_input_json"],summary["original_raw_json"],
+            dict(receipt["execution_context"]),tuple(lane[key]for key in("unit","basis","baseline_ref","posted_debit"))))
+    _native_require(common[0]==common[1] and body.observed_metric_refs==tuple(lane["projection_ref"]for lane in lanes),
+                    "LP03_EDGE_REVIEW_SIGNED_LANE_JOIN")
+    # Reuse the already-closed pure M01 subproof checker on an explicit
+    # structural view. This creates no signed record, clock, grant or receipt.
+    market_view=dict(method="EXACT_ORDERED_DECIMAL_MARKET_FROM_ORIGINAL_PRICE_SOURCES",math_id="MATH-01",
+        lane_calculations=tuple(market_lanes),registration_bound_proof=market_bound,
+        **{key:calculation[key]for key in("registration_numerical_consumption","original_numerical_limits",
+            "review_numerical_limits","numerical_consumption_before_final_encoding","result")})
+    body_view=SimpleNamespace(limitations=("SOFTWARE_CONFORMANCE_ONLY","SELECTED_MATH_01_CLOSURE_ONLY",
+        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY","NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+        observed_metric_refs=body.observed_metric_refs)
+    _evidence_market_review_calculation_v1(_evidence_frozen_data_v1(market_view),body_view)
+
+    # The inherited checker establishes the closed M01 proof and textual
+    # representation. Independently prove its original arithmetic as well.
+    from decimal import Decimal,localcontext,Inexact,InvalidOperation,Overflow,Underflow
+    from .context import decimal_context_v1
+    for lane in lanes:
+        producer=lane["producer_proof"]
+        operands=[]
+        for _name,source_text in producer["source_texts"]:
+            _native_require(len(source_text)<=4096,"LP03_EDGE_REVIEW_SIGNED_DECIMAL_BOUND")
+            value=Decimal(source_text)
+            shape=value.as_tuple()
+            _native_require(value.is_finite() and type(shape.exponent)is int
+                and max(4*(len(shape.digits)+max(shape.exponent,0)),1+4*max(-shape.exponent,0))
+                    <=min(65536,original["max_input_bits"]),
+                "LP03_EDGE_REVIEW_SIGNED_DECIMAL_BOUND")
+            operands.append(value)
+        price,payout=operands
+        _native_require(Decimal(0)<=price<=payout and payout>0,
+                        "LP03_EDGE_REVIEW_SIGNED_PRICE_DOMAIN")
+        exact=Fraction(price)/Fraction(payout)
+        _native_require(exact==rational(producer["summary"]["result"]),"LP03_EDGE_REVIEW_SIGNED_PRODUCER_DIVISION")
+        with localcontext(decimal_context_v1())as context:
+            context.clear_flags()
+            result=context.divide(price,payout)
+            _native_require(result.is_finite() and not any(context.flags[signal]for signal in(Inexact,InvalidOperation,Overflow,Underflow))
+                and str(result)==producer["steps"][0]["decimal_text"]==producer["projected_text"]==producer_expected
+                and "|".join(sorted(signal.__name__ for signal,active in context.flags.items()if active))==producer["steps"][0]["flags"],
+                "LP03_EDGE_REVIEW_SIGNED_PRODUCER_TEXT")
+    # Exact retained byte charges: registration emits its two bounds; each
+    # lane emits its M01 step/summary/proof, conversion summary/proof, and
+    # M02 summary/proof. Baseline admissions emit no separate fragment.
+    encoded_size=lambda value:len(deterministic_json(value).encode("utf-8"))
+    registration_size=encoded_size(market_bound)+encoded_size(bounds)
+    fragments_size=sum(encoded_size(value)for lane in lanes for value in(
+        lane["producer_proof"]["steps"][0],lane["producer_proof"]["summary"],lane["producer_proof"],
+        lane["conversion_proof"]["summary"],lane["conversion_proof"],lane["edge_proof"]["summary"],lane["edge_proof"]))
+    final_size=encoded_size(calculation)
+    _native_require(calculation["registration_numerical_consumption"]["serialized_bytes"]==registration_size
+        and calculation["numerical_consumption_before_final_encoding"]["serialized_bytes"]==fragments_size
+        and registration_size+fragments_size+final_size<=original["max_serialized_bytes"],
+        "LP03_EDGE_REVIEW_SIGNED_EXACT_SERIALIZATION")
+
+
+def _evidence_cashflow_review_calculation_v1(calculation, body):
+    """Closed signed proof data; no source admission or numerical-work reset."""
+    from decimal import localcontext
+    from fractions import Fraction
+    from .context import decimal_context_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_CASHFLOW_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "math_id", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    math_id = calculation["math_id"]
+    _native_require(type(math_id) is str and math_id in ("MATH-06","MATH-07"), "LP03_CASHFLOW_REVIEW_SIGNED_PROFILE")
+    _native_require(calculation["method"] == "EXACT_ORDERED_DECIMAL_CASHFLOW_FROM_ORIGINAL_SIGNED_TOTAL_SOURCES"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_" + math_id.replace("-", "_") + "_CLOSURE_ONLY",
+                        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY", "NO_EMPIRICAL_MODEL_FEE_OR_ACCOUNT_CERTIFICATION", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_CASHFLOW_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "decimal_parse_attempts", "serialized_bytes"))
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_CASHFLOW_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] < remaining["max_serialized_bytes"],
+                    "LP03_CASHFLOW_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    def decimal_data(text, *, expected=None):
+        # Canonical source text needs no exponent expansion. A claimed work
+        # limit in signed data is not authority to allocate an integer power.
+        _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"]),
+                        "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL")
+        match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+        _native_require(match is not None, "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL")
+        whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+        _native_require(len(exponent_digits) <= 18 and 4 * (len(whole) + len(fraction)) <= original["max_work_bits"],
+                        "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL_BOUND")
+        exponent = int(exponent_digits) * (-1 if match[4] == "-" else 1) - len(fraction)
+        _native_require(max(4 * (len(whole) + len(fraction) + max(exponent, 0)), 1 + 4 * max(-exponent, 0))
+                        <= original["max_work_bits"], "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL_BOUND")
+        try:
+            value = Decimal(text)
+        except ArithmeticError:
+            _native_require(False, "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL")
+        with localcontext(decimal_context_v1()):
+            _native_require(str(value) == text, "LP03_CASHFLOW_REVIEW_SIGNED_DECIMAL")
+        if expected is None:
+            return value
+        # Ratio members have separately bounded text lengths. Their actual
+        # integer sizes plus this coefficient bound every allocation before
+        # Decimal.as_integer_ratio can expand the exponent, even if a forged
+        # payload declares an enormous numerical-work allowance.
+        allocation_bound = 4 * (len(whole) + len(fraction) + abs(expected.numerator).bit_length()
+            + expected.denominator.bit_length()) + 8
+        _native_require(value.is_zero() or max(4 * (len(whole) + len(fraction) + max(exponent, 0)),
+            1 + 4 * max(-exponent, 0)) <= allocation_bound, "LP03_CASHFLOW_REVIEW_SIGNED_RATIO_EXPANSION_BOUND")
+        result = Fraction(0) if value.is_zero() else Fraction(value)
+        _native_require(result == expected, "LP03_CASHFLOW_REVIEW_SIGNED_STEP_JOIN")
+        return result
+
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for key in value:
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"])
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if key == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_CASHFLOW_REVIEW_SIGNED_RATIONAL")
+        try:
+            numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        except ValueError:
+            _native_require(False, "LP03_CASHFLOW_REVIEW_SIGNED_RATIONAL")
+        _native_require(max(numerator.bit_length(), denominator.bit_length()) <= original["max_work_bits"],
+                        "LP03_CASHFLOW_REVIEW_SIGNED_RATIONAL_BOUND")
+        result = Fraction(numerator, denominator)
+        _native_require((result.numerator, result.denominator) == (numerator, denominator), "LP03_CASHFLOW_REVIEW_SIGNED_RATIONAL")
+        return result
+
+    binary = math_id == "MATH-06"
+    names = (("p_win","p_void","fill_probability","entry_trade_cashflow_total",
+        "win_terminal_cashflow_total","lose_terminal_cashflow_total","void_terminal_cashflow_total",
+        "no_fill_cashflow_total","platform_fee_total","builder_fee_total","other_fee_total","expected_rebate_total",
+        "exit_slippage_reserve_total","market_impact_reserve_total","latency_adverse_selection_reserve_total",
+        "capital_time_cost_reserve_total") if binary else
+        ("probability_simplex_tolerance","fill_probability","entry_trade_cashflow_total","no_fill_cashflow_total",
+         "platform_fee_total","builder_fee_total","other_fee_total","expected_rebate_total","exit_slippage_reserve_total",
+         "market_impact_reserve_total","latency_adverse_selection_reserve_total","capital_time_cost_reserve_total"))
+    raw_names = (("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","p_lose") if binary else
+        ("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","outcome_ids",
+         "normalized_probabilities","original_probability_sum","normalization_applied"))
+    basis = "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE"
+    bounds = calculation["registration_bound_proof"]
+    fields(bounds,("profile","math_id","scope","financial_source_count","source_texts","cashflow_basis","outcome_ids",
+        "probability_texts","terminal_texts","declared_lower","declared_upper","preregistered_fields","steps","summary"))
+    _native_require(bounds["profile"] == "DECLARED_EXACT_SOURCE_CASHFLOW_ENCLOSURE_V1" and bounds["math_id"] == math_id
+        and bounds["scope"] == "INDEPENDENT_RATIONAL_SOURCE_ENCLOSURE_NO_NATIVE_RETURN_OR_SCALE_AUTHORITY"
+        and bounds["cashflow_basis"] == basis,"LP03_CASHFLOW_REVIEW_SIGNED_BOUNDS")
+    for key in ("outcome_ids","probability_texts","terminal_texts"):
+        _native_require(type(bounds[key]) is tuple,"LP03_CASHFLOW_REVIEW_SIGNED_OUTCOMES")
+    count = 3 if binary else len(bounds["outcome_ids"])
+    _native_require((not bounds["outcome_ids"] and not bounds["probability_texts"] and not bounds["terminal_texts"]) if binary else
+        2 <= count == len(bounds["probability_texts"]) == len(bounds["terminal_texts"]) <= 4096,
+        "LP03_CASHFLOW_REVIEW_SIGNED_OUTCOMES")
+    _native_require(type(bounds["financial_source_count"]) is int
+        and bounds["financial_source_count"] == (16 if binary else 12+2*count),"LP03_CASHFLOW_REVIEW_SIGNED_BOUNDS")
+    for text in (*bounds["probability_texts"],*bounds["terminal_texts"]):decimal_data(text)
+    fields(bounds["summary"],("declared_lower","declared_upper","derived_net_cash","derived_if_filled","derived_terminal_cash"))
+    lower,upper = (rational(bounds["summary"][key]) for key in ("declared_lower","declared_upper"))
+    decimal_data(bounds["declared_lower"],expected=lower);decimal_data(bounds["declared_upper"],expected=upper)
+    _native_require(lower <= rational(bounds["summary"]["derived_net_cash"]) <= upper,"LP03_CASHFLOW_REVIEW_SIGNED_BOUNDS")
+    costs = tuple("ADD_COST::"+name for name in ("platform_fee_total","builder_fee_total","other_fee_total",
+        "exit_slippage_reserve_total","market_impact_reserve_total","latency_adverse_selection_reserve_total","capital_time_cost_reserve_total"))
+    tail = ("ENTRY_PLUS_TERMINAL","SUBTRACT_COSTS","ADD_REBATE","FILL_TIMES_FILLED_CASH","ONE_MINUS_FILL",
+        "NO_FILL_TIMES_CASH","ADD_FILLED_AND_UNFILLED_CASH")
+    def raw_fields(value):
+        _native_require(type(value) is tuple and len(value) == len(raw_names)
+            and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in value)
+            and tuple(row[0] for row in value) == raw_names,"LP03_CASHFLOW_REVIEW_SIGNED_RAW_FIELDS")
+        result = dict(value)
+        for key in (raw_names if binary else ("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","original_probability_sum")):
+            decimal_data(result[key])
+        if not binary:
+            _native_require(type(result["outcome_ids"]) is tuple and result["outcome_ids"] == bounds["outcome_ids"]
+                and type(result["normalized_probabilities"]) is tuple and len(result["normalized_probabilities"]) == count
+                and type(result["normalization_applied"]) is bool,"LP03_CASHFLOW_REVIEW_SIGNED_RAW_FIELDS")
+            for value in result["normalized_probabilities"]:decimal_data(value)
+        return result
+    declared = raw_fields(bounds["preregistered_fields"])
+    normalize = False if binary else declared["normalization_applied"]
+    labels = (("ONE_MINUS_WIN","REMAINDER_MINUS_VOID",*costs,"WIN_TIMES_WIN_CASH","LOSE_TIMES_LOSE_CASH",
+        "WIN_PLUS_LOSE_CASH","VOID_TIMES_VOID_CASH","ADD_VOID_CASH",*tail) if binary else
+        (*tuple("SUM_PROBABILITY::"+str(index) for index in range(count)),"SIMPLEX_SUM_MINUS_ONE","SIMPLEX_UNARY_ABSOLUTE",
+         *tuple("NORMALIZE_PROBABILITY::"+str(index) for index in range(count) if normalize),
+         *tuple(label+str(index) for index in range(count) for label in ("PROBABILITY_TIMES_TERMINAL_CASH::","ADD_TERMINAL_CASH::")),*costs,*tail))
+    registered_steps = bounds["steps"]
+    _native_require(type(registered_steps) is tuple and len(registered_steps) == len(labels),"LP03_CASHFLOW_REVIEW_SIGNED_BOUNDS")
+    for index,(step,label) in enumerate(zip(registered_steps,labels,strict=True)):
+        fields(step,("position","operation","exact","absolute_coefficient","decimal_exponent"))
+        coefficient,exponent = step["absolute_coefficient"],step["decimal_exponent"]
+        exact = rational(step["exact"])
+        _native_require(type(step["position"]) is int and step["position"] == index and step["operation"] == label
+            and type(coefficient) is int and 0 <= coefficient < 10000000000000000000000000000000000
+            and (coefficient == 0 or coefficient % 10 != 0)
+            and type(exponent) is int and -999966 <= exponent <= 999966,
+            "LP03_CASHFLOW_REVIEW_SIGNED_REPRESENTABILITY")
+        # A signed work-limit number is not authority to expand a large power.
+        # Bound this data-only reconstruction by the already bounded ratio.
+        _native_require(4*abs(exponent)+1 <= 4*(coefficient.bit_length()+abs(exact.numerator).bit_length()+exact.denominator.bit_length())+8,
+            "LP03_CASHFLOW_REVIEW_SIGNED_REPRESENTABILITY_ALLOCATION")
+        represented = Fraction(coefficient*10**exponent) if exponent >= 0 else Fraction(coefficient,10**(-exponent))
+        _native_require(represented == abs(exact),"LP03_CASHFLOW_REVIEW_SIGNED_REPRESENTABILITY")
+    lanes,common = calculation["lane_calculations"],[]
+    _native_require(type(lanes) is tuple and len(lanes) == 2,"LP03_CASHFLOW_REVIEW_SIGNED_LANES")
+    context_fields = ("currency","input_snapshot_ref","event_ref","instrument_ref","horizon_ref","horizon_end_wall_ns",
+        "cashflow_basis","account_basis","account_context_ref","outcome_ids","ordered_outcome_roles")
+    for lane_index,(lane,name) in enumerate(zip(lanes,("REPLAY","PAPER"),strict=True)):
+        fields(lane,("lane","event_segment_ref","source_record_refs","proof","raw_ref","projection_ref","unit","basis",
+            "cashflow_context","baseline_ref","posted_debit","posted_credit"))
+        for key in set(lane)-{"source_record_refs","proof","cashflow_context"}:_native_ident(lane[key])
+        metadata=lane["cashflow_context"];fields(metadata,context_fields)
+        for key in set(metadata)-{"horizon_end_wall_ns","outcome_ids","ordered_outcome_roles"}:_native_ident(metadata[key])
+        _public_counter_v1(metadata["horizon_end_wall_ns"])
+        currency=metadata["currency"]
+        _native_require(type(currency) is str and len(currency) == 3 and currency.isascii() and currency.isalpha() and currency.isupper()
+            and lane["lane"] == name and lane["basis"] == metadata["cashflow_basis"] == basis and lane["unit"] == currency
+            and metadata["account_basis"] == "SYNTHETIC_TOTAL_ACCOUNT_NO_CASH_MOVEMENT"
+            and type(metadata["outcome_ids"]) is tuple and len(metadata["outcome_ids"]) == count
+            and all(type(value) is str and bool(value) for value in metadata["outcome_ids"])
+            and len(set(metadata["outcome_ids"])) == count
+            and metadata["ordered_outcome_roles"] == (("WIN","LOSE","VOID") if binary else ("DECLARED_OUTCOME_ORDER",))
+            and (binary or metadata["outcome_ids"] == bounds["outcome_ids"])
+            and decimal_data(lane["posted_debit"]) == decimal_data(lane["posted_credit"]),
+            "LP03_CASHFLOW_REVIEW_SIGNED_LANE_CONTEXT")
+        for value in metadata["outcome_ids"]:_native_ident(value)
+        sources=lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == (17 if binary else 16),"LP03_CASHFLOW_REVIEW_SIGNED_SOURCE_ROSTER")
+        refs=[]
+        for source in sources:
+            fields(source,("store_id","record_id"));refs.append(EvidenceRecordRefV1(source["store_id"],source["record_id"]))
+        _native_require(len(set(refs)) == len(sources),"LP03_CASHFLOW_REVIEW_SIGNED_SOURCE_ROSTER")
+        proof=lane["proof"]
+        fields(proof,("profile","math_id","context","source_texts","cashflow_basis","input_conversion_scope",
+            "declared_lower","declared_upper","steps","summary","original_raw_fields","preregistered_raw_fields","projected_text",
+            *(() if binary else ("outcome_ids","probability_texts","terminal_texts"))))
+        context=dict(precision=34,rounding="ROUND_HALF_EVEN",Emin=-999999,Emax=999999,capitals=1,clamp=0,
+            trapped_signals=("DivisionByZero","FloatOperation","InvalidOperation","Overflow"),
+            flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+        _native_require(proof["profile"] == ("EXACT_DECIMAL_ORDERED_BINARY_CASHFLOW_INTERMEDIATES_V1" if binary else
+                "EXACT_DECIMAL_ORDERED_MULTI_OUTCOME_CASHFLOW_INTERMEDIATES_V1") and proof["math_id"] == math_id
+            and proof["context"] == context and all(type(proof["context"][key]) is type(value) for key,value in context.items())
+            and proof["cashflow_basis"] == basis
+            and proof["input_conversion_scope"] == "ORIGINAL_CANONICAL_FINANCIAL_TEXT_FITS_CONTEXT_EXACTLY",
+            "LP03_CASHFLOW_REVIEW_SIGNED_CONTEXT")
+        source_texts=proof["source_texts"]
+        _native_require(type(source_texts) is tuple and len(source_texts) == len(names)
+            and all(type(row) is tuple and len(row) == 2 for row in source_texts)
+            and tuple(row[0] for row in source_texts) == names and source_texts == bounds["source_texts"],
+            "LP03_CASHFLOW_REVIEW_SIGNED_INPUT_ROSTER")
+        for key,text in source_texts:
+            shape=decimal_data(text).as_tuple()
+            _native_require(len(shape.digits) <= 34 and -999966 <= shape.exponent <= 999966,"LP03_CASHFLOW_REVIEW_SIGNED_INPUT_CONTEXT")
+        if not binary:
+            _native_require(all(type(proof[key]) is tuple and proof[key] == bounds[key]
+                for key in ("outcome_ids","probability_texts","terminal_texts")),"LP03_CASHFLOW_REVIEW_SIGNED_INPUT_ROSTER")
+        _native_require(proof["declared_lower"] == bounds["declared_lower"] and proof["declared_upper"] == bounds["declared_upper"],
+            "LP03_CASHFLOW_REVIEW_SIGNED_BOUNDS")
+        steps=proof["steps"]
+        _native_require(type(steps) is tuple and len(steps) == len(labels),"LP03_CASHFLOW_REVIEW_SIGNED_STEPS")
+        for index,(step,label,registered_step) in enumerate(zip(steps,labels,registered_steps,strict=True)):
+            fields(step,("position","operation","exact","decimal_text","flags",*(() if binary else ("operand_arity","right_operand_usage"))))
+            _native_require(type(step["position"]) is int and step["position"] == lane_index*len(labels)+index
+                and step["operation"] == label and type(step["decimal_text"]) is str and len(step["decimal_text"]) <= 128
+                and type(step["flags"]) is str and step["exact"] == registered_step["exact"],"LP03_CASHFLOW_REVIEW_SIGNED_STEPS")
+            if not binary:
+                unary=label == "SIMPLEX_UNARY_ABSOLUTE"
+                _native_require(type(step["operand_arity"]) is int and step["operand_arity"] == (1 if unary else 2)
+                    and step["right_operand_usage"] == ("UNUSED_UNARY_PLACEHOLDER" if unary else "ORIGINAL_RIGHT_OPERAND"),
+                    "LP03_CASHFLOW_REVIEW_SIGNED_UNARY_STEP")
+            flags=() if step["flags"] == "" else tuple(step["flags"].split("|"))
+            _native_require(flags == tuple(sorted(set(flags))) and set(flags) <= {"Rounded","Subnormal","Clamped"},
+                "LP03_CASHFLOW_REVIEW_SIGNED_STEP_JOIN")
+            decimal_data(step["decimal_text"],expected=rational(step["exact"]))
+        # Independently reconstruct each original bounded Decimal operation
+        # from the signed source values. Agreement between two copied proof
+        # ratios does not establish the arithmetic, scale, zero sign or flags.
+        values={key:decimal_data(text) for key,text in source_texts}
+        probabilities=() if binary else tuple(decimal_data(text) for text in proof["probability_texts"])
+        terminals=() if binary else tuple(decimal_data(text) for text in proof["terminal_texts"])
+        for value in (*values.values(),*probabilities,*terminals):
+            shape=value.as_tuple()
+            _native_require(len(shape.digits) <= 34 and -999966 <= shape.exponent <= 999966,
+                "LP03_CASHFLOW_REVIEW_SIGNED_INPUT_CONTEXT")
+        zero,one=Decimal(0),Decimal(1)
+        for value in ((values["p_win"],values["p_void"],values["fill_probability"]) if binary else
+                (*probabilities,values["fill_probability"])):
+            _native_require(zero <= value <= one,"LP03_CASHFLOW_REVIEW_SIGNED_PROBABILITY_DOMAIN")
+        cost_names=("platform_fee_total","builder_fee_total","other_fee_total","exit_slippage_reserve_total",
+            "market_impact_reserve_total","latency_adverse_selection_reserve_total","capital_time_cost_reserve_total")
+        _native_require(all(values[key] >= zero for key in (*cost_names,"expected_rebate_total")),
+            "LP03_CASHFLOW_REVIEW_SIGNED_FRICTION_DOMAIN")
+        position=0
+        with localcontext(decimal_context_v1()) as arithmetic:
+            _native_require((arithmetic.prec,arithmetic.rounding,arithmetic.Emin,arithmetic.Emax,arithmetic.capitals,arithmetic.clamp)
+                == (34,"ROUND_HALF_EVEN",-999999,999999,1,0),"LP03_CASHFLOW_REVIEW_SIGNED_CONTEXT")
+            def reconstruct(label,operation,left,right=None):
+                nonlocal position
+                _native_require(position < len(steps) and steps[position]["operation"] == label,
+                    "LP03_CASHFLOW_REVIEW_SIGNED_RECONSTRUCTION_ORDER")
+                arithmetic.clear_flags()
+                try:
+                    value=arithmetic.abs(left) if operation == "abs" else getattr(arithmetic,operation)(left,right)
+                except ArithmeticError:
+                    _native_require(False,"LP03_CASHFLOW_REVIEW_SIGNED_RECONSTRUCTION_ARITHMETIC")
+                flags=tuple(sorted(signal.__name__ for signal,active in arithmetic.flags.items() if active))
+                _native_require(type(value) is Decimal and value.is_finite()
+                    and set(flags) <= {"Rounded","Subnormal","Clamped"}
+                    and steps[position]["decimal_text"] == str(value) and steps[position]["flags"] == "|".join(flags),
+                    "LP03_CASHFLOW_REVIEW_SIGNED_RECONSTRUCTION_VALUE_FLAGS")
+                # Existing decimal_data separately bounded ratio expansion by
+                # the retained exact numerator/denominator before this replay.
+                position += 1
+                return value
+            def reconstruct_costs():
+                cost=zero
+                for key in cost_names:cost=reconstruct("ADD_COST::"+key,"add",cost,values[key])
+                return cost
+            if binary:
+                lose=reconstruct("ONE_MINUS_WIN","subtract",one,values["p_win"])
+                lose=reconstruct("REMAINDER_MINUS_VOID","subtract",lose,values["p_void"])
+                _native_require(lose >= zero,"LP03_CASHFLOW_REVIEW_SIGNED_SIMPLEX_DOMAIN")
+                cost=reconstruct_costs()
+                win_cash=reconstruct("WIN_TIMES_WIN_CASH","multiply",values["p_win"],values["win_terminal_cashflow_total"])
+                lose_cash=reconstruct("LOSE_TIMES_LOSE_CASH","multiply",lose,values["lose_terminal_cashflow_total"])
+                terminal=reconstruct("WIN_PLUS_LOSE_CASH","add",win_cash,lose_cash)
+                void_cash=reconstruct("VOID_TIMES_VOID_CASH","multiply",values["p_void"],values["void_terminal_cashflow_total"])
+                terminal=reconstruct("ADD_VOID_CASH","add",terminal,void_cash)
+            else:
+                _native_require(values["probability_simplex_tolerance"] >= zero,"LP03_CASHFLOW_REVIEW_SIGNED_TOLERANCE_DOMAIN")
+                total=zero
+                for index,value in enumerate(probabilities):total=reconstruct("SUM_PROBABILITY::"+str(index),"add",total,value)
+                difference=reconstruct("SIMPLEX_SUM_MINUS_ONE","subtract",total,one)
+                distance=reconstruct("SIMPLEX_UNARY_ABSOLUTE","abs",difference)
+                _native_require(total > zero and distance <= values["probability_simplex_tolerance"]
+                    and normalize is (total != one),"LP03_CASHFLOW_REVIEW_SIGNED_SIMPLEX_DOMAIN")
+                normalized=(tuple(reconstruct("NORMALIZE_PROBABILITY::"+str(index),"divide",value,total)
+                    for index,value in enumerate(probabilities)) if normalize else probabilities)
+                terminal=zero
+                for index,(probability,cash) in enumerate(zip(normalized,terminals,strict=True)):
+                    product=reconstruct("PROBABILITY_TIMES_TERMINAL_CASH::"+str(index),"multiply",probability,cash)
+                    terminal=reconstruct("ADD_TERMINAL_CASH::"+str(index),"add",terminal,product)
+                cost=reconstruct_costs()
+            filled=reconstruct("ENTRY_PLUS_TERMINAL","add",values["entry_trade_cashflow_total"],terminal)
+            filled=reconstruct("SUBTRACT_COSTS","subtract",filled,cost)
+            filled=reconstruct("ADD_REBATE","add",filled,values["expected_rebate_total"])
+            net=reconstruct("FILL_TIMES_FILLED_CASH","multiply",values["fill_probability"],filled)
+            not_filled=reconstruct("ONE_MINUS_FILL","subtract",one,values["fill_probability"])
+            unfilled=reconstruct("NO_FILL_TIMES_CASH","multiply",not_filled,values["no_fill_cashflow_total"])
+            net=reconstruct("ADD_FILLED_AND_UNFILLED_CASH","add",net,unfilled)
+            _native_require(position == len(steps),"LP03_CASHFLOW_REVIEW_SIGNED_RECONSTRUCTION_ORDER")
+        raw=raw_fields(proof["original_raw_fields"])
+        _native_require(proof["original_raw_fields"] == proof["preregistered_raw_fields"] == bounds["preregistered_fields"],
+            "LP03_CASHFLOW_REVIEW_SIGNED_RAW_FIELDS")
+        by_label={step["operation"]:step for step in steps}
+        selected={"expected_net_cash":steps[-1],"expected_net_cash_if_filled":by_label["ADD_REBATE"],
+            "expected_terminal_cashflow":by_label["ADD_VOID_CASH" if binary else "ADD_TERMINAL_CASH::"+str(count-1)],
+            ("p_lose" if binary else "original_probability_sum"):by_label["REMAINDER_MINUS_VOID" if binary else "SUM_PROBABILITY::"+str(count-1)]}
+        summary=proof["summary"];fields(summary,(*selected,"lower","upper"))
+        _native_require(all(raw[key] == step["decimal_text"] and rational(summary[key]) == rational(step["exact"])
+                for key,step in selected.items()) and proof["projected_text"] == raw["expected_net_cash"]
+            and rational(summary["lower"]) == lower and rational(summary["upper"]) == upper
+            and lower <= rational(summary["expected_net_cash"]) <= upper,"LP03_CASHFLOW_REVIEW_SIGNED_SUMMARY_JOIN")
+        if not binary:
+            normalized=tuple(by_label["NORMALIZE_PROBABILITY::"+str(index)]["decimal_text"] for index in range(count)) if normalize else proof["probability_texts"]
+            _native_require(raw["normalized_probabilities"] == normalized
+                and normalize is (rational(summary["original_probability_sum"]) != 1),"LP03_CASHFLOW_REVIEW_SIGNED_NORMALIZATION")
+        _native_require(all(rational(bounds["summary"][bound_key]) == rational(summary[lane_key]) for bound_key,lane_key in (
+            ("derived_net_cash","expected_net_cash"),("derived_if_filled","expected_net_cash_if_filled"),
+            ("derived_terminal_cash","expected_terminal_cashflow"))),"LP03_CASHFLOW_REVIEW_SIGNED_SUMMARY_JOIN")
+        common.append((sources,tuple((key,value) for key,value in proof.items() if key != "steps"),
+            tuple(tuple((key,value) for key,value in step.items() if key != "position") for step in steps),
+            tuple(lane[key] for key in ("unit","basis","cashflow_context","baseline_ref","posted_debit"))))
+    from .serialization import deterministic_json, _native_strict_json
+    def serialized_bytes(value):
+        return len(deterministic_json(value).encode("utf-8"))
+    def proof_charge(proof):
+        return sum(serialized_bytes(step) for step in proof["steps"])+serialized_bytes(proof["summary"])+serialized_bytes(proof)
+    registration_charge=proof_charge(bounds)
+    review_prefix_charge=sum(proof_charge(lane["proof"]) for lane in lanes)
+    final_bytes=deterministic_json(calculation).encode("utf-8")
+    _native_require(counters[0]["serialized_bytes"] == registration_charge
+        and counters[1]["serialized_bytes"] == review_prefix_charge
+        and review_prefix_charge+len(final_bytes) <= remaining["max_serialized_bytes"]
+        and registration_charge+review_prefix_charge+len(final_bytes) <= original["max_serialized_bytes"],
+        "LP03_CASHFLOW_REVIEW_SIGNED_EXACT_CUMULATIVE_CHARGE")
+    _native_strict_json(final_bytes,max_bytes=min(1048576,original["max_serialized_bytes"]),max_nodes=4096)
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+        and len(set(body.observed_metric_refs)) == 2,"LP03_CASHFLOW_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_market_review_calculation_v1(calculation, body):
+    """Closed signed proof data; no source admission or numerical-work reset."""
+    from decimal import localcontext
+    from fractions import Fraction
+    from .context import decimal_context_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_MARKET_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "math_id", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    math_id = calculation["math_id"]
+    _native_require(type(math_id) is str and math_id in _LP03_MARKET_METRIC_PROFILES_V1, "LP03_MARKET_REVIEW_SIGNED_PROFILE")
+    descriptor = _LP03_MARKET_METRIC_PROFILES_V1[math_id]
+    _native_require(calculation["method"] == "EXACT_ORDERED_DECIMAL_MARKET_FROM_ORIGINAL_PRICE_SOURCES"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_" + math_id.replace("-", "_") + "_CLOSURE_ONLY",
+                        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_MARKET_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "decimal_parse_attempts", "serialized_bytes"))
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_MARKET_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] < remaining["max_serialized_bytes"],
+                    "LP03_MARKET_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    def decimal_data(text, *, expected=None):
+        # Canonical source text needs no exponent expansion. A claimed work
+        # limit in signed data is not authority to allocate an integer power.
+        _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"]),
+                        "LP03_MARKET_REVIEW_SIGNED_DECIMAL")
+        match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+        _native_require(match is not None, "LP03_MARKET_REVIEW_SIGNED_DECIMAL")
+        whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+        _native_require(len(exponent_digits) <= 18 and 4 * (len(whole) + len(fraction)) <= original["max_work_bits"],
+                        "LP03_MARKET_REVIEW_SIGNED_DECIMAL_BOUND")
+        exponent = int(exponent_digits) * (-1 if match[4] == "-" else 1) - len(fraction)
+        _native_require(max(4 * (len(whole) + len(fraction) + max(exponent, 0)), 1 + 4 * max(-exponent, 0))
+                        <= original["max_work_bits"], "LP03_MARKET_REVIEW_SIGNED_DECIMAL_BOUND")
+        try:
+            value = Decimal(text)
+        except ArithmeticError:
+            _native_require(False, "LP03_MARKET_REVIEW_SIGNED_DECIMAL")
+        with localcontext(decimal_context_v1()):
+            _native_require(str(value) == text, "LP03_MARKET_REVIEW_SIGNED_DECIMAL")
+        if expected is None:
+            return value
+        # Ratio members have separately bounded text lengths. Their actual
+        # integer sizes plus this coefficient bound every allocation before
+        # Decimal.as_integer_ratio can expand the exponent, even if a forged
+        # payload declares an enormous numerical-work allowance.
+        allocation_bound = 4 * (len(whole) + len(fraction) + abs(expected.numerator).bit_length()
+            + expected.denominator.bit_length()) + 8
+        _native_require(value.is_zero() or max(4 * (len(whole) + len(fraction) + max(exponent, 0)),
+            1 + 4 * max(-exponent, 0)) <= allocation_bound, "LP03_MARKET_REVIEW_SIGNED_RATIO_EXPANSION_BOUND")
+        result = Fraction(0) if value.is_zero() else Fraction(value)
+        _native_require(result == expected, "LP03_MARKET_REVIEW_SIGNED_STEP_JOIN")
+        return result
+
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for key in value:
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"])
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if key == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_MARKET_REVIEW_SIGNED_RATIONAL")
+        try:
+            numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        except ValueError:
+            _native_require(False, "LP03_MARKET_REVIEW_SIGNED_RATIONAL")
+        _native_require(max(numerator.bit_length(), denominator.bit_length()) <= original["max_work_bits"],
+                        "LP03_MARKET_REVIEW_SIGNED_RATIONAL_BOUND")
+        result = Fraction(numerator, denominator)
+        _native_require((result.numerator, result.denominator) == (numerator, denominator), "LP03_MARKET_REVIEW_SIGNED_RATIONAL")
+        return result
+
+    bounds = calculation["registration_bound_proof"]
+    fields(bounds, ("profile", "math_id", "financial_source_count", "declared_lower", "declared_upper", "original_payout"))
+    source_count = 2 if math_id == "MATH-01" else 3
+    _native_require(bounds["profile"] == "DECLARED_MARKET_PRICE_ENCLOSURE_V1" and bounds["math_id"] == math_id
+                    and type(bounds["financial_source_count"]) is int and bounds["financial_source_count"] == source_count,
+                    "LP03_MARKET_REVIEW_SIGNED_BOUNDS")
+    lower, upper, payout = (rational(bounds[key]) for key in ("declared_lower", "declared_upper", "original_payout"))
+    _native_require(lower == 0 and payout > 0 and upper == (1 if math_id == "MATH-01" else payout if math_id == "MATH-04" else 2),
+                    "LP03_MARKET_REVIEW_SIGNED_BOUNDS")
+    labels = (("PRICE_DIVIDED_BY_PAYOUT",) if math_id == "MATH-01" else ("ASK_MINUS_BID",) if math_id == "MATH-04" else
+              ("BID_PLUS_ASK", "MIDPOINT_DIVIDE_TWO", "ASK_MINUS_BID", "SPREAD_DIVIDED_BY_MIDPOINT", "RATIO_TIMES_TEN_THOUSAND"))
+    names = ("contract_price", "payout_per_winning_contract") if math_id == "MATH-01" else ("best_bid", "best_ask", "payout")
+    lanes, common = calculation["lane_calculations"], []
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_MARKET_REVIEW_SIGNED_LANES")
+    for lane_index, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"))):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref", "unit", "basis",
+            "price_currency", "snapshot_ref", "baseline_ref", "posted_debit", "posted_credit"))
+        for key in set(lane) - {"source_record_refs", "proof"}:
+            _native_ident(lane[key])
+        currency = lane["price_currency"]
+        _native_require(lane["lane"] == name and lane["basis"] == descriptor[3]
+                        and type(currency) is str and len(currency) == 3 and currency.isascii() and currency.isalpha() and currency.isupper()
+                        and lane["unit"] == (currency + "/CONTRACT" if math_id == "MATH-04" else descriptor[2])
+                        and decimal_data(lane["posted_debit"]) == decimal_data(lane["posted_credit"]),
+                        "LP03_MARKET_REVIEW_SIGNED_LANE_PROFILE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == (2 if math_id == "MATH-01" else 5),
+                        "LP03_MARKET_REVIEW_SIGNED_SOURCE_ROSTER")
+        refs = []
+        for source in sources:
+            fields(source, ("store_id", "record_id"))
+            refs.append(EvidenceRecordRefV1(source["store_id"], source["record_id"]))
+        _native_require(len(set(refs)) == len(sources), "LP03_MARKET_REVIEW_SIGNED_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "math_id", "context", "source_texts", "declared_lower", "declared_upper", "steps", "summary",
+            "original_raw_texts", "preregistered_raw_texts", "projected_text"))
+        context = dict(precision=34, rounding="ROUND_HALF_EVEN", Emin=-999999, Emax=999999, capitals=1, clamp=0,
+            trapped_signals=("DivisionByZero", "FloatOperation", "InvalidOperation", "Overflow"),
+            flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+        _native_require(proof["profile"] == "EXACT_DECIMAL_ORDERED_MARKET_INTERMEDIATES_V1" and proof["math_id"] == math_id
+                        and proof["context"] == context
+                        and all(type(proof["context"][key]) is type(value) for key, value in context.items()),
+                        "LP03_MARKET_REVIEW_SIGNED_CONTEXT")
+        source_texts = proof["source_texts"]
+        _native_require(type(source_texts) is tuple and len(source_texts) == source_count
+                        and all(type(row) is tuple and len(row) == 2 for row in source_texts)
+                        and tuple(row[0] for row in source_texts) == names, "LP03_MARKET_REVIEW_SIGNED_INPUT_ROSTER")
+        for key, text in source_texts:
+            decimal_data(text)
+        decimal_data(source_texts[-1][1], expected=payout)
+        decimal_data(proof["declared_lower"], expected=lower)
+        decimal_data(proof["declared_upper"], expected=upper)
+        steps = proof["steps"]
+        _native_require(type(steps) is tuple and len(steps) == len(labels), "LP03_MARKET_REVIEW_SIGNED_STEPS")
+        for index, (step, label) in enumerate(zip(steps, labels)):
+            fields(step, ("position", "operation", "exact", "decimal_text", "flags"))
+            _native_require(type(step["position"]) is int and step["position"] == lane_index * len(labels) + index
+                            and step["operation"] == label and type(step["decimal_text"]) is str and len(step["decimal_text"]) <= 128
+                            and type(step["flags"]) is str, "LP03_MARKET_REVIEW_SIGNED_STEPS")
+            flags = () if step["flags"] == "" else tuple(step["flags"].split("|"))
+            _native_require(flags == tuple(sorted(set(flags))) and set(flags) <= {"Rounded", "Subnormal", "Clamped"},
+                            "LP03_MARKET_REVIEW_SIGNED_STEP_JOIN")
+            decimal_data(step["decimal_text"], expected=rational(step["exact"]))
+        summary = proof["summary"]
+        fields(summary, ("result", "lower", "upper", "basis_points") if math_id == "MATH-05" else ("result", "lower", "upper"))
+        selected = steps[-2] if math_id == "MATH-05" else steps[-1]
+        expected_texts = (selected["decimal_text"], steps[-1]["decimal_text"]) if math_id == "MATH-05" else (selected["decimal_text"],)
+        _native_require(type(proof["original_raw_texts"]) is tuple and type(proof["preregistered_raw_texts"]) is tuple
+                        and proof["original_raw_texts"] == proof["preregistered_raw_texts"] == expected_texts
+                        and proof["projected_text"] == selected["decimal_text"]
+                        and rational(summary["result"]) == rational(selected["exact"])
+                        and rational(summary["lower"]) == lower and rational(summary["upper"]) == upper
+                        and lower <= rational(summary["result"]) <= upper
+                        and (math_id != "MATH-05" or rational(summary["basis_points"]) == rational(steps[-1]["exact"])),
+                        "LP03_MARKET_REVIEW_SIGNED_SUMMARY_JOIN")
+        common.append((sources, tuple((key, value) for key, value in proof.items() if key != "steps"),
+            tuple(tuple((key, value) for key, value in step.items() if key != "position") for step in steps),
+            tuple(lane[key] for key in ("unit", "price_currency", "snapshot_ref", "baseline_ref", "posted_debit"))))
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_MARKET_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_kelly27_review_calculation_v1(calculation, body):
+    """Closed signed proof data; no source admission or numerical-work reset."""
+    from decimal import localcontext
+    from fractions import Fraction
+    from .context import decimal_context_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_KELLY27_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "EXACT_ORDERED_DECIMAL_MATH27_FROM_ORIGINAL_PROBABILITY_PAYOFF_SOURCES"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_27_CLOSURE_ONLY",
+                        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_KELLY27_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "decimal_parse_attempts", "serialized_bytes"))
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_KELLY27_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] < remaining["max_serialized_bytes"],
+                    "LP03_KELLY27_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    def decimal_data(text, *, expected=None):
+        # Canonical source text needs no exponent expansion. A claimed work
+        # limit in signed data is not authority to allocate an integer power.
+        _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"]),
+                        "LP03_KELLY27_REVIEW_SIGNED_DECIMAL")
+        match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+        _native_require(match is not None, "LP03_KELLY27_REVIEW_SIGNED_DECIMAL")
+        whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+        _native_require(len(exponent_digits) <= 18 and 4 * (len(whole) + len(fraction)) <= original["max_work_bits"],
+                        "LP03_KELLY27_REVIEW_SIGNED_DECIMAL_BOUND")
+        exponent = int(exponent_digits) * (-1 if match[4] == "-" else 1) - len(fraction)
+        _native_require(max(4 * (len(whole) + len(fraction) + max(exponent, 0)), 1 + 4 * max(-exponent, 0))
+                        <= original["max_work_bits"], "LP03_KELLY27_REVIEW_SIGNED_DECIMAL_BOUND")
+        try:
+            value = Decimal(text)
+        except ArithmeticError:
+            _native_require(False, "LP03_KELLY27_REVIEW_SIGNED_DECIMAL")
+        with localcontext(decimal_context_v1()):
+            _native_require(str(value) == text, "LP03_KELLY27_REVIEW_SIGNED_DECIMAL")
+        if expected is None:
+            return value
+        # Ratio members have separately bounded text lengths. Their actual
+        # integer sizes plus this coefficient bound every allocation before
+        # Decimal.as_integer_ratio can expand the exponent, even if a forged
+        # payload declares an enormous numerical-work allowance.
+        allocation_bound = 4 * (len(whole) + len(fraction) + abs(expected.numerator).bit_length()
+            + expected.denominator.bit_length()) + 8
+        _native_require(value.is_zero() or max(4 * (len(whole) + len(fraction) + max(exponent, 0)),
+            1 + 4 * max(-exponent, 0)) <= allocation_bound, "LP03_KELLY27_REVIEW_SIGNED_RATIO_EXPANSION_BOUND")
+        result = Fraction(0) if value.is_zero() else Fraction(value)
+        _native_require(result == expected, "LP03_KELLY27_REVIEW_SIGNED_STEP_JOIN")
+        return result
+
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for key in value:
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"])
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if key == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_KELLY27_REVIEW_SIGNED_RATIONAL")
+        try:
+            numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        except ValueError:
+            _native_require(False, "LP03_KELLY27_REVIEW_SIGNED_RATIONAL")
+        _native_require(max(numerator.bit_length(), denominator.bit_length()) <= original["max_work_bits"],
+                        "LP03_KELLY27_REVIEW_SIGNED_RATIONAL_BOUND")
+        result = Fraction(numerator, denominator)
+        _native_require((result.numerator, result.denominator) == (numerator, denominator), "LP03_KELLY27_REVIEW_SIGNED_RATIONAL")
+        return result
+
+    bounds = calculation["registration_bound_proof"]
+    fields(bounds, ("profile", "math_id", "financial_source_count", "declared_lower", "declared_upper"))
+    _native_require(bounds["profile"] == "DECLARED_KELLY_FRACTION_ENCLOSURE_V1" and bounds["math_id"] == "MATH-27"
+                    and type(bounds["financial_source_count"]) is int and bounds["financial_source_count"] == 2,
+                    "LP03_KELLY27_REVIEW_SIGNED_BOUNDS")
+    lower, upper = rational(bounds["declared_lower"]), rational(bounds["declared_upper"])
+    _native_require(lower < 0 and upper == 1, "LP03_KELLY27_REVIEW_SIGNED_BOUNDS")
+    labels = ("ODDS_TIMES_PROBABILITY", "ONE_MINUS_PROBABILITY", "WEIGHTED_WIN_MINUS_LOSS", "NUMERATOR_DIVIDED_BY_ODDS")
+    basis_fields = ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")
+    lanes, common = calculation["lane_calculations"], []
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_KELLY27_REVIEW_SIGNED_LANES")
+    for lane_index, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"))):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref", "unit", "basis",
+            *basis_fields, "baseline_ref", "posted_debit", "posted_credit"))
+        for key in set(lane) - {"source_record_refs", "proof"}:
+            _native_ident(lane[key])
+        currency = lane["risk_capital_currency"]
+        _native_require(lane["lane"] == name and lane["basis"] == "wealth_fraction"
+                        and lane["unit"] == "fraction_of_approved_risk_capital"
+                        and type(currency) is str and len(currency) == 3 and currency.isascii() and currency.isalpha() and currency.isupper()
+                        and decimal_data(lane["posted_debit"]) == decimal_data(lane["posted_credit"]),
+                        "LP03_KELLY27_REVIEW_SIGNED_LANE_PROFILE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 2, "LP03_KELLY27_REVIEW_SIGNED_SOURCE_ROSTER")
+        refs = []
+        for source in sources:
+            fields(source, ("store_id", "record_id"))
+            refs.append(EvidenceRecordRefV1(source["store_id"], source["record_id"]))
+        _native_require(len(set(refs)) == 2, "LP03_KELLY27_REVIEW_SIGNED_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "math_id", "context", "source_texts", "declared_lower", "declared_upper", "steps", "selections", "summary",
+            "original_raw_texts", "preregistered_raw_texts", "projected_text"))
+        context = dict(precision=34, rounding="ROUND_HALF_EVEN", Emin=-999999, Emax=999999, capitals=1, clamp=0,
+            trapped_signals=("DivisionByZero", "FloatOperation", "InvalidOperation", "Overflow"),
+            flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+        _native_require(proof["profile"] == "EXACT_DECIMAL_ORDERED_KELLY_INTERMEDIATES_V1" and proof["math_id"] == "MATH-27"
+                        and proof["context"] == context
+                        and all(type(proof["context"][key]) is type(value) for key, value in context.items()),
+                        "LP03_KELLY27_REVIEW_SIGNED_CONTEXT")
+        source_texts = proof["source_texts"]
+        _native_require(type(source_texts) is tuple and len(source_texts) == 2
+                        and all(type(row) is tuple and len(row) == 2 for row in source_texts)
+                        and tuple(row[0] for row in source_texts) == ("win_probability", "net_odds"),
+                        "LP03_KELLY27_REVIEW_SIGNED_INPUT_ROSTER")
+        probability, odds = (decimal_data(row[1]) for row in source_texts)
+        _native_require(0 <= probability <= 1 and odds > 0, "LP03_KELLY27_REVIEW_SIGNED_INPUT_DOMAIN")
+        decimal_data(proof["declared_lower"], expected=lower)
+        decimal_data(proof["declared_upper"], expected=upper)
+        steps = proof["steps"]
+        _native_require(type(steps) is tuple and len(steps) == len(labels), "LP03_KELLY27_REVIEW_SIGNED_STEPS")
+        for index, (step, label) in enumerate(zip(steps, labels)):
+            fields(step, ("position", "operation", "exact", "decimal_text", "flags"))
+            _native_require(type(step["position"]) is int and step["position"] == lane_index * len(labels) + index
+                            and step["operation"] == label and type(step["decimal_text"]) is str and len(step["decimal_text"]) <= 128
+                            and type(step["flags"]) is str, "LP03_KELLY27_REVIEW_SIGNED_STEPS")
+            flags = () if step["flags"] == "" else tuple(step["flags"].split("|"))
+            _native_require(flags == tuple(sorted(set(flags))) and set(flags) <= {"Rounded", "Subnormal", "Clamped"},
+                            "LP03_KELLY27_REVIEW_SIGNED_STEP_JOIN")
+            decimal_data(step["decimal_text"], expected=rational(step["exact"]))
+        selections = proof["selections"]
+        _native_require(type(selections) is tuple and len(selections) == 1, "LP03_KELLY27_REVIEW_SIGNED_SELECTION")
+        selected = selections[0]
+        fields(selected, ("operation", "selected_index", "decimal_text", "exact"))
+        raw = rational(steps[-1]["exact"])
+        sizing = raw if raw > 0 else Fraction(0)
+        sizing_text = steps[-1]["decimal_text"] if raw > 0 else "0"
+        _native_require(selected["operation"] == "NONNEGATIVE_FIRST_MAX"
+                        and type(selected["selected_index"]) is int and selected["selected_index"] == (1 if raw > 0 else 0)
+                        and selected["decimal_text"] == sizing_text and rational(selected["exact"]) == sizing,
+                        "LP03_KELLY27_REVIEW_SIGNED_SELECTION")
+        summary = proof["summary"]
+        fields(summary, ("result", "lower", "upper", "sizing_candidate"))
+        expected_texts = (steps[-1]["decimal_text"], sizing_text)
+        _native_require(type(proof["original_raw_texts"]) is tuple and type(proof["preregistered_raw_texts"]) is tuple
+                        and proof["original_raw_texts"] == proof["preregistered_raw_texts"] == expected_texts
+                        and proof["projected_text"] == steps[-1]["decimal_text"]
+                        and rational(summary["result"]) == raw and rational(summary["sizing_candidate"]) == sizing
+                        and rational(summary["lower"]) == lower and rational(summary["upper"]) == upper
+                        and lower <= raw <= upper, "LP03_KELLY27_REVIEW_SIGNED_SUMMARY_JOIN")
+        common.append((sources, tuple((key, value) for key, value in proof.items() if key != "steps"),
+            tuple(tuple((key, value) for key, value in step.items() if key != "position") for step in steps),
+            tuple(lane[key] for key in ("unit", *basis_fields, "baseline_ref", "posted_debit"))))
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_KELLY27_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+
+def _evidence_kelly28_review_calculation_v1(calculation, body):
+    """Closed signed proof data; no source admission or numerical-work reset."""
+    from decimal import localcontext
+    from fractions import Fraction
+    from .context import decimal_context_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_KELLY28_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "EXACT_ORDERED_DECIMAL_MATH28_FROM_ORIGINAL_PUBLISHED_KELLY_AND_CONSTRAINTS"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_28_CLOSURE_ONLY",
+                        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_KELLY28_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "decimal_parse_attempts", "serialized_bytes"))
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_KELLY28_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] < remaining["max_serialized_bytes"],
+                    "LP03_KELLY28_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    def decimal_data(text, *, expected=None):
+        # Canonical source text needs no exponent expansion. A claimed work
+        # limit in signed data is not authority to allocate an integer power.
+        _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"]),
+                        "LP03_KELLY28_REVIEW_SIGNED_DECIMAL")
+        match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+        _native_require(match is not None, "LP03_KELLY28_REVIEW_SIGNED_DECIMAL")
+        whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+        _native_require(len(exponent_digits) <= 18 and 4 * (len(whole) + len(fraction)) <= original["max_work_bits"],
+                        "LP03_KELLY28_REVIEW_SIGNED_DECIMAL_BOUND")
+        exponent = int(exponent_digits) * (-1 if match[4] == "-" else 1) - len(fraction)
+        _native_require(max(4 * (len(whole) + len(fraction) + max(exponent, 0)), 1 + 4 * max(-exponent, 0))
+                        <= original["max_work_bits"], "LP03_KELLY28_REVIEW_SIGNED_DECIMAL_BOUND")
+        try:
+            value = Decimal(text)
+        except ArithmeticError:
+            _native_require(False, "LP03_KELLY28_REVIEW_SIGNED_DECIMAL")
+        with localcontext(decimal_context_v1()):
+            _native_require(str(value) == text, "LP03_KELLY28_REVIEW_SIGNED_DECIMAL")
+        if expected is None:
+            return value
+        # Ratio members have separately bounded text lengths. Their actual
+        # integer sizes plus this coefficient bound every allocation before
+        # Decimal.as_integer_ratio can expand the exponent, even if a forged
+        # payload declares an enormous numerical-work allowance.
+        allocation_bound = 4 * (len(whole) + len(fraction) + abs(expected.numerator).bit_length()
+            + expected.denominator.bit_length()) + 8
+        _native_require(value.is_zero() or max(4 * (len(whole) + len(fraction) + max(exponent, 0)),
+            1 + 4 * max(-exponent, 0)) <= allocation_bound, "LP03_KELLY28_REVIEW_SIGNED_RATIO_EXPANSION_BOUND")
+        result = Fraction(0) if value.is_zero() else Fraction(value)
+        _native_require(result == expected, "LP03_KELLY28_REVIEW_SIGNED_STEP_JOIN")
+        return result
+
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for key in value:
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"])
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if key == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_KELLY28_REVIEW_SIGNED_RATIONAL")
+        try:
+            numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        except ValueError:
+            _native_require(False, "LP03_KELLY28_REVIEW_SIGNED_RATIONAL")
+        _native_require(max(numerator.bit_length(), denominator.bit_length()) <= original["max_work_bits"],
+                        "LP03_KELLY28_REVIEW_SIGNED_RATIONAL_BOUND")
+        result = Fraction(numerator, denominator)
+        _native_require((result.numerator, result.denominator) == (numerator, denominator), "LP03_KELLY28_REVIEW_SIGNED_RATIONAL")
+        return result
+
+    bounds = calculation["registration_bound_proof"]
+    fields(bounds, ("profile", "math_id", "financial_source_count", "declared_lower", "declared_upper"))
+    _native_require(bounds["profile"] == "DECLARED_KELLY_FRACTION_ENCLOSURE_V1" and bounds["math_id"] == "MATH-28"
+                    and type(bounds["financial_source_count"]) is int and 3 <= bounds["financial_source_count"] <= 4098,
+                    "LP03_KELLY28_REVIEW_SIGNED_BOUNDS")
+    lower, upper = rational(bounds["declared_lower"]), rational(bounds["declared_upper"])
+    _native_require(lower == 0 and upper == 1, "LP03_KELLY28_REVIEW_SIGNED_BOUNDS")
+    labels = ("NONNEGATIVE_TIMES_MULTIPLIER",)
+    basis_fields = ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")
+    lanes, common = calculation["lane_calculations"], []
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_KELLY28_REVIEW_SIGNED_LANES")
+    for lane_index, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"))):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref", "unit", "basis",
+            *basis_fields, "baseline_ref", "posted_debit", "posted_credit"))
+        for key in set(lane) - {"source_record_refs", "proof"}:
+            _native_ident(lane[key])
+        currency = lane["risk_capital_currency"]
+        _native_require(lane["lane"] == name and lane["basis"] == "bounded_fractional_wealth_fraction"
+                        and lane["unit"] == "fraction_of_approved_risk_capital"
+                        and type(currency) is str and len(currency) == 3 and currency.isascii() and currency.isalpha() and currency.isupper()
+                        and decimal_data(lane["posted_debit"]) == decimal_data(lane["posted_credit"]),
+                        "LP03_KELLY28_REVIEW_SIGNED_LANE_PROFILE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 3, "LP03_KELLY28_REVIEW_SIGNED_SOURCE_ROSTER")
+        refs = []
+        for source in sources:
+            fields(source, ("store_id", "record_id"))
+            refs.append(EvidenceRecordRefV1(source["store_id"], source["record_id"]))
+        _native_require(len(set(refs)) == 3, "LP03_KELLY28_REVIEW_SIGNED_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "math_id", "context", "source_texts", "declared_lower", "declared_upper", "steps", "selections", "summary",
+            "original_raw_texts", "preregistered_raw_texts", "projected_text"))
+        context = dict(precision=34, rounding="ROUND_HALF_EVEN", Emin=-999999, Emax=999999, capitals=1, clamp=0,
+            trapped_signals=("DivisionByZero", "FloatOperation", "InvalidOperation", "Overflow"),
+            flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+        _native_require(proof["profile"] == "EXACT_DECIMAL_ORDERED_KELLY_INTERMEDIATES_V1" and proof["math_id"] == "MATH-28"
+                        and proof["context"] == context
+                        and all(type(proof["context"][key]) is type(value) for key, value in context.items()),
+                        "LP03_KELLY28_REVIEW_SIGNED_CONTEXT")
+        source_texts = proof["source_texts"]
+        _native_require(type(source_texts) is tuple and len(source_texts) == 3
+                        and all(type(row) is tuple and len(row) == 2 for row in source_texts)
+                        and tuple(row[0] for row in source_texts) == ("full_kelly_fraction", "fraction_multiplier", "risk_caps")
+                        and type(source_texts[2][1]) is tuple and 0 < len(source_texts[2][1]) <= 4096
+                        and bounds["financial_source_count"] == 2 + len(source_texts[2][1]),
+                        "LP03_KELLY28_REVIEW_SIGNED_INPUT_ROSTER")
+        full, multiplier = decimal_data(source_texts[0][1]), decimal_data(source_texts[1][1])
+        caps = tuple(decimal_data(text) for text in source_texts[2][1])
+        _native_require(full <= 1 and 0 < multiplier <= 1 and all(cap >= 0 for cap in caps),
+                        "LP03_KELLY28_REVIEW_SIGNED_INPUT_DOMAIN")
+        decimal_data(proof["declared_lower"], expected=lower)
+        decimal_data(proof["declared_upper"], expected=upper)
+        steps = proof["steps"]
+        _native_require(type(steps) is tuple and len(steps) == len(labels), "LP03_KELLY28_REVIEW_SIGNED_STEPS")
+        for index, (step, label) in enumerate(zip(steps, labels)):
+            fields(step, ("position", "operation", "exact", "decimal_text", "flags"))
+            _native_require(type(step["position"]) is int and step["position"] == lane_index * len(labels) + index
+                            and step["operation"] == label and type(step["decimal_text"]) is str and len(step["decimal_text"]) <= 128
+                            and type(step["flags"]) is str, "LP03_KELLY28_REVIEW_SIGNED_STEPS")
+            flags = () if step["flags"] == "" else tuple(step["flags"].split("|"))
+            _native_require(flags == tuple(sorted(set(flags))) and set(flags) <= {"Rounded", "Subnormal", "Clamped"},
+                            "LP03_KELLY28_REVIEW_SIGNED_STEP_JOIN")
+            decimal_data(step["decimal_text"], expected=rational(step["exact"]))
+        selections = proof["selections"]
+        _native_require(type(selections) is tuple and len(selections) == 2, "LP03_KELLY28_REVIEW_SIGNED_SELECTION")
+        for selected in selections:
+            fields(selected, ("operation", "selected_index", "decimal_text", "exact"))
+            _native_require(type(selected["selected_index"]) is int, "LP03_KELLY28_REVIEW_SIGNED_SELECTION")
+        nonnegative = full if full > 0 else Decimal(0)
+        with localcontext(decimal_context_v1()):
+            nonnegative_text = str(nonnegative)
+        first = selections[0]
+        _native_require(first["operation"] == "NONNEGATIVE_FIRST_MAX"
+                        and first["selected_index"] == (1 if full > 0 else 0)
+                        and first["decimal_text"] == nonnegative_text, "LP03_KELLY28_REVIEW_SIGNED_SELECTION")
+        decimal_data(first["decimal_text"], expected=rational(first["exact"]))
+        with localcontext(decimal_context_v1()) as arithmetic:
+            arithmetic.clear_flags()
+            candidate = nonnegative * multiplier
+            actual_flags = tuple(sorted(signal.__name__ for signal, active in arithmetic.flags.items() if active))
+            _native_require(set(actual_flags) <= {"Rounded", "Subnormal", "Clamped"}
+                            and steps[0]["flags"] == "|".join(actual_flags)
+                            and steps[0]["decimal_text"] == str(candidate), "LP03_KELLY28_REVIEW_SIGNED_STEP_JOIN")
+        candidates = (candidate, *caps)
+        selected_index = 0
+        for index in range(1, len(candidates)):
+            if candidates[index] < candidates[selected_index]:
+                selected_index = index
+        second = selections[1]
+        with localcontext(decimal_context_v1()):
+            selected_text = str(candidates[selected_index])
+        _native_require(second["operation"] == "CANDIDATE_AND_CAPS_FIRST_MIN"
+                        and second["selected_index"] == selected_index and second["decimal_text"] == selected_text,
+                        "LP03_KELLY28_REVIEW_SIGNED_SELECTION")
+        raw = rational(second["exact"])
+        decimal_data(selected_text, expected=raw)
+        summary = proof["summary"]
+        fields(summary, ("result", "lower", "upper"))
+        _native_require(type(proof["original_raw_texts"]) is tuple and type(proof["preregistered_raw_texts"]) is tuple
+                        and proof["original_raw_texts"] == proof["preregistered_raw_texts"] == (selected_text,)
+                        and proof["projected_text"] == selected_text and rational(summary["result"]) == raw
+                        and rational(summary["lower"]) == lower and rational(summary["upper"]) == upper
+                        and lower <= raw <= upper, "LP03_KELLY28_REVIEW_SIGNED_SUMMARY_JOIN")
+        common.append((sources, tuple((key, value) for key, value in proof.items() if key != "steps"),
+            tuple(tuple((key, value) for key, value in step.items() if key != "position") for step in steps),
+            tuple(lane[key] for key in ("unit", *basis_fields, "baseline_ref", "posted_debit"))))
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_KELLY28_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+def _evidence_math26_review_calculation_v1(calculation, body):
+    """Closed signed proof data; no source admission or numerical-work reset."""
+    from decimal import localcontext
+    from fractions import Fraction
+    from .context import decimal_context_v1
+
+    def fields(value, names):
+        _native_require(isinstance(value, Mapping) and set(value) == set(names), "LP03_MATH26_REVIEW_SIGNED_FIELDS")
+    fields(calculation, ("method", "lane_calculations", "registration_bound_proof", "registration_numerical_consumption",
+        "original_numerical_limits", "review_numerical_limits", "numerical_consumption_before_final_encoding", "result"))
+    _native_require(calculation["method"] == "EXACT_ORDERED_DECIMAL_MATH26_FROM_ORIGINAL_RESEARCH_SOURCES"
+                    and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                    and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_26_CLOSURE_ONLY",
+                        "EXACT_DECIMAL_CONTEXT_INTERMEDIATES_ONLY", "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                    "LP03_MATH26_REVIEW_SIGNED_PROFILE")
+    original, remaining = calculation["original_numerical_limits"], calculation["review_numerical_limits"]
+    for limits in (original, remaining):
+        fields(limits, ("max_input_bits", "max_work_bits", "max_serialized_bytes"))
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=False)
+    counters = []
+    for key in ("registration_numerical_consumption", "numerical_consumption_before_final_encoding"):
+        counts = calculation[key]
+        fields(counts, ("integer_operations", "comparisons", "rational_normalizations", "log_series_terms", "square_roots",
+            "random_draws", "peak_preflight_bits", "serialized_bytes", "input_values", "decimal_parse_attempts",
+            "decimal_constructions", "integer_powers", "retained_decimal_inputs"))
+        for value in counts.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(all(counts[name] == 0 for name in ("log_series_terms", "square_roots", "random_draws"))
+                        and all(counts[name] > 0 for name in ("input_values", "decimal_parse_attempts", "serialized_bytes"))
+                        and counts["peak_preflight_bits"] <= original["max_work_bits"], "LP03_MATH26_REVIEW_SIGNED_COUNTERS")
+        counters.append(counts)
+    _native_require(remaining["max_input_bits"] == original["max_input_bits"]
+                    and remaining["max_work_bits"] == original["max_work_bits"]
+                    and remaining["max_serialized_bytes"] == original["max_serialized_bytes"] - counters[0]["serialized_bytes"]
+                    and counters[1]["serialized_bytes"] < remaining["max_serialized_bytes"],
+                    "LP03_MATH26_REVIEW_CUMULATIVE_ALLOWANCE")
+
+    def decimal_data(text, *, expected=None):
+        # Canonical source text needs no exponent expansion. A claimed work
+        # limit in signed data is not authority to allocate an integer power.
+        _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"]),
+                        "LP03_MATH26_REVIEW_SIGNED_DECIMAL")
+        match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+        _native_require(match is not None, "LP03_MATH26_REVIEW_SIGNED_DECIMAL")
+        whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+        _native_require(len(exponent_digits) <= 18 and 4 * (len(whole) + len(fraction)) <= original["max_work_bits"],
+                        "LP03_MATH26_REVIEW_SIGNED_DECIMAL_BOUND")
+        exponent = int(exponent_digits) * (-1 if match[4] == "-" else 1) - len(fraction)
+        _native_require(max(4 * (len(whole) + len(fraction) + max(exponent, 0)), 1 + 4 * max(-exponent, 0))
+                        <= original["max_work_bits"], "LP03_MATH26_REVIEW_SIGNED_DECIMAL_BOUND")
+        try:
+            value = Decimal(text)
+        except ArithmeticError:
+            _native_require(False, "LP03_MATH26_REVIEW_SIGNED_DECIMAL")
+        with localcontext(decimal_context_v1()):
+            _native_require(str(value) == text, "LP03_MATH26_REVIEW_SIGNED_DECIMAL")
+        if expected is None:
+            return value
+        # Ratio members have separately bounded text lengths. Their actual
+        # integer sizes plus this coefficient bound every allocation before
+        # Decimal.as_integer_ratio can expand the exponent, even if a forged
+        # payload declares an enormous numerical-work allowance.
+        allocation_bound = 4 * (len(whole) + len(fraction) + abs(expected.numerator).bit_length()
+            + expected.denominator.bit_length()) + 8
+        _native_require(value.is_zero() or max(4 * (len(whole) + len(fraction) + max(exponent, 0)),
+            1 + 4 * max(-exponent, 0)) <= allocation_bound, "LP03_MATH26_REVIEW_SIGNED_RATIO_EXPANSION_BOUND")
+        result = Fraction(0) if value.is_zero() else Fraction(value)
+        _native_require(result == expected, "LP03_MATH26_REVIEW_SIGNED_STEP_JOIN")
+        return result
+
+    def rational(value):
+        fields(value, ("numerator", "denominator"))
+        for key in value:
+            text = value[key]
+            _native_require(type(text) is str and 0 < len(text) <= min(65536, original["max_work_bits"])
+                            and re.fullmatch(r"0|-?[1-9][0-9]*" if key == "numerator" else r"[1-9][0-9]*", text) is not None,
+                            "LP03_MATH26_REVIEW_SIGNED_RATIONAL")
+        try:
+            numerator, denominator = int(value["numerator"]), int(value["denominator"])
+        except ValueError:
+            _native_require(False, "LP03_MATH26_REVIEW_SIGNED_RATIONAL")
+        _native_require(max(numerator.bit_length(), denominator.bit_length()) <= original["max_work_bits"],
+                        "LP03_MATH26_REVIEW_SIGNED_RATIONAL_BOUND")
+        result = Fraction(numerator, denominator)
+        _native_require((result.numerator, result.denominator) == (numerator, denominator), "LP03_MATH26_REVIEW_SIGNED_RATIONAL")
+        return result
+
+    bounds = calculation["registration_bound_proof"]
+    fields(bounds, ("profile", "action_count", "scenario_count", "probability_sum", "declared_utility_lower",
+        "declared_utility_upper", "declared_cost_cap", "fixed_lower", "fixed_upper"))
+    _native_require(bounds["profile"] == "DECLARED_MATH26_UTILITY_AND_COST_ENCLOSURE_V1", "LP03_MATH26_REVIEW_SIGNED_BOUNDS")
+    for key in ("action_count", "scenario_count"):
+        _public_counter_v1(bounds[key], allow_zero=False)
+    a, s = bounds["action_count"], bounds["scenario_count"]
+    _native_require(96 + a + s * (a + 1) + 4 + 15 * (3 * s + 2) + 4 * s <= 4096,
+                    "LP03_MATH26_REVIEW_SIGNED_ROSTER_BOUND")
+    bound_values = {key: rational(bounds[key]) for key in ("probability_sum", "declared_utility_lower",
+        "declared_utility_upper", "declared_cost_cap", "fixed_lower", "fixed_upper")}
+    _native_require(bound_values["probability_sum"] == 1, "LP03_MATH26_REVIEW_SIGNED_BOUNDS")
+    lanes, common = calculation["lane_calculations"], []
+    _native_require(type(lanes) is tuple and len(lanes) == 2, "LP03_MATH26_REVIEW_SIGNED_LANES")
+    for lane_index, (lane, name) in enumerate(zip(lanes, ("REPLAY", "PAPER"))):
+        fields(lane, ("lane", "event_segment_ref", "source_record_refs", "proof", "raw_ref", "projection_ref", "unit", "basis",
+            "utility_basis_ref", "horizon_ref", "research_decision_ref", "baseline_ref", "posted_debit", "posted_credit"))
+        for key in set(lane) - {"source_record_refs", "proof"}:
+            _native_ident(lane[key])
+        _native_require(lane["lane"] == name and lane["basis"] == "EXPECTED_VALUE_OF_INFORMATION_PER_DECISION"
+                        and decimal_data(lane["posted_debit"]) == decimal_data(lane["posted_credit"]),
+                        "LP03_MATH26_REVIEW_SIGNED_LANE_PROFILE")
+        sources = lane["source_record_refs"]
+        _native_require(type(sources) is tuple and len(sources) == 3, "LP03_MATH26_REVIEW_SIGNED_SOURCE_ROSTER")
+        refs = []
+        for source in sources:
+            fields(source, ("store_id", "record_id"))
+            refs.append(EvidenceRecordRefV1(source["store_id"], source["record_id"]))
+        _native_require(len(set(refs)) == 3, "LP03_MATH26_REVIEW_SIGNED_SOURCE_ROSTER")
+        proof = lane["proof"]
+        fields(proof, ("profile", "context", "current_action_texts", "scenario_texts", "acquisition_cost_text",
+            "declared_utility_lower", "declared_utility_upper", "declared_cost_cap", "scenario_max_positions", "steps", "summary"))
+        context = dict(precision=34, rounding="ROUND_HALF_EVEN", Emin=-999999, Emax=999999, capitals=1, clamp=0,
+            trapped_signals=("DivisionByZero", "FloatOperation", "InvalidOperation", "Overflow"),
+            flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+        _native_require(proof["profile"] == "EXACT_DECIMAL_ORDERED_MATH26_INTERMEDIATES_V1"
+                        and proof["context"] == context
+                        and all(type(proof["context"][key]) is type(value) for key, value in context.items()),
+                        "LP03_MATH26_REVIEW_SIGNED_CONTEXT")
+        current, scenarios = proof["current_action_texts"], proof["scenario_texts"]
+        _native_require(type(current) is tuple and len(current) == a and type(scenarios) is tuple and len(scenarios) == s
+                        and all(type(row) is tuple and len(row) == 2 and type(row[1]) is tuple and len(row[1]) == a for row in scenarios),
+                        "LP03_MATH26_REVIEW_SIGNED_INPUT_ROSTER")
+        for text in (*current, *(text for probability, values in scenarios for text in (probability, *values)), proof["acquisition_cost_text"]):
+            decimal_data(text)
+        for key in ("declared_utility_lower", "declared_utility_upper", "declared_cost_cap"):
+            decimal_data(proof[key], expected=bound_values[key])
+        positions = proof["scenario_max_positions"]
+        _native_require(type(positions) is tuple and len(positions) == s
+                        and all(type(position) is int and 0 <= position < a for position in positions),
+                        "LP03_MATH26_REVIEW_SIGNED_MAX_POSITIONS")
+        labels = tuple(label + "::" + str(i) for i in range(s)
+            for label in ("PROBABILITY_PREFIX", "WEIGHTED_SCENARIO_MAX", "POSTERIOR_PREFIX")) + ("SUBTRACT_CURRENT_MAX", "SUBTRACT_ACQUISITION_COST")
+        steps = proof["steps"]
+        _native_require(type(steps) is tuple and len(steps) == len(labels), "LP03_MATH26_REVIEW_SIGNED_STEPS")
+        for index, (step, label) in enumerate(zip(steps, labels)):
+            fields(step, ("position", "operation", "exact", "decimal_text", "flags"))
+            _native_require(type(step["position"]) is int and step["position"] == lane_index * len(labels) + index
+                            and step["operation"] == label and type(step["decimal_text"]) is str and len(step["decimal_text"]) <= 128
+                            and type(step["flags"]) is str, "LP03_MATH26_REVIEW_SIGNED_STEPS")
+            flags = () if step["flags"] == "" else tuple(step["flags"].split("|"))
+            _native_require(flags == tuple(sorted(set(flags))) and set(flags) <= {"Rounded", "Subnormal", "Clamped"},
+                            "LP03_MATH26_REVIEW_SIGNED_STEP_JOIN")
+            decimal_data(step["decimal_text"], expected=rational(step["exact"]))
+        summary = proof["summary"]
+        fields(summary, ("result", "lower", "upper", "current_max_position", "original_raw_text", "projected_text", "preregistered_text"))
+        _native_require(type(summary["current_max_position"]) is int and 0 <= summary["current_max_position"] < a
+                        and summary["original_raw_text"] == summary["projected_text"] == summary["preregistered_text"] == steps[-1]["decimal_text"]
+                        and rational(summary["result"]) == rational(steps[-1]["exact"])
+                        and rational(summary["lower"]) == bound_values["fixed_lower"]
+                        and rational(summary["upper"]) == bound_values["fixed_upper"], "LP03_MATH26_REVIEW_SIGNED_SUMMARY_JOIN")
+        common.append((sources, tuple((key, value) for key, value in proof.items() if key != "steps"),
+            tuple(tuple((key, value) for key, value in step.items() if key != "position") for step in steps),
+            tuple(lane[key] for key in ("unit", "utility_basis_ref", "horizon_ref", "research_decision_ref", "baseline_ref", "posted_debit"))))
+    _native_require(common[0] == common[1] and body.observed_metric_refs == tuple(lane["projection_ref"] for lane in lanes)
+                    and len(set(body.observed_metric_refs)) == 2, "LP03_MATH26_REVIEW_SIGNED_ORIGINAL_LANE_JOIN")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceReviewDecisionPayloadV1:
+    record_body: Mapping[str, object]
+    independent_calculation: Mapping[str, object]
+    consumer_principal: str
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1, _evidence_canonical_object_v1, deterministic_json
+        _native_ident(self.consumer_principal)
+        _native_require(isinstance(self.record_body, Mapping) and set(self.record_body)
+                        == {member.name for member in dataclass_fields(EvidenceIndependentReviewRecordV1)
+                            if member.name != "reviewer_decision_signature"}, "LP03_REVIEW_SIGNED_BODY_FIELDS")
+        body = _EvidenceIndependentReviewBodyV1.from_canonical_mapping(_evidence_canonical_object_v1(
+            deterministic_json(self.record_body).encode("utf-8")))
+        calculation = _evidence_frozen_data_v1(self.independent_calculation)
+        _native_require(isinstance(calculation, Mapping), "LP03_REVIEW_METHOD_FIELDS")
+        if calculation.get("method") == "EXACT_ORDERED_DECIMAL_MATH27_FROM_ORIGINAL_PROBABILITY_PAYOFF_SOURCES":
+            _evidence_kelly27_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_ORDERED_DECIMAL_MATH28_FROM_ORIGINAL_PUBLISHED_KELLY_AND_CONSTRAINTS":
+            _evidence_kelly28_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORIGINAL_MARKET_CONVERSION_AND_BINARY64_EDGE_FROM_FOUR_SOURCES":
+            _evidence_probability_edge_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_ORDERED_DECIMAL_CASHFLOW_FROM_ORIGINAL_SIGNED_TOTAL_SOURCES":
+            _evidence_cashflow_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_ORDERED_DECIMAL_MARKET_FROM_ORIGINAL_PRICE_SOURCES":
+            _evidence_market_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_ORDERED_DECIMAL_MATH26_FROM_ORIGINAL_RESEARCH_SOURCES":
+            _evidence_math26_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_MULTIPLE_TESTING_FROM_ORIGINAL_DECLARED_LEDGER_AND_Q_POLICY":
+            _evidence_multiple_testing_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORIGINAL_MEASURED_QUANTUM_CONSTRUCTOR_REVIEW_V1":
+            _evidence_original_quantum_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") in ("ORIGINAL_PRIVATE_EXECUTION_DECIMAL_REVIEW_V1",
+                "ORIGINAL_PRIVATE_EXECUTION_BINARY64_REVIEW_V1", "ORIGINAL_PRIVATE_EXECUTION_BINARY64_REVIEW_V2"):
+            _evidence_private_execution_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORIGINAL_PRIVATE_ANALYTIC_REVIEW_V1":
+            _evidence_private_analytic_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORIGINAL_RECORDED_OPE_POINT_ESTIMATOR_REVIEW_V1":
+            _evidence_recorded_ope_point_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORIGINAL_RECORDED_DR_ESTIMATOR_AND_CONDITIONAL_SCORE_INTERVAL":
+            _evidence_recorded_dr_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") in ("ORIGINAL_TOPOLOGY_AND_COMPLETE_HELD_OUT_SCORING",
+                "ORIGINAL_TOPOLOGY_AND_COMPLETE_HELD_OUT_SCORING_COMPACT_V1"):
+            _evidence_heldout_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_CSCV_FROM_ORIGINAL_MATRIX_AND_GROUP_POLICY":
+            _evidence_cscv_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_SHARPE_FROM_ORIGINAL_COMPLETE_LEDGER_AND_MOMENTS":
+            _evidence_sharpe_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_SPA_FROM_ORIGINAL_COMPLETE_FAMILY_AND_POLICY":
+            _evidence_spa_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_REALITY_CHECK_FROM_ORIGINAL_COMPLETE_FAMILY_AND_POLICY":
+            _evidence_reality_check_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_STATIONARY_BOOTSTRAP_FROM_ORIGINAL_SERIES_AND_POLICY":
+            _evidence_bootstrap_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "ORDERED_WILSON_FROM_ORIGINAL_COUNTS_AND_CONFIDENCE_POLICY":
+            _evidence_wilson_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_CALIBRATION_FROM_ORIGINAL_DATASET_AND_BIN_POLICY":
+            _evidence_calibration_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "RATIONAL_LOG_LOSS_FROM_ORIGINAL_DATASET_AND_CLIP_POLICY":
+            _evidence_log_loss_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        if calculation.get("method") == "EXACT_RATIONAL_BRIER_WITH_BINARY64_INTERMEDIATE_PROOFS":
+            _evidence_brier_review_calculation_v1(calculation, body)
+            object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+            object.__setattr__(self, "independent_calculation", calculation)
+            return
+        _native_require(set(calculation) == {
+            "method", "lane_calculations", "preregistered_expected", "result"}, "LP03_REVIEW_METHOD_FIELDS")
+        _native_require(calculation["method"] == "EXACT_RATIONAL_MIDPOINT_FROM_ORIGINAL_EVENT"
+                        and calculation["result"] == "BOTH_LANES_MATCH_PREREGISTERED_EXPECTATION"
+                        and body.limitations == ("SOFTWARE_CONFORMANCE_ONLY", "SELECTED_MATH_03_CLOSURE_ONLY",
+                                                 "NATIVE_CLOCK_ACCURACY_NOT_QUALIFIED"),
+                        "LP03_REVIEW_SELECTED_METHOD")
+        lanes = calculation["lane_calculations"]
+        _native_require(type(lanes) in (tuple, list) and len(lanes) == 2, "LP03_REVIEW_METHOD_LANE_ROSTER")
+        for lane, name in zip(lanes, ("REPLAY", "PAPER")):
+            _native_require(isinstance(lane, Mapping) and set(lane) == {
+                "lane", "event_segment_ref", "source_record_ref", "bid", "ask", "independent_value_rational", "raw_ref",
+                "raw_value", "projection_ref", "projection_value", "unit", "basis", "baseline_ref", "posted_debit", "posted_credit"}
+                and lane["lane"] == name, "LP03_REVIEW_METHOD_LANE_FIELDS")
+            for field in set(lane) - {"independent_value_rational", "source_record_ref"}:
+                _native_ident(lane[field])
+            source = lane["source_record_ref"]
+            _native_require(isinstance(source, Mapping) and set(source) == {"store_id", "record_id"}, "LP03_REVIEW_METHOD_SOURCE_REF")
+            EvidenceRecordRefV1(source["store_id"], source["record_id"])
+            rational = lane["independent_value_rational"]
+            _native_require(type(rational) in (tuple, list) and len(rational) == 2
+                            and type(rational[0]) is int and type(rational[1]) is int and rational[1] > 0,
+                            "LP03_REVIEW_METHOD_RATIONAL")
+        _native_ident(calculation["preregistered_expected"])
+        object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+        object.__setattr__(self, "independent_calculation", calculation)
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        return cls(**_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceDeliveryRecordV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="DELIVERY", init=False)
+    receiver_owner: str
+    receiver_purpose: str
+    bundle_or_conformance_store: str
+    bundle_or_conformance_ref: str
+    bundle_or_conformance_version: str
+    payload_reference_roster: tuple[EvidenceRecordRefV1, ...]
+    attempt_ordinal: int
+    expiry: int
+    previous_attempt_ref_or_absence: str | EvidenceAbsenceV1
+    sender_outbox_ref: str
+
+    def __post_init__(self):
+        EvidenceRecordHeaderV1.__post_init__(self)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and self.receiver_owner in ("READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1")
+                        and self.receiver_purpose == "EVIDENCE_RECEIVER_ACCEPTANCE_V1"
+                        and self.bundle_or_conformance_version == "R1"
+                        and self.bundle_or_conformance_ref.endswith("::CONFORMANCE:R1"), "LP03_DELIVERY_SELECTED_SCOPE")
+        for name in ("bundle_or_conformance_store", "bundle_or_conformance_ref", "sender_outbox_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.payload_reference_roster) is tuple and bool(self.payload_reference_roster)
+                        and all(type(ref) is EvidenceRecordRefV1 for ref in self.payload_reference_roster)
+                        and len(set(self.payload_reference_roster)) == len(self.payload_reference_roster)
+                        and EvidenceRecordRefV1(self.bundle_or_conformance_store, self.bundle_or_conformance_ref)
+                            in self.payload_reference_roster, "LP03_DELIVERY_REFERENCE_ROSTER")
+        _public_counter_v1(self.attempt_ordinal, allow_zero=False)
+        _public_counter_v1(self.expiry, allow_zero=False)
+        _native_require(self.created_wall_ns < self.expiry, "LP03_DELIVERY_EXPIRED_AT_CREATION")
+        if type(self.previous_attempt_ref_or_absence) is EvidenceAbsenceV1:
+            _native_require(self.attempt_ordinal == 1 and self.previous_attempt_ref_or_absence.reason == "FIRST_DELIVERY_ATTEMPT",
+                            "LP03_DELIVERY_PREDECESSOR")
+        else:
+            _native_ident(self.previous_attempt_ref_or_absence)
+            _native_require(self.attempt_ordinal > 1, "LP03_DELIVERY_PREDECESSOR")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["payload_reference_roster"] = _evidence_tuple_decode_v1(data["payload_reference_roster"], EvidenceRecordRefV1.from_canonical_mapping)
+        data["previous_attempt_ref_or_absence"] = _evidence_absence_or_ref_v1(data["previous_attempt_ref_or_absence"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceReceiverAdmissionPayloadV1:
+    grant_ref: str
+    original_owner_envelope_ref: str
+    candidate_ref: EvidenceRecordRefV1
+    candidate_version: str
+    delivery_ref: str
+    receiver_owner: str
+    receiver_principal: str
+    receiver_store_id: str
+    protocol_ref: str
+    input_lock_ref: str
+    origin: EvidenceOriginV1
+    generation: int
+    source_purpose: str
+    limits: Mapping[str, object]
+    deadline: EvidenceProcessDeadlineV1
+    expiry: int
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1
+        for name in ("grant_ref", "original_owner_envelope_ref", "delivery_ref", "receiver_principal", "receiver_store_id", "protocol_ref", "input_lock_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.candidate_ref) is EvidenceRecordRefV1 and self.candidate_version == "R1"
+                        and self.candidate_ref.record_id.endswith("::CONFORMANCE:R1")
+                        and self.receiver_owner in ("READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1")
+                        and self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and self.source_purpose == "EVIDENCE_RECEIVER_ACCEPTANCE_V1"
+                        and type(self.deadline) is EvidenceProcessDeadlineV1, "LP03_RECEIVER_ADMISSION_SCOPE")
+        _public_counter_v1(self.generation, allow_zero=True)
+        _public_counter_v1(self.expiry, allow_zero=False)
+        limits = self.limits
+        _native_require(isinstance(limits, Mapping) and set(limits) == {
+            "maximum_delivery_attempts", "maximum_wall_ns", "maximum_input_reads", "maximum_input_bytes",
+            "maximum_persistent_operations", "maximum_persistent_bytes", "exclusive_expiry_wall_ns", "required_receiver_ids"},
+            "LP03_RECEIVER_LIMIT_FIELDS")
+        for name, value in limits.items():
+            if name != "required_receiver_ids":
+                _public_counter_v1(value, allow_zero=False)
+        _public_refs_v1(limits["required_receiver_ids"])
+        _native_require(len(limits["required_receiver_ids"]) == 4
+                        and set(limits["required_receiver_ids"]) == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"}
+                        and self.expiry <= limits["exclusive_expiry_wall_ns"], "LP03_RECEIVER_LIMIT_SCOPE")
+        object.__setattr__(self, "limits", _evidence_frozen_data_v1(limits))
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = dict(_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+        data["candidate_ref"] = EvidenceRecordRefV1.from_canonical_mapping(data["candidate_ref"])
+        data["deadline"] = EvidenceProcessDeadlineV1.from_canonical_mapping(data["deadline"])
+        _native_require(data["origin"] == EvidenceOriginV1.SOFTWARE_CONFORMANCE.value, "LP03_RECEIVER_ADMISSION_ORIGIN")
+        data["origin"] = EvidenceOriginV1(data["origin"])
+        _native_require(isinstance(data["limits"], Mapping) and "required_receiver_ids" in data["limits"], "LP03_RECEIVER_LIMIT_FIELDS")
+        data["limits"] = {**data["limits"], "required_receiver_ids": _evidence_tuple_decode_v1(data["limits"]["required_receiver_ids"])}
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class _EvidenceReceiverAckBodyV1(EvidenceRecordHeaderV1):
+    kind: str = field(default="RECEIVER_ACK", init=False)
+    delivery_ref: str
+    original_candidate_store: str
+    original_candidate_ref: str
+    original_candidate_version: str
+    receiving_owner: str
+    receiving_principal: str
+    receiver_admission_ref: str
+    state: str
+    reason_codes: tuple[str, ...]
+    received_wall_ns: int
+    original_readback_ref: str
+    durable_accept_observation: Mapping[str, object]
+    expiry: int
+
+    def __post_init__(self):
+        from .latency_policy import _evidence_storage_observation_v1
+        from .serialization import _evidence_frozen_data_v1
+        EvidenceRecordHeaderV1.__post_init__(self)
+        for name in ("delivery_ref", "original_candidate_store", "original_candidate_ref", "receiver_admission_ref", "original_readback_ref"):
+            _native_ident(getattr(self, name))
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE and self.original_candidate_version == "R1"
+                        and self.original_candidate_ref.endswith("::CONFORMANCE:R1")
+                        and self.receiving_owner in ("READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1")
+                        and self.producing_owner == self.receiving_owner and self.producing_principal == self.receiving_principal
+                        and self.state in ("ACCEPTED", "REJECTED", "DEFERRED"), "LP03_RECEIVER_ACK_SCOPE")
+        _public_refs_v1(self.reason_codes)
+        _native_require(bool(self.reason_codes), "LP03_RECEIVER_ACK_REASON_REQUIRED")
+        _public_counter_v1(self.received_wall_ns, allow_zero=True)
+        _public_counter_v1(self.expiry, allow_zero=False)
+        observations = self.durable_accept_observation
+        _native_require(isinstance(observations, Mapping) and set(observations) == {
+            "successful_commit_return_observation", "independent_readback_observation"}, "LP03_RECEIVER_ACCEPT_OBSERVATION_FIELDS")
+        first = _evidence_storage_observation_v1(observations["successful_commit_return_observation"])
+        second = _evidence_storage_observation_v1(observations["independent_readback_observation"])
+        _native_require(first["clock_domain_id"] == self.clock_domain_id
+                        and all(first[name] == second[name] for name in (
+                            "clock_domain_id", "process_identity_ref", "boot_identity_ref", "clock_declarations"))
+                        and all(first[name] <= second[name] for name in ("wall_ns", "monotonic_ns", "process_cpu_ns"))
+                        and self.received_wall_ns <= first["wall_ns"] <= second["wall_ns"] <= self.created_wall_ns < self.expiry,
+                        "LP03_RECEIVER_ACCEPT_OBSERVATION_ORDER")
+        object.__setattr__(self, "durable_accept_observation", _evidence_frozen_data_v1(dict(
+            successful_commit_return_observation=first, independent_readback_observation=second)))
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["reason_codes"] = _evidence_tuple_decode_v1(data["reason_codes"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceReceiverAckRecordV1(_EvidenceReceiverAckBodyV1):
+    signature: EvidenceSignedMessageV1
+
+    def __post_init__(self):
+        from .serialization import _evidence_canonical_object_v1, deterministic_json
+        _EvidenceReceiverAckBodyV1.__post_init__(self)
+        _native_require(type(self.signature) is EvidenceSignedMessageV1, "LP03_RECEIVER_ACK_SIGNATURE_TYPE")
+        signed = EvidenceAuthorizationMessageV1.from_canonical_mapping(_evidence_canonical_object_v1(self.signature.canonical_message.encode("utf-8")))
+        unsigned = {member.name: getattr(self, member.name) for member in dataclass_fields(_EvidenceReceiverAckBodyV1)}
+        _native_require(signed.kind is EvidenceMessageKindV1.RECEIVER_ACK
+                        and deterministic_json(signed.payload["record_body"]) == deterministic_json(unsigned), "LP03_RECEIVER_ACK_SIGNED_BODY_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        data = _evidence_header_decode_v1(cls, value)
+        data["signature"] = EvidenceSignedMessageV1.from_canonical_mapping(data["signature"])
+        data["reason_codes"] = _evidence_tuple_decode_v1(data["reason_codes"])
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceReceiverAckPayloadV1:
+    record_body: Mapping[str, object]
+    consumer_principal: str
+
+    def __post_init__(self):
+        from .serialization import _evidence_frozen_data_v1, _evidence_canonical_object_v1, deterministic_json
+        _native_ident(self.consumer_principal)
+        _native_require(isinstance(self.record_body, Mapping) and set(self.record_body)
+                        == {member.name for member in dataclass_fields(_EvidenceReceiverAckBodyV1)}, "LP03_RECEIVER_ACK_BODY_FIELDS")
+        _EvidenceReceiverAckBodyV1.from_canonical_mapping(_evidence_canonical_object_v1(deterministic_json(self.record_body).encode("utf-8")))
+        object.__setattr__(self, "record_body", _evidence_frozen_data_v1(self.record_body))
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        return cls(**_native_obj(value, tuple(member.name for member in dataclass_fields(cls))))
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceConformanceSourceRightsV1:
+    """Original synthetic owner's policy data, never native source authority.
+
+    Explicit protected test composition retains this object with the original
+    owner. Deserializing it does not bind a registry or authorize any read.
+    """
+
+    rights_ref: str
+    rights_version: str
+    source_version: str
+    origin: EvidenceOriginV1
+    generation: int
+    source_selection: EvidenceSourceSelectionV1
+    consumer_principals: tuple[str, ...]
+    source_purposes: tuple[str, ...]
+    valid_from_wall_ns: int
+    exclusive_expiry_wall_ns: int
+    exclusive_retention_wall_ns: int
+    native_clock_companions: tuple[tuple[str, tuple[tuple[str, int], ...]], ...]
+
+    def __post_init__(self) -> None:
+        for name in ("rights_ref", "rights_version", "source_version"):
+            _native_ident(getattr(self, name))
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE,
+                        "LP03_CONFORMANCE_RIGHTS_NOT_NATIVE_AUTHORITY")
+        _public_counter_v1(self.generation, allow_zero=True)
+        _native_require(type(self.source_selection) is EvidenceSourceSelectionV1,
+                        "LP03_ORIGINAL_RIGHTS_SELECTION_TYPE")
+        _native_require(type(self.source_selection.selection) is EvidenceExactSelectionV1,
+                        "LP03_CONFORMANCE_OWNER_PREDICATE_UNAVAILABLE")
+        _native_require(self.source_selection.required_original_rights_refs == (self.rights_ref,),
+                        "LP03_ORIGINAL_RIGHTS_IDENTITY")
+        _public_refs_v1(self.consumer_principals)
+        _public_refs_v1(self.source_purposes)
+        _native_require("EVIDENCE_INPUT_ASSEMBLY_V1" in self.source_purposes and set(self.source_purposes) <= {
+            "EVIDENCE_INPUT_ASSEMBLY_V1", "EVIDENCE_EXPERIMENT_REGISTRATION_V1", "EVIDENCE_LANE_EXECUTION_V1",
+            "EVIDENCE_LANE_REGISTRATION_V1", "EVIDENCE_BUNDLE_CONSTRUCTION_V1", "EVIDENCE_INDEPENDENT_REVIEW_V1", "EVIDENCE_RECEIVER_ACCEPTANCE_V1"},
+                        "LP03_CONFORMANCE_SOURCE_PURPOSE_UNAVAILABLE")
+        for name in ("valid_from_wall_ns", "exclusive_expiry_wall_ns", "exclusive_retention_wall_ns"):
+            _public_counter_v1(getattr(self, name), allow_zero=True)
+        _native_require(self.valid_from_wall_ns < self.exclusive_expiry_wall_ns
+                        <= self.exclusive_retention_wall_ns, "LP03_ORIGINAL_RIGHTS_VALIDITY")
+        rows = self.native_clock_companions
+        _native_require(type(rows) is tuple and len(rows) == len(self.source_selection.selection.record_refs),
+                        "LP03_ORIGINAL_CLOCK_ROSTER")
+        for row in rows:
+            _native_require(type(row) is tuple and len(row) == 2 and type(row[1]) is tuple,
+                            "LP03_ORIGINAL_CLOCK_ROW")
+            _native_ident(row[0])
+            _native_require(len(row[1]) == 6 and all(type(pair) is tuple and len(pair) == 2 for pair in row[1]),
+                            "LP03_ORIGINAL_CLOCK_FIELDS")
+            _native_require(tuple(pair[0] for pair in row[1]) == (
+                "observed_time", "effective_time", "available_time", "received_time", "processed_time", "as_of_time"),
+                "LP03_ORIGINAL_CLOCK_FIELDS")
+            for _, value in row[1]:
+                _public_counter_v1(value, allow_zero=True)
+            clocks = dict(row[1])
+            _native_require(clocks["observed_time"] <= clocks["available_time"] <= clocks["received_time"]
+                            <= clocks["processed_time"] <= clocks["as_of_time"],
+                            "LP03_ORIGINAL_NATIVE_CLOCK_ORDER")
+        _native_require(tuple(row[0] for row in rows) == self.source_selection.selection.record_refs,
+                        "LP03_ORIGINAL_CLOCK_RECORD_JOIN")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceConformanceSourceRightsV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        _native_require(data["origin"] == "SOFTWARE_CONFORMANCE" and type(data["origin"]) is str,
+                        "LP03_CONFORMANCE_RIGHTS_NOT_NATIVE_AUTHORITY")
+        data["origin"] = EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        data["source_selection"] = EvidenceSourceSelectionV1.from_canonical_mapping(data["source_selection"])
+        for name in ("consumer_principals", "source_purposes"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        rows = _evidence_tuple_decode_v1(data["native_clock_companions"])
+        decoded = []
+        for row in rows:
+            pair = _evidence_tuple_decode_v1(row)
+            _native_require(len(pair) == 2, "LP03_ORIGINAL_CLOCK_ROW")
+            decoded.append((pair[0], tuple(_evidence_tuple_decode_v1(item)
+                                          for item in _evidence_tuple_decode_v1(pair[1]))))
+        data["native_clock_companions"] = tuple(decoded)
+        return cls(**data)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceSourceSliceV1:
+    """Data-only historical view; it cannot recreate any live source handle."""
+
+    original_record_refs: tuple[EvidenceRecordRefV1, ...]
+    reconstructed_canonical_events: tuple[Mapping[str, object], ...]
+    original_native_clock_companions: tuple[tuple[str, tuple[tuple[str, int], ...]], ...]
+    access_wall_ns: int
+    origin: EvidenceOriginV1
+    rights_refs: tuple[str, ...]
+    revision_limitations: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        from .serialization import _evidence_frozen_data_v1
+        _native_require(type(self.original_record_refs) is tuple and 0 < len(self.original_record_refs) <= 4096
+                        and all(type(ref) is EvidenceRecordRefV1 for ref in self.original_record_refs)
+                        and len(set(self.original_record_refs)) == len(self.original_record_refs),
+                        "LP03_SOURCE_SLICE_ORIGINAL_REFS")
+        _native_require(type(self.origin) is EvidenceOriginV1, "LP03_SOURCE_SLICE_ORIGIN")
+        _public_counter_v1(self.access_wall_ns, allow_zero=True)
+        _public_refs_v1(self.rights_refs)
+        _public_refs_v1(self.revision_limitations, allow_empty=True)
+        _native_require(type(self.reconstructed_canonical_events) is tuple
+                        and len(self.reconstructed_canonical_events) == len(self.original_record_refs),
+                        "LP03_SOURCE_SLICE_EVENT_ROSTER")
+        frozen = _evidence_frozen_data_v1(self.reconstructed_canonical_events)
+        _native_require(all(isinstance(row, Mapping) for row in frozen), "LP03_SOURCE_SLICE_EVENT_DATA")
+        for ref, row in zip(self.original_record_refs, frozen):
+            _native_require(set(row) == {"representation", "origin", "record_ref", "owner_id", "record_kind",
+                "schema_id", "schema_version", "context_id", "scope", "source_epoch_id", "input_version",
+                "native_clocks", "ttl_ns", "values", "authorized_binding_ids", "producer_receipt_id",
+                "producer_receipt_type", "source_state_and_claim_lineage", "provider_sequence", "revision",
+                "prior_revision_available_wall_ns_or_absence", "source_conflict"}, "LP03_SOURCE_SLICE_EVENT_FIELDS")
+            _native_require(row["representation"] == "OWNER_PACKET_V1" and row["origin"] == self.origin.value
+                            and row["record_ref"] == ref.record_id and row["source_conflict"] is False,
+                            "LP03_SOURCE_SLICE_EVENT_JOIN")
+            for name in ("record_ref", "owner_id", "record_kind", "schema_id", "schema_version", "context_id",
+                         "source_epoch_id", "input_version", "producer_receipt_id", "producer_receipt_type"):
+                _native_ident(row[name])
+            _native_text(row["source_state_and_claim_lineage"])
+            _native_require(isinstance(row["scope"], Mapping), "LP03_SOURCE_SLICE_ECONOMIC_SCOPE")
+            ComputationScopeV1(**_native_obj(dict(row["scope"]), tuple(f.name for f in dataclass_fields(ComputationScopeV1))))
+            _public_counter_v1(row["ttl_ns"])
+            _public_refs_v1(row["authorized_binding_ids"])
+            _native_require(isinstance(row["values"], Mapping) and bool(row["values"]), "LP03_SOURCE_SLICE_VALUES")
+            for name in row["values"]:
+                _native_ident(name)
+            for name, reason in (("provider_sequence", "PROVIDER_SEQUENCE_UNAVAILABLE"),
+                                 ("revision", "SOURCE_REVISION_UNAVAILABLE"),
+                                 ("prior_revision_available_wall_ns_or_absence", "NO_PRIOR_REVISION_CLOCK")):
+                value = row[name]
+                if isinstance(value, Mapping):
+                    absence = EvidenceAbsenceV1.from_canonical_mapping(dict(value))
+                    _native_require(absence.reason == reason, "LP03_SOURCE_SLICE_REVISION_ABSENCE")
+                elif type(value) is str and name != "prior_revision_available_wall_ns_or_absence":
+                    _native_ident(value)
+                else:
+                    _public_counter_v1(value, allow_zero=True)
+        object.__setattr__(self, "reconstructed_canonical_events", frozen)
+        clocks = self.original_native_clock_companions
+        _native_require(type(clocks) is tuple and len(clocks) == len(self.original_record_refs),
+                        "LP03_SOURCE_SLICE_CLOCK_ROSTER")
+        for ref, row, event in zip(self.original_record_refs, clocks, frozen):
+            _native_require(type(row) is tuple and len(row) == 2 and row[0] == ref.record_id
+                            and type(row[1]) is tuple and len(row[1]) == 6,
+                            "LP03_SOURCE_SLICE_CLOCK_JOIN")
+            _native_require(all(type(pair) is tuple and len(pair) == 2 for pair in row[1])
+                            and tuple(pair[0] for pair in row[1]) == (
+                                "observed_time", "effective_time", "available_time", "received_time", "processed_time", "as_of_time"),
+                            "LP03_SOURCE_SLICE_CLOCK_FIELDS")
+            for _, value in row[1]:
+                _public_counter_v1(value, allow_zero=True)
+            values = dict(row[1])
+            _native_require(isinstance(event["native_clocks"], Mapping) and dict(event["native_clocks"]) == values,
+                            "LP03_SOURCE_SLICE_EVENT_CLOCK_JOIN")
+            _native_require(values["observed_time"] <= values["available_time"] <= values["received_time"]
+                            <= values["processed_time"] <= values["as_of_time"] <= self.access_wall_ns,
+                            "LP03_SOURCE_SLICE_CLOCK_ORDER")
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "EvidenceSourceSliceV1":
+        data = dict(_native_obj(value, tuple(f.name for f in dataclass_fields(cls))))
+        _native_require(type(data["origin"]) is str, "LP03_SOURCE_SLICE_ORIGIN")
+        try:
+            data["origin"] = EvidenceOriginV1(data["origin"])
+        except ValueError as exc:
+            raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_SOURCE_SLICE_ORIGIN") from exc
+        data["original_record_refs"] = tuple(EvidenceRecordRefV1.from_canonical_mapping(row)
+            for row in _evidence_tuple_decode_v1(data["original_record_refs"]))
+        for name in ("reconstructed_canonical_events", "rights_refs", "revision_limitations"):
+            data[name] = _evidence_tuple_decode_v1(data[name])
+        rows = []
+        for row in _evidence_tuple_decode_v1(data["original_native_clock_companions"]):
+            pair = _evidence_tuple_decode_v1(row)
+            _native_require(len(pair) == 2, "LP03_SOURCE_SLICE_CLOCK_ROW")
+            rows.append((pair[0], tuple(_evidence_tuple_decode_v1(item) for item in _evidence_tuple_decode_v1(pair[1]))))
+        data["original_native_clock_companions"] = tuple(rows)
+        return cls(**data)
+
+
+def _evidence_probability_edge_chain_sources_v1(payload):
+    """Four external software sources; the M01 result is still pending.
+
+    This closed data decoder does not certify calibration, prediction quality,
+    original source custody, or execution authority. The original source owner
+    must still issue every slice through its current purpose-scoped grant.
+    """
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_resolver import _evidence_decode_source_values_v1
+    from .serialization import _evidence_canonical_object_v1, _evidence_frozen_data_v1, deterministic_json
+    frozen = _evidence_frozen_data_v1(payload)
+    _native_require(type(frozen) is MappingProxyType and set(frozen) == {
+        "association_profile", "stack_id", "edge_id", "source_slices"}
+        and frozen["association_profile"] == "ORIGINAL_SOFTWARE_MARKET_PREDICTION_AND_INDEPENDENT_CALIBRATION_CONTEXT"
+        and frozen["stack_id"] == "STACK::MATH-01::MATH-02::V3_4"
+        and frozen["edge_id"] == "EDGE::MATH-01::MATH-02"
+        and type(frozen["source_slices"]) is tuple and len(frozen["source_slices"]) == 4,
+        "LP03_EDGE_CHAIN_EXTERNAL_SOURCE_ROSTER")
+    # This stack-specific schema adds original payoff outcome/horizon facts.
+    # The existing single-M01 source schema remains unchanged; its narrower
+    # price/currency fields alone cannot prove this prediction association.
+    market, currencies = [], []
+    market_bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-01"]
+    _native_require(tuple(row.input_name for row in market_bindings) == (
+        "contract_price", "payout_per_winning_contract"), "LP03_EDGE_CHAIN_ORIGINAL_MARKET_BINDING_ORDER")
+    for body, binding, root, field in zip(frozen["source_slices"][:2], market_bindings,
+        ("market_state", "contract_semantics"), ("contract_price", "payout_per_winning_contract"), strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_EDGE_CHAIN_SINGLE_MARKET_SOURCE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and set(event["values"]) == {root, "contract_context"}
+            and type(event["values"][root]) is MappingProxyType and set(event["values"][root]) == {field, "currency"},
+            "LP03_EDGE_CHAIN_MARKET_BINDING_JOIN")
+        value, currency = event["values"][root][field], event["values"][root]["currency"]
+        _native_require(type(value) is str and 0 < len(value) <= 4096
+            and type(currency) is str and len(currency) == 3 and currency.isascii()
+            and currency.isalpha() and currency.isupper(), "LP03_EDGE_CHAIN_MARKET_EXACT_TEXT_AND_CURRENCY")
+        market.append(part)
+        currencies.append(currency)
+    _native_require(currencies[0] == currencies[1], "LP03_EDGE_CHAIN_MARKET_CURRENCY_JOIN")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-02"]
+    _native_require(tuple(row.input_name for row in bindings) == (
+        "calibrated_model_probability", "market_implied_probability", "calibration_state"),
+        "LP03_EDGE_CHAIN_ORIGINAL_BINDING_ORDER")
+    result = list(market)
+    contexts = []
+    common_fields = {"profile", "model_semantic_version", "model_implementation_version", "calibration_version",
+        "feature_schema_ref", "input_snapshot_ref", "calibration_source_ref", "calibration_receipt_id",
+        "declared_validation_method_ref", "empirical_evidence_bundle"}
+    for body, binding, role in zip(frozen["source_slices"][2:], (bindings[0], bindings[2]),
+                                 ("MODEL_PREDICTION", "INDEPENDENT_CALIBRATION_VALIDATION"), strict=True):
+        part = EvidenceSourceSliceV1.from_canonical_mapping(
+            _evidence_canonical_object_v1(deterministic_json(body).encode("utf-8"), max_bytes=65536))
+        _native_require(part.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+            and len(part.original_record_refs) == len(part.reconstructed_canonical_events) == 1,
+            "LP03_EDGE_CHAIN_SINGLE_EXTERNAL_SOURCE")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+            event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+            == (binding.accepted_upstream_owner_id, binding.accepted_packet_or_snapshot_type,
+                binding.schema_id, binding.schema_version, binding.producer_receipt_type, binding.source_state_and_claim_lineage)
+            and event["authorized_binding_ids"] == (binding.binding_id,)
+            and set(event["values"]) == {binding.exact_field_path, "probability_edge_context", "contract_context"},
+            "LP03_EDGE_CHAIN_EXTERNAL_BINDING_JOIN")
+        metadata = event["values"]["probability_edge_context"]
+        _native_require(type(metadata) is MappingProxyType and set(metadata) == common_fields | {"producer_role"}
+            and metadata["profile"] == "SOFTWARE_PRODUCER_ASSOCIATION_ONLY_NO_EMPIRICAL_CALIBRATION_CLAIM"
+            and metadata["producer_role"] == role,
+            "LP03_EDGE_CHAIN_MODEL_CONTEXT_FIELDS")
+        for name in common_fields - {"calibration_source_ref", "empirical_evidence_bundle"}:
+            _native_ident(metadata[name])
+        ref = metadata["calibration_source_ref"]
+        _native_require(type(ref) is tuple and len(ref) == 2, "LP03_EDGE_CHAIN_CALIBRATION_REFERENCE")
+        for value in ref:
+            _native_ident(value)
+        absence = metadata["empirical_evidence_bundle"]
+        _native_require(type(absence) is MappingProxyType and dict(absence) == {
+            "state": "ABSENT_WITH_REASON", "reason": "NO_EMPIRICAL_CALIBRATION_BUNDLE_IN_SOFTWARE_FIXTURE"},
+            "LP03_EDGE_CHAIN_EMPIRICAL_BUNDLE_ABSENCE")
+        _native_require(metadata["input_snapshot_ref"] == event["scope"]["input_snapshot_id"]
+            and type(event["revision"]) is str and event["revision"] == metadata["calibration_version"],
+            "LP03_EDGE_CHAIN_MODEL_SNAPSHOT_VERSION_JOIN")
+        # Only the registered numeric leaf is decoded. A state enum and these
+        # software records never stand in for an operational model validation.
+        values = _evidence_decode_source_values_v1(event)
+        if role == "MODEL_PREDICTION":
+            from math import isfinite
+            value = values[binding.exact_field_path]
+            _native_require(type(value) is float and isfinite(value) and 0.0 <= value <= 1.0,
+                            "LP03_EDGE_CHAIN_ORIGINAL_MODEL_PROBABILITY")
+        else:
+            _native_require(values[binding.exact_field_path] == "CALIBRATED_FOR_DECLARED_CONTEXT"
+                            and type(values[binding.exact_field_path]) is str,
+                            "LP03_EDGE_CHAIN_ORIGINAL_CALIBRATION_STATE")
+        result.append(part)
+        contexts.append(metadata)
+    events = tuple(part.reconstructed_canonical_events[0] for part in result)
+    contract_fields = {"profile", "input_snapshot_ref", "event_ref", "instrument_ref", "winning_outcome_ref",
+        "outcome_orientation", "horizon_ref", "horizon_end_wall_ns", "currency"}
+    contract_contexts = []
+    for event in events:
+        contract = event["values"]["contract_context"]
+        _native_require(type(contract) is MappingProxyType and set(contract) == contract_fields
+            and contract["profile"] == "SOFTWARE_ORIGINAL_PAYOFF_OUTCOME_HORIZON_CONTEXT_V1"
+            and contract["outcome_orientation"] == "PAYOUT_FOR_DECLARED_WINNING_OUTCOME",
+            "LP03_EDGE_CHAIN_ORIGINAL_PAYOFF_CONTEXT")
+        for name in contract_fields - {"horizon_end_wall_ns"}:
+            _native_ident(contract[name])
+        _public_counter_v1(contract["horizon_end_wall_ns"])
+        _native_require(contract["input_snapshot_ref"] == event["scope"]["input_snapshot_id"]
+            and contract["event_ref"] == event["scope"]["event_scope_id"]
+            and contract["instrument_ref"] == event["scope"]["instrument_or_contract_scope_id"]
+            and contract["currency"] == currencies[0], "LP03_EDGE_CHAIN_ORIGINAL_PAYOFF_SCOPE_JOIN")
+        contract_contexts.append(contract)
+    _native_require(all(deterministic_json(contract) == deterministic_json(contract_contexts[0])
+        for contract in contract_contexts[1:]), "LP03_EDGE_CHAIN_ORIGINAL_PAYOFF_OUTCOME_HORIZON_JOIN")
+    _native_require(len({part.original_record_refs[0] for part in result})
+        == len({event["record_ref"] for event in events}) == len({event["producer_receipt_id"] for event in events}) == 4
+        and all(type(event[name]) is type(events[0][name])
+                and deterministic_json(event[name]) == deterministic_json(events[0][name])
+                for event in events[1:] for name in ("context_id", "scope", "source_epoch_id", "input_version"))
+        and all(event["native_clocks"]["as_of_time"] == events[0]["native_clocks"]["as_of_time"] for event in events[1:])
+        and events[2]["owner_id"] != events[3]["owner_id"], "LP03_EDGE_CHAIN_SAME_SNAPSHOT_EXTERNAL_JOIN")
+    _native_require(all(type(contexts[0][name]) is type(contexts[1][name])
+        and deterministic_json(contexts[0][name]) == deterministic_json(contexts[1][name]) for name in common_fields),
+        "LP03_EDGE_CHAIN_MODEL_CALIBRATION_VERSION_JOIN")
+    calibration_ref = result[3].original_record_refs[0]
+    _native_require(contexts[0]["calibration_source_ref"] == (calibration_ref.store_id, calibration_ref.record_id)
+        and contexts[0]["calibration_receipt_id"] == events[3]["producer_receipt_id"],
+        "LP03_EDGE_CHAIN_ORIGINAL_CALIBRATION_RECEIPT_JOIN")
+    # Calibration must already be available to the prediction, and the input
+    # market snapshot must already have been processed. Preserve all six clocks;
+    # no clock is rewritten to the eventual execution/publication observation.
+    prediction_time = events[2]["native_clocks"]["observed_time"]
+    _native_require(events[3]["native_clocks"]["processed_time"] <= prediction_time
+        and max(event["native_clocks"]["processed_time"] for event in events[:2]) <= prediction_time
+        and prediction_time <= events[0]["native_clocks"]["as_of_time"] < contract_contexts[0]["horizon_end_wall_ns"],
+        "LP03_EDGE_CHAIN_PREDICTION_CALIBRATION_CAUSAL_ORDER")
+    return tuple(result)

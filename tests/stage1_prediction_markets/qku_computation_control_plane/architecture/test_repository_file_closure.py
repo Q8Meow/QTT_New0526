@@ -48,6 +48,7 @@ EXPECTED_PRODUCTION_FILES = {
     "cohort_compiler.py",
     "input_lock.py",
     "evidence.py",
+    "evidence_execution.py",
     "model_risk.py",
     "quantum_benchmark.py",
     "llm_gateway.py",

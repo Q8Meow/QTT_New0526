@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+from tempfile import TemporaryDirectory, gettempdir
 
 from tools import run_validation_gates as runner
 from tools import (
@@ -302,14 +303,17 @@ def test_missing_and_malformed_upstream_fail_closed(tmp_path) -> None:
     _evidence, missing_failures = pr151_report.load_static_evidence(tmp_path / "empty")
     assert any(failure.startswith("PR151_UPSTREAM_REPORT_MISSING") for failure in missing_failures)
 
-    copied_root = _copy_inputs(tmp_path / "malformed")
-    bad_path = copied_root / c.PR150_REPORT_PATH
-    bad_path.write_text("{", encoding="utf-8")
-    _evidence, parse_failures = pr151_report.load_static_evidence(copied_root)
-    assert any(
-        failure.startswith("PR151_UPSTREAM_REPORT_PARSE_ERROR")
-        for failure in parse_failures
-    )
+    fixture_parent = Path(gettempdir()).resolve(strict=True)
+    assert not fixture_parent.is_relative_to(REPO_ROOT)
+    with TemporaryDirectory(prefix="qtt-pr151-", dir=fixture_parent) as fixture_root:
+        copied_root = _copy_inputs(Path(fixture_root) / "malformed")
+        bad_path = copied_root / c.PR150_REPORT_PATH
+        bad_path.write_text("{", encoding="utf-8")
+        _evidence, parse_failures = pr151_report.load_static_evidence(copied_root)
+        assert any(
+            failure.startswith("PR151_UPSTREAM_REPORT_PARSE_ERROR")
+            for failure in parse_failures
+        )
 
 
 def test_synthetic_missing_queue_or_exclusion_fails_closed() -> None:

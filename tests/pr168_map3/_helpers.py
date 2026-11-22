@@ -1,15 +1,40 @@
 from __future__ import annotations
 
 import json
+import shutil
+import stat
 import subprocess
 import sys
+import tempfile
 from functools import lru_cache
+from os import stat_result
 from pathlib import Path
 from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-GENERATED_ROOT = REPO_ROOT / "docs" / "master_plan" / "generated"
+GENERATED_PATH = Path("docs/master_plan/generated")
+MAP3_TOOLS = (
+    "build_pr168_map3.py",
+    "validate_pr168_map3.py",
+    "pr168_map3_config.py",
+    "pr168_map3_external_intake.py",
+    "pr168_map3_formula_factory.py",
+    "pr168_map3_formula_family_matrix.py",
+    "pr168_map3_formula_materialization.py",
+    "pr168_map3_formula_provenance.py",
+    "pr168_map3_online_scout.py",
+    "pr168_map3_report_writer.py",
+    "pr168_map3_source_triangulation.py",
+    "pr168_map3_validator.py",
+)
+GENERATED_INPUT_PATTERNS = (
+    "PR168_RP2*.report.json",
+    "PR168_GFP2R_*.report.json",
+    "PR168_DATA1A_*.report.json",
+    "PR168_DATA1_*.report.json",
+    "PR165_D2_*.report.json",
+)
 REQUIRED_ONLINE_REPORTS = [
     "PR168_MAP3_OnlineScout.report.json",
     "PR168_MAP3_ExtSources.report.json",
@@ -22,20 +47,83 @@ REQUIRED_ONLINE_REPORTS = [
 ]
 
 
-def _run_build_once() -> None:
+def _require_directory(path: Path) -> None:
+    info = path.lstat()
+    if not stat.S_ISDIR(info.st_mode) or _is_reparse_point(info):
+        raise ValueError(f"MAP3 fixture requires an ordinary directory: {path}")
+
+
+def _is_reparse_point(info: stat_result) -> bool:
+    return bool(getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+
+
+def _seed_workspace(workspace: Path) -> None:
+    generated = REPO_ROOT / GENERATED_PATH
+    for directory in (REPO_ROOT / "tools", REPO_ROOT / "docs", generated.parent, generated):
+        _require_directory(directory)
+    sources = {REPO_ROOT / "tools" / name for name in MAP3_TOOLS}
+    for pattern in GENERATED_INPUT_PATTERNS:
+        sources.update(generated.glob(pattern))
+    for name in ("rp2p", "pr168_gfp2r_candidate_compute"):
+        folder = generated / name
+        try:
+            _require_directory(folder)
+        except FileNotFoundError:
+            continue
+        sources.update(sorted(folder.glob("*.jsonl"))[:20])
+        if name == "rp2p":
+            sources.update(folder.glob("rank2_rows.jsonl"))
+
+    for source in sorted(sources):
+        info = source.lstat()
+        if not stat.S_ISREG(info.st_mode) or _is_reparse_point(info) or info.st_nlink != 1:
+            raise ValueError(f"MAP3 fixture requires an ordinary, unaliased input: {source}")
+        target = workspace / source.relative_to(REPO_ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with source.open("rb") as original, target.open("xb") as copy:
+            shutil.copyfileobj(original, copy)
+
+
+def new_map3_workspace() -> tempfile.TemporaryDirectory[str]:
+    parent = Path(tempfile.gettempdir()).resolve(strict=True)
+    if parent.is_relative_to(REPO_ROOT):
+        raise ValueError(f"MAP3 fixture temporary directory must be outside the checkout: {parent}")
+    temporary = tempfile.TemporaryDirectory(prefix="map3-", dir=parent)
+    try:
+        workspace = Path(temporary.name)
+        _require_directory(workspace)
+        _seed_workspace(workspace)
+    except BaseException:
+        temporary.cleanup()
+        raise
+    return temporary
+
+
+def run_map3_tool(workspace: Path, script: str, *args: str) -> None:
     subprocess.run(
-        [sys.executable, "tools/build_pr168_map3.py", "--offline"],
-        cwd=REPO_ROOT,
+        [sys.executable, "-I", "-B", f"tools/{script}", *args],
+        cwd=workspace,
         check=True,
     )
 
 
 @lru_cache(maxsize=1)
+def _report_workspace() -> tempfile.TemporaryDirectory[str]:
+    return new_map3_workspace()
+
+
+def _run_build_once() -> Path:
+    workspace = Path(_report_workspace().name)
+    run_map3_tool(workspace, "build_pr168_map3.py", "--offline")
+    return workspace / GENERATED_PATH
+
+
+@lru_cache(maxsize=1)
 def map3_reports() -> dict[str, dict[str, Any]]:
-    _run_build_once()
+    generated = _run_build_once()
     reports = {}
     for name in REQUIRED_ONLINE_REPORTS:
-        path = GENERATED_ROOT / name
+        path = generated / name
         assert path.exists(), f"missing report {name}"
         reports[name] = json.loads(path.read_text(encoding="utf-8"))
     return reports
@@ -50,16 +138,15 @@ def records(name: str) -> list[dict[str, Any]]:
 def report(name: str) -> dict[str, Any]:
     if name in REQUIRED_ONLINE_REPORTS:
         return map3_reports()[name]
-    _run_build_once()
-    path = GENERATED_ROOT / name
+    path = _run_build_once() / name
     assert path.exists(), f"missing report {name}"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def all_records() -> list[dict[str, Any]]:
-    _run_build_once()
+    generated = _run_build_once()
     rows = []
-    for path in GENERATED_ROOT.glob("PR168_MAP3_*.report.json"):
+    for path in generated.glob("PR168_MAP3_*.report.json"):
         payload = json.loads(path.read_text(encoding="utf-8"))
         rows.extend(payload.get("records", []))
     return rows

@@ -512,20 +512,31 @@ def write_json(path: Path, payload: Any) -> None:
 
 
 def write_jsonl(path: Path, rows: Iterable[dict[str, Any]], *, schema_version_name: str) -> None:
+    _write_jsonl_at(path, rows, logical_path=path, schema_version_name=schema_version_name)
+
+
+def _write_jsonl_at(
+    path: Path,
+    rows: Iterable[dict[str, Any]],
+    *,
+    logical_path: Path,
+    schema_version_name: str,
+) -> None:
     materialized = list(rows)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(stable_json(row, compact=True) for row in materialized), encoding="utf-8")
+    logical_ref = rel_ref(logical_path)
     manifest = with_common(
         {
             "generated_surface_authority_class": "RP5D_GENERATED_COMPUTABILITY_TIERING_ARTIFACT_NOT_SOURCE_TRUTH",
             "manifest_id": f"{path.stem.upper()}_MANIFEST",
-            "physical_filename": rel_ref(path),
+            "physical_filename": logical_ref,
             "pr_id": PR_ID,
             "report_version": REPORT_VERSION,
             "row_count": len(materialized),
             "row_count_within_bound_flag": True,
             "schema_version_name": schema_version_name,
-            "shard_file_path": rel_ref(path),
+            "shard_file_path": logical_ref,
         },
         producer_agent="GovernanceAgent",
         consumer_agent_refs=["RP5DValidator", "ArtifactNameAgent", "PathSafetyAgent"],

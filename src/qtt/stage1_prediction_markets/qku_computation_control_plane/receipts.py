@@ -6,7 +6,7 @@ import copy
 import base64
 import re
 from dataclasses import dataclass, fields as dataclass_fields
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 import json
@@ -101,6 +101,7 @@ class EconomicRecordTypeV1(StrEnum):
     EXECUTION_CUSTODY = "EXECUTION_CUSTODY"
     MODE_SNAPSHOT_CONTROL = "MODE_SNAPSHOT_CONTROL"
     ST12F_EVIDENCE_CONTROL = "ST12F_EVIDENCE_CONTROL"
+    LP03_EVIDENCE_CONTROL_V1 = "LP03_EVIDENCE_CONTROL_V1"
     PIT_COMMIT_INTENT = "PIT_COMMIT_INTENT"
     PIT_COMMIT_COMPLETION = "PIT_COMMIT_COMPLETION"
     PIT_AVAILABILITY = "PIT_AVAILABILITY"
@@ -124,6 +125,43 @@ class ModeSnapshotControlClassV1(StrEnum):
     SNAPSHOT_ROLLBACK_PROPOSAL = "SNAPSHOT_ROLLBACK_PROPOSAL"
     SNAPSHOT_STALE_OR_RETIREMENT = "SNAPSHOT_STALE_OR_RETIREMENT"
     LATENCY_MEASUREMENT = "LATENCY_MEASUREMENT"
+
+
+@dataclass(frozen=True, slots=True)
+class LP03EvidenceControlReceiptRecordV1:
+    """Typed append-only payload, never a store/access or execution capability."""
+
+    record_id: str
+    record: object
+
+    def __post_init__(self) -> None:
+        from .models import (EvidenceScenarioPlanV1, EvidenceAssemblyGrantRecordV1, EvidenceAssemblyStateRecordV1,
+                             EvidenceInputAssemblyRecordV1, EvidenceExperimentRecordV1, EvidenceClaimRecordV1,
+                             EvidenceAttemptGrantRecordV1, EvidenceAttemptStateRecordV1,
+                             EvidenceDependencyExecutionRecordV1, EvidenceRecordedDrGroupMeasurementRecordV1,
+                             EvidenceRecordedDrUncertaintyRecordV1, EvidenceHeldOutFoldScoreRecordV1, EvidenceHeldOutCpcvPathScoreRecordV1, EvidenceEventSegmentRecordV1, EvidenceValueProjectionRecordV1, EvidenceAnalyticBinary64ConversionRecordV1, EvidencePublicationRecordV1,
+                             EvidenceLaneRegistrationRecordV1, EvidencePipelineConformanceV1, EvidenceIndependentReviewRecordV1,
+                             EvidenceDeliveryRecordV1, EvidenceReceiverAckRecordV1, EvidenceRevocationRecordV1)
+
+        _native_ident(self.record_id)
+        _native_require(type(self.record) in (EvidenceScenarioPlanV1, EvidenceAssemblyGrantRecordV1,
+                                              EvidenceAssemblyStateRecordV1, EvidenceInputAssemblyRecordV1,
+                                              EvidenceExperimentRecordV1, EvidenceClaimRecordV1,
+                                              EvidenceAttemptGrantRecordV1, EvidenceAttemptStateRecordV1,
+                                              EvidenceDependencyExecutionRecordV1, EvidenceRecordedDrGroupMeasurementRecordV1,
+                             EvidenceRecordedDrUncertaintyRecordV1, EvidenceHeldOutFoldScoreRecordV1, EvidenceHeldOutCpcvPathScoreRecordV1, EvidenceEventSegmentRecordV1, EvidenceValueProjectionRecordV1, EvidenceAnalyticBinary64ConversionRecordV1,
+                                              EvidencePublicationRecordV1, EvidenceLaneRegistrationRecordV1,
+                                              EvidencePipelineConformanceV1, EvidenceIndependentReviewRecordV1,
+                                              EvidenceDeliveryRecordV1, EvidenceReceiverAckRecordV1, EvidenceRevocationRecordV1), "LP03_CONTROL_RECORD_TYPE")
+        _native_require(self.record_id == self.record.record_id, "LP03_CONTROL_RECORD_ID")
+        type(self.record).__post_init__(self.record)
+
+    @classmethod
+    def from_canonical_mapping(cls, value: object) -> "LP03EvidenceControlReceiptRecordV1":
+        from .models import _evidence_control_record_from_mapping_v1
+
+        data = _native_obj(value, ("record_id", "record"))
+        return cls(record_id=data["record_id"], record=_evidence_control_record_from_mapping_v1(data["record"]))
 
 
 class ST12FReceiptClassV1(StrEnum):
@@ -511,6 +549,7 @@ ECONOMIC_RECORD_PAYLOAD_CLASS: Mapping[EconomicRecordTypeV1, tuple[str, str]] = 
             "receipts",
             "ST12FEvidenceControlReceiptRecordV1",
         ),
+        EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1: ("receipts", "LP03EvidenceControlReceiptRecordV1"),
         EconomicRecordTypeV1.PIT_COMMIT_INTENT: (
             "receipts",
             "PITCommitIntentV1",
@@ -612,10 +651,133 @@ class EconomicReceiptEventSpineV1:
 
         if self.record_type is EconomicRecordTypeV1.PRIVATE_OBSERVATION_CLOCK:
             _private_clock_validate_spine_v1(self)
+        if self.record_type is EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1:
+            _lp03_validate_spine_v1(self)
         if self.record_type in {EconomicRecordTypeV1.PUBLIC_SOURCE_USE_CONTROL,
                                 EconomicRecordTypeV1.PUBLIC_NATIVE_CAPTURE,
                                 EconomicRecordTypeV1.PUBLIC_NATIVE_PUBLICATION}:
             _public_validate_spine_v1(self)
+
+
+def _lp03_validate_spine_v1(spine: EconomicReceiptEventSpineV1) -> None:
+    _native_require(type(spine) is EconomicReceiptEventSpineV1
+                    and spine.record_type is EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1
+                    and type(spine.typed_payload) is LP03EvidenceControlReceiptRecordV1,
+                    "LP03_SPINE_PAYLOAD_TYPE")
+    payload = spine.typed_payload
+    record = payload.record
+    _native_require(spine.record_id == payload.record_id == record.record_id
+                    and spine.schema_version == "1"
+                    and spine.semantic_owner == record.producing_owner
+                    and spine.implementation_owner == record.producing_owner
+                    and spine.context_ref == record.experiment_id
+                    and spine.aggregate_id == record.experiment_id
+                    and spine.causation_id == record.causation_ref
+                    and spine.correlation_id == record.correlation_ref
+                    and spine.authority_class == "LP03_" + record.origin.value,
+                    "LP03_SPINE_RECORD_JOIN")
+    for name in ("record_id", "schema_version", "semantic_owner", "implementation_owner", "context_ref",
+                 "causation_id", "correlation_id", "traceparent", "tracestate", "aggregate_id", "authority_class"):
+        _native_ident(getattr(spine, name))
+    _public_counter_v1(spine.sequence, allow_zero=True)
+    _public_counter_v1(spine.aggregate_version, allow_zero=True)
+    _native_require(type(spine.no_effect_flags) is NoEffectFlagsV1 and spine.no_effect_flags == NO_EFFECTS_V1,
+                    "LP03_SPINE_FORBIDDEN_EFFECT")
+    seconds, nanoseconds = divmod(record.created_wall_ns, 1_000_000_000)
+    utc_projection = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(seconds=seconds, microseconds=nanoseconds // 1000)
+    _native_require(spine.recorded_at == utc_projection and spine.effective_at == utc_projection,
+                    "LP03_SPINE_NATIVE_TIME_PROJECTION")
+
+
+def _lp03_spine_from_storage_v1(raw: bytes, *, expected_record_id: str) -> EconomicReceiptEventSpineV1:
+    from .serialization import _evidence_projection_spine_object_v1
+
+    _native_ident(expected_record_id)
+    row = _evidence_projection_spine_object_v1(raw)
+    data = dict(_native_obj(row, tuple(f.name for f in dataclass_fields(EconomicReceiptEventSpineV1))))
+    _native_require(data["record_type"] == "LP03_EVIDENCE_CONTROL_V1"
+                    and data["record_id"] == expected_record_id, "LP03_STORED_DISCRIMINATOR_OR_ID")
+    data["record_type"] = EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1
+    data["typed_payload"] = LP03EvidenceControlReceiptRecordV1.from_canonical_mapping(data["typed_payload"])
+    flags = _native_obj(data["no_effect_flags"], tuple(f.name for f in dataclass_fields(NoEffectFlagsV1)))
+    data["no_effect_flags"] = NoEffectFlagsV1(**flags)
+    result = EconomicReceiptEventSpineV1(**data)
+    _native_require(deterministic_json(result).encode("utf-8") == raw, "LP03_STORED_NONCANONICAL")
+    return result
+
+
+def _lp03_spine_for_record_v1(record, *, sequence: int, trace_ref: str) -> EconomicReceiptEventSpineV1:
+    """One canonical wrapper; the record's original nanoseconds remain intact."""
+    wall = datetime(1970, 1, 1, tzinfo=UTC) + timedelta(microseconds=record.created_wall_ns // 1000)
+    return EconomicReceiptEventSpineV1(
+        record_id=record.record_id, record_type=EconomicRecordTypeV1.LP03_EVIDENCE_CONTROL_V1,
+        schema_version="1", semantic_owner=record.producing_owner, implementation_owner=record.producing_owner,
+        context_ref=record.experiment_id, effective_at=wall, recorded_at=wall,
+        causation_id=record.causation_ref, correlation_id=record.correlation_ref,
+        traceparent=trace_ref, tracestate="LP03-CONTROL", sequence=sequence,
+        aggregate_id=record.experiment_id, aggregate_version=sequence,
+        authority_class="LP03_" + record.origin.value,
+        typed_payload=LP03EvidenceControlReceiptRecordV1(record.record_id, record),
+    )
+
+
+def _evidence_quantum_trace_spine_from_storage_v1(raw, *, expected_record_id):
+    """Strictly read the existing trace control payload from an original lane."""
+    from .quantum_benchmark import QuantumTraceValidationReceiptV1
+    from .serialization import _evidence_canonical_object_v1
+
+    data = dict(_native_obj(_evidence_canonical_object_v1(raw, max_bytes=65536),
+        tuple(member.name for member in dataclass_fields(EconomicReceiptEventSpineV1))))
+    _native_require(data["record_type"] == "ST12F_EVIDENCE_CONTROL" and data["record_id"] == expected_record_id,
+        "LP03_QUANTUM_TRACE_SPINE_DISCRIMINATOR")
+    payload = dict(_native_obj(data["typed_payload"],
+        tuple(member.name for member in dataclass_fields(ST12FEvidenceControlReceiptRecordV1))))
+    _native_require(payload["receipt_class"] == "QUANTUM_TRACE_VALIDATION"
+        and payload["operation_id"] == "ST12F-PRIVATE::REGISTER_CONTROL"
+        and payload["control_receipt_id"] == expected_record_id
+        and payload["typed_reason_codes"] == [] and payload["fixture_only_not_evidence"] is False,
+        "LP03_QUANTUM_TRACE_CONTROL_ORIGINAL_METADATA")
+    flags = tuple(member.name for member in dataclass_fields(NoEffectFlagsV1))
+    for member in (payload, data):
+        member["no_effect_flags"] = NoEffectFlagsV1(**_native_obj(member["no_effect_flags"], flags))
+        _native_require(member["no_effect_flags"] == NO_EFFECTS_V1, "LP03_QUANTUM_TRACE_CONTROL_NO_EFFECTS")
+    for key in ("source_record_refs", "parameter_value_refs", "source_epoch_refs"):
+        _native_require(type(payload[key]) is list, "LP03_QUANTUM_TRACE_CONTROL_REF_ROSTER")
+        payload[key] = tuple(payload[key])
+    payload["receipt_class"] = ST12FReceiptClassV1.QUANTUM_TRACE_VALIDATION
+    payload["typed_reason_codes"] = ()
+    control = ST12FEvidenceControlReceiptRecordV1(**payload)
+    control.reconstruct(QuantumTraceValidationReceiptV1)
+    data["typed_payload"] = control
+    data["record_type"] = EconomicRecordTypeV1.ST12F_EVIDENCE_CONTROL
+    result = EconomicReceiptEventSpineV1(**data)
+    _native_require(deterministic_json(result).encode("utf-8", "strict") == raw,
+        "LP03_QUANTUM_TRACE_CONTROL_CANONICAL_JOIN")
+    return result
+
+
+def _evidence_raw_spine_from_storage_v1(raw: bytes, *, expected_record_id: str):
+    """Reconstruct the unchanged raw receipt without promoting its authority."""
+    from .serialization import _evidence_canonical_object_v1
+    data = dict(_native_obj(_evidence_canonical_object_v1(raw, max_bytes=1048576),
+                           tuple(member.name for member in dataclass_fields(EconomicReceiptEventSpineV1))))
+    _native_require(data["record_type"] == "DURABLE_COMPUTATION_RECEIPT" and data["record_id"] == expected_record_id,
+                    "LP03_RAW_SPINE_DISCRIMINATOR")
+    payload = dict(_native_obj(data["typed_payload"], tuple(member.name for member in dataclass_fields(DurableComputationExecutionReceiptRecordV1))))
+    existing = dict(_native_obj(payload["existing_receipt"], tuple(member.name for member in dataclass_fields(ComputationExecutionReceiptV1))))
+    _native_require(type(existing["warnings"]) is list, "LP03_RAW_WARNING_ROSTER")
+    existing["warnings"] = tuple(existing["warnings"])
+    payload["existing_receipt"] = ComputationExecutionReceiptV1(**existing)
+    for name in ("input_value_lineage_refs", "dependency_receipt_refs", "warning_codes"):
+        _native_require(type(payload[name]) is list, "LP03_RAW_REFERENCE_ROSTER")
+        payload[name] = tuple(payload[name])
+    data["typed_payload"] = DurableComputationExecutionReceiptRecordV1(**payload)
+    data["record_type"] = EconomicRecordTypeV1.DURABLE_COMPUTATION_RECEIPT
+    data["no_effect_flags"] = NoEffectFlagsV1(**_native_obj(data["no_effect_flags"], tuple(member.name for member in dataclass_fields(NoEffectFlagsV1))))
+    result = EconomicReceiptEventSpineV1(**data)
+    _native_require(result.typed_payload.record_id == expected_record_id and deterministic_json(result).encode("utf-8") == raw,
+                    "LP03_RAW_SPINE_CANONICAL_JOIN")
+    return result
 
 
 _PUBLIC_OPERATIONS_V1 = MappingProxyType({

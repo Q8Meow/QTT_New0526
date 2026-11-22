@@ -1762,3 +1762,161 @@ if (
         ReasonCode.INVALID_CONTRACT,
         "v3.4 source/value authority population is not exact",
     )
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePrivateInputBindingV1:
+    """Private field semantics, never a source registration or read capability.
+
+    The concrete owner is fixed by the original signed source selection and
+    retained producer custody at resolution. A role label or matching value
+    cannot supply that authority. Public 3.4 bindings remain separate.
+    """
+
+    binding_id: str
+    input_name: str
+    exact_field_path: str
+    native_input_type: str
+    producer_role: str
+    unit_or_basis_requirement: str
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePrivateInputContractV1:
+    math_id: str
+    schema_id: str
+    callable_ref: str
+    bindings: tuple[EvidencePrivateInputBindingV1, ...]
+    required_original_producer_joins: tuple[str, ...]
+
+
+def _private_evidence_inputs_v1(number, callable_ref, rows, joins):
+    math_id = f"MATH-{number:02d}"
+    return EvidencePrivateInputContractV1(
+        math_id, f"LP03::{math_id}::INPUT_V1", callable_ref,
+        tuple(EvidencePrivateInputBindingV1(
+            f"LP03_FIVAB::{name}::{math_id}", name, f"values['{name}']",
+            native_type, producer, basis) for name, native_type, producer, basis in rows),
+        joins,
+    )
+
+
+# These are exact function/constructor inputs, not a second authority registry.
+# Required joins refer to original records whose custody must be established by
+# the existing input owner. They are not booleans accepted from a caller packet.
+_EVIDENCE_PRIVATE_INPUT_ROWS_V1 = (
+    _private_evidence_inputs_v1(26, "economic_math.py::expected_value_of_information_v1", (
+        ("current_action_values", "tuple[Decimal]", "RESEARCH_ACTION_VALUE", "COMMON_UTILITY_BASIS"),
+        ("new_information_scenarios", "tuple[tuple[Decimal,tuple[Decimal]]]", "RESEARCH_SCENARIO", "PROBABILITY_AND_COMMON_UTILITY_BASIS"),
+        ("acquisition_cost", "Decimal", "ACQUISITION_COST", "COMMON_UTILITY_BASIS"),
+    ), ("ORIGINAL_ACTION_SCENARIO_AND_ACQUISITION_RECORDS", "SAME_ACTION_ORDER_AND_UTILITY_BASIS")),
+    _private_evidence_inputs_v1(27, "economic_math.py::binary_kelly_fraction_v1", (
+        ("win_probability", "Decimal", "CALIBRATED_PROBABILITY", "WIN_PROBABILITY"),
+        ("net_odds", "Decimal", "PAYOFF_CONTRACT", "NET_ODDS_PER_UNIT_AT_RISK"),
+    ), ("ORIGINAL_CALIBRATION_AND_PAYOFF_RECORDS", "DECLARED_RISK_CAPITAL_BASIS")),
+    _private_evidence_inputs_v1(28, "economic_math.py::fractional_kelly_v1", (
+        ("full_kelly_fraction", "Decimal", "MATH27_COMPUTATION", "ORIGINAL_RAW_KELLY_FRACTION"),
+        ("fraction_multiplier", "Decimal", "PARAMETER_POLICY", "KELLY_MULTIPLIER"),
+        ("risk_caps", "tuple[Decimal]", "RISK_POLICY", "SAME_RISK_CAPITAL_FRACTION_BASIS"),
+    ), ("ORIGINAL_MATH27_RAW_RESULT_AND_INPUT_PROVENANCE", "CURRENT_PARAMETER_AND_RISK_CONSTRAINTS")),
+    _private_evidence_inputs_v1(29, "economic_math.py::mean_variance_utility_v1", (
+        ("weights", "tuple[Decimal]", "PORTFOLIO_SCENARIO", "ORIGINAL_INPUT_WEIGHTS"),
+        ("expected_returns", "tuple[Decimal]", "PORTFOLIO_SCENARIO", "MATCHED_RETURN_HORIZON"),
+        ("covariance", "tuple[tuple[Decimal]]", "PORTFOLIO_SCENARIO", "SAME_ORDER_AND_RETURN_HORIZON"),
+        ("risk_aversion", "Decimal", "RISK_POLICY", "DECLARED_UTILITY_BASIS"),
+        ("transaction_cost", "Decimal", "COST_RECORD", "DECLARED_UTILITY_BASIS"),
+    ), ("ORIGINAL_PORTFOLIO_SCENARIO_WEIGHT_AND_COST_RECORDS", "CURRENT_RISK_POLICY")),
+    *tuple(_private_evidence_inputs_v1(number, "economic_math.py::" + function, (
+        ("losses", "tuple[Decimal]", "EMPIRICAL_LOSS_COHORT", "ORDERED_LOSS_COHORT_UNIT_AND_HORIZON"),
+        ("alpha", "Decimal", "PARAMETER_POLICY", "LOSS_CONFIDENCE"),
+    ), ("ORIGINAL_ORDERED_EMPIRICAL_LOSS_COHORT", "CURRENT_CONFIDENCE_POLICY"))
+        for number, function in ((30, "conditional_value_at_risk_v1"), (31, "empirical_expected_shortfall_v1"))),
+    _private_evidence_inputs_v1(32, "economic_math.py::implementation_shortfall_v1", (
+        ("side", "str", "LANE_ORDER", "BUY_OR_SELL"),
+        ("quantity", "Decimal", "LANE_FILL", "REALIZED_FILLED_QUANTITY"),
+        ("execution_price", "Decimal", "LANE_FILL", "EXECUTION_PRICE_PER_DECLARED_UNIT"),
+        ("decision_price", "Decimal", "LANE_DECISION_QUOTE", "MATCHED_DECISION_PRICE"),
+        ("explicit_fees", "Decimal", "LANE_COST", "TOTAL_EXPLICIT_FEES"),
+        ("opportunity_cost_unfilled", "Decimal", "LANE_COST", "UNFILLED_OPPORTUNITY_COST"),
+        ("other_declared_costs", "Decimal", "LANE_COST", "OTHER_DISJOINT_DECLARED_COSTS"),
+    ), ("ORIGINAL_LANE_ORDER_FILL_COST_AND_DECISION_QUOTE", "ORIGINAL_TCA_NO_DOUBLE_COUNT_ATTRIBUTION")),
+    _private_evidence_inputs_v1(33, "economic_math.py::spread_cost_v1", (
+        ("side", "str", "LANE_ORDER", "BUY_OR_SELL"),
+        ("quantity", "Decimal", "LANE_FILL", "REALIZED_FILLED_QUANTITY"),
+        ("execution_price", "Decimal", "LANE_FILL", "EXECUTION_PRICE_PER_DECLARED_UNIT"),
+        ("midpoint_at_decision", "Decimal", "LANE_DECISION_QUOTE", "MATCHED_DECISION_MIDPOINT"),
+    ), ("ORIGINAL_LANE_FILL_AND_MATCHED_DECISION_QUOTE", "SIGNED_EXECUTION_MINUS_DECISION_MIDPOINT_TIMES_QUANTITY")),
+    _private_evidence_inputs_v1(34, "economic_math.py::global_prediction_market_fee_v1", (
+        ("contracts", "Decimal", "LANE_ORDER_OR_FILL", "DECLARED_CONTRACT_QUANTITY"),
+        ("fee_rate", "Decimal", "ACCEPTED_FEE_SCHEDULE", "ORIGINAL_PLATFORM_FEE_RATE"),
+        ("price", "Decimal", "LANE_ORDER_OR_FILL", "SOURCE_SUPPORTED_UNIT_PAYOUT_PRICE_IN_ZERO_ONE"),
+        ("schedule_binding", "FeeScheduleBindingV1", "ACCEPTED_FEE_SCHEDULE", "EXACT_VENUE_MARKET_COMPONENT_AND_EFFECTIVE_INTERVAL"),
+        ("quantization_policy", "QuantizationPolicyV1", "PARAMETER_POLICY", "SOURCE_REQUIRED_QUANTIZATION"),
+        ("receipt_id", "str", "LANE_COMPUTATION", "PREALLOCATED_ORIGINAL_INVOCATION_RECEIPT_ID"),
+    ), ("ORIGINAL_ACCEPTED_SCHEDULE_AND_APPLICABILITY", "ORIGINAL_PAYOUT_SCHEDULE_ASSOCIATION_NO_IMPLICIT_NORMALIZATION", "ORIGINAL_INVOCATION_ID_ALLOCATION", "ORIGINAL_QUANTIZATION_POLICY", "EXCLUDED_GLOBAL_VENUE_REMAINS_BLOCKED")),
+    _private_evidence_inputs_v1(35, "economic_math.py::us_prediction_market_fee_or_rebate_v1", (
+        ("contracts", "Decimal", "LANE_ORDER_OR_FILL", "DECLARED_CONTRACT_QUANTITY"),
+        ("theta", "Decimal", "ACCEPTED_FEE_SCHEDULE", "ORIGINAL_SIGNED_QUADRATIC_RATE"),
+        ("price", "Decimal", "LANE_ORDER_OR_FILL", "SOURCE_SUPPORTED_UNIT_PAYOUT_PRICE_IN_ZERO_ONE"),
+        ("liquidity_role", "str", "LANE_ORDER_OR_FILL", "MAKER_OR_TAKER"),
+        ("schedule_binding", "FeeScheduleBindingV1", "ACCEPTED_FEE_SCHEDULE", "EXACT_VENUE_MARKET_COMPONENT_AND_EFFECTIVE_INTERVAL"),
+        ("quantization_policy", "QuantizationPolicyV1", "PARAMETER_POLICY", "SOURCE_REQUIRED_QUANTIZATION"),
+        ("receipt_id", "str", "LANE_COMPUTATION", "PREALLOCATED_ORIGINAL_INVOCATION_RECEIPT_ID"),
+    ), ("ORIGINAL_ACCEPTED_SIGNED_QUADRATIC_SCHEDULE_AND_APPLICABILITY", "ORIGINAL_PAYOUT_SCHEDULE_ASSOCIATION_NO_IMPLICIT_NORMALIZATION", "ORIGINAL_INVOCATION_ID_ALLOCATION", "ORIGINAL_HALF_EVEN_QUANTIZATION_POLICY", "NO_OTHER_NATIVE_FEE_FAMILY_COERCION")),
+    _private_evidence_inputs_v1(37, "economic_math.py::fill_probability_v1", (
+        ("artifact", "FillProbabilityModelArtifactV1", "EXECUTION_MODEL", "CALIBRATED_FILL_PROBABILITY"),
+        ("feature_schema_ref", "str", "EXECUTION_MODEL", "ORIGINAL_FEATURE_SCHEMA"),
+        ("scope_ref", "str", "EXECUTION_MODEL", "ORIGINAL_MODEL_SCOPE"),
+        ("horizon_seconds", "int", "EXECUTION_MODEL", "MODEL_HORIZON_SECONDS"),
+    ), ("ORIGINAL_MODEL_CALIBRATION_AND_FEATURE_SOURCE_EVIDENCE", "MATCHED_SCOPE_HORIZON_AND_CURRENTNESS")),
+    _private_evidence_inputs_v1(38, "economic_math.py::expected_partial_fill_quantity_v1", (
+        ("artifact", "FillQuantityDistributionArtifactV1", "EXECUTION_MODEL", "EXPECTED_FILLED_QUANTITY_IN_DECLARED_UNITS"),
+    ), ("ORIGINAL_MODEL_AND_DISTRIBUTION_SOURCE_EVIDENCE", "ORIGINAL_ORDER_QUANTITY_SCOPE_HORIZON_AND_CURRENTNESS")),
+    _private_evidence_inputs_v1(40, "implementation_registry.py::compute_math_40_adverse_selection_cost", (
+        ("signed_fill_quantity", "Decimal", "LANE_FILL", "SIGNED_REALIZED_FILLED_QUANTITY"),
+        ("midpoint_after_fill", "Decimal", "LANE_MARKOUT_QUOTE", "POST_FILL_HORIZON_MATCHED_MIDPOINT"),
+        ("fill_price", "Decimal", "LANE_FILL", "EXECUTION_PRICE_PER_DECLARED_UNIT"),
+    ), ("ORIGINAL_LANE_FILL_AND_HORIZON_MATCHED_MARKOUT_QUOTE",)),
+    _private_evidence_inputs_v1(41, "implementation_registry.py::compute_math_41_latency_alpha_decay", (
+        ("edge_now", "float", "EDGE_COMPUTATION", "ORIGINAL_EDGE_AMOUNT"),
+        ("latency", "float", "LANE_LATENCY_MEASUREMENT", "SAME_DURATION_UNIT_AS_FITTED_TAU"),
+        ("tau", "float", "FITTED_PARAMETER", "FITTED_DECAY_DURATION"),
+    ), ("ORIGINAL_EDGE_AND_MEASURED_LATENCY_RECORDS", "ORIGINAL_TAU_CALIBRATION_AND_UNIT_JOIN")),
+    _private_evidence_inputs_v1(42, "implementation_registry.py::compute_math_42_square_root_market_impact", (
+        ("Y", "float", "FITTED_PARAMETER", "FITTED_IMPACT_COEFFICIENT"),
+        ("sigma", "float", "FITTED_PARAMETER", "COMPARABLE_VOLATILITY_HORIZON"),
+        ("Q", "Decimal", "LANE_ORDER_OR_FILL", "DECLARED_QUANTITY"),
+        ("ADV", "Decimal", "VOLUME_OBSERVATION", "COMPARABLE_QUANTITY_VOLUME_AND_HORIZON"),
+    ), ("ORIGINAL_FITTED_IMPACT_VOLATILITY_AND_VOLUME_RECORDS", "QUANTITY_VOLUME_HORIZON_JOIN")),
+    _private_evidence_inputs_v1(43, "implementation_registry.py::compute_math_43_capacity_crowding_penalty", (
+        ("participation", "float", "LANE_PARTICIPATION_MEASUREMENT", "MEASURED_PARTICIPATION"),
+        ("approved_participation_cap", "float", "PARAMETER_POLICY", "MATCHED_PARTICIPATION_CAP"),
+        ("penalty_scale", "float", "PARAMETER_POLICY", "DECLARED_PENALTY_UTILITY_BASIS"),
+    ), ("ORIGINAL_PARTICIPATION_MEASUREMENT", "CURRENT_SCOPED_CAP_AND_PENALTY_POLICY")),
+    _private_evidence_inputs_v1(44, "implementation_registry.py::compute_math_44_covariance_shrinkage", (
+        ("sample_covariance", "tuple[tuple[float]]", "COVARIANCE_ESTIMATE", "ORIGINAL_ORDERED_SAMPLE_COVARIANCE"),
+        ("target", "tuple[tuple[float]]", "COVARIANCE_TARGET", "MATCHED_ORDER_AND_COVARIANCE_BASIS"),
+        ("delta", "float", "PARAMETER_POLICY", "ADMITTED_SHRINKAGE_INTENSITY"),
+    ), ("ORIGINAL_COVARIANCE_AND_TARGET_RECORDS", "CURRENT_SHRINKAGE_POLICY_NO_REFITTING")),
+    _private_evidence_inputs_v1(45, "implementation_registry.py::compute_math_45_lower_confidence_bound_no_trade_gate", (
+        ("estimated_net_edge", "Decimal", "EDGE_COMPUTATION", "SAME_NET_EDGE_BASIS"),
+        ("uncertainty", "Decimal", "FIXED_ANALYSIS_UNCERTAINTY", "SAME_NET_EDGE_BASIS"),
+        ("z_or_quantile", "Decimal", "PARAMETER_POLICY", "APPROVED_FIXED_ANALYSIS_MULTIPLIER"),
+        ("model_risk_haircut", "Decimal", "MODEL_RISK_POLICY", "SAME_NET_EDGE_BASIS"),
+    ), ("ORIGINAL_EDGE_UNCERTAINTY_AND_MODEL_RISK_RECORDS", "APPROVED_FIXED_ANALYSIS_METHOD_NOT_SEQUENTIAL_BOUND")),
+    *tuple(_private_evidence_inputs_v1(number, "quantum_benchmark.py::QuantumBenchmarkServiceV1::" + method, (
+        ("trace", native_type, "QUANTUM_TRACE", "ORIGINAL_TRACE_AND_ECONOMIC_COMPARISON_BASIS"),
+    ), ("ORIGINAL_PREEXISTING_TRACE_PROBLEM_AND_CURRENTNESS", "ORIGINAL_CLASSICAL_AND_NO_TRADE_COMPARATORS", "EXACT_ELEVEN_DIMENSION_COMPARISON_BASIS", "EXPLICIT_OBSERVED_OR_SYNTHETIC_ORIGIN"))
+        for number, method, native_type in ((50, "_validate_qaoa_trace_with_raw_v1", "QAOAPreexistingTraceV1"),
+                                           (51, "_validate_vqe_trace_with_raw_v1", "VQEPreexistingTraceV1"))),
+    _private_evidence_inputs_v1(52, "quantum_benchmark.py::QuantumBenchmarkServiceV1::_compare_same_lock_with_raw_v1", (
+        ("comparison_id", "str", "LANE_COMPUTATION", "PREALLOCATED_ORIGINAL_INVOCATION_COMPARISON_ID"),
+        ("quantum_receipt", "QuantumTraceValidationReceiptV1", "QUANTUM_TRACE_VALIDATION", "ORIGINAL_VALIDATED_QUANTUM_ALTERNATIVE"),
+        ("strongest_classical_receipt", "EconomicComparatorReceiptV1", "CLASSICAL_COMPARATOR", "ORIGINAL_STRONGEST_CLASSICAL_ALTERNATIVE"),
+        ("no_trade_receipt", "EconomicComparatorReceiptV1", "NO_TRADE_COMPARATOR", "ORIGINAL_NO_TRADE_ALTERNATIVE"),
+    ), ("ORIGINAL_INVOCATION_ID_ALLOCATION", "ORIGINAL_QUANTUM_CONSTRUCTOR_RECEIPT", "ORIGINAL_CLASSICAL_AND_NO_TRADE_COMPARATORS", "EXACT_ELEVEN_DIMENSION_COMPARISON_BASIS")),
+)
+
+EVIDENCE_PRIVATE_INPUT_CONTRACTS_V1: Mapping[str, EvidencePrivateInputContractV1] = MappingProxyType(
+    {row.math_id: row for row in _EVIDENCE_PRIVATE_INPUT_ROWS_V1}
+)

@@ -33,6 +33,5395 @@ from .models import (
 )
 
 
+_LP03_HELDOUT_ANALYSIS_PROFILE_V1 = "DETERMINISTIC_ORIGINAL_HELD_OUT_BOUNDED_SCORING_V1"
+_LP03_HELDOUT_PROTOCOL_METRICS_V1 = MappingProxyType({
+    "MATH-20": ("CONFORMANCE::MATH-20::split_indices", "PURGED_FOLD_SCORE_DISTRIBUTION"),
+    "MATH-21": ("CONFORMANCE::MATH-21::cpcv_paths", "COMBINATORIAL_PURGED_PATH_SCORE_DISTRIBUTION"),
+})
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EvidenceProtocolParametersV1:
+    """Explicit original policy data, separate from the 3,096-row inventory.
+
+    The first admitted profile is deterministic midpoint conformance. It has
+    no confidence or stopping permission; statistical profiles require their
+    own complete original policy before this owner will admit them.
+    """
+
+    parameter_protocol_ref: str
+    schema_version: str
+    origin: object
+    experiment_id: str
+    experiment_revision: str
+    source_receipt_ref: str
+    owner_envelope_ref: str
+    scenario_plan_ref: str
+    analysis_profile: str
+    selected_metric_ids: tuple[str, ...]
+    statistical_policy_or_absence: object
+    coverage_eligibility: Mapping[str, object]
+    numeric_profile: Mapping[str, object]
+    numerical_work_limits: Mapping[str, object]
+    per_attempt_limits: object
+    aggregate_execution_limits: object
+    review_ack_policy: Mapping[str, object]
+    formula_seed_bindings: tuple[tuple[str, int], ...]
+    valid_from_wall_ns: int
+    exclusive_expiry_wall_ns: int
+
+    def __post_init__(self):
+        from .context import _native_ident, _native_require, _public_counter_v1, _public_refs_v1
+        from .models import EvidenceAbsenceV1, EvidenceOriginV1, EvidenceExecutionLimitsV1
+        from .serialization import _evidence_frozen_data_v1
+        for name in ("parameter_protocol_ref", "experiment_id", "experiment_revision", "source_receipt_ref",
+                     "owner_envelope_ref", "scenario_plan_ref", "analysis_profile"):
+            _native_ident(getattr(self, name))
+        _native_require(type(self.schema_version) is str and self.schema_version == "1.0", "LP03_PARAMETER_PROTOCOL_SCHEMA")
+        _public_refs_v1(self.selected_metric_ids)
+        _native_require(self.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE
+                        and type(self.selected_metric_ids) is tuple
+                        and (self.analysis_profile, self.selected_metric_ids) in (
+                            ("DETERMINISTIC_SAME_SNAPSHOT_PROBABILITY_EDGE_CONFORMANCE_V1", ("CONFORMANCE::MATH-02::edge",)),
+                            ("DETERMINISTIC_RAW_IDENTITY_CONFORMANCE_V1", ("CONFORMANCE::MATH-03::mid",)),
+                            ("DETERMINISTIC_EXACT_BINARY64_BRIER_CONFORMANCE_V1", ("CONFORMANCE::MATH-08::brier_score",)),
+                            ("DETERMINISTIC_CERTIFIED_BINARY64_LOG_LOSS_CONFORMANCE_V1", ("CONFORMANCE::MATH-09::log_loss",)),
+                            ("DETERMINISTIC_EXACT_BINARY64_CALIBRATION_CONFORMANCE_V1", ("CONFORMANCE::MATH-10::ece",)),
+                            ("DETERMINISTIC_AS241_BINARY64_WILSON_CONFORMANCE_V1", ("CONFORMANCE::MATH-11::interval",)),
+                            ("DETERMINISTIC_ORIGINAL_RECORDED_DR_UNCERTAINTY_CONFORMANCE_V1",
+                                ("CONFORMANCE::MATH-22::dr_value_and_uncertainty",)),
+                            ("DETERMINISTIC_ORIGINAL_RECORDED_OPE_POINT_CONFORMANCE_V1", ("CONFORMANCE::MATH-23::ips_value",)),
+                            ("DETERMINISTIC_ORIGINAL_RECORDED_OPE_POINT_CONFORMANCE_V1", ("CONFORMANCE::MATH-24::snips_value",)),
+                            ("DETERMINISTIC_ORIGINAL_RECORDED_OPE_POINT_CONFORMANCE_V1", ("CONFORMANCE::MATH-25::switch_value_and_selected_tau",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-32::implementation_shortfall",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-33::spread_cost",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-35::signed_fee_or_rebate",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-36::derived_yes_and_no_touches",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-38::expected_fill_quantity",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-39::queue_ahead_estimate",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-40::signed_post_fill_markout",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-45::gate_decision",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-41::decayed_edge",)),
+                            ("DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1", ("CONFORMANCE::MATH-50::recomputed_objective",)),
+                            ("DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1", ("CONFORMANCE::MATH-51::recomputed_objective",)),
+                            ("DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1", ("CONFORMANCE::MATH-52::benchmark_delta_packet",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-42::impact_fraction",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-43::capacity_penalty",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1", ("CONFORMANCE::MATH-44::shrunk_covariance",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1", ("CONFORMANCE::MATH-29::utility",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1", ("CONFORMANCE::MATH-30::cvar",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1", ("CONFORMANCE::MATH-31::expected_shortfall",)),
+                            ("DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1", ("CONFORMANCE::MATH-37::fill_probability",)),
+                            (_LP03_HELDOUT_ANALYSIS_PROFILE_V1, (_LP03_HELDOUT_PROTOCOL_METRICS_V1["MATH-20"][0],)),
+                            (_LP03_HELDOUT_ANALYSIS_PROFILE_V1, (_LP03_HELDOUT_PROTOCOL_METRICS_V1["MATH-21"][0],)),
+                            ("DETERMINISTIC_ORDERED_BINARY64_CSCV_CONFORMANCE_V1", ("CONFORMANCE::MATH-19::pbo_receipt",)),
+                            ("DETERMINISTIC_ORDERED_BINARY64_SHARPE_CONFORMANCE_V1", ("CONFORMANCE::MATH-17::psr",)),
+                            ("DETERMINISTIC_ORDERED_BINARY64_SHARPE_CONFORMANCE_V1", ("CONFORMANCE::MATH-18::dsr",)),
+                            ("DETERMINISTIC_ORDERED_COMPLETE_FAMILY_SPA_CONFORMANCE_V1", ("CONFORMANCE::MATH-16::spa_receipt",)),
+                            ("DETERMINISTIC_ORDERED_COMPLETE_FAMILY_REALITY_CHECK_CONFORMANCE_V1", ("CONFORMANCE::MATH-15::reality_check_receipt",)),
+                            ("DETERMINISTIC_ORDERED_STATIONARY_BOOTSTRAP_CONFORMANCE_V1", ("CONFORMANCE::MATH-14::bootstrap_distribution_and_interval",)),
+                            ("DETERMINISTIC_ORDERED_BINARY64_MULTIPLE_TESTING_CONFORMANCE_V1", ("CONFORMANCE::MATH-12::rejections_and_adjusted_p",)),
+                            ("DETERMINISTIC_ORDERED_BINARY64_MULTIPLE_TESTING_CONFORMANCE_V1", ("CONFORMANCE::MATH-13::rejections_and_adjusted_p",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_EVI_CONFORMANCE_V1", ("CONFORMANCE::MATH-26::evi",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_CASHFLOW_CONFORMANCE_V1", ("CONFORMANCE::MATH-06::expected_net_cash",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_CASHFLOW_CONFORMANCE_V1", ("CONFORMANCE::MATH-07::expected_net_cash",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_MARKET_CONFORMANCE_V1", ("CONFORMANCE::MATH-01::p_market",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_MARKET_CONFORMANCE_V1", ("CONFORMANCE::MATH-04::spread",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_MARKET_CONFORMANCE_V1", ("CONFORMANCE::MATH-05::relative_spread",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_KELLY_CONFORMANCE_V1", ("CONFORMANCE::MATH-27::full_kelly_fraction",)),
+                            ("DETERMINISTIC_EXACT_DECIMAL_KELLY_CONFORMANCE_V1", ("CONFORMANCE::MATH-28::bounded_fraction",))),
+                        "LP03_PARAMETER_ANALYSIS_PROFILE_UNAVAILABLE")
+        _native_require(type(self.statistical_policy_or_absence) is EvidenceAbsenceV1
+                        and self.statistical_policy_or_absence.reason == "NOT_APPLICABLE_TO_DETERMINISTIC_CONFORMANCE",
+                        "LP03_PARAMETER_STATISTICAL_POLICY_NOT_ADMITTED")
+        for name in ("coverage_eligibility", "numeric_profile", "numerical_work_limits", "review_ack_policy"):
+            value = _evidence_frozen_data_v1(getattr(self, name))
+            _native_require(isinstance(value, Mapping), "LP03_PARAMETER_PROTOCOL_MAPPING")
+            object.__setattr__(self, name, value)
+        coverage = self.coverage_eligibility
+        _native_require(set(coverage) == {"source_record_refs", "group_rule_ref", "coverage_rule_ref", "first_unrevealed_group_ordinal",
+            "outcome_eligibility", "complete_prefix_required", "censoring_rule"}, "LP03_PARAMETER_COVERAGE_FIELDS")
+        _public_refs_v1(coverage["source_record_refs"])
+        _native_require(bool(coverage["source_record_refs"]), "LP03_PARAMETER_COVERAGE_EMPTY")
+        _native_ident(coverage["group_rule_ref"])
+        _native_ident(coverage["coverage_rule_ref"])
+        _public_counter_v1(coverage["first_unrevealed_group_ordinal"])
+        _native_require(coverage["outcome_eligibility"] == "SYNTHETIC_PREREGISTERED_ONLY"
+                        and coverage["complete_prefix_required"] is True and coverage["censoring_rule"] == "BLOCK_INCOMPLETE_PREFIX",
+                        "LP03_PARAMETER_COVERAGE_PROFILE")
+        if self.analysis_profile == "DETERMINISTIC_SAME_SNAPSHOT_PROBABILITY_EDGE_CONFORMANCE_V1":
+            from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+            from .serialization import _native_strict_json, deterministic_json
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"decimal_context_policy_ref", "ordered_arithmetic_policy", "conversion_policy",
+                "subtraction_policy", "output_unit", "measurement_basis", "contract_context", "model_context",
+                "producer_expected_raw_json", "bound_source_ref", "registration_and_review_serialization"},
+                "LP03_PARAMETER_EDGE_NUMERICAL_FIELDS")
+            _native_require(profile["decimal_context_policy_ref"] == LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+                and profile["ordered_arithmetic_policy"] == "EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1"
+                and profile["conversion_policy"] == "ORIGINAL_REGISTERED_DECIMAL_PROBABILITY_TO_NEAREST_BINARY64_V1"
+                and profile["subtraction_policy"] == "REPRESENTED_BINARY64_MODEL_MINUS_MARKET_NEAREST_EVEN_V1"
+                and profile["output_unit"] == "probability points"
+                and profile["measurement_basis"] == "MODEL_MINUS_MARKET_SAME_SNAPSHOT"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_EDGE_NUMERICAL_PROFILE")
+            contract, model = profile["contract_context"], profile["model_context"]
+            _native_require(isinstance(contract, Mapping) and set(contract) == {"profile", "input_snapshot_ref", "event_ref",
+                "instrument_ref", "winning_outcome_ref", "outcome_orientation", "horizon_ref", "horizon_end_wall_ns", "currency"}
+                and contract["profile"] == "SOFTWARE_ORIGINAL_PAYOFF_OUTCOME_HORIZON_CONTEXT_V1"
+                and contract["outcome_orientation"] == "PAYOUT_FOR_DECLARED_WINNING_OUTCOME",
+                "LP03_PARAMETER_EDGE_PAYOFF_CONTEXT")
+            for name in set(contract) - {"horizon_end_wall_ns"}:
+                _native_ident(contract[name])
+            _public_counter_v1(contract["horizon_end_wall_ns"])
+            _native_require(self.exclusive_expiry_wall_ns <= contract["horizon_end_wall_ns"],
+                            "LP03_PARAMETER_EDGE_HORIZON")
+            _native_require(isinstance(model, Mapping) and set(model) == {"profile", "producer_role", "model_semantic_version",
+                "model_implementation_version", "calibration_version", "feature_schema_ref", "input_snapshot_ref",
+                "calibration_source_ref", "calibration_receipt_id", "declared_validation_method_ref", "empirical_evidence_bundle"}
+                and model["profile"] == "SOFTWARE_PRODUCER_ASSOCIATION_ONLY_NO_EMPIRICAL_CALIBRATION_CLAIM"
+                and model["producer_role"] == "MODEL_PREDICTION" and model["input_snapshot_ref"] == contract["input_snapshot_ref"]
+                and type(model["calibration_source_ref"]) is tuple and len(model["calibration_source_ref"]) == 2
+                and model["empirical_evidence_bundle"] == {
+                    "state":"ABSENT_WITH_REASON", "reason":"NO_EMPIRICAL_CALIBRATION_BUNDLE_IN_SOFTWARE_FIXTURE"},
+                "LP03_PARAMETER_EDGE_MODEL_CONTEXT")
+            for name in set(model) - {"calibration_source_ref", "empirical_evidence_bundle"}:
+                _native_ident(model[name])
+            for value in model["calibration_source_ref"]:
+                _native_ident(value)
+            expected = profile["producer_expected_raw_json"]
+            _native_require(type(expected) is str and 0 < len(expected) <= 4096 and expected.isascii(),
+                            "LP03_PARAMETER_EDGE_PRODUCER_EXPECTATION")
+            parsed = _native_strict_json(expected.encode("ascii"), max_bytes=4096, max_nodes=4)
+            _native_require(type(parsed) is str and deterministic_json(parsed) == expected,
+                            "LP03_PARAMETER_EDGE_PRODUCER_EXPECTATION")
+        elif self.analysis_profile == "DETERMINISTIC_EXACT_DECIMAL_CASHFLOW_CONFORMANCE_V1":
+            from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"decimal_context_policy_ref","ordered_arithmetic_policy","output_unit",
+                "measurement_basis","currency","input_snapshot_ref","event_ref","instrument_ref","horizon_ref",
+                "horizon_end_wall_ns","cashflow_basis","account_basis","account_context_ref","outcome_ids",
+                "ordered_outcome_roles","bound_source_ref","registration_and_review_serialization"},
+                "LP03_PARAMETER_CASHFLOW_NUMERICAL_FIELDS")
+            for name in set(profile)-{"horizon_end_wall_ns","outcome_ids","ordered_outcome_roles"}:
+                _native_ident(profile[name])
+            _public_counter_v1(profile["horizon_end_wall_ns"])
+            _public_refs_v1(profile["outcome_ids"])
+            _native_require(type(profile["outcome_ids"]) is tuple and 2 <= len(profile["outcome_ids"]) <= 4096
+                and len(set(profile["outcome_ids"])) == len(profile["outcome_ids"]),
+                "LP03_PARAMETER_CASHFLOW_OUTCOME_ROSTER")
+            currency = profile["currency"]
+            binary = self.selected_metric_ids == ("CONFORMANCE::MATH-06::expected_net_cash",)
+            _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+                and currency.isalpha() and currency.isupper()
+                and profile["output_unit"] == currency
+                and profile["measurement_basis"] == profile["cashflow_basis"]
+                    == "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE"
+                and profile["account_basis"] == "SYNTHETIC_TOTAL_ACCOUNT_NO_CASH_MOVEMENT"
+                and profile["ordered_outcome_roles"] == (("WIN","LOSE","VOID") if binary else ("DECLARED_OUTCOME_ORDER",))
+                and (len(profile["outcome_ids"]) == 3 if binary else True)
+                and self.exclusive_expiry_wall_ns <= profile["horizon_end_wall_ns"]
+                and profile["decimal_context_policy_ref"] == LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+                and profile["ordered_arithmetic_policy"] == "EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref,
+                "LP03_PARAMETER_CASHFLOW_NUMERICAL_PROFILE")
+
+
+        elif self.analysis_profile == "DETERMINISTIC_EXACT_DECIMAL_MARKET_CONFORMANCE_V1":
+            from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+            from .models import _LP03_MARKET_METRIC_PROFILES_V1
+            profile = self.numeric_profile
+            math_id = self.selected_metric_ids[0].split("::")[1]
+            descriptor = _LP03_MARKET_METRIC_PROFILES_V1[math_id]
+            _native_require(set(profile) == {"decimal_context_policy_ref", "ordered_arithmetic_policy", "price_currency",
+                "output_unit", "measurement_basis", "snapshot_ref", "bound_source_ref", "registration_and_review_serialization"},
+                "LP03_PARAMETER_MARKET_NUMERICAL_FIELDS")
+            for name in ("price_currency", "output_unit", "measurement_basis", "snapshot_ref", "bound_source_ref"):
+                _native_ident(profile[name])
+            currency = profile["price_currency"]
+            _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+                            and currency.isalpha() and currency.isupper()
+                            and profile["output_unit"] == (currency + "/CONTRACT" if math_id == "MATH-04" else descriptor[2])
+                            and profile["measurement_basis"] == descriptor[3]
+                            and profile["decimal_context_policy_ref"] == LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+                            and profile["ordered_arithmetic_policy"] == "EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1"
+                            and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                            and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_MARKET_NUMERICAL_PROFILE")
+        elif self.analysis_profile == "DETERMINISTIC_EXACT_DECIMAL_KELLY_CONFORMANCE_V1":
+            from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"decimal_context_policy_ref", "ordered_arithmetic_policy", "output_unit",
+                "measurement_basis", "risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref",
+                "sizing_decision_ref", "bound_source_ref", "registration_and_review_serialization"},
+                "LP03_PARAMETER_KELLY_NUMERICAL_FIELDS")
+            for name in profile:
+                _native_ident(profile[name])
+            currency = profile["risk_capital_currency"]
+            _native_require(type(currency) is str and len(currency) == 3 and currency.isascii()
+                            and currency.isalpha() and currency.isupper()
+                            and profile["output_unit"] == "fraction_of_approved_risk_capital"
+                            and profile["measurement_basis"] == ("wealth_fraction" if self.selected_metric_ids == ("CONFORMANCE::MATH-27::full_kelly_fraction",)
+                                else "bounded_fractional_wealth_fraction")
+                            and profile["decimal_context_policy_ref"] == LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+                            and profile["ordered_arithmetic_policy"] == "EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1"
+                            and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                            and profile["bound_source_ref"] == self.parameter_protocol_ref,
+                            "LP03_PARAMETER_KELLY_NUMERICAL_PROFILE")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_BINARY64_MULTIPLE_TESTING_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "ledger_source_ref", "q_policy_source_ref", "candidate_universe_id", "evidence_window_id",
+                "result_direction", "bound_scope", "registration_and_review_serialization"}
+                and profile["arithmetic_policy"] == "ORDERED_NEAREST_EVEN_WITH_INDEPENDENT_HARMONIC_SUM_PROOF"
+                and profile["output_unit"] == "probability" and profile["measurement_basis"] == "adjusted_p_and_rejection_mask"
+                and profile["result_direction"] == "CONTROL" and profile["bound_scope"] == "ADJUSTED_P_COORDINATES_ONLY"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_MULTIPLE_NUMERICAL_PROFILE")
+            for name in ("ledger_source_ref", "q_policy_source_ref", "candidate_universe_id", "evidence_window_id"):
+                _native_ident(profile[name])
+        elif self.analysis_profile == "DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1":
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+            from .models import _LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1
+            from .quantum_benchmark import QuantumEconomicBasisV1
+
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"math_id", "output_unit", "output_basis", "quantity_scope_ref",
+                "horizon_ref", "ordered_coordinate_ids", "economic_basis", "registration_and_review_serialization"},
+                "LP03_QUANTUM_PARAMETER_FIELDS")
+            math_id = profile["math_id"]
+            _native_require(math_id in _LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1, "LP03_QUANTUM_PARAMETER_SELECTED_MATH")
+            rule = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            basis = QuantumEconomicBasisV1.from_canonical_mapping(profile["economic_basis"])
+            _public_refs_v1(profile["ordered_coordinate_ids"])
+            _native_require(0 < len(profile["ordered_coordinate_ids"]) <= 128
+                and self.selected_metric_ids == (f"CONFORMANCE::{math_id}::{rule.output_name}",)
+                and profile["output_unit"] == _LP03_ORIGINAL_QUANTUM_OUTPUT_UNITS_V1[math_id]
+                and profile["output_basis"] == rule.basis_requirement
+                and (profile["quantity_scope_ref"], profile["horizon_ref"]) == (basis.original_formulation_id, basis.ttl_policy_ref)
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_QUANTUM_PARAMETER_ORIGINAL_SCOPE")
+        elif self.analysis_profile in ("DETERMINISTIC_ORIGINAL_PRIVATE_DECIMAL_EXECUTION_CONFORMANCE_V1", "DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1"):
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"math_id", "output_unit", "output_basis", "quantity_scope_ref",
+                "horizon_ref", "ordered_coordinate_ids", "registration_and_review_serialization"},
+                "LP03_PARAMETER_PRIVATE_EXECUTION_FIELDS")
+            math_id = profile["math_id"]
+            _native_require(math_id in ("MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45"), "LP03_PARAMETER_PRIVATE_EXECUTION_MATH")
+            target = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            use_binary64 = math_id in ("MATH-41", "MATH-42", "MATH-43", "MATH-44")
+            _native_require((self.analysis_profile == "DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1") is use_binary64,
+                "LP03_PARAMETER_EXECUTION_NATIVE_NUMERIC_PROFILE")
+            for name in ("output_unit", "quantity_scope_ref", "horizon_ref"):
+                _native_ident(profile[name])
+            _public_refs_v1(profile["ordered_coordinate_ids"])
+            dimension = len(profile["ordered_coordinate_ids"])
+            _native_require((0 < dimension <= 16 if math_id == "MATH-44" else dimension == 1)
+                and self.selected_metric_ids == (f"CONFORMANCE::{math_id}::{target.output_name}",)
+                and profile["output_basis"] == target.basis_requirement
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_ORIGINAL_PRIVATE_EXECUTION_SCOPE")
+        elif self.analysis_profile == "DETERMINISTIC_ORIGINAL_PRIVATE_ANALYTIC_CONFORMANCE_V1":
+            from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"math_id", "output_unit", "output_basis", "quantity_scope_ref",
+                "horizon_ref", "ordered_coordinate_ids", "conversion_work_limits", "registration_and_review_serialization"},
+                "LP03_PARAMETER_ANALYTIC_PROFILE_FIELDS")
+            math_id = profile["math_id"]
+            _native_require(type(math_id) is str and math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37"),
+                "LP03_PARAMETER_ANALYTIC_MATH")
+            target = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+            for name in ("output_unit", "quantity_scope_ref", "horizon_ref"):
+                _native_ident(profile[name])
+            _public_refs_v1(profile["ordered_coordinate_ids"])
+            limits = profile["conversion_work_limits"]
+            maxima = {"max_input_bits": 4096, "max_work_bits": 65536, "max_serialized_bytes": 1048576}
+            _native_require(isinstance(limits, Mapping) and set(limits) == set(maxima)
+                and all(type(limits[name]) is int and 0 < limits[name] <= cap for name, cap in maxima.items())
+                and len(profile["ordered_coordinate_ids"]) <= 64
+                and self.selected_metric_ids == (f"CONFORMANCE::{math_id}::{target.output_name}",)
+                and profile["output_basis"] == target.basis_requirement
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_ANALYTIC_ORIGINAL_WORK_SCOPE")
+        elif self.analysis_profile == "DETERMINISTIC_ORIGINAL_RECORDED_OPE_POINT_CONFORMANCE_V1":
+            from .models import _LP03_OPE_POINT_PROJECTION_PROFILES_V1
+
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"math_id", "ordered_original_row_ids", "output_unit", "output_basis",
+                "evaluation_horizon_ref", "original_policy_value_authority", "registration_and_review_serialization"},
+                "LP03_PARAMETER_ORIGINAL_OPE_POINT_FIELDS")
+            math_id = profile["math_id"]
+            _native_require(type(math_id) is str and math_id in _LP03_OPE_POINT_PROJECTION_PROFILES_V1,
+                "LP03_PARAMETER_ORIGINAL_OPE_POINT_MATH")
+            _, metric, basis, _ = _LP03_OPE_POINT_PROJECTION_PROFILES_V1[math_id]
+            _public_refs_v1(profile["ordered_original_row_ids"])
+            _native_ident(profile["output_unit"])
+            _native_ident(profile["evaluation_horizon_ref"])
+            _native_require(0 < len(profile["ordered_original_row_ids"]) <= 64
+                and self.selected_metric_ids == (f"CONFORMANCE::{math_id}::{metric}",)
+                and profile["output_basis"] == basis
+                and profile["original_policy_value_authority"] == "ABSENT_SOFTWARE_CONFORMANCE_ONLY"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_ORIGINAL_OPE_POINT_PROFILE")
+        elif self.analysis_profile == "DETERMINISTIC_ORIGINAL_RECORDED_DR_UNCERTAINTY_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {
+                "logged_row_source_ref", "logged_row_receipt_ref", "uncertainty_source_ref",
+                "uncertainty_policy_receipt_ref", "assumption_source_refs", "output_unit",
+                "output_basis", "target", "bound_and_error_allocation_source_ref",
+                "evaluation_horizon_ref", "original_policy_value_authority",
+                "registration_and_review_serialization",
+            }, "LP03_PARAMETER_ORIGINAL_DR_UNCERTAINTY_FIELDS")
+            for name in ("logged_row_source_ref", "logged_row_receipt_ref", "uncertainty_source_ref",
+                         "uncertainty_policy_receipt_ref", "output_unit", "output_basis",
+                         "bound_and_error_allocation_source_ref", "evaluation_horizon_ref"):
+                _native_ident(profile[name])
+            refs = profile["assumption_source_refs"]
+            _public_refs_v1(refs, allow_empty=True)
+            _native_require(len(refs) <= 6
+                and len(set((profile["logged_row_source_ref"], profile["uncertainty_source_ref"], *refs))) == 2+len(refs)
+                and profile["logged_row_receipt_ref"] != profile["uncertainty_policy_receipt_ref"]
+                and profile["target"] == "MEAN_CONDITIONAL_RECORDED_DR_SCORE"
+                and profile["original_policy_value_authority"] == "ABSENT_SOFTWARE_CONFORMANCE_ONLY"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_ORIGINAL_DR_UNCERTAINTY_PROFILE")
+            if len(refs) == 6:
+                _native_require(profile["bound_and_error_allocation_source_ref"] == refs[-1],
+                    "LP03_PARAMETER_ORIGINAL_DR_BOUND_SOURCE")
+        elif self.analysis_profile == _LP03_HELDOUT_ANALYSIS_PROFILE_V1:
+            from .implementation_registry import resolve_evidence_invocation_v1
+            from .serialization import _native_strict_json, deterministic_json
+
+            profile = self.numeric_profile
+            _native_require(set(profile) == {
+                "topology_math_id", "topology_source_refs", "prediction_trace_source_ref",
+                "prediction_trace_receipt_ref", "outcome_label_source_ref", "outcome_label_receipt_ref",
+                "prediction_model_id", "prediction_model_version", "scorer_math_id",
+                "scorer_implementation_id", "scorer_specification_id", "scorer_resource_policy_ref",
+                "clip_epsilon_json_or_absence", "output_unit", "measurement_basis",
+                "path_aggregation_or_absence", "evaluation_horizon_ref", "bound_source_ref",
+                "statistical_authority", "registration_and_review_serialization",
+            }, "LP03_PARAMETER_HELD_OUT_FIELDS")
+            math_id = profile["topology_math_id"]
+            scorer = profile["scorer_math_id"]
+            _native_require(type(math_id) is str and math_id in _LP03_HELDOUT_PROTOCOL_METRICS_V1
+                and type(scorer) is str and scorer in ("MATH-08", "MATH-09"),
+                "LP03_PARAMETER_HELD_OUT_COMPONENTS")
+            metric, basis = _LP03_HELDOUT_PROTOCOL_METRICS_V1[math_id]
+            unit = "squared probability error" if scorer == "MATH-08" else "nats/sample"
+            _native_require(self.selected_metric_ids == (metric,)
+                and profile["measurement_basis"] == basis and profile["output_unit"] == unit
+                and profile["scorer_resource_policy_ref"] == profile["bound_source_ref"] == self.parameter_protocol_ref
+                and profile["statistical_authority"] == "SOFTWARE_CONFORMANCE_ONLY"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_HELD_OUT_PROFILE")
+            topology = profile["topology_source_refs"]
+            _native_require(type(topology) is tuple and len(topology) == (3 if math_id == "MATH-20" else 5),
+                "LP03_PARAMETER_HELD_OUT_SOURCE_ROSTER")
+            refs = (*topology, profile["prediction_trace_source_ref"], profile["outcome_label_source_ref"])
+            _public_refs_v1(refs)
+            _native_require(len(set(refs)) == len(refs), "LP03_PARAMETER_HELD_OUT_SOURCE_ROSTER")
+            for name in ("prediction_trace_receipt_ref", "outcome_label_receipt_ref", "prediction_model_id",
+                         "prediction_model_version", "evaluation_horizon_ref"):
+                _native_ident(profile[name])
+            _native_require(profile["prediction_trace_receipt_ref"] != profile["outcome_label_receipt_ref"],
+                "LP03_PARAMETER_HELD_OUT_RECEIPT_ROSTER")
+            resolve_evidence_invocation_v1(scorer, implementation_pin=profile["scorer_implementation_id"],
+                specification_pin=profile["scorer_specification_id"], resource_policy_ref=self.parameter_protocol_ref,
+                origin=self.origin)
+            clip = profile["clip_epsilon_json_or_absence"]
+            if scorer == "MATH-08":
+                _native_require(clip == {"state": "ABSENT_WITH_REASON", "reason": "BRIER_NO_CLIP"},
+                    "LP03_PARAMETER_HELD_OUT_SCORER_CLIP")
+            else:
+                _native_require(type(clip) is str and 0 < len(clip) <= 32 and clip.isascii(),
+                    "LP03_PARAMETER_HELD_OUT_SCORER_CLIP")
+                epsilon = _native_strict_json(clip.encode("ascii"), max_bytes=32, max_nodes=2, binary64_numbers=True)
+                _native_require(type(epsilon) is float and 0.0 < epsilon < 0.5
+                    and deterministic_json(epsilon) == clip, "LP03_PARAMETER_HELD_OUT_SCORER_CLIP")
+            aggregation = profile["path_aggregation_or_absence"]
+            _native_require(aggregation == ("MEAN_COMPLETE_PATH_SAMPLE_SCORES" if math_id == "MATH-21"
+                else {"state": "ABSENT_WITH_REASON", "reason": "NO_CPCV_PATHS_IN_MATH_20"}),
+                "LP03_PARAMETER_HELD_OUT_PATH_POLICY")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_BINARY64_CSCV_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "original_source_refs", "candidate_universe_id", "evidence_window_id", "return_basis_id",
+                "ordered_strategy_ids", "ordered_strategy_dispositions", "ordered_time_ids", "S",
+                "bound_scope", "result_direction", "statistical_authority", "registration_and_review_serialization"},
+                "LP03_PARAMETER_CSCV_PROFILE_FIELDS")
+            _native_require(profile["arithmetic_policy"] == "ORDERED_BINARY64_COMPLETE_CSCV_SPLIT_AND_LOG_MODEL"
+                and profile["output_unit"] == "mixed; member-specific"
+                and profile["measurement_basis"] == "probability_of_backtest_overfitting"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref
+                and profile["bound_scope"] == "PROBABILITY_OF_BACKTEST_OVERFITTING_COORDINATE_ONLY"
+                and profile["result_direction"] == "LOWER_IS_BETTER"
+                and profile["statistical_authority"] == "NO_EMPIRICAL_OVERFITTING_OR_GENERALIZATION_CERTIFICATION"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE",
+                "LP03_PARAMETER_CSCV_PROFILE")
+            sources, strategies, statuses, times, groups = (profile[key] for key in ("original_source_refs",
+                "ordered_strategy_ids", "ordered_strategy_dispositions", "ordered_time_ids", "S"))
+            _native_require(type(sources) is type(strategies) is type(statuses) is type(times) is tuple
+                and len(sources) == 3 and 1 <= len(strategies) == len(statuses) <= 4 and 2 <= len(times) <= 8
+                and type(groups) is int and groups in (2, 4) and len(times) % groups == 0
+                and all(type(status) is str and status in ("ATTEMPTED", "PRUNED") for status in statuses),
+                "LP03_PARAMETER_CSCV_COMPLETE_ROSTER")
+            for name in (*sources, *strategies, *times, profile["candidate_universe_id"], profile["evidence_window_id"],
+                    profile["return_basis_id"]):
+                _native_ident(name)
+            _native_require(all(len(set(values)) == len(values) for values in (sources, strategies, times)),
+                "LP03_PARAMETER_CSCV_COMPLETE_ROSTER")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_BINARY64_SHARPE_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"math_id", "arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "ledger_source_ref", "original_source_refs", "candidate_universe_id", "evidence_window_id", "return_basis_id",
+                "annualization_basis_id", "support_input_declaration_ref", "support_scope", "candidate_trial_id", "ordered_trial_ids",
+                "bound_scope", "result_direction", "statistical_authority", "registration_and_review_serialization"}
+                and type(profile["math_id"]) is str and profile["math_id"] in ("MATH-17", "MATH-18"),
+                "LP03_PARAMETER_SHARPE_NUMERICAL_PROFILE")
+            math_id = profile["math_id"]
+            _native_require(self.selected_metric_ids == ("CONFORMANCE::" + math_id + ("::psr" if math_id == "MATH-17" else "::dsr"),)
+                and profile["arithmetic_policy"] == ("ORDERED_BINARY64_PSR_ERFC_MODEL_CONFORMANCE_V1" if math_id == "MATH-17"
+                    else "ORDERED_BINARY64_DSR_AS241_ERFC_MODEL_CONFORMANCE_V1")
+                and profile["output_unit"] == "probability"
+                and profile["measurement_basis"] == ("probability_sharpe_exceeds_benchmark" if math_id == "MATH-17"
+                    else "multiple_testing_adjusted_sharpe_probability")
+                and profile["bound_scope"] == "PROJECTED_PSR_OR_DSR_PROBABILITY_ONLY"
+                and profile["result_direction"] == "HIGHER_IS_BETTER"
+                and profile["statistical_authority"] == "NO_EMPIRICAL_INDEPENDENCE_TRIAL_SUPPORT_OR_CONFIDENCE_CERTIFICATION"
+                and profile["support_scope"] == "SOFTWARE_INTEGER_INPUT_ONLY_NO_STATISTICAL_SUPPORT_CLAIM"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_SHARPE_NUMERICAL_PROFILE")
+            for name in ("ledger_source_ref", "candidate_universe_id", "evidence_window_id", "return_basis_id", "annualization_basis_id",
+                    "support_input_declaration_ref", "candidate_trial_id"):
+                _native_ident(profile[name])
+            sources, roster = profile["original_source_refs"], profile["ordered_trial_ids"]
+            _native_require(type(sources) is tuple and len(sources) == (5 if math_id == "MATH-17" else 6)
+                and all(type(value) is str for value in sources)
+                and type(roster) is tuple and (1 if math_id == "MATH-17" else 2) <= len(roster) <= 5
+                and all(type(value) is str and 0 < len(value) <= 128 for value in roster), "LP03_PARAMETER_SHARPE_DECLARED_ROSTER")
+            for value in (*sources, *roster):_native_ident(value)
+            _native_require(len(set(sources)) == len(sources) and sources[0] == profile["ledger_source_ref"]
+                and len(set(roster)) == len(roster) and profile["candidate_trial_id"] in roster, "LP03_PARAMETER_SHARPE_DECLARED_ROSTER")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_SPA_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                "block_policy_source_ref", "alpha_policy_source_ref", "variant_policy_source_ref", "candidate_universe_id", "evidence_window_id",
+                "benchmark_id", "ordered_trial_ids", "ordered_time_ids", "bound_scope", "result_direction",
+                "statistical_authority", "registration_and_review_serialization", "rng_replay_profile"}
+                and profile["arithmetic_policy"] == "ORDERED_BINARY64_MT19937_SPA_STUDENTIZATION_LOG_LOG_PLUS_ONE"
+                and profile["output_unit"] == "mixed; member-specific"
+                and profile["measurement_basis"] == "studentized_loss_differential_spa_p_value"
+                and profile["bound_scope"] == "ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS"
+                and profile["result_direction"] == "RECORD"
+                and profile["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"
+                and profile["rng_replay_profile"] == "ORIGINAL_CPYTHON_RANDOM_INTEGER_SEED_PINNED_ENVIRONMENT"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_REALITY_NUMERICAL_PROFILE")
+            for name in ("family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                         "block_policy_source_ref", "alpha_policy_source_ref", "variant_policy_source_ref", "candidate_universe_id", "evidence_window_id", "benchmark_id"):
+                _native_ident(profile[name])
+            _native_require(type(profile["ordered_trial_ids"]) is tuple and 1 <= len(profile["ordered_trial_ids"]) <= 2
+                and type(profile["ordered_time_ids"]) is tuple and 3 <= len(profile["ordered_time_ids"]) <= 4,
+                "LP03_PARAMETER_REALITY_DECLARED_GRID")
+            for roster in (profile["ordered_trial_ids"], profile["ordered_time_ids"]):
+                for value in roster:
+                    _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_PARAMETER_REALITY_GRID_ID")
+                    _native_ident(value)
+                _native_require(len(set(roster)) == len(roster), "LP03_PARAMETER_REALITY_DECLARED_GRID")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_REALITY_CHECK_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                "block_policy_source_ref", "alpha_policy_source_ref", "candidate_universe_id", "evidence_window_id",
+                "benchmark_id", "ordered_trial_ids", "ordered_time_ids", "bound_scope", "result_direction",
+                "statistical_authority", "registration_and_review_serialization", "rng_replay_profile"}
+                and profile["arithmetic_policy"] == "ORDERED_BINARY64_MT19937_COMPLETE_FAMILY_CENTERING_PLUS_ONE"
+                and profile["output_unit"] == "mixed; member-specific"
+                and profile["measurement_basis"] == "benchmark_candidate_loss_differential_p_value"
+                and profile["bound_scope"] == "ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS"
+                and profile["result_direction"] == "RECORD"
+                and profile["statistical_authority"] == "NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"
+                and profile["rng_replay_profile"] == "ORIGINAL_CPYTHON_RANDOM_INTEGER_SEED_PINNED_ENVIRONMENT"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_REALITY_NUMERICAL_PROFILE")
+            for name in ("family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                         "block_policy_source_ref", "alpha_policy_source_ref", "candidate_universe_id", "evidence_window_id", "benchmark_id"):
+                _native_ident(profile[name])
+            _native_require(type(profile["ordered_trial_ids"]) is tuple and 1 <= len(profile["ordered_trial_ids"]) <= 2
+                and type(profile["ordered_time_ids"]) is tuple and 2 <= len(profile["ordered_time_ids"]) <= 4,
+                "LP03_PARAMETER_REALITY_DECLARED_GRID")
+            for roster in (profile["ordered_trial_ids"], profile["ordered_time_ids"]):
+                for value in roster:
+                    _native_require(type(value) is str and 0 < len(value) <= 128, "LP03_PARAMETER_REALITY_GRID_ID")
+                    _native_ident(value)
+                _native_require(len(set(roster)) == len(roster), "LP03_PARAMETER_REALITY_DECLARED_GRID")
+        elif self.analysis_profile == "DETERMINISTIC_ORDERED_STATIONARY_BOOTSTRAP_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "series_source_ref", "block_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                "confidence_policy_source_ref", "interval_method_policy_source_ref", "bound_scope", "result_direction",
+                "statistical_authority", "registration_and_review_serialization", "rng_replay_profile"}
+                and profile["arithmetic_policy"] == "ORDERED_BINARY64_MT19937_STATIONARY_TYPE7"
+                and profile["output_unit"] == "statistic_unit"
+                and profile["measurement_basis"] == "bootstrap_statistic_distribution_and_interval"
+                and profile["bound_scope"] == "ALL_MEAN_AND_INTERVAL_COORDINATES" and profile["result_direction"] == "RECORD"
+                and profile["statistical_authority"] == "NO_COVERAGE_OR_EMPIRICAL_CERTIFICATION"
+                and profile["rng_replay_profile"] == "ORIGINAL_CPYTHON_RANDOM_INTEGER_SEED_PINNED_ENVIRONMENT"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_BOOTSTRAP_NUMERICAL_PROFILE")
+            for name in ("series_source_ref", "block_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref",
+                         "confidence_policy_source_ref", "interval_method_policy_source_ref"):
+                _native_ident(profile[name])
+        elif self.analysis_profile == "DETERMINISTIC_AS241_BINARY64_WILSON_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "successes_source_ref", "trials_source_ref", "confidence_policy_source_ref", "bound_scope", "result_direction",
+                "statistical_authority", "registration_and_review_serialization"}
+                and profile["arithmetic_policy"] == "ORDERED_AS241_BINARY64_WITH_CERTIFIED_LOG_AND_SQRT_CELLS"
+                and profile["output_unit"] == "probability" and profile["measurement_basis"] == "lower_upper_probability_interval"
+                and profile["bound_scope"] == "INTERVAL_ENDPOINTS_ONLY" and profile["result_direction"] == "INTERVAL"
+                and profile["statistical_authority"] == "NO_EXACT_QUANTILE_OR_COVERAGE_CERTIFICATION"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_WILSON_NUMERICAL_PROFILE")
+            for name in ("successes_source_ref", "trials_source_ref", "confidence_policy_source_ref"):
+                _native_ident(profile[name])
+        elif self.analysis_profile == "DETERMINISTIC_EXACT_BINARY64_CALIBRATION_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"arithmetic_policy", "output_unit", "measurement_basis", "bound_source_ref",
+                "bin_policy_source_ref", "bin_count_source_ref", "registration_and_review_serialization"}
+                and profile["arithmetic_policy"] == "ALL_NATIVE_INTERMEDIATES_EXACT_WITH_COMPLETE_DISJOINT_MEMBERSHIP"
+                and profile["output_unit"] == "probability" and profile["measurement_basis"] == "absolute_calibration_gap"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref, "LP03_PARAMETER_CALIBRATION_NUMERICAL_PROFILE")
+            _native_ident(profile["bin_policy_source_ref"]); _native_ident(profile["bin_count_source_ref"])
+        elif self.analysis_profile == "DETERMINISTIC_CERTIFIED_BINARY64_LOG_LOSS_CONFORMANCE_V1":
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"log_terms", "rounding_policy", "output_unit", "measurement_basis",
+                "bound_source_ref", "clip_policy_source_ref", "registration_and_review_serialization"}
+                and type(profile["log_terms"]) is int and profile["log_terms"] == 64
+                and profile["rounding_policy"] == "WHOLE_RATIONAL_ENCLOSURE_INSIDE_NEAREST_EVEN_CELL"
+                and profile["output_unit"] == "nats/sample" and profile["measurement_basis"] == "per_sample_natural_log_loss"
+                and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                and profile["bound_source_ref"] == self.parameter_protocol_ref,
+                "LP03_PARAMETER_LOG_LOSS_NUMERICAL_PROFILE")
+            _native_ident(profile["clip_policy_source_ref"])
+        elif self.selected_metric_ids == ("CONFORMANCE::MATH-26::evi",):
+            from .implementation_registry import LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+            profile = self.numeric_profile
+            _native_require(set(profile) == {"decimal_context_policy_ref", "ordered_arithmetic_policy", "utility_lower",
+                "utility_upper", "cost_cap", "utility_unit", "utility_basis_ref", "horizon_ref", "research_decision_ref",
+                "bound_source_ref", "registration_and_review_serialization"}, "LP03_PARAMETER_MATH26_NUMERICAL_FIELDS")
+            for name in ("utility_lower", "utility_upper", "cost_cap"):
+                _native_require(type(profile[name]) is str and 0 < len(profile[name]) <= 4096,
+                                "LP03_PARAMETER_MATH26_DECLARED_BOUND_TEXT")
+            for name in ("utility_unit", "utility_basis_ref", "horizon_ref", "research_decision_ref", "bound_source_ref"):
+                _native_ident(profile[name])
+            _native_require(profile["decimal_context_policy_ref"] == LP03_DECIMAL_CONTEXT_POLICY_REF_V1
+                            and profile["ordered_arithmetic_policy"] == "EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1"
+                            and profile["registration_and_review_serialization"] == "CUMULATIVE_ORIGINAL_ALLOWANCE"
+                            and profile["bound_source_ref"] == self.parameter_protocol_ref,
+                            "LP03_PARAMETER_MATH26_NUMERICAL_PROFILE")
+        else:
+            _native_require(set(self.numeric_profile) == {"log_terms", "sqrt_fraction_bits"}
+                            and type(self.numeric_profile["log_terms"]) is int and self.numeric_profile["log_terms"] == 64
+                            and type(self.numeric_profile["sqrt_fraction_bits"]) is int and self.numeric_profile["sqrt_fraction_bits"] == 128,
+                            "LP03_PARAMETER_NUMERICAL_PROFILE")
+        _native_require(set(self.numerical_work_limits) == {"max_input_bits", "max_work_bits", "max_serialized_bytes"},
+                        "LP03_PARAMETER_NUMERICAL_LIMIT_FIELDS")
+        for value in self.numerical_work_limits.values():
+            _public_counter_v1(value, allow_zero=True)
+        _native_require(type(self.per_attempt_limits) is EvidenceExecutionLimitsV1
+                        and type(self.aggregate_execution_limits) is EvidenceExecutionLimitsV1,
+                        "LP03_PARAMETER_RUNTIME_BUDGET_TYPES")
+        from dataclasses import fields
+        _native_require(self.per_attempt_limits.aggregate_budget_ref == self.aggregate_execution_limits.aggregate_budget_ref
+                        and all(getattr(self.per_attempt_limits, member.name) <= getattr(self.aggregate_execution_limits, member.name)
+                                for member in fields(EvidenceExecutionLimitsV1) if member.name != "aggregate_budget_ref"),
+                        "LP03_PARAMETER_RUNTIME_BUDGET_JOIN")
+        delivery = self.review_ack_policy
+        _native_require(set(delivery) == {"maximum_delivery_attempts", "maximum_wall_ns", "maximum_input_reads",
+            "maximum_input_bytes", "maximum_persistent_operations", "maximum_persistent_bytes", "exclusive_expiry_wall_ns",
+            "required_receiver_ids"}, "LP03_PARAMETER_DELIVERY_POLICY_FIELDS")
+        for name, value in delivery.items():
+            if name != "required_receiver_ids":
+                _public_counter_v1(value, allow_zero=True)
+        _public_refs_v1(delivery["required_receiver_ids"])
+        _native_require(set(delivery["required_receiver_ids"]) == {"READINESS1", "PRETRADE1", "AGENT_ORCH1", "SVC1"},
+                        "LP03_REQUIRED_RECEIVERS")
+        if self.analysis_profile in ("DETERMINISTIC_ORDERED_STATIONARY_BOOTSTRAP_CONFORMANCE_V1", "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_REALITY_CHECK_CONFORMANCE_V1", "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_SPA_CONFORMANCE_V1"):
+            pairs = self.formula_seed_bindings
+            _native_require(type(pairs) is tuple and len(pairs) == 1 and type(pairs[0]) is tuple and len(pairs[0]) == 2
+                and type(pairs[0][0]) is str and pairs[0][0] == ("MATH-16" if self.analysis_profile == "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_SPA_CONFORMANCE_V1" else "MATH-15" if self.analysis_profile == "DETERMINISTIC_ORDERED_COMPLETE_FAMILY_REALITY_CHECK_CONFORMANCE_V1" else "MATH-14")
+                and type(pairs[0][1]) is int and pairs[0][1].bit_length() <= 256,
+                "LP03_PARAMETER_BOOTSTRAP_ORIGINAL_FORMULA_SEED")
+        else:
+            _native_require(type(self.formula_seed_bindings) is tuple and self.formula_seed_bindings == (),
+                            "LP03_PARAMETER_MIDPOINT_HAS_NO_FORMULA_SEED")
+        _public_counter_v1(self.valid_from_wall_ns, allow_zero=True)
+        _public_counter_v1(self.exclusive_expiry_wall_ns)
+        _native_require(self.valid_from_wall_ns < self.exclusive_expiry_wall_ns
+                        and self.valid_from_wall_ns < delivery["exclusive_expiry_wall_ns"] <= self.exclusive_expiry_wall_ns,
+                        "LP03_PARAMETER_PROTOCOL_VALIDITY")
+
+    @classmethod
+    def from_canonical_mapping(cls, value):
+        from dataclasses import fields
+        from .context import _native_obj, _native_require
+        from .models import EvidenceOriginV1, EvidenceExecutionLimitsV1, EvidenceAbsenceV1, _evidence_tuple_decode_v1
+        data = dict(_native_obj(value, tuple(member.name for member in fields(cls))))
+        _native_require(type(data["origin"]) is str and data["origin"] == "SOFTWARE_CONFORMANCE", "LP03_PARAMETER_ORIGIN")
+        data["origin"] = EvidenceOriginV1.SOFTWARE_CONFORMANCE
+        data["selected_metric_ids"] = _evidence_tuple_decode_v1(data["selected_metric_ids"])
+        data["statistical_policy_or_absence"] = EvidenceAbsenceV1.from_canonical_mapping(data["statistical_policy_or_absence"])
+        for name in ("per_attempt_limits", "aggregate_execution_limits"):
+            data[name] = EvidenceExecutionLimitsV1.from_canonical_mapping(data[name])
+        data["formula_seed_bindings"] = _evidence_tuple_decode_v1(data["formula_seed_bindings"], _evidence_tuple_decode_v1)
+        return cls(**data)
+
+
+class _EvidenceNumericalWorkV1:
+    """Cumulative pure arithmetic work; never a source, claim or execution grant.
+
+    The admitted owner must retain this same object and its failed work, and
+    account physical CPU/wall around calls. Counters describe explicit integer,
+    comparison and Fraction-normalization operations, not hidden library cycles.
+    No operation-count allowance is inferred from a bit-size limit.
+    """
+
+    __slots__ = ("_limits", "_consumed", "_consumed_view", "_state", "_failure", "_original",
+                 "_decimal_inputs", "_decimal_admissions", "_retained_input_capacity", "_math26_context_steps",
+                 "_math26_context_prefix", "_bootstrap_invocations", "_bootstrap_inspect", "_bootstrap_admit", "__weakref__")
+
+    def __init__(self, limits, *, retained_input_capacity):
+        from .context import _native_require, _public_counter_v1
+        _native_require(isinstance(limits, Mapping) and set(limits) == {
+            "max_input_bits", "max_work_bits", "max_serialized_bytes"}, "LP03_NUMERICAL_LIMIT_FIELDS")
+        for value in limits.values():
+            _public_counter_v1(value, allow_zero=True)
+        _public_counter_v1(retained_input_capacity, allow_zero=True)
+        self._limits = MappingProxyType(dict(limits))
+        self._consumed = dict(integer_operations=0, comparisons=0, rational_normalizations=0,
+            log_series_terms=0, square_roots=0, random_draws=0, peak_preflight_bits=0, serialized_bytes=0, input_values=0,
+            decimal_parse_attempts=0, decimal_constructions=0, integer_powers=0, retained_decimal_inputs=0)
+        self._consumed_view = MappingProxyType(self._consumed)
+        self._decimal_inputs = {}
+        self._decimal_admissions = ()
+        self._retained_input_capacity = retained_input_capacity
+        # The original M26 proof producer retains each actual context attempt,
+        # including a failed operation or subsequent encoding/custody failure.
+        # This diagnostic root grants no source or derived-input permission.
+        self._math26_context_steps = []
+        self._math26_context_prefix = ()
+        self._state, self._failure = "OPEN", None
+        self._bootstrap_invocations = []
+        bootstrap_roster = ()
+
+        def inspect_bootstrap(active=None, *, failed=False):
+            from .context import _native_require
+            require = _native_require if failed else self._require
+            require(not failed or self.state == "FAILED" and active is None,
+                "LP03_BOOTSTRAP_FAILED_INSPECTION_ONLY")
+            require(type(self._bootstrap_invocations) is list
+                and len(self._bootstrap_invocations) == len(bootstrap_roster) <= 16
+                and all(self._bootstrap_invocations[index] is record for index, record in enumerate(bootstrap_roster)),
+                "LP03_BOOTSTRAP_ORIGINAL_INVOCATION_ROSTER_REQUIRED")
+            require(active is None or bool(bootstrap_roster) and bootstrap_roster[-1][0] is active,
+                "LP03_BOOTSTRAP_ORIGINAL_ACTIVE_INVOCATION_REQUIRED")
+            for entry, guard in bootstrap_roster:
+                guard(completed=entry.phase == "COMPLETE" if failed else entry is not active, failed=failed)
+
+        def admit_bootstrap(entry, guard):
+            nonlocal bootstrap_roster
+            inspect_bootstrap()
+            self._require(len(bootstrap_roster) < 16 and type(entry) is _EvidenceBootstrapReplayV1
+                and entry.work is self and entry.ordinal == len(bootstrap_roster)
+                and entry._inspect is guard and entry.phase == "CONSTRUCTING",
+                "LP03_BOOTSTRAP_ORIGINAL_INVOCATION_ADMISSION")
+            record = (entry, guard)
+            bootstrap_roster = (*bootstrap_roster, record)
+            self._bootstrap_invocations.append(record)
+
+        self._bootstrap_inspect, self._bootstrap_admit = inspect_bootstrap, admit_bootstrap
+
+        self._original = (self, self._limits, self._consumed, self._consumed_view, self._decimal_inputs,
+                          retained_input_capacity, self._math26_context_steps, self._bootstrap_invocations,
+                          self._bootstrap_inspect, self._bootstrap_admit)
+
+    @property
+    def limits(self):
+        return self._limits
+
+    @property
+    def consumed(self):
+        return self._consumed_view
+
+    @property
+    def state(self):
+        return self._state
+
+    @property
+    def failure(self):
+        return self._failure
+
+    def __enter__(self):
+        self._open()
+        self._assert_math26_context_custody_v1()
+        return self
+
+    def __exit__(self, kind, error, traceback):
+        from .errors import ComputationControlPlaneError
+        if kind is not None and self._state != "FAILED":
+            self._state, self._failure = "FAILED", "LP03_NUMERICAL_OPERATION_FAILED"
+        # Typed boundary failures already carry their original reason. They
+        # also inherit ValueError, but must not lose that diagnostic here.
+        if isinstance(error, ComputationControlPlaneError):
+            return False
+        if isinstance(error, (ArithmeticError, ValueError, TypeError, MemoryError)):
+            from .context import _native_require
+            _native_require(False, self._failure)
+        return False
+
+    def __copy__(self):
+        raise TypeError("LP03 numerical work cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("LP03 numerical work cannot be copied")
+
+    def __reduce_ex__(self, protocol):
+        raise TypeError("LP03 numerical work cannot be serialized")
+
+    def _require(self, condition, diagnostic, *, reason=None):
+        from .context import _native_require
+        if not condition:
+            self._state, self._failure = "FAILED", diagnostic
+            if reason is not None:
+                from .errors import ContractValidationError
+                raise ContractValidationError(reason, diagnostic)
+        _native_require(condition, diagnostic)
+
+    def _open(self):
+        from .context import _native_require
+        _native_require(self._state == "OPEN", "LP03_NUMERICAL_WORK_NOT_OPEN")
+        self._require(type(self) is _EvidenceNumericalWorkV1 and type(self._original) is tuple
+                      and len(self._original) == 10 and self._original[0] is self
+                        and self._original[1] is self._limits and self._original[2] is self._consumed
+                        and self._original[3] is self._consumed_view and self._original[4] is self._decimal_inputs
+                      and type(self._retained_input_capacity) is int and self._original[5] == self._retained_input_capacity
+                      and type(self._math26_context_steps) is list and self._original[6] is self._math26_context_steps
+                      and self._original[7] is self._bootstrap_invocations
+                      and self._original[8] is self._bootstrap_inspect and self._original[9] is self._bootstrap_admit,
+                        "LP03_NUMERICAL_ORIGINAL_WORK_MEMBERS_REQUIRED")
+        self._require(all(value > 0 for value in self.limits.values()), "LP03_NUMERICAL_ZERO_BUDGET")
+
+    def _assert_decimal_custody(self):
+        from fractions import Fraction
+        records = self._decimal_admissions
+        self._require(type(records) is tuple and len(records) == self._consumed["retained_decimal_inputs"]
+                      and len(records) == len(self._decimal_inputs) <= self._retained_input_capacity,
+                      "LP03_ORIGINAL_DECIMAL_ADMISSION_ROSTER_REQUIRED")
+        self._require(all(type(record) is tuple and len(record) == 4 and type(record[0]) is Decimal
+                          and type(record[1]) is Fraction and type(record[2]) is str and type(record[3]) is str
+                          and record[3] in ("STATISTICAL_EXACT_DECIMAL_V1", "MATH26_FINANCIAL_DECIMAL_V1",
+                                            "MATH26_CONTEXT_RESULT_V1", "MARKET_FINANCIAL_DECIMAL_V1",
+                                            "MARKET_CONTEXT_RESULT_V1", "KELLY_FINANCIAL_DECIMAL_V1",
+                                            "KELLY_CONTEXT_RESULT_V1", "CASHFLOW_FINANCIAL_DECIMAL_V1",
+                                            "CASHFLOW_CONTEXT_RESULT_V1", "PRIVATE_EXECUTION_DECIMAL_V1") for record in records),
+                      "LP03_ORIGINAL_DECIMAL_ADMISSION_ROSTER_REQUIRED")
+        self._require(tuple(self._decimal_inputs) == tuple(id(record[0]) for record in records)
+                      and all(self._decimal_inputs[id(record[0])] is record for record in records),
+                      "LP03_ORIGINAL_DECIMAL_ADMISSION_ROSTER_REQUIRED")
+
+    def _assert_bootstrap_custody_v1(self, active=None, *, failed=False):
+        from .context import _native_require
+        require = _native_require if failed else self._require
+        require(type(self._original) is tuple and len(self._original) == 10 and self._original[0] is self
+            and self._original[7] is self._bootstrap_invocations and self._original[8] is self._bootstrap_inspect
+            and self._original[9] is self._bootstrap_admit, "LP03_BOOTSTRAP_ORIGINAL_WORK_ROSTER_REQUIRED")
+        self._bootstrap_inspect(active, failed=failed)
+
+    def _assert_math26_context_custody_v1(self):
+        from fractions import Fraction
+        self._assert_decimal_custody()
+        self._assert_bootstrap_custody_v1()
+        records = self._math26_context_prefix
+        self._require(type(records) is tuple and len(records) == len(self._math26_context_steps)
+                      and len(records) <= self._retained_input_capacity
+                      and all(type(record) is tuple and len(record) == 9 and type(record[0]) is int
+                              and type(record[1]) is str and type(record[2]) is Decimal and type(record[3]) is Decimal
+                              and type(record[4]) is Fraction and type(record[5]) is Decimal
+                              and type(record[6]) is tuple and all(type(flag) is str for flag in record[6])
+                              and type(record[7]) is str and type(record[8]) is str and record[0] == ordinal
+                              and record[8] == "EXACT" and self._math26_context_steps[ordinal] is record
+                              for ordinal, record in enumerate(records)),
+                      "LP03_MATH26_ORIGINAL_CONTEXT_PREFIX_REQUIRED")
+        derived = tuple(record for record in self._decimal_admissions if record[3] in (
+            "MATH26_CONTEXT_RESULT_V1", "MARKET_CONTEXT_RESULT_V1", "KELLY_CONTEXT_RESULT_V1",
+            "CASHFLOW_CONTEXT_RESULT_V1"))
+        self._require(len(derived) == len(records)
+                      and all(record[5] is admission[0] and record[4] is admission[1] and record[7] is admission[2]
+                              for record, admission in zip(records, derived)),
+                      "LP03_MATH26_ORIGINAL_CONTEXT_PREFIX_REQUIRED")
+
+    def parse_decimal_v1(self, text):
+        """Bound original text before construction; retain exact data identity.
+
+        The original operation supplies retained_input_capacity from its finite
+        input/resource allowance and charges retained memory. This parser grants
+        no source authority and never accepts a caller's size certificate.
+        """
+        return self._parse_decimal_text_v1(text, "STATISTICAL_EXACT_DECIMAL_V1")
+
+    def _parse_math26_decimal_v1(self, text):
+        """Closed financial data admission, preserving canonical signed zero.
+
+        Its retained profile cannot feed statistical Decimal consumers. Source
+        rights, original input identity and M26 review admission remain external.
+        """
+        return self._parse_decimal_text_v1(text, "MATH26_FINANCIAL_DECIMAL_V1")
+
+    def _parse_market_decimal_v1(self, text):
+        """Financial text for the closed market family, without M26 custody."""
+        return self._parse_decimal_text_v1(text, "MARKET_FINANCIAL_DECIMAL_V1")
+
+    def _parse_cashflow_decimal_v1(self, text):
+        """Canonical financial text for original signed cashflow proof only."""
+        return self._parse_decimal_text_v1(text, "CASHFLOW_FINANCIAL_DECIMAL_V1")
+
+    def _parse_private_execution_decimal_v1(self, text):
+        """Admit a canonical exact Decimal before the selected executable proof."""
+        return self._parse_decimal_text_v1(text, "PRIVATE_EXECUTION_DECIMAL_V1")
+
+    def _parse_kelly_decimal_v1(self, text):
+        """Kelly financial data only; this does not establish upstream custody."""
+        return self._parse_decimal_text_v1(text, "KELLY_FINANCIAL_DECIMAL_V1")
+
+    def _parse_decimal_text_v1(self, text, profile):
+        with self:
+            self._require(type(profile) is str and profile in (
+                "STATISTICAL_EXACT_DECIMAL_V1", "MATH26_FINANCIAL_DECIMAL_V1", "MARKET_FINANCIAL_DECIMAL_V1",
+                "KELLY_FINANCIAL_DECIMAL_V1", "CASHFLOW_FINANCIAL_DECIMAL_V1", "PRIVATE_EXECUTION_DECIMAL_V1"),
+                "LP03_NUMERICAL_DECIMAL_PROFILE")
+            self._consumed["decimal_parse_attempts"] += 1
+            self._require(type(text) is str and bool(text), "LP03_NUMERICAL_DECIMAL_TEXT_REQUIRED")
+            # The closed grammar needs at most one input character per admitted
+            # work bit. Check before regex, slicing, int(), or Decimal(text).
+            self._bits(len(text))
+            self._require(self._consumed["retained_decimal_inputs"] < self._retained_input_capacity,
+                          "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            match = re.fullmatch(r"([+-]?)([0-9]+)(?:\.([0-9]+))?(?:[eE]([+-]?)([0-9]+))?", text)
+            self._require(match is not None, "LP03_NUMERICAL_EXACT_INPUT_DOMAIN")
+            whole, fraction, exponent_digits = match[2], match[3] or "", match[5] or "0"
+            self._bits(4 * (len(whole) + len(fraction)))
+            self._bits(4 * len(exponent_digits))
+            self._consumed["integer_operations"] += 1
+            exponent = int(exponent_digits)
+            if match[4] == "-":
+                exponent = self._int_product(-1, exponent)
+            exponent = self._int_sum(exponent, -len(fraction))
+            required_bits = max(4 * (len(whole) + len(fraction)) + 4 * max(exponent, 0), 1 + 4 * max(-exponent, 0))
+            self._bits(required_bits)
+            self._consumed["integer_operations"] += 1
+            numerator = int(whole + fraction)
+            if profile == "STATISTICAL_EXACT_DECIMAL_V1":
+                self._require(not (match[1] == "-" and numerator == 0), "LP03_NUMERICAL_EXACT_INPUT_DOMAIN")
+            if match[1] == "-":
+                numerator = self._int_product(-1, numerator)
+            self._consumed["integer_operations"] += 1
+            self._consumed["integer_powers"] += 1
+            power = 10 ** abs(exponent)
+            ratio = self._fraction(self._int_product(numerator, power)) if exponent >= 0 else self._fraction(numerator, power)
+            self._require(max(ratio.numerator.bit_length(), ratio.denominator.bit_length()) <= self.limits["max_input_bits"],
+                          "LP03_NUMERICAL_INPUT_BITS_EXHAUSTED")
+            self._consumed["decimal_constructions"] += 1
+            original = Decimal(text)
+            if profile in ("MATH26_FINANCIAL_DECIMAL_V1", "MARKET_FINANCIAL_DECIMAL_V1", "KELLY_FINANCIAL_DECIMAL_V1", "CASHFLOW_FINANCIAL_DECIMAL_V1", "PRIVATE_EXECUTION_DECIMAL_V1"):
+                # All coefficient/exponent allocations were bounded above.
+                # Retain the original scale/sign/exponent spelling, not merely
+                # a numerically equal normalized value.
+                with localcontext(decimal_context_v1()):
+                    self._require(str(original) == text, "LP03_MATH26_NUMERICAL_DECIMAL_CANONICAL")
+            # Strong references prevent id reuse; comparisons below use `is`,
+            # never Decimal hashing/equality or a reconstructed representation.
+            self._require(id(original) not in self._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+            record = (original, ratio, text, profile)
+            self._decimal_admissions = (*self._decimal_admissions, record)
+            self._decimal_inputs[id(original)] = record
+            self._consumed["retained_decimal_inputs"] += 1
+            return original
+
+    def _bits(self, size):
+        self._open()
+        self._consumed["peak_preflight_bits"] = max(self._consumed["peak_preflight_bits"], size)
+        self._require(size <= self.limits["max_work_bits"], "LP03_NUMERICAL_WORK_BITS_EXHAUSTED")
+
+    def _int_product(self, left, right):
+        self._bits(left.bit_length() + right.bit_length())
+        self._consumed["integer_operations"] += 1
+        return left * right
+
+    def _int_sum(self, left, right):
+        self._bits(max(left.bit_length(), right.bit_length()) + 1)
+        self._consumed["integer_operations"] += 1
+        return left + right
+
+    def _fraction(self, numerator, denominator=1):
+        from fractions import Fraction
+        self._bits(max(numerator.bit_length(), denominator.bit_length()))
+        self._require(denominator != 0, "LP03_NUMERICAL_ZERO_DENOMINATOR")
+        self._consumed["rational_normalizations"] += 1
+        return Fraction(numerator, denominator)
+
+    def _add(self, left, right):
+        return self._fraction(self._int_sum(self._int_product(left.numerator, right.denominator),
+            self._int_product(right.numerator, left.denominator)), self._int_product(left.denominator, right.denominator))
+
+    def _subtract(self, left, right):
+        self._bits(right.numerator.bit_length())
+        self._consumed["integer_operations"] += 1
+        return self._add(left, self._fraction(-right.numerator, right.denominator))
+
+    def _multiply(self, left, right):
+        return self._fraction(self._int_product(left.numerator, right.numerator), self._int_product(left.denominator, right.denominator))
+
+    def _divide(self, left, right):
+        self._require(right.numerator != 0, "LP03_NUMERICAL_ZERO_DENOMINATOR")
+        return self._fraction(self._int_product(left.numerator, right.denominator), self._int_product(left.denominator, right.numerator))
+
+    def _compare(self, left, right):
+        first = self._int_product(left.numerator, right.denominator)
+        second = self._int_product(right.numerator, left.denominator)
+        self._consumed["comparisons"] += 1
+        return (first > second) - (first < second)
+
+    def _shift(self, value, places):
+        self._require(type(places) is int and places >= 0, "LP03_NUMERICAL_SHIFT_DOMAIN")
+        self._bits(value.bit_length() + places)
+        self._consumed["integer_operations"] += 1
+        return value << places
+
+    def _exact(self, value, *, binary64=False):
+        from fractions import Fraction
+        from math import isfinite, copysign
+        self._open()
+        self._consumed["input_values"] += 1
+        if type(value) is int:
+            self._require(value.bit_length() <= self.limits["max_input_bits"], "LP03_NUMERICAL_INPUT_BITS_EXHAUSTED")
+            return self._fraction(value)
+        if type(value) is Fraction:
+            self._require(max(value.numerator.bit_length(), value.denominator.bit_length()) <= self.limits["max_input_bits"],
+                          "LP03_NUMERICAL_INPUT_BITS_EXHAUSTED")
+            return self._fraction(value.numerator, value.denominator)
+        if type(value) is Decimal:
+            self._assert_decimal_custody()
+            original = self._decimal_inputs.get(id(value))
+            self._require(type(original) is tuple and len(original) == 4 and original[0] is value,
+                          "LP03_ORIGINAL_BOUNDED_NUMERICAL_DECIMAL_REQUIRED")
+            self._require(original[3] == "STATISTICAL_EXACT_DECIMAL_V1",
+                          "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            return original[1]
+        if binary64 and type(value) is float:
+            self._require(isfinite(value) and not (value == 0 and copysign(1, value) < 0), "LP03_NUMERICAL_BINARY64_INPUT_DOMAIN")
+            return self._binary64_ratio(value, original_input=True)
+        self._require(False, "LP03_NUMERICAL_EXACT_INPUT_TYPE")
+
+    def _exact_math26_decimal_v1(self, value):
+        """Read only a retained M26 financial admission from this same work."""
+        self._open()
+        self._consumed["input_values"] += 1
+        self._assert_decimal_custody()
+        self._require(type(value) is Decimal, "LP03_MATH26_NUMERICAL_DECIMAL_REQUIRED")
+        original = self._decimal_inputs.get(id(value))
+        self._require(type(original) is tuple and len(original) == 4 and original[0] is value,
+                      "LP03_ORIGINAL_BOUNDED_NUMERICAL_DECIMAL_REQUIRED")
+        self._require(original[3] == "MATH26_FINANCIAL_DECIMAL_V1", "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        return original[1]
+
+    def _exact_market_decimal_v1(self, value):
+        """Read an original market financial input from this same work."""
+        self._open()
+        self._consumed["input_values"] += 1
+        self._assert_decimal_custody()
+        self._require(type(value) is Decimal, "LP03_MARKET_NUMERICAL_DECIMAL_REQUIRED")
+        original = self._decimal_inputs.get(id(value))
+        self._require(type(original) is tuple and len(original) == 4 and original[0] is value,
+                      "LP03_ORIGINAL_BOUNDED_NUMERICAL_DECIMAL_REQUIRED")
+        self._require(original[3] == "MARKET_FINANCIAL_DECIMAL_V1", "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        return original[1]
+
+    def _exact_cashflow_decimal_v1(self, value):
+        """Read an original cashflow financial input from this same work."""
+        self._open()
+        self._consumed["input_values"] += 1
+        self._assert_decimal_custody()
+        self._require(type(value) is Decimal, "LP03_CASHFLOW_NUMERICAL_DECIMAL_REQUIRED")
+        original = self._decimal_inputs.get(id(value))
+        self._require(type(original) is tuple and len(original) == 4 and original[0] is value,
+                      "LP03_ORIGINAL_BOUNDED_NUMERICAL_DECIMAL_REQUIRED")
+        self._require(original[3] == "CASHFLOW_FINANCIAL_DECIMAL_V1", "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        return original[1]
+
+    def _exact_private_execution_decimal_v1(self, value):
+        """Access the rational coordinate of this work's exact source admission."""
+        self._open()
+        self._consumed["input_values"] += 1
+        self._assert_decimal_custody()
+        self._require(type(value) is Decimal, "LP03_PRIVATE_EXECUTION_ORIGINAL_DECIMAL_REQUIRED")
+        original = self._decimal_inputs.get(id(value))
+        self._require(type(original) is tuple and len(original) == 4 and original[0] is value
+            and original[3] == "PRIVATE_EXECUTION_DECIMAL_V1", "LP03_PRIVATE_EXECUTION_ORIGINAL_DECIMAL_ADMISSION")
+        return original[1]
+
+    def _exact_kelly_decimal_v1(self, value):
+        """Read only the original financial admission from this Kelly work."""
+        self._open()
+        self._consumed["input_values"] += 1
+        self._assert_decimal_custody()
+        self._require(type(value) is Decimal, "LP03_KELLY_NUMERICAL_DECIMAL_REQUIRED")
+        original = self._decimal_inputs.get(id(value))
+        self._require(type(original) is tuple and len(original) == 4 and original[0] is value,
+                      "LP03_ORIGINAL_BOUNDED_NUMERICAL_DECIMAL_REQUIRED")
+        self._require(original[3] == "KELLY_FINANCIAL_DECIMAL_V1", "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        return original[1]
+
+    def _binary64_ratio(self, value, *, original_input=False):
+        # Only exact finite source values admitted above, or original finite
+        # adjacent floats, reach this method. A negative-zero neighbor denotes
+        # rational zero without changing the candidate or admitting signed-zero
+        # source data. Binary64 conversion cannot allocate beyond this bound.
+        self._bits(1075)
+        self._consumed["integer_operations"] += 1
+        numerator, denominator = value.as_integer_ratio()
+        if original_input:
+            self._require(max(numerator.bit_length(), denominator.bit_length()) <= self.limits["max_input_bits"],
+                          "LP03_NUMERICAL_INPUT_BITS_EXHAUSTED")
+        return self._fraction(numerator, denominator)
+
+    def _ordinal(self, value):
+        self._require(type(value) is int and value > 0, "LP03_NUMERICAL_POSITIVE_ORDINAL_REQUIRED")
+        return self._exact(value).numerator
+
+    def _series(self, z):
+        zero, one, third = self._fraction(0), self._fraction(1), self._fraction(1, 3)
+        self._require(self._compare(z, zero) >= 0 and self._compare(z, third) <= 0, "LP03_NUMERICAL_LOG_REDUCTION_DOMAIN")
+        square, power, total = self._multiply(z, z), z, zero
+        for index in range(64):
+            self._consumed["log_series_terms"] += 1
+            total = self._add(total, self._divide(power, self._fraction(self._int_sum(self._int_product(2, index), 1))))
+            power = self._multiply(power, square)
+        lower = self._multiply(self._fraction(2), total)
+        remainder = self._divide(self._multiply(self._fraction(2), power),
+            self._multiply(self._fraction(129), self._subtract(one, square)))
+        return lower, self._add(lower, remainder)
+
+    def _log_enclosure(self, value):
+        one, two = self._fraction(1), self._fraction(2)
+        self._require(self._compare(value, one) >= 0, "LP03_NUMERICAL_LOG_DOMAIN")
+        k = self._int_sum(value.numerator.bit_length(), -value.denominator.bit_length())
+        self._require(k >= 0, "LP03_NUMERICAL_LOG_DOMAIN")
+        y = self._divide(value, self._fraction(self._shift(1, k)))
+        if self._compare(y, one) < 0:
+            k = self._int_sum(k, -1)
+            y = self._multiply(y, two)
+        if self._compare(y, two) >= 0:
+            k = self._int_sum(k, 1)
+            y = self._divide(y, two)
+        low, high = self._series(self._divide(self._subtract(y, one), self._add(y, one)))
+        low_two, high_two = self._series(self._fraction(1, 3))
+        return self._add(self._multiply(self._fraction(k), low_two), low), self._add(self._multiply(self._fraction(k), high_two), high)
+
+    def _sqrt_upper(self, value):
+        from math import isqrt
+        self._require(self._compare(value, self._fraction(0)) >= 0, "LP03_NUMERICAL_SQRT_DOMAIN")
+        numerator = self._shift(value.numerator, 256)
+        # divmod avoids forming numerator+denominator-1 before a ceiling.
+        self._bits(max(numerator.bit_length(), value.denominator.bit_length()))
+        self._consumed["integer_operations"] += 1
+        quotient, remainder = divmod(numerator, value.denominator)
+        if remainder:
+            quotient = self._int_sum(quotient, 1)
+        self._bits(quotient.bit_length())
+        self._consumed["square_roots"] += 1
+        root = isqrt(quotient)
+        squared = self._int_product(root, root)
+        self._consumed["comparisons"] += 1
+        if squared < quotient:
+            root = self._int_sum(root, 1)
+        upper = self._fraction(root, self._shift(1, 128))
+        self._require(self._compare(self._multiply(upper, upper), value) >= 0, "LP03_NUMERICAL_SQRT_ENCLOSURE_FAILURE")
+        return upper
+
+    def _emit(self, values):
+        """Size decimal integer text before formatting; retain actual JSON bytes."""
+        from fractions import Fraction
+        from .serialization import deterministic_json
+        self._open()
+        # One decimal digit per bit is a conservative upper bound. Account all
+        # names, quotes, signs and the two named rational members before str().
+        upper = 2
+        for name, value in values.items():
+            upper += len(name.encode("utf-8")) + 8
+            if type(value) is Fraction:
+                upper += max(1, value.numerator.bit_length()) + max(1, value.denominator.bit_length()) + 40
+            elif type(value) is int:
+                upper += max(1, value.bit_length()) + 1
+            elif type(value) is float:
+                upper += 32
+            elif type(value) is str:
+                upper += len(value.encode("utf-8")) * 6 + 2
+            else:
+                self._require(False, "LP03_NUMERICAL_OUTPUT_TYPE")
+        self._require(self.consumed["serialized_bytes"] + upper <= self.limits["max_serialized_bytes"],
+                      "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+        try:
+            encoded = {name: dict(numerator=str(value.numerator), denominator=str(value.denominator))
+                if type(value) is Fraction else value for name, value in values.items()}
+            raw = deterministic_json(encoded).encode("utf-8")
+        except (ValueError, OverflowError):
+            self._require(False, "LP03_NUMERICAL_SERIALIZATION_UNREPRESENTABLE")
+        self._consumed["serialized_bytes"] += len(raw)
+        self._require(len(raw) <= upper and self.consumed["serialized_bytes"] <= self.limits["max_serialized_bytes"],
+                      "LP03_NUMERICAL_SERIALIZATION_BOUND_FAILURE")
+        # This narrow pure numerical result explicitly permits its one certified
+        # binary64 field. The general evidence data-tree decoder stays unchanged.
+        return MappingProxyType({name: MappingProxyType(value) if type(value) is dict else value
+                                 for name, value in encoded.items()})
+
+
+class _EvidenceBootstrapReplayV1:
+    """Original review-side replay custody; no native formula/source authority."""
+
+    __slots__ = ("work", "ordinal", "original", "phase", "generator", "get_bits", "get_uniform", "attempts",
+                 "prefix", "pending_request", "completed", "draw_count_before", "_inspect", "_draw", "_finish")
+
+    def __init__(self, work, *, seed, input_json, environment_json):
+        from random import Random
+        from _random import Random as NativeRandom
+        import struct
+        from math import isfinite
+        work._open()
+        work._require(type(work) is _EvidenceNumericalWorkV1 and type(seed) is int and seed.bit_length() <= 256
+            and type(input_json) is str and type(environment_json) is str
+            and 0 < len(input_json) <= 65536 and 0 < len(environment_json) <= 8192,
+            "LP03_BOOTSTRAP_REPLAY_ADMISSION")
+        work._assert_bootstrap_custody_v1()
+        work._bits(8 * (len(input_json) + len(environment_json)))
+        work._bits(624 * 32 + 256)
+        self.work, self.ordinal = work, len(work._bootstrap_invocations)
+        self.phase, self.generator, self.get_bits, self.get_uniform = "CONSTRUCTING", None, None, None
+        self.attempts, self.prefix, self.pending_request, self.completed = [], (), None, None
+        self.draw_count_before = work.consumed["random_draws"]
+        header = (self, work, work._original, self.ordinal, seed, input_json, environment_json, 64, Random,
+                  self.attempts, self.draw_count_before)
+        self.original = header
+        # These originals live in constructor-captured cells. Mutable diagnostic
+        # mirrors are never their own authority, including after completion.
+        prefix, completion, pending = (), None, None
+        pending_attempt, pending_stage = None, "NONE"
+        returned_original, returned_value, returned_disposition, returned_bits_original = None, None, None, None
+        construction_return, construction_failed = None, False
+        generator_state = None
+
+        def inspect(*, completed, failed=False):
+            from .context import _native_require
+            require = _native_require if failed else work._require
+            require(self.work is work and self.original is header and header[2] is work._original
+                and type(self.ordinal) is int and self.ordinal == header[3]
+                and self.draw_count_before == header[10] and self.attempts is header[9]
+                and self.prefix is prefix and self.completed is completion and self.pending_request is pending
+                and self._inspect is inspect and self._draw is draw and self._finish is finish,
+                "LP03_BOOTSTRAP_ORIGINAL_REPLAY_CHANGED")
+            # Validate the independently captured header before method attributes.
+            if failed and construction_failed:
+                require(work.state == "FAILED" and self.phase == "CONSTRUCTION_UNAVAILABLE"
+                    and self.generator is construction_return and not prefix and not self.attempts
+                    and completion is None and pending is None, "LP03_BOOTSTRAP_FAILED_CONSTRUCTION_CHANGED")
+                return
+            require(len(header) == 14 and self.generator is header[11] and type(self.generator) is header[8]
+                and self.get_bits is header[12] and self.get_uniform is header[13],
+                "LP03_BOOTSTRAP_ORIGINAL_GENERATOR_CHANGED")
+            require(self.get_bits.__self__ is self.get_uniform.__self__ is self.generator
+                and type(self.attempts) is list and len(prefix) <= len(self.attempts) <= 64
+                and all(self.attempts[index] is row for index, row in enumerate(prefix)),
+                "LP03_BOOTSTRAP_ORIGINAL_PREFIX_CHANGED")
+            require((failed and generator_state is None and pending_attempt is not None)
+                or generator_state is not None and NativeRandom.getstate(self.generator) == generator_state,
+                "LP03_BOOTSTRAP_ORIGINAL_GENERATOR_STATE_CHANGED")
+            if failed and not completed:
+                require(work.state == "FAILED" and completion is None,
+                    "LP03_BOOTSTRAP_FAILED_REPLAY_STATE")
+                if pending is None:
+                    require(self.phase == "OPEN" and pending_stage == "NONE" and pending_attempt is None
+                        and len(self.attempts) == len(prefix)
+                        and work.consumed["random_draws"] == header[10] + len(prefix),
+                        "LP03_BOOTSTRAP_FAILED_ARITHMETIC_PREFIX_CHANGED")
+                    return
+                if pending_attempt is None:
+                    require(pending_stage == "UNENTERED" and self.phase == "PREFLIGHT_PENDING"
+                        and len(self.attempts) == len(prefix)
+                        and work.consumed["random_draws"] == header[10] + len(prefix),
+                        "LP03_BOOTSTRAP_FAILED_UNENTERED_REQUEST_CHANGED")
+                else:
+                    require(pending_stage in ("ATTEMPTED", "RETURNED_UNVALIDATED", "RETURNED_VALIDATED")
+                        and self.phase == "DRAW_UNAVAILABLE" and len(self.attempts) == len(prefix) + 1
+                        and self.attempts[-1] is pending_attempt and type(pending_attempt) is list
+                        and len(pending_attempt) == 7 and pending_attempt[0] == len(prefix)
+                        and pending_attempt[1] is pending and pending_attempt[2] is returned_original
+                        and pending_attempt[3] is returned_value and pending_attempt[4] is returned_disposition
+                        and pending_attempt[5] == ("ATTEMPTED" if pending_stage == "ATTEMPTED" else "RETURNED_UNVALIDATED")
+                        and pending_attempt[6] is returned_bits_original
+                        and work.consumed["random_draws"] == header[10] + len(prefix) + 1,
+                        "LP03_BOOTSTRAP_FAILED_ATTEMPT_CHANGED")
+                return
+            require(len(self.attempts) == len(prefix), "LP03_BOOTSTRAP_ORIGINAL_PREFIX_CHANGED")
+            if completed:
+                require(self.phase == "COMPLETE" and completion is not None
+                    and completion[0] is prefix and completion[3] == len(prefix) and pending is None,
+                    "LP03_BOOTSTRAP_COMPLETED_PREFIX_CHANGED")
+            else:
+                require(self.phase == "OPEN" and completion is None and pending is None
+                    and work.consumed["random_draws"] == header[10] + len(prefix),
+                    "LP03_BOOTSTRAP_REPLAY_NOT_OPEN")
+
+        def draw(kind, width, *, replicate, position, threshold=None, population=None):
+            nonlocal prefix, pending, pending_attempt, pending_stage, generator_state
+            nonlocal returned_original, returned_value, returned_disposition, returned_bits_original
+            work._open()
+            work._assert_bootstrap_custody_v1(active=self)
+            work._require(type(kind) is str and kind in ("GETRANDBITS", "RANDOM_U53")
+                and type(width) is int and type(replicate) is type(position) is int
+                and 0 <= replicate < 4 and 0 <= position < 8, "LP03_BOOTSTRAP_DRAW_REQUEST")
+            if kind == "GETRANDBITS":
+                work._require(type(population) is int and 2 <= population <= 8
+                    and width == population.bit_length() and threshold is None,
+                    "LP03_BOOTSTRAP_DRAW_POPULATION")
+                comparison = str(population)
+            else:
+                work._require(width == 53 and population is None and type(threshold) is float
+                    and isfinite(threshold) and 0 < threshold <= 1, "LP03_BOOTSTRAP_DRAW_THRESHOLD")
+                comparison = struct.pack(">d", threshold).hex()
+            pending = (kind, width, replicate, position, population, threshold, comparison)
+            pending_stage = "UNENTERED"
+            self.pending_request, self.phase = pending, "PREFLIGHT_PENDING"
+            work._require(len(prefix) < 64, "LP03_BOOTSTRAP_REPLAY_DRAW_LIMIT_EXHAUSTED")
+            work._require(work.consumed["serialized_bytes"] + 640 <= work.limits["max_serialized_bytes"],
+                "LP03_BOOTSTRAP_DRAW_SERIALIZATION_EXHAUSTED")
+            attempt = [len(prefix), pending, None, None, None, "ATTEMPTED", None]
+            next_draw_count = work._consumed["random_draws"] + 1
+            self.attempts.append(attempt)
+            pending_attempt, pending_stage = attempt, "ATTEMPTED"
+            self.phase = "DRAW_PENDING"
+            work._consumed["random_draws"] = next_draw_count
+            try:
+                # A raised native state snapshot leaves its availability
+                # unknown; the captured actual return still remains inspectable.
+                generator_state = None
+                actual = header[12](width) if kind == "GETRANDBITS" else header[13]()
+                returned_original = actual
+                attempt[2], attempt[5], self.phase = actual, "RETURNED_UNVALIDATED", "VALIDATING_RETURN"
+                pending_stage = "RETURNED_UNVALIDATED"
+                generator_state = NativeRandom.getstate(generator)
+                if kind == "GETRANDBITS":
+                    work._require(type(actual) is int and 0 <= actual < 2**width,
+                        "LP03_BOOTSTRAP_REPLAY_BITS_DOMAIN")
+                    value, disposition, returned_bits = actual, ("SELECTED" if actual < population else "REJECTED"), "INTEGER"
+                else:
+                    work._require(type(actual) is float and isfinite(actual) and 0 <= actual < 1,
+                        "LP03_BOOTSTRAP_REPLAY_UNIFORM_DOMAIN")
+                    returned_bits = struct.pack(">d", actual).hex()
+                    work._require(returned_bits != "8000000000000000", "LP03_BOOTSTRAP_REPLAY_UNIFORM_ZERO_SIGN")
+                    ratio = work._binary64_ratio(actual)
+                    scaled = work._multiply(ratio, work._fraction(work._shift(1, 53)))
+                    work._require(scaled.denominator == 1, "LP03_BOOTSTRAP_REPLAY_U53_GRID")
+                    value, disposition = scaled.numerator, ("RESTART" if actual < threshold else "CONTINUE")
+                returned_value, returned_disposition, returned_bits_original = value, disposition, returned_bits
+                attempt[3], attempt[4], attempt[6] = value, disposition, returned_bits
+                pending_stage = "RETURNED_VALIDATED"
+                fragment = work._emit(dict(ordinal=attempt[0], method=kind, width=width, value=value,
+                    comparison=comparison, disposition=disposition, replicate=replicate, position=position))
+                retained = (attempt[0], pending, actual, value, disposition, "RETAINED", returned_bits)
+                next_prefix = (*prefix, retained)
+                result = (actual, dict(fragment))
+            except BaseException:
+                self.phase = "DRAW_UNAVAILABLE"
+                if work.state != "FAILED":
+                    work._state, work._failure = "FAILED", "LP03_BOOTSTRAP_DRAW_UNAVAILABLE"
+                raise
+            # All variable allocations have succeeded. Publish with fixed
+            # assignments only; later inspection failures retain this prefix.
+            self.attempts[retained[0]] = retained
+            prefix = next_prefix
+            self.prefix, self.pending_request, self.phase = prefix, None, "OPEN"
+            pending = None
+            pending_attempt, pending_stage = None, "NONE"
+            returned_original, returned_value, returned_disposition, returned_bits_original = None, None, None, None
+            inspect(completed=False)
+            return result
+
+        def finish(proof):
+            nonlocal completion
+            from .serialization import deterministic_json, _evidence_frozen_data_v1
+            work._assert_bootstrap_custody_v1(active=self)
+            proof = _evidence_frozen_data_v1(proof)
+            completion = (prefix, proof, deterministic_json(proof), len(prefix))
+            self.completed, self.phase = completion, "COMPLETE"
+            inspect(completed=True)
+            return proof
+
+        self._inspect, self._draw, self._finish = inspect, draw, finish
+        # The work's captured roster pins this entry and its inspect-only guard
+        # before constructing the generator or accessing its methods.
+        work._bootstrap_admit(self, inspect)
+        try:
+            generator = Random(seed)
+            construction_return = generator
+            self.generator = generator
+            work._require(type(generator) is Random and self.original is header,
+                "LP03_BOOTSTRAP_REPLAY_CONSTRUCTION_CHANGED")
+            work._require(Random.getrandbits is NativeRandom.getrandbits and Random.random is NativeRandom.random,
+                "LP03_BOOTSTRAP_NATIVE_RNG_METHODS_REQUIRED")
+            self.get_bits = Random.getrandbits.__get__(generator, Random)
+            self.get_uniform = Random.random.__get__(generator, Random)
+            generator_state = NativeRandom.getstate(generator)
+            header = (*header, generator, self.get_bits, self.get_uniform)
+            self.original, self.phase = header, "OPEN"
+            inspect(completed=False)
+        except BaseException:
+            construction_failed = True
+            self.phase = "CONSTRUCTION_UNAVAILABLE"
+            if work.state != "FAILED":
+                work._state, work._failure = "FAILED", "LP03_BOOTSTRAP_CONSTRUCTION_UNAVAILABLE"
+            raise
+
+    def __copy__(self):
+        raise TypeError("LP03 bootstrap replay cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("LP03 bootstrap replay cannot be copied")
+
+    def __reduce_ex__(self, protocol):
+        raise TypeError("LP03 bootstrap replay cannot be serialized")
+
+    def _draw_v1(self, *args, **kwargs):
+        self.work._open()
+        self.work._assert_bootstrap_custody_v1(active=self)
+        return self._draw(*args, **kwargs)
+
+    def _complete_v1(self, proof):
+        self.work._open()
+        self.work._assert_bootstrap_custody_v1(active=self)
+        return self._finish(proof)
+
+
+def _validate_evidence_math26_bounds_v1(current_texts, scenario_texts, cost_text, *, lower_text, upper_text,
+                                       cost_cap_text, fixed_lower_text, fixed_upper_text, work):
+    """Validate preregistered domains and enclosure without calculating EVI.
+
+    The original registration owns this work and its consumed allowance. This
+    pure function neither selects bounds from observations nor admits sources.
+    """
+    from .context import _native_require
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(all(record[3] in ("MATH26_FINANCIAL_DECIMAL_V1", "MATH26_CONTEXT_RESULT_V1")
+                          for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        work._require(type(current_texts) is tuple and 0 < len(current_texts) <= 4096
+                      and type(scenario_texts) is tuple and 0 < len(scenario_texts) <= 4096
+                      and all(type(row) is tuple and len(row) == 2 and type(row[1]) is tuple
+                              and len(row[1]) == len(current_texts) for row in scenario_texts),
+                      "LP03_MATH26_ADMISSION_COMPLETE_ORDERED_ROSTER")
+        count = len(current_texts) + len(scenario_texts) * (len(current_texts) + 1) + 6
+        work._require(count + 4 * len(scenario_texts) + 96 <= 4096,
+                      "LP03_MATH26_ADMISSION_ROSTER_BOUND")
+        work._require(count <= work._retained_input_capacity - len(work._decimal_admissions),
+                      "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+        text_size = 0
+        def admitted(text):
+            nonlocal text_size
+            work._require(type(text) is str and bool(text), "LP03_MATH26_ADMISSION_ORIGINAL_TEXTS")
+            text_size += len(text)
+            work._require(text_size <= min(65536, work.limits["max_serialized_bytes"]),
+                          "LP03_MATH26_ADMISSION_ORIGINAL_TEXTS")
+            return work._exact_math26_decimal_v1(work._parse_math26_decimal_v1(text))
+        lo, hi, cap, fixed_lo, fixed_hi = (admitted(text) for text in (
+            lower_text, upper_text, cost_cap_text, fixed_lower_text, fixed_upper_text))
+        zero, one = work._fraction(0), work._fraction(1)
+        work._require(work._compare(lo, hi) <= 0 and work._compare(cap, zero) >= 0,
+                      "LP03_MATH26_ADMISSION_DECLARED_BOUND_OR_COST")
+        enclosed_lower, enclosed_upper = work._subtract(work._subtract(lo, hi), cap), work._subtract(hi, lo)
+        work._require(work._compare(fixed_lo, enclosed_lower) == 0 and work._compare(fixed_hi, enclosed_upper) == 0,
+                      "LP03_MATH26_ADMISSION_DECLARED_ENCLOSURE_MISMATCH")
+        def utility(text):
+            value = admitted(text)
+            work._require(work._compare(lo, value) <= 0 and work._compare(value, hi) <= 0,
+                          "LP03_MATH26_ADMISSION_UTILITY_OUT_OF_BOUNDS")
+        for text in current_texts:
+            utility(text)
+        total = zero
+        for probability_text, values in scenario_texts:
+            probability = admitted(probability_text)
+            work._require(work._compare(probability, zero) >= 0 and work._compare(probability, one) <= 0,
+                          "LP03_MATH26_ADMISSION_PROBABILITY_DOMAIN")
+            total = work._add(total, probability)
+            for text in values:
+                utility(text)
+        work._require(work._compare(total, one) == 0, "LP03_MATH26_ADMISSION_PROBABILITY_SUM")
+        cost = admitted(cost_text)
+        work._require(work._compare(cost, zero) >= 0 and work._compare(cost, cap) <= 0,
+                      "LP03_MATH26_ADMISSION_DECLARED_BOUND_OR_COST")
+        return work._emit(dict(profile="DECLARED_MATH26_UTILITY_AND_COST_ENCLOSURE_V1",
+            action_count=len(current_texts), scenario_count=len(scenario_texts), probability_sum=total,
+            declared_utility_lower=lo, declared_utility_upper=hi, declared_cost_cap=cap,
+            fixed_lower=enclosed_lower, fixed_upper=enclosed_upper))
+
+
+def _bind_evidence_math26_review_v1():
+    # Only this complete producer can mint the third Decimal profile. It
+    # performs the native operation itself; callers cannot submit a derived
+    # value, a size certificate, or a flag that skips source admission.
+    from decimal import Inexact, InvalidOperation, Overflow, Underflow
+    original_context, original_localcontext, original_decimal = decimal_context_v1, localcontext, Decimal
+
+    def calculate(current_texts, scenario_texts, cost_text, *, lower_text, upper_text, cost_cap_text,
+                  raw_text, projected_text, expected_text, work):
+        """Pure independent ordered proof, without source or execution authority.
+
+        Exact finite Rounded/Subnormal/Clamped results retain their flags.
+        Inexact, invalid, overflowing, underflowing or trapped steps deny the
+        complete proof. The caller must admit the original bounds and charge
+        physical resources and the final review artifact to this same work.
+        """
+        from .context import _native_require
+        from .serialization import _encode_evidence_projection_json_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            work._require(all(record[3] in ("MATH26_FINANCIAL_DECIMAL_V1", "MATH26_CONTEXT_RESULT_V1")
+                              for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            work._require(type(current_texts) is tuple and 0 < len(current_texts) <= 4096
+                          and type(scenario_texts) is tuple and 0 < len(scenario_texts) <= 4096
+                          and all(type(row) is tuple and len(row) == 2 and type(row[1]) is tuple
+                                  and len(row[1]) == len(current_texts) for row in scenario_texts),
+                          "LP03_MATH26_REVIEW_COMPLETE_ORDERED_ROSTER")
+            source_count = len(current_texts) + len(scenario_texts) * (len(current_texts) + 1) + 4
+            step_count = 3 * len(scenario_texts) + 2
+            # Count the complete proof graph before expanding any scalar or
+            # step roster. Each step has at most fifteen native JSON nodes.
+            work._require(96 + source_count + 15 * step_count + 4 * len(scenario_texts) <= 4096,
+                          "LP03_MATH26_REVIEW_COMPLETE_PROOF_ROSTER_BOUND")
+            work._require(source_count + step_count <= work._retained_input_capacity - len(work._decimal_admissions),
+                          "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            text_size = 0
+            def bound_text(text):
+                nonlocal text_size
+                work._require(type(text) is str and bool(text), "LP03_MATH26_REVIEW_ORIGINAL_TEXTS")
+                text_size += len(text)
+                work._require(text_size <= min(65536, work.limits["max_serialized_bytes"]),
+                              "LP03_MATH26_REVIEW_ORIGINAL_TEXTS")
+            for text in current_texts:
+                bound_text(text)
+            for probability, values in scenario_texts:
+                bound_text(probability)
+                for text in values:
+                    bound_text(text)
+            for text in (cost_text, lower_text, upper_text, cost_cap_text, raw_text, projected_text, expected_text):
+                bound_text(text)
+
+            def admitted(text):
+                value = work._parse_math26_decimal_v1(text)
+                return value, work._exact_math26_decimal_v1(value)
+
+            current = tuple(admitted(text) for text in current_texts)
+            scenarios = tuple((admitted(row[0]), tuple(admitted(text) for text in row[1])) for row in scenario_texts)
+            cost, lower, upper, cap = (admitted(text) for text in (cost_text, lower_text, upper_text, cost_cap_text))
+            zero, one = work._fraction(0), work._fraction(1)
+            lo, hi, maximum_cost = lower[1], upper[1], cap[1]
+            work._require(work._compare(lo, hi) <= 0 and work._compare(maximum_cost, zero) >= 0
+                          and work._compare(cost[1], zero) >= 0 and work._compare(cost[1], maximum_cost) <= 0,
+                          "LP03_MATH26_REVIEW_DECLARED_BOUND_OR_COST")
+            def selected(values):
+                best, position = values[0], 0
+                for index, value in enumerate(values):
+                    work._require(work._compare(lo, value[1]) <= 0 and work._compare(value[1], hi) <= 0,
+                                  "LP03_MATH26_REVIEW_UTILITY_OUT_OF_BOUNDS")
+                    if work._compare(value[1], best[1]) > 0:
+                        best, position = value, index
+                return best, position
+            current_best, current_position = selected(current)
+            scenario_best = tuple(selected(row[1]) for row in scenarios)
+            for probability, _ in scenarios:
+                work._require(work._compare(probability[1], zero) >= 0 and work._compare(probability[1], one) <= 0,
+                              "LP03_MATH26_REVIEW_PROBABILITY_DOMAIN")
+            bound_lower = work._subtract(work._subtract(lo, hi), maximum_cost)
+            bound_upper = work._subtract(hi, lo)
+            proof_steps = []
+            with original_localcontext(original_context()) as context:
+                work._require((context.prec, context.rounding, context.Emin, context.Emax, context.capitals, context.clamp)
+                              == (34, "ROUND_HALF_EVEN", -999999, 999999, 1, 0),
+                              "LP03_MATH26_REVIEW_ORIGINAL_CONTEXT_REQUIRED")
+                context_record = dict(precision=context.prec, rounding=context.rounding, Emin=context.Emin,
+                    Emax=context.Emax, capitals=context.capitals, clamp=context.clamp,
+                    trapped_signals=tuple(sorted(signal.__name__ for signal, active in context.traps.items() if active)),
+                    flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+                work._bits(4 * context.prec)
+                work._consumed["decimal_constructions"] += 2
+                probability_total, posterior = (original_decimal(0), zero), (original_decimal(0), zero)
+
+                def step(label, operation, left, right):
+                    work._assert_math26_context_custody_v1()
+                    work._require(len(work._decimal_admissions) < work._retained_input_capacity,
+                                  "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+                    exact = {"add": work._add, "multiply": work._multiply, "subtract": work._subtract}[operation](left[1], right[1])
+                    # Bound a full step fragment, including flags and Decimal
+                    # text, before retaining a diagnostic or invoking context.
+                    fragment_upper = 512 + max(1, exact.numerator.bit_length()) + exact.denominator.bit_length()
+                    work._require(work.consumed["serialized_bytes"] + fragment_upper <= work.limits["max_serialized_bytes"],
+                                  "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+                    work._bits(4 * context.prec)
+                    ordinal = len(work._math26_context_steps)
+                    attempt = [ordinal, label, left[0], right[0], exact, None, (), None, "ATTEMPTED"]
+                    work._math26_context_steps.append(attempt)
+                    context.clear_flags()
+                    work._consumed["decimal_constructions"] += 1
+                    try:
+                        result = getattr(context, operation)(left[0], right[0])
+                        attempt[5] = result
+                    finally:
+                        attempt[6] = tuple(sorted(signal.__name__ for signal, active in context.flags.items() if active))
+                    work._require(type(result) is original_decimal and result.is_finite()
+                                  and not any(context.flags[signal] for signal in (Inexact, InvalidOperation, Overflow, Underflow)),
+                                  "LP03_MATH26_REVIEW_NONEXACT_CONTEXT_STEP")
+                    # Native context has bounded coefficient precision. Its
+                    # exponent still needs a work-bit preflight before ratio
+                    # conversion, even for zero and subnormal results.
+                    shape = result.as_tuple()
+                    work._bits(max(4 * (len(shape.digits) + max(shape.exponent, 0)), 1 + 4 * max(-shape.exponent, 0)))
+                    work._consumed["integer_operations"] += 1
+                    numerator, denominator = result.as_integer_ratio()
+                    represented = work._fraction(numerator, denominator)
+                    work._require(work._compare(exact, represented) == 0, "LP03_MATH26_REVIEW_CONTEXT_RATIO_MISMATCH")
+                    text = str(result)
+                    attempt[7] = text
+                    work._require(len(text) <= 128, "LP03_MATH26_REVIEW_CONTEXT_TEXT_BOUND")
+                    work._require(id(result) not in work._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+                    admission = (result, exact, text, "MATH26_CONTEXT_RESULT_V1")
+                    work._decimal_admissions = (*work._decimal_admissions, admission)
+                    work._decimal_inputs[id(result)] = admission
+                    work._consumed["retained_decimal_inputs"] += 1
+                    fragment = work._emit(dict(position=ordinal, operation=label, exact=exact,
+                        decimal_text=text, flags="|".join(attempt[6])))
+                    proof_steps.append({name: dict(value) if type(value) is MappingProxyType else value
+                                        for name, value in fragment.items()})
+                    attempt[8] = "EXACT"
+                    retained = tuple(attempt)
+                    work._math26_context_steps[ordinal] = retained
+                    work._math26_context_prefix = (*work._math26_context_prefix, retained)
+                    return result, exact
+
+                for position, ((probability, _), (best, _)) in enumerate(zip(scenarios, scenario_best)):
+                    probability_total = step("PROBABILITY_PREFIX::" + str(position), "add", probability_total, probability)
+                    product = step("WEIGHTED_SCENARIO_MAX::" + str(position), "multiply", probability, best)
+                    posterior = step("POSTERIOR_PREFIX::" + str(position), "add", posterior, product)
+                work._require(work._compare(probability_total[1], one) == 0, "LP03_MATH26_REVIEW_PROBABILITY_SUM")
+                before_cost = step("SUBTRACT_CURRENT_MAX", "subtract", posterior, current_best)
+                result = step("SUBTRACT_ACQUISITION_COST", "subtract", before_cost, cost)
+                actual_text = work._decimal_inputs[id(result[0])][2]
+                work._require(actual_text == raw_text == projected_text == expected_text,
+                              "LP03_MATH26_REVIEW_ORIGINAL_RESULT_TEXT_MISMATCH")
+                work._require(work._compare(bound_lower, result[1]) <= 0 and work._compare(result[1], bound_upper) <= 0,
+                              "LP03_MATH26_REVIEW_RESULT_OUT_OF_DECLARED_BOUNDS")
+            summary = work._emit(dict(result=result[1], lower=bound_lower, upper=bound_upper,
+                current_max_position=current_position, original_raw_text=raw_text,
+                projected_text=projected_text, preregistered_text=expected_text))
+            proof = dict(profile="EXACT_DECIMAL_ORDERED_MATH26_INTERMEDIATES_V1", context=context_record,
+                current_action_texts=current_texts, scenario_texts=scenario_texts, acquisition_cost_text=cost_text,
+                declared_utility_lower=lower_text, declared_utility_upper=upper_text, declared_cost_cap=cost_cap_text,
+                scenario_max_positions=tuple(position for _, position in scenario_best), steps=tuple(proof_steps),
+                summary={name: dict(value) if type(value) is MappingProxyType else value for name, value in summary.items()})
+            work._assert_math26_context_custody_v1()
+            remaining = min(1048576, work.limits["max_serialized_bytes"] - work.consumed["serialized_bytes"])
+            work._require(remaining > 0, "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+            raw = _encode_evidence_projection_json_v1(proof, maximum_bytes=remaining, maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(raw)
+            return proof
+
+    return calculate
+
+
+_bounded_evidence_math26_review_v1 = _bind_evidence_math26_review_v1()
+
+
+def _validate_evidence_market_bounds_v1(math_id, source_texts, *, lower_text, upper_text, expected_texts, work):
+    """Preregister market domains/enclosures without executing a formula."""
+    from .context import _native_require
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(type(math_id) is str and math_id in ("MATH-01", "MATH-04", "MATH-05"),
+                      "LP03_MARKET_ADMISSION_CLOSED_PROFILE")
+        names = (("contract_price", "payout_per_winning_contract") if math_id == "MATH-01"
+                 else ("best_bid", "best_ask", "payout"))
+        work._require(type(source_texts) is tuple and len(source_texts) == len(names)
+                      and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in source_texts)
+                      and tuple(row[0] for row in source_texts) == names
+                      and type(expected_texts) is tuple and len(expected_texts) == (2 if math_id == "MATH-05" else 1),
+                      "LP03_MARKET_ADMISSION_ORIGINAL_ROSTER")
+        work._require(all(record[3] == "MARKET_FINANCIAL_DECIMAL_V1" for record in work._decimal_admissions),
+                      "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        texts = (*tuple(row[1] for row in source_texts), lower_text, upper_text, *expected_texts)
+        work._require(len(texts) <= work._retained_input_capacity - len(work._decimal_admissions),
+                      "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+        work._require(all(type(text) is str and bool(text) for text in texts)
+                      and sum(len(text) for text in texts) <= min(65536, work.limits["max_serialized_bytes"]),
+                      "LP03_MARKET_ADMISSION_ORIGINAL_TEXTS")
+        values = tuple(work._exact_market_decimal_v1(work._parse_market_decimal_v1(text)) for text in texts)
+        prices, lower, upper = values[:len(names)], values[len(names)], values[len(names)+1]
+        expected = values[len(names)+2:]
+        zero, one, two = work._fraction(0), work._fraction(1), work._fraction(2)
+        payout = prices[-1]
+        work._require(work._compare(payout, zero) > 0 and work._compare(lower, zero) == 0
+                      and work._compare(upper, one if math_id == "MATH-01" else payout if math_id == "MATH-04" else two) == 0,
+                      "LP03_MARKET_ADMISSION_DECLARED_ENCLOSURE")
+        for price in prices[:-1]:
+            work._require(work._compare(zero, price) <= 0 and work._compare(price, payout) <= 0,
+                          "LP03_MARKET_ADMISSION_PRICE_DOMAIN")
+        if math_id != "MATH-01":
+            work._require(work._compare(prices[0], prices[1]) <= 0, "LP03_MARKET_ADMISSION_CROSSED_BOOK")
+        if math_id == "MATH-05":
+            work._require(work._compare(prices[1], zero) > 0, "LP03_MARKET_ADMISSION_POSITIVE_MIDPOINT")
+            work._require(work._compare(zero, expected[1]) <= 0 and work._compare(expected[1], work._fraction(20000)) <= 0,
+                          "LP03_MARKET_ADMISSION_EXPECTED_BPS_DOMAIN")
+        work._require(work._compare(lower, expected[0]) <= 0 and work._compare(expected[0], upper) <= 0,
+                      "LP03_MARKET_ADMISSION_EXPECTATION_OUT_OF_BOUNDS")
+        return work._emit(dict(profile="DECLARED_MARKET_PRICE_ENCLOSURE_V1", math_id=math_id,
+            financial_source_count=len(names), declared_lower=lower, declared_upper=upper, original_payout=payout))
+
+
+def _validate_evidence_cashflow_bounds_v1(math_id, source_texts, *, cashflow_basis,
+        lower_text, upper_text, expected_fields, work, outcome_ids=(), probability_texts=(), terminal_texts=()):
+    """Declared exact-source enclosure; no invocation or original-return claim."""
+    from .context import _native_require
+    from .serialization import _encode_evidence_projection_json_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(type(math_id) is str and math_id in ("MATH-06","MATH-07"),
+            "LP03_CASHFLOW_ADMISSION_CLOSED_PROFILE")
+        binary = math_id == "MATH-06"
+        names = (("p_win","p_void","fill_probability","entry_trade_cashflow_total",
+            "win_terminal_cashflow_total","lose_terminal_cashflow_total","void_terminal_cashflow_total",
+            "no_fill_cashflow_total","platform_fee_total","builder_fee_total","other_fee_total",
+            "expected_rebate_total","exit_slippage_reserve_total","market_impact_reserve_total",
+            "latency_adverse_selection_reserve_total","capital_time_cost_reserve_total") if binary else
+            ("probability_simplex_tolerance","fill_probability","entry_trade_cashflow_total","no_fill_cashflow_total",
+             "platform_fee_total","builder_fee_total","other_fee_total","expected_rebate_total",
+             "exit_slippage_reserve_total","market_impact_reserve_total","latency_adverse_selection_reserve_total",
+             "capital_time_cost_reserve_total"))
+        fields = (("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","p_lose") if binary else
+            ("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","outcome_ids",
+             "normalized_probabilities","original_probability_sum","normalization_applied"))
+        costs = ("platform_fee_total","builder_fee_total","other_fee_total","exit_slippage_reserve_total",
+            "market_impact_reserve_total","latency_adverse_selection_reserve_total","capital_time_cost_reserve_total")
+        work._require(type(cashflow_basis) is str and cashflow_basis ==
+            "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE","LP03_CASHFLOW_ADMISSION_SIGNED_TOTAL_BASIS")
+        work._require(type(source_texts) is tuple and len(source_texts) == len(names)
+            and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str and type(row[1]) is str for row in source_texts)
+            and tuple(row[0] for row in source_texts) == names,"LP03_CASHFLOW_ADMISSION_ORIGINAL_ROSTER")
+        work._require(all(type(values) is tuple for values in (outcome_ids,probability_texts,terminal_texts))
+            and ((not outcome_ids and not probability_texts and not terminal_texts) if binary else
+                2 <= len(outcome_ids) == len(probability_texts) == len(terminal_texts) <= 4096),
+            "LP03_CASHFLOW_ADMISSION_OUTCOME_ROSTER")
+        count = 3 if binary else len(outcome_ids)
+        work._require(all(type(value) is str and bool(value) for value in outcome_ids)
+            and sum(len(value) for value in outcome_ids) <= min(65536,work.limits["max_serialized_bytes"])
+            and len(set(outcome_ids)) == len(outcome_ids),"LP03_CASHFLOW_ADMISSION_OUTCOME_IDENTITIES")
+        work._require(type(expected_fields) is tuple and len(expected_fields) == len(fields)
+            and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in expected_fields)
+            and tuple(row[0] for row in expected_fields) == fields,"LP03_CASHFLOW_ADMISSION_EXPECTED_FIELDS")
+        expected = dict(expected_fields)
+        if not binary:
+            work._require(type(expected["outcome_ids"]) is tuple and expected["outcome_ids"] == outcome_ids
+                and type(expected["normalized_probabilities"]) is tuple and len(expected["normalized_probabilities"]) == count
+                and type(expected["normalization_applied"]) is bool,"LP03_CASHFLOW_ADMISSION_EXPECTED_FIELDS")
+        expected_texts = (tuple(expected[name] for name in fields) if binary else
+            (*tuple(expected[name] for name in ("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow",
+                "original_probability_sum")),*expected["normalized_probabilities"]))
+        texts = (*tuple(row[1] for row in source_texts),*probability_texts,*terminal_texts,lower_text,upper_text,*expected_texts)
+        work._require(all(record[3] == "CASHFLOW_FINANCIAL_DECIMAL_V1" for record in work._decimal_admissions),
+            "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        work._require(len(texts) <= work._retained_input_capacity - len(work._decimal_admissions),
+            "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+        work._require(all(type(text) is str and bool(text) for text in texts)
+            and sum(len(text) for text in texts) <= min(65536,work.limits["max_serialized_bytes"]),
+            "LP03_CASHFLOW_ADMISSION_ORIGINAL_TEXTS")
+        def admitted(text):
+            value = work._parse_cashflow_decimal_v1(text)
+            ratio = work._exact_cashflow_decimal_v1(value)
+            shape = value.as_tuple()
+            work._require(len(shape.digits) <= 34 and -999966 <= shape.exponent <= 999966,
+                "LP03_CASHFLOW_ADMISSION_EXACT_SOURCE_CONTEXT_UNAVAILABLE")
+            return ratio
+        values = dict((name,admitted(text)) for name,text in source_texts)
+        probabilities,terminals = tuple(admitted(text) for text in probability_texts),tuple(admitted(text) for text in terminal_texts)
+        lower,upper = admitted(lower_text),admitted(upper_text)
+        declared = tuple(admitted(text) for text in expected_texts)
+        zero,one = work._fraction(0),work._fraction(1)
+        work._require(work._compare(lower,upper) <= 0,"LP03_CASHFLOW_ADMISSION_DECLARED_ENCLOSURE")
+        for value in ((values["p_win"],values["p_void"],values["fill_probability"]) if binary else
+                (*probabilities,values["fill_probability"])):
+            work._require(work._compare(zero,value) <= 0 and work._compare(value,one) <= 0,
+                "LP03_CASHFLOW_ADMISSION_PROBABILITY_DOMAIN")
+        for name in (*costs,"expected_rebate_total"):
+            work._require(work._compare(zero,values[name]) <= 0,"LP03_CASHFLOW_ADMISSION_NONNEGATIVE_FRICTION")
+        steps = []
+        def step(label,operation,left,right):
+            if operation == "abs":
+                exact = work._subtract(zero,left) if work._compare(left,zero) < 0 else work._fraction(left.numerator,left.denominator)
+            else:
+                exact = {"add":work._add,"subtract":work._subtract,"multiply":work._multiply,"divide":work._divide}[operation](left,right)
+            # Prove finite exact representability without executing a Decimal
+            # operation or attributing source-derived data to a native return.
+            work._bits(max(exact.numerator.bit_length(),exact.denominator.bit_length()))
+            work._consumed["integer_operations"] += 1
+            coefficient,denominator = abs(exact.numerator),exact.denominator
+            powers = []
+            for base in (2,5):
+                power = 0
+                while denominator > 1:
+                    work._bits(denominator.bit_length())
+                    work._consumed["integer_operations"] += 1
+                    quotient,remainder = divmod(denominator,base)
+                    if remainder:
+                        break
+                    denominator = quotient
+                    power = work._int_sum(power,1)
+                powers.append(power)
+            work._require(denominator == 1,"LP03_CASHFLOW_ADMISSION_NONTERMINATING_INTERMEDIATE")
+            scale = max(powers)
+            for base,power in zip((2,5),powers,strict=True):
+                missing = scale - power
+                if missing:
+                    work._bits(base.bit_length() * missing + 1)
+                    work._consumed["integer_powers"] += 1
+                    coefficient = work._int_product(coefficient,pow(base,missing))
+            exponent = -scale
+            while coefficient:
+                work._bits(coefficient.bit_length())
+                work._consumed["integer_operations"] += 1
+                quotient,remainder = divmod(coefficient,10)
+                if remainder:
+                    break
+                coefficient = quotient
+                exponent = work._int_sum(exponent,1)
+            work._bits(113)
+            work._consumed["comparisons"] += 1
+            work._require(coefficient <= 9999999999999999999999999999999999 and -999966 <= exponent <= 999966,
+                "LP03_CASHFLOW_ADMISSION_NONEXACT_CONTEXT_INTERMEDIATE")
+            fragment = work._emit(dict(position=len(steps),operation=label,exact=exact,
+                absolute_coefficient=coefficient,decimal_exponent=exponent))
+            steps.append({key:dict(value) if type(value) is MappingProxyType else value for key,value in fragment.items()})
+            return exact
+        if binary:
+            lose = step("ONE_MINUS_WIN","subtract",one,values["p_win"])
+            lose = step("REMAINDER_MINUS_VOID","subtract",lose,values["p_void"])
+            work._require(work._compare(lose,zero) >= 0,"LP03_CASHFLOW_ADMISSION_PROBABILITY_SIMPLEX")
+            cost = zero
+            for name in costs:
+                cost = step("ADD_COST::"+name,"add",cost,values[name])
+            win_cash = step("WIN_TIMES_WIN_CASH","multiply",values["p_win"],values["win_terminal_cashflow_total"])
+            lose_cash = step("LOSE_TIMES_LOSE_CASH","multiply",lose,values["lose_terminal_cashflow_total"])
+            terminal = step("WIN_PLUS_LOSE_CASH","add",win_cash,lose_cash)
+            void_cash = step("VOID_TIMES_VOID_CASH","multiply",values["p_void"],values["void_terminal_cashflow_total"])
+            terminal = step("ADD_VOID_CASH","add",terminal,void_cash)
+        else:
+            work._require(work._compare(zero,values["probability_simplex_tolerance"]) <= 0,
+                "LP03_CASHFLOW_ADMISSION_SIMPLEX_TOLERANCE")
+            original_sum = zero
+            for index,value in enumerate(probabilities):
+                original_sum = step("SUM_PROBABILITY::"+str(index),"add",original_sum,value)
+            difference = step("SIMPLEX_SUM_MINUS_ONE","subtract",original_sum,one)
+            distance = step("SIMPLEX_UNARY_ABSOLUTE","abs",difference,zero)
+            work._require(work._compare(original_sum,zero) > 0
+                and work._compare(distance,values["probability_simplex_tolerance"]) <= 0,
+                "LP03_CASHFLOW_ADMISSION_PROBABILITY_SIMPLEX")
+            normalization = work._compare(original_sum,one) != 0
+            normalized = (tuple(step("NORMALIZE_PROBABILITY::"+str(index),"divide",value,original_sum)
+                for index,value in enumerate(probabilities)) if normalization else probabilities)
+            terminal = zero
+            for index,(probability,cash) in enumerate(zip(normalized,terminals,strict=True)):
+                product = step("PROBABILITY_TIMES_TERMINAL_CASH::"+str(index),"multiply",probability,cash)
+                terminal = step("ADD_TERMINAL_CASH::"+str(index),"add",terminal,product)
+            cost = zero
+            for name in costs:
+                cost = step("ADD_COST::"+name,"add",cost,values[name])
+        if_filled = step("ENTRY_PLUS_TERMINAL","add",values["entry_trade_cashflow_total"],terminal)
+        if_filled = step("SUBTRACT_COSTS","subtract",if_filled,cost)
+        if_filled = step("ADD_REBATE","add",if_filled,values["expected_rebate_total"])
+        filled = step("FILL_TIMES_FILLED_CASH","multiply",values["fill_probability"],if_filled)
+        not_filled = step("ONE_MINUS_FILL","subtract",one,values["fill_probability"])
+        unfilled = step("NO_FILL_TIMES_CASH","multiply",not_filled,values["no_fill_cashflow_total"])
+        net = step("ADD_FILLED_AND_UNFILLED_CASH","add",filled,unfilled)
+        derived = (net,if_filled,terminal,lose) if binary else (net,if_filled,terminal,original_sum,*normalized)
+        work._require(all(work._compare(first,second) == 0 for first,second in zip(declared,derived,strict=True))
+            and (binary or expected["normalization_applied"] is normalization),"LP03_CASHFLOW_ADMISSION_DECLARED_EXPECTATION_MISMATCH")
+        work._require(work._compare(lower,net) <= 0 and work._compare(net,upper) <= 0,
+            "LP03_CASHFLOW_ADMISSION_EXPECTATION_OUT_OF_BOUNDS")
+        summary = work._emit(dict(declared_lower=lower,declared_upper=upper,derived_net_cash=net,
+            derived_if_filled=if_filled,derived_terminal_cash=terminal))
+        proof = dict(profile="DECLARED_EXACT_SOURCE_CASHFLOW_ENCLOSURE_V1",math_id=math_id,
+            scope="INDEPENDENT_RATIONAL_SOURCE_ENCLOSURE_NO_NATIVE_RETURN_OR_SCALE_AUTHORITY",
+            financial_source_count=len(names)+len(probabilities)+len(terminals),source_texts=source_texts,
+            cashflow_basis=cashflow_basis,outcome_ids=outcome_ids,probability_texts=probability_texts,terminal_texts=terminal_texts,
+            declared_lower=lower_text,declared_upper=upper_text,preregistered_fields=expected_fields,
+            steps=tuple(steps),summary={key:dict(value) if type(value) is MappingProxyType else value for key,value in summary.items()})
+        remaining = min(1048576,work.limits["max_serialized_bytes"]-work.consumed["serialized_bytes"])
+        work._require(remaining > 0,"LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+        raw = _encode_evidence_projection_json_v1(proof,maximum_bytes=remaining,maximum_nodes=4096)
+        work._consumed["serialized_bytes"] += len(raw)
+        return proof
+
+
+def _bind_evidence_binary_cashflow_review_v1():
+    """Independent exact ordered Decimal arithmetic; no formula/source authority."""
+    from decimal import Inexact, InvalidOperation, Overflow, Underflow
+    original_context, original_localcontext, original_decimal = decimal_context_v1, localcontext, Decimal
+
+    def calculate(source_texts, *, cashflow_basis, lower_text, upper_text, raw_fields, expected_fields, projected_text, work):
+        from .context import _native_require
+        from .serialization import _encode_evidence_projection_json_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            names = ("p_win", "p_void", "fill_probability", "entry_trade_cashflow_total",
+                "win_terminal_cashflow_total", "lose_terminal_cashflow_total", "void_terminal_cashflow_total",
+                "no_fill_cashflow_total", "platform_fee_total", "builder_fee_total", "other_fee_total",
+                "expected_rebate_total", "exit_slippage_reserve_total", "market_impact_reserve_total",
+                "latency_adverse_selection_reserve_total", "capital_time_cost_reserve_total")
+            fields = ("expected_net_cash", "expected_net_cash_if_filled", "expected_terminal_cashflow", "p_lose")
+            costs = ("platform_fee_total", "builder_fee_total", "other_fee_total", "exit_slippage_reserve_total",
+                "market_impact_reserve_total", "latency_adverse_selection_reserve_total", "capital_time_cost_reserve_total")
+            work._require(type(cashflow_basis) is str and cashflow_basis ==
+                "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE", "LP03_CASHFLOW_REVIEW_SIGNED_TOTAL_BASIS")
+            work._require(type(source_texts) is tuple and len(source_texts) == 16
+                and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str and type(row[1]) is str for row in source_texts)
+                and tuple(row[0] for row in source_texts) == names, "LP03_CASHFLOW_REVIEW_ORIGINAL_ROSTER")
+            work._require(all(type(rows) is tuple and len(rows) == 4
+                and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str and type(row[1]) is str for row in rows)
+                and tuple(row[0] for row in rows) == fields for rows in (raw_fields, expected_fields)),
+                "LP03_CASHFLOW_REVIEW_RAW_FIELDS")
+            work._require(all(record[3] in ("CASHFLOW_FINANCIAL_DECIMAL_V1", "CASHFLOW_CONTEXT_RESULT_V1")
+                for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            work._require(39 <= work._retained_input_capacity - len(work._decimal_admissions),
+                "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            texts = (*tuple(row[1] for row in source_texts), lower_text, upper_text,
+                *tuple(row[1] for row in raw_fields), *tuple(row[1] for row in expected_fields), projected_text)
+            work._require(all(type(text) is str and bool(text) for text in texts)
+                and sum(len(text) for text in texts) <= min(65536,work.limits["max_serialized_bytes"]),
+                "LP03_CASHFLOW_REVIEW_ORIGINAL_TEXTS")
+            def admitted(text):
+                value = work._parse_cashflow_decimal_v1(text)
+                ratio = work._exact_cashflow_decimal_v1(value)
+                # This initial exact-input profile does not conceal the original
+                # owner's create_decimal rounding before formula arithmetic.
+                # Original exponent allocations are already bounded by _bits.
+                shape = value.as_tuple()
+                work._require(len(shape.digits) <= 34 and -999966 <= shape.exponent <= 999966,
+                    "LP03_CASHFLOW_REVIEW_EXACT_SOURCE_CONTEXT_UNAVAILABLE")
+                return value, ratio
+            values = dict((name, admitted(text)) for name,text in source_texts)
+            lower, upper = admitted(lower_text)[1], admitted(upper_text)[1]
+            zero, one = work._fraction(0), work._fraction(1)
+            work._require(work._compare(lower,upper) <= 0, "LP03_CASHFLOW_REVIEW_DECLARED_ENCLOSURE")
+            for name in ("p_win", "p_void", "fill_probability"):
+                work._require(work._compare(zero,values[name][1]) <= 0 and work._compare(values[name][1],one) <= 0,
+                    "LP03_CASHFLOW_REVIEW_PROBABILITY_DOMAIN")
+            for name in (*costs,"expected_rebate_total"):
+                work._require(work._compare(zero,values[name][1]) <= 0, "LP03_CASHFLOW_REVIEW_NONNEGATIVE_FRICTION")
+            proof_steps = []
+            with original_localcontext(original_context()) as context:
+                work._require((context.prec,context.rounding,context.Emin,context.Emax,context.capitals,context.clamp)
+                    == (34,"ROUND_HALF_EVEN",-999999,999999,1,0), "LP03_CASHFLOW_REVIEW_ORIGINAL_CONTEXT")
+                context_record = dict(precision=context.prec,rounding=context.rounding,Emin=context.Emin,Emax=context.Emax,
+                    capitals=context.capitals,clamp=context.clamp,
+                    trapped_signals=tuple(sorted(signal.__name__ for signal,active in context.traps.items() if active)),
+                    flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+                def step(label, operation, left, right):
+                    work._assert_math26_context_custody_v1()
+                    work._require(len(work._decimal_admissions) < work._retained_input_capacity,
+                                  "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+                    exact = {"add": work._add, "subtract": work._subtract, "multiply": work._multiply,
+                             "divide": work._divide}[operation](left[1], right[1])
+                    fragment_upper = 512 + max(1, exact.numerator.bit_length()) + exact.denominator.bit_length()
+                    work._require(work.consumed["serialized_bytes"] + fragment_upper <= work.limits["max_serialized_bytes"],
+                                  "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+                    work._bits(4 * context.prec)
+                    ordinal = len(work._math26_context_steps)
+                    attempt = [ordinal, label, left[0], right[0], exact, None, (), None, "ATTEMPTED"]
+                    work._math26_context_steps.append(attempt)
+                    context.clear_flags()
+                    work._consumed["decimal_constructions"] += 1
+                    try:
+                        result = getattr(context, operation)(left[0], right[0])
+                        attempt[5] = result
+                    finally:
+                        attempt[6] = tuple(sorted(signal.__name__ for signal, active in context.flags.items() if active))
+                    work._require(type(result) is original_decimal and result.is_finite()
+                                  and not any(context.flags[signal] for signal in (Inexact, InvalidOperation, Overflow, Underflow)),
+                                  "LP03_CASHFLOW_REVIEW_NONEXACT_CONTEXT_STEP")
+                    shape = result.as_tuple()
+                    work._bits(max(4 * (len(shape.digits) + max(shape.exponent, 0)), 1 + 4 * max(-shape.exponent, 0)))
+                    work._consumed["integer_operations"] += 1
+                    numerator, denominator = result.as_integer_ratio()
+                    represented = work._fraction(numerator, denominator)
+                    work._require(work._compare(exact, represented) == 0, "LP03_CASHFLOW_REVIEW_CONTEXT_RATIO_MISMATCH")
+                    text = str(result)
+                    attempt[7] = text
+                    work._require(len(text) <= 128, "LP03_CASHFLOW_REVIEW_CONTEXT_TEXT_BOUND")
+                    work._require(id(result) not in work._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+                    admission = (result, exact, text, "CASHFLOW_CONTEXT_RESULT_V1")
+                    work._decimal_admissions = (*work._decimal_admissions, admission)
+                    work._decimal_inputs[id(result)] = admission
+                    work._consumed["retained_decimal_inputs"] += 1
+                    fragment = work._emit(dict(position=ordinal, operation=label, exact=exact, decimal_text=text, flags="|".join(attempt[6])))
+                    proof_steps.append({key: dict(value) if type(value) is MappingProxyType else value for key, value in fragment.items()})
+                    attempt[8] = "EXACT"
+                    retained = tuple(attempt)
+                    work._math26_context_steps[ordinal] = retained
+                    work._math26_context_prefix = (*work._math26_context_prefix, retained)
+                    return result, exact
+
+                work._bits(4 * context.prec)
+                work._consumed["decimal_constructions"] += 2
+                zero_value, one_value = (original_decimal(0),zero),(original_decimal(1),one)
+                lose = step("ONE_MINUS_WIN", "subtract", one_value, values["p_win"])
+                lose = step("REMAINDER_MINUS_VOID", "subtract", lose, values["p_void"])
+                work._require(work._compare(lose[1],zero) >= 0, "LP03_CASHFLOW_REVIEW_PROBABILITY_SIMPLEX")
+                cost = zero_value
+                for name in costs:
+                    cost = step("ADD_COST::"+name, "add", cost, values[name])
+                win_cash = step("WIN_TIMES_WIN_CASH", "multiply", values["p_win"], values["win_terminal_cashflow_total"])
+                lose_cash = step("LOSE_TIMES_LOSE_CASH", "multiply", lose, values["lose_terminal_cashflow_total"])
+                terminal = step("WIN_PLUS_LOSE_CASH", "add", win_cash, lose_cash)
+                void_cash = step("VOID_TIMES_VOID_CASH", "multiply", values["p_void"], values["void_terminal_cashflow_total"])
+                terminal = step("ADD_VOID_CASH", "add", terminal, void_cash)
+                if_filled = step("ENTRY_PLUS_TERMINAL", "add", values["entry_trade_cashflow_total"], terminal)
+                if_filled = step("SUBTRACT_COSTS", "subtract", if_filled, cost)
+                if_filled = step("ADD_REBATE", "add", if_filled, values["expected_rebate_total"])
+                filled = step("FILL_TIMES_FILLED_CASH", "multiply", values["fill_probability"], if_filled)
+                not_filled = step("ONE_MINUS_FILL", "subtract", one_value, values["fill_probability"])
+                unfilled = step("NO_FILL_TIMES_CASH", "multiply", not_filled, values["no_fill_cashflow_total"])
+                expected = step("ADD_FILLED_AND_UNFILLED_CASH", "add", filled, unfilled)
+                outputs = (expected,if_filled,terminal,lose)
+                actual = tuple((name,work._decimal_inputs[id(value[0])][2]) for name,value in zip(fields,outputs,strict=True))
+                work._require(actual == raw_fields == expected_fields and projected_text == actual[0][1],
+                    "LP03_CASHFLOW_REVIEW_ORIGINAL_RESULT_TEXT_MISMATCH")
+                work._require(work._compare(lower,expected[1]) <= 0 and work._compare(expected[1],upper) <= 0,
+                    "LP03_CASHFLOW_REVIEW_RESULT_OUT_OF_BOUNDS")
+            summary = work._emit(dict(expected_net_cash=expected[1],expected_net_cash_if_filled=if_filled[1],
+                expected_terminal_cashflow=terminal[1],p_lose=lose[1],lower=lower,upper=upper))
+            proof = dict(profile="EXACT_DECIMAL_ORDERED_BINARY_CASHFLOW_INTERMEDIATES_V1",math_id="MATH-06",
+                context=context_record,source_texts=source_texts,cashflow_basis=cashflow_basis,
+                input_conversion_scope="ORIGINAL_CANONICAL_FINANCIAL_TEXT_FITS_CONTEXT_EXACTLY",
+                declared_lower=lower_text,declared_upper=upper_text,steps=tuple(proof_steps),
+                summary={key:dict(value) if type(value) is MappingProxyType else value for key,value in summary.items()},
+                original_raw_fields=raw_fields,preregistered_raw_fields=expected_fields,projected_text=projected_text)
+            work._assert_math26_context_custody_v1()
+            remaining = min(1048576,work.limits["max_serialized_bytes"]-work.consumed["serialized_bytes"])
+            work._require(remaining > 0, "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+            raw = _encode_evidence_projection_json_v1(proof,maximum_bytes=remaining,maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(raw)
+            return proof
+    return calculate
+
+
+_bounded_evidence_binary_cashflow_review_v1 = _bind_evidence_binary_cashflow_review_v1()
+
+
+def _bind_evidence_multi_outcome_cashflow_review_v1():
+    """Closed exact M07 proof, retaining ordered simplex and cash operations."""
+    from decimal import Inexact, InvalidOperation, Overflow, Underflow
+    original_context, original_localcontext, original_decimal = decimal_context_v1, localcontext, Decimal
+
+    def calculate(source_texts, *, outcome_ids, probability_texts, terminal_texts, cashflow_basis,
+                  lower_text, upper_text, raw_fields, expected_fields, projected_text, work):
+        from .context import _native_require
+        from .serialization import _encode_evidence_projection_json_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            names = ("probability_simplex_tolerance", "fill_probability", "entry_trade_cashflow_total",
+                "no_fill_cashflow_total", "platform_fee_total", "builder_fee_total", "other_fee_total",
+                "expected_rebate_total", "exit_slippage_reserve_total", "market_impact_reserve_total",
+                "latency_adverse_selection_reserve_total", "capital_time_cost_reserve_total")
+            fields = ("expected_net_cash", "expected_net_cash_if_filled", "expected_terminal_cashflow",
+                "outcome_ids", "normalized_probabilities", "original_probability_sum", "normalization_applied")
+            costs = ("platform_fee_total", "builder_fee_total", "other_fee_total", "exit_slippage_reserve_total",
+                "market_impact_reserve_total", "latency_adverse_selection_reserve_total", "capital_time_cost_reserve_total")
+            work._require(type(cashflow_basis) is str and cashflow_basis ==
+                "SIGNED_TOTAL_ACCOUNT_CASHFLOW_EACH_EVENT_INCLUDED_EXACTLY_ONCE", "LP03_CASHFLOW_REVIEW_SIGNED_TOTAL_BASIS")
+            work._require(type(source_texts) is tuple and len(source_texts) == 12
+                and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str and type(row[1]) is str for row in source_texts)
+                and tuple(row[0] for row in source_texts) == names, "LP03_MULTI_CASHFLOW_REVIEW_ORIGINAL_ROSTER")
+            work._require(type(outcome_ids) is tuple and len(outcome_ids) >= 2
+                and type(probability_texts) is tuple and type(terminal_texts) is tuple
+                and len(outcome_ids) == len(probability_texts) == len(terminal_texts),
+                "LP03_MULTI_CASHFLOW_REVIEW_OUTCOME_ROSTER")
+            count = len(outcome_ids)
+            # Worst case includes all N original normalization divisions and
+            # the original sum-minus-one and unary absolute-value operations.
+            work._require(6 * count + 30 <= work._retained_input_capacity - len(work._decimal_admissions),
+                "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            work._require(all(type(value) is str and bool(value) for value in outcome_ids)
+                and sum(len(value) for value in outcome_ids) <= min(65536,work.limits["max_serialized_bytes"])
+                and len(set(outcome_ids)) == count, "LP03_MULTI_CASHFLOW_REVIEW_OUTCOME_IDENTITIES")
+            work._require(all(record[3] in ("CASHFLOW_FINANCIAL_DECIMAL_V1", "CASHFLOW_CONTEXT_RESULT_V1")
+                for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            def raw_shape(rows):
+                return (type(rows) is tuple and len(rows) == 7
+                    and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in rows)
+                    and tuple(row[0] for row in rows) == fields
+                    and all(type(rows[index][1]) is str and bool(rows[index][1]) for index in (0,1,2,5))
+                    and type(rows[3][1]) is tuple and len(rows[3][1]) == count
+                    and all(type(value) is str and bool(value) for value in rows[3][1])
+                    and type(rows[4][1]) is tuple and len(rows[4][1]) == count
+                    and all(type(value) is str and bool(value) for value in rows[4][1])
+                    and type(rows[6][1]) is bool)
+            work._require(raw_shape(raw_fields) and raw_shape(expected_fields), "LP03_MULTI_CASHFLOW_REVIEW_RAW_FIELDS")
+            texts = (*tuple(row[1] for row in source_texts), *probability_texts, *terminal_texts,
+                lower_text, upper_text, projected_text,
+                *tuple(rows[index][1] for rows in (raw_fields,expected_fields) for index in (0,1,2,5)),
+                *raw_fields[3][1],*raw_fields[4][1],*expected_fields[3][1],*expected_fields[4][1])
+            work._require(all(type(text) is str and bool(text) for text in texts)
+                and sum(len(text) for text in texts) <= min(65536,work.limits["max_serialized_bytes"]),
+                "LP03_CASHFLOW_REVIEW_ORIGINAL_TEXTS")
+            def admitted(text):
+                value = work._parse_cashflow_decimal_v1(text)
+                ratio = work._exact_cashflow_decimal_v1(value)
+                shape = value.as_tuple()
+                work._require(len(shape.digits) <= 34 and -999966 <= shape.exponent <= 999966,
+                    "LP03_CASHFLOW_REVIEW_EXACT_SOURCE_CONTEXT_UNAVAILABLE")
+                return value,ratio
+            values = dict((name,admitted(text)) for name,text in source_texts)
+            probabilities = tuple(admitted(text) for text in probability_texts)
+            terminals = tuple(admitted(text) for text in terminal_texts)
+            lower,upper = admitted(lower_text)[1],admitted(upper_text)[1]
+            zero,one = work._fraction(0),work._fraction(1)
+            work._require(work._compare(lower,upper) <= 0, "LP03_CASHFLOW_REVIEW_DECLARED_ENCLOSURE")
+            for value in (*probabilities,values["fill_probability"]):
+                work._require(work._compare(zero,value[1]) <= 0 and work._compare(value[1],one) <= 0,
+                    "LP03_CASHFLOW_REVIEW_PROBABILITY_DOMAIN")
+            work._require(work._compare(zero,values["probability_simplex_tolerance"][1]) <= 0,
+                "LP03_MULTI_CASHFLOW_REVIEW_SIMPLEX_TOLERANCE")
+            for name in (*costs,"expected_rebate_total"):
+                work._require(work._compare(zero,values[name][1]) <= 0, "LP03_CASHFLOW_REVIEW_NONNEGATIVE_FRICTION")
+            proof_steps = []
+            with original_localcontext(original_context()) as context:
+                work._require((context.prec,context.rounding,context.Emin,context.Emax,context.capitals,context.clamp)
+                    == (34,"ROUND_HALF_EVEN",-999999,999999,1,0), "LP03_CASHFLOW_REVIEW_ORIGINAL_CONTEXT")
+                context_record = dict(precision=context.prec,rounding=context.rounding,Emin=context.Emin,Emax=context.Emax,
+                    capitals=context.capitals,clamp=context.clamp,
+                    trapped_signals=tuple(sorted(signal.__name__ for signal,active in context.traps.items() if active)),
+                    flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+                def step(label, operation, left, right):
+                    work._assert_math26_context_custody_v1()
+                    work._require(len(work._decimal_admissions) < work._retained_input_capacity,
+                                  "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+                    if operation == "abs":
+                        # The original prefix format retains two Decimal slots.
+                        # The second is explicitly unused for this unary operation.
+                        exact = (work._subtract(zero,left[1]) if work._compare(left[1],zero) < 0
+                                 else work._fraction(left[1].numerator,left[1].denominator))
+                    else:
+                        exact = {"add": work._add, "subtract": work._subtract, "multiply": work._multiply,
+                                 "divide": work._divide}[operation](left[1], right[1])
+                    fragment_upper = 512 + max(1, exact.numerator.bit_length()) + exact.denominator.bit_length()
+                    work._require(work.consumed["serialized_bytes"] + fragment_upper <= work.limits["max_serialized_bytes"],
+                                  "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+                    work._bits(4 * context.prec)
+                    ordinal = len(work._math26_context_steps)
+                    attempt = [ordinal, label, left[0], right[0], exact, None, (), None, "ATTEMPTED"]
+                    work._math26_context_steps.append(attempt)
+                    context.clear_flags()
+                    work._consumed["decimal_constructions"] += 1
+                    try:
+                        result = context.abs(left[0]) if operation == "abs" else getattr(context, operation)(left[0], right[0])
+                        attempt[5] = result
+                    finally:
+                        attempt[6] = tuple(sorted(signal.__name__ for signal, active in context.flags.items() if active))
+                    work._require(type(result) is original_decimal and result.is_finite()
+                                  and not any(context.flags[signal] for signal in (Inexact, InvalidOperation, Overflow, Underflow)),
+                                  "LP03_CASHFLOW_REVIEW_NONEXACT_CONTEXT_STEP")
+                    shape = result.as_tuple()
+                    work._bits(max(4 * (len(shape.digits) + max(shape.exponent, 0)), 1 + 4 * max(-shape.exponent, 0)))
+                    work._consumed["integer_operations"] += 1
+                    numerator, denominator = result.as_integer_ratio()
+                    represented = work._fraction(numerator, denominator)
+                    work._require(work._compare(exact, represented) == 0, "LP03_CASHFLOW_REVIEW_CONTEXT_RATIO_MISMATCH")
+                    text = str(result)
+                    attempt[7] = text
+                    work._require(len(text) <= 128, "LP03_CASHFLOW_REVIEW_CONTEXT_TEXT_BOUND")
+                    work._require(id(result) not in work._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+                    admission = (result, exact, text, "CASHFLOW_CONTEXT_RESULT_V1")
+                    work._decimal_admissions = (*work._decimal_admissions, admission)
+                    work._decimal_inputs[id(result)] = admission
+                    work._consumed["retained_decimal_inputs"] += 1
+                    fragment = work._emit(dict(position=ordinal, operation=label, operand_arity=1 if operation == "abs" else 2,
+                        right_operand_usage="UNUSED_UNARY_PLACEHOLDER" if operation == "abs" else "ORIGINAL_RIGHT_OPERAND",
+                        exact=exact, decimal_text=text, flags="|".join(attempt[6])))
+                    proof_steps.append({key: dict(value) if type(value) is MappingProxyType else value for key, value in fragment.items()})
+                    attempt[8] = "EXACT"
+                    retained = tuple(attempt)
+                    work._math26_context_steps[ordinal] = retained
+                    work._math26_context_prefix = (*work._math26_context_prefix, retained)
+                    return result, exact
+
+                work._bits(4 * context.prec)
+                work._consumed["decimal_constructions"] += 2
+                zero_value,one_value = (original_decimal(0),zero),(original_decimal(1),one)
+                original_sum = zero_value
+                for index,value in enumerate(probabilities):
+                    original_sum = step("SUM_PROBABILITY::"+str(index),"add",original_sum,value)
+                difference = step("SIMPLEX_SUM_MINUS_ONE","subtract",original_sum,one_value)
+                distance = step("SIMPLEX_UNARY_ABSOLUTE","abs",difference,zero_value)
+                work._require(work._compare(distance[1],values["probability_simplex_tolerance"][1]) <= 0
+                    and work._compare(original_sum[1],zero) > 0, "LP03_MULTI_CASHFLOW_REVIEW_PROBABILITY_SIMPLEX")
+                normalization_applied = work._compare(original_sum[1],one) != 0
+                normalized = (tuple(step("NORMALIZE_PROBABILITY::"+str(index),"divide",value,original_sum)
+                    for index,value in enumerate(probabilities)) if normalization_applied else probabilities)
+                terminal = zero_value
+                for index,(probability,cash) in enumerate(zip(normalized,terminals,strict=True)):
+                    product = step("PROBABILITY_TIMES_TERMINAL_CASH::"+str(index),"multiply",probability,cash)
+                    terminal = step("ADD_TERMINAL_CASH::"+str(index),"add",terminal,product)
+                cost = zero_value
+                for name in costs:
+                    cost = step("ADD_COST::"+name,"add",cost,values[name])
+                if_filled = step("ENTRY_PLUS_TERMINAL","add",values["entry_trade_cashflow_total"],terminal)
+                if_filled = step("SUBTRACT_COSTS","subtract",if_filled,cost)
+                if_filled = step("ADD_REBATE","add",if_filled,values["expected_rebate_total"])
+                filled = step("FILL_TIMES_FILLED_CASH","multiply",values["fill_probability"],if_filled)
+                not_filled = step("ONE_MINUS_FILL","subtract",one_value,values["fill_probability"])
+                unfilled = step("NO_FILL_TIMES_CASH","multiply",not_filled,values["no_fill_cashflow_total"])
+                expected = step("ADD_FILLED_AND_UNFILLED_CASH","add",filled,unfilled)
+                def spelling(value):
+                    return work._decimal_inputs[id(value[0])][2]
+                actual = tuple(zip(fields,(spelling(expected),spelling(if_filled),spelling(terminal),outcome_ids,
+                    tuple(spelling(value) for value in normalized),spelling(original_sum),normalization_applied),strict=True))
+                work._require(actual == raw_fields == expected_fields and projected_text == actual[0][1],
+                    "LP03_CASHFLOW_REVIEW_ORIGINAL_RESULT_TEXT_MISMATCH")
+                work._require(work._compare(lower,expected[1]) <= 0 and work._compare(expected[1],upper) <= 0,
+                    "LP03_CASHFLOW_REVIEW_RESULT_OUT_OF_BOUNDS")
+            summary = work._emit(dict(expected_net_cash=expected[1],expected_net_cash_if_filled=if_filled[1],
+                expected_terminal_cashflow=terminal[1],original_probability_sum=original_sum[1],lower=lower,upper=upper))
+            proof = dict(profile="EXACT_DECIMAL_ORDERED_MULTI_OUTCOME_CASHFLOW_INTERMEDIATES_V1",math_id="MATH-07",
+                context=context_record,source_texts=source_texts,cashflow_basis=cashflow_basis,outcome_ids=outcome_ids,
+                probability_texts=probability_texts,terminal_texts=terminal_texts,
+                input_conversion_scope="ORIGINAL_CANONICAL_FINANCIAL_TEXT_FITS_CONTEXT_EXACTLY",
+                declared_lower=lower_text,declared_upper=upper_text,steps=tuple(proof_steps),
+                summary={key:dict(value) if type(value) is MappingProxyType else value for key,value in summary.items()},
+                original_raw_fields=raw_fields,preregistered_raw_fields=expected_fields,projected_text=projected_text)
+            work._assert_math26_context_custody_v1()
+            remaining = min(1048576,work.limits["max_serialized_bytes"]-work.consumed["serialized_bytes"])
+            work._require(remaining > 0,"LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+            raw = _encode_evidence_projection_json_v1(proof,maximum_bytes=remaining,maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(raw)
+            return proof
+    return calculate
+
+
+_bounded_evidence_multi_outcome_cashflow_review_v1 = _bind_evidence_multi_outcome_cashflow_review_v1()
+
+
+
+def _bind_evidence_market_review_v1():
+    # A closed sibling producer owns these actual context operations. Market
+    # source/result tags cannot adopt M26 or statistical Decimal admissions.
+    from decimal import Inexact, InvalidOperation, Overflow, Underflow
+    original_context, original_localcontext, original_decimal = decimal_context_v1, localcontext, Decimal
+    from weakref import WeakKeyDictionary
+    completed = WeakKeyDictionary()
+
+    def calculate(math_id, source_texts, *, lower_text, upper_text, raw_texts, expected_texts, projected_text, work):
+        from .context import _native_require
+        from .serialization import _encode_evidence_projection_json_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        completed.pop(work, None)
+        with work:
+            work._require(type(math_id) is str and math_id in ("MATH-01", "MATH-04", "MATH-05"),
+                          "LP03_MARKET_REVIEW_CLOSED_PROFILE")
+            names = (("contract_price", "payout_per_winning_contract") if math_id == "MATH-01"
+                     else ("best_bid", "best_ask", "payout"))
+            step_count = 5 if math_id == "MATH-05" else 1
+            output_count = 2 if math_id == "MATH-05" else 1
+            work._require(type(source_texts) is tuple and len(source_texts) == len(names)
+                          and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in source_texts)
+                          and tuple(row[0] for row in source_texts) == names
+                          and type(raw_texts) is tuple and type(expected_texts) is tuple
+                          and len(raw_texts) == len(expected_texts) == output_count,
+                          "LP03_MARKET_REVIEW_ORIGINAL_ROSTER")
+            work._require(all(record[3] in ("MARKET_FINANCIAL_DECIMAL_V1", "MARKET_CONTEXT_RESULT_V1")
+                              for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            work._require(len(names) + 2 + step_count <= work._retained_input_capacity - len(work._decimal_admissions),
+                          "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            texts = (*tuple(row[1] for row in source_texts), lower_text, upper_text, *raw_texts, *expected_texts, projected_text)
+            work._require(all(type(text) is str and bool(text) for text in texts)
+                          and sum(len(text) for text in texts) <= min(65536, work.limits["max_serialized_bytes"]),
+                          "LP03_MARKET_REVIEW_ORIGINAL_TEXTS")
+            def admitted(text):
+                value = work._parse_market_decimal_v1(text)
+                return value, work._exact_market_decimal_v1(value)
+            inputs = tuple(admitted(row[1]) for row in source_texts)
+            lower, upper = admitted(lower_text)[1], admitted(upper_text)[1]
+            zero, one, two = work._fraction(0), work._fraction(1), work._fraction(2)
+            payout = inputs[-1]
+            work._require(work._compare(payout[1], zero) > 0 and work._compare(lower, zero) == 0
+                          and work._compare(upper, one if math_id == "MATH-01" else payout[1] if math_id == "MATH-04" else two) == 0,
+                          "LP03_MARKET_REVIEW_DECLARED_ENCLOSURE")
+            for value in inputs[:-1]:
+                work._require(work._compare(zero, value[1]) <= 0 and work._compare(value[1], payout[1]) <= 0,
+                              "LP03_MARKET_REVIEW_PRICE_DOMAIN")
+            if math_id != "MATH-01":
+                work._require(work._compare(inputs[0][1], inputs[1][1]) <= 0, "LP03_MARKET_REVIEW_CROSSED_BOOK")
+            proof_steps = []
+            with original_localcontext(original_context()) as context:
+                work._require((context.prec, context.rounding, context.Emin, context.Emax, context.capitals, context.clamp)
+                              == (34, "ROUND_HALF_EVEN", -999999, 999999, 1, 0), "LP03_MARKET_REVIEW_ORIGINAL_CONTEXT")
+                context_record = dict(precision=context.prec, rounding=context.rounding, Emin=context.Emin, Emax=context.Emax,
+                    capitals=context.capitals, clamp=context.clamp,
+                    trapped_signals=tuple(sorted(signal.__name__ for signal, active in context.traps.items() if active)),
+                    flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+
+                def step(label, operation, left, right):
+                    work._assert_math26_context_custody_v1()
+                    work._require(len(work._decimal_admissions) < work._retained_input_capacity,
+                                  "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+                    exact = {"add": work._add, "subtract": work._subtract, "multiply": work._multiply,
+                             "divide": work._divide}[operation](left[1], right[1])
+                    fragment_upper = 512 + max(1, exact.numerator.bit_length()) + exact.denominator.bit_length()
+                    work._require(work.consumed["serialized_bytes"] + fragment_upper <= work.limits["max_serialized_bytes"],
+                                  "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+                    work._bits(4 * context.prec)
+                    ordinal = len(work._math26_context_steps)
+                    attempt = [ordinal, label, left[0], right[0], exact, None, (), None, "ATTEMPTED"]
+                    work._math26_context_steps.append(attempt)
+                    context.clear_flags()
+                    work._consumed["decimal_constructions"] += 1
+                    try:
+                        result = getattr(context, operation)(left[0], right[0])
+                        attempt[5] = result
+                    finally:
+                        attempt[6] = tuple(sorted(signal.__name__ for signal, active in context.flags.items() if active))
+                    work._require(type(result) is original_decimal and result.is_finite()
+                                  and not any(context.flags[signal] for signal in (Inexact, InvalidOperation, Overflow, Underflow)),
+                                  "LP03_MARKET_REVIEW_NONEXACT_CONTEXT_STEP")
+                    shape = result.as_tuple()
+                    work._bits(max(4 * (len(shape.digits) + max(shape.exponent, 0)), 1 + 4 * max(-shape.exponent, 0)))
+                    work._consumed["integer_operations"] += 1
+                    numerator, denominator = result.as_integer_ratio()
+                    represented = work._fraction(numerator, denominator)
+                    work._require(work._compare(exact, represented) == 0, "LP03_MARKET_REVIEW_CONTEXT_RATIO_MISMATCH")
+                    text = str(result)
+                    attempt[7] = text
+                    work._require(len(text) <= 128, "LP03_MARKET_REVIEW_CONTEXT_TEXT_BOUND")
+                    work._require(id(result) not in work._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+                    admission = (result, exact, text, "MARKET_CONTEXT_RESULT_V1")
+                    work._decimal_admissions = (*work._decimal_admissions, admission)
+                    work._decimal_inputs[id(result)] = admission
+                    work._consumed["retained_decimal_inputs"] += 1
+                    fragment = work._emit(dict(position=ordinal, operation=label, exact=exact, decimal_text=text, flags="|".join(attempt[6])))
+                    proof_steps.append({key: dict(value) if type(value) is MappingProxyType else value for key, value in fragment.items()})
+                    attempt[8] = "EXACT"
+                    retained = tuple(attempt)
+                    work._math26_context_steps[ordinal] = retained
+                    work._math26_context_prefix = (*work._math26_context_prefix, retained)
+                    return result, exact
+
+                if math_id == "MATH-01":
+                    results = (step("PRICE_DIVIDED_BY_PAYOUT", "divide", inputs[0], payout),)
+                elif math_id == "MATH-04":
+                    results = (step("ASK_MINUS_BID", "subtract", inputs[1], inputs[0]),)
+                else:
+                    # These are original mathematical constants, not financial
+                    # policy inputs or renewed source-bit allowances.
+                    work._bits(4 * context.prec)
+                    work._consumed["decimal_constructions"] += 2
+                    divisor, bps_factor = (original_decimal(2), two), (original_decimal(10000), work._fraction(10000))
+                    summed = step("BID_PLUS_ASK", "add", inputs[0], inputs[1])
+                    midpoint = step("MIDPOINT_DIVIDE_TWO", "divide", summed, divisor)
+                    spread = step("ASK_MINUS_BID", "subtract", inputs[1], inputs[0])
+                    work._require(work._compare(midpoint[1], zero) > 0, "LP03_MARKET_REVIEW_POSITIVE_MIDPOINT")
+                    ratio = step("SPREAD_DIVIDED_BY_MIDPOINT", "divide", spread, midpoint)
+                    bps = step("RATIO_TIMES_TEN_THOUSAND", "multiply", ratio, bps_factor)
+                    results = (ratio, bps)
+                actual_texts = tuple(work._decimal_inputs[id(result[0])][2] for result in results)
+                work._require(actual_texts == raw_texts == expected_texts and projected_text == actual_texts[0],
+                              "LP03_MARKET_REVIEW_ORIGINAL_RESULT_TEXT_MISMATCH")
+                work._require(work._compare(lower, results[0][1]) <= 0 and work._compare(results[0][1], upper) <= 0,
+                              "LP03_MARKET_REVIEW_RESULT_OUT_OF_BOUNDS")
+            summary_values = dict(result=results[0][1], lower=lower, upper=upper)
+            if math_id == "MATH-05":
+                summary_values["basis_points"] = results[1][1]
+            summary = work._emit(summary_values)
+            proof = dict(profile="EXACT_DECIMAL_ORDERED_MARKET_INTERMEDIATES_V1", math_id=math_id, context=context_record,
+                source_texts=source_texts, declared_lower=lower_text, declared_upper=upper_text, steps=tuple(proof_steps),
+                summary={key: dict(value) if type(value) is MappingProxyType else value for key, value in summary.items()},
+                original_raw_texts=raw_texts, preregistered_raw_texts=expected_texts, projected_text=projected_text)
+            work._assert_math26_context_custody_v1()
+            remaining = min(1048576, work.limits["max_serialized_bytes"] - work.consumed["serialized_bytes"])
+            work._require(remaining > 0, "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+            raw = _encode_evidence_projection_json_v1(proof, maximum_bytes=remaining, maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(raw)
+            # Publish only this successful original completion. The weak-key
+            # value retains no work or work-capturing closure.
+            completion = (proof, raw, source_texts, work._math26_context_prefix[-1],
+                work._decimal_admissions[-1], work._math26_context_prefix, work._decimal_admissions,
+                tuple(work.consumed.items()))
+            completed[work] = completion
+            return proof
+
+    def certify_conversion(producer_proof, *, producer_input_json, producer_raw_json,
+                           conversion_receipt_json, consumer_input_json, work):
+        """Certify observed adapter data from a completed same-work M01 review.
+
+        The original converter's Decimal and this independent review's Decimal
+        remain distinct. Their exact raw text, including zero sign, joins them.
+        No source authority, converter invocation, or new Decimal is supplied.
+        """
+        import struct
+        from math import isfinite, nextafter, inf, copysign
+        from .context import _native_require, _native_ident
+        from .serialization import _native_strict_json, _encode_evidence_projection_json_v1
+        from .input_resolver import decode_evidence_public_invocation_inputs_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            completion = completed.get(work)
+            work._require(completion is not None and producer_proof is completion[0],
+                          "LP03_EDGE_CONVERSION_COMPLETED_M01_REVIEW_REQUIRED")
+            proof, proof_wire, source_texts, step, admission, prefix, admissions, endpoint = completion
+            work._require(type(proof) is dict and proof.get("math_id") == "MATH-01"
+                and _encode_evidence_projection_json_v1(proof, maximum_bytes=len(proof_wire), maximum_nodes=4096) == proof_wire
+                and work._math26_context_prefix is prefix and work._decimal_admissions is admissions
+                and tuple(work.consumed.items()) == endpoint
+                and bool(work._math26_context_prefix) and work._math26_context_prefix[-1] is step
+                and work._decimal_admissions[-1] is admission
+                and step[1] == "PRICE_DIVIDED_BY_PAYOUT" and step[8] == "EXACT"
+                and admission[3] == "MARKET_CONTEXT_RESULT_V1"
+                and step[5] is admission[0] and step[4] is admission[1] and step[7] is admission[2],
+                "LP03_EDGE_CONVERSION_ORIGINAL_COMPLETION_JOIN")
+            wires = (producer_input_json, producer_raw_json, conversion_receipt_json, consumer_input_json)
+            work._require(all(type(value) is bytes and bool(value) for value in wires)
+                and sum(map(len, wires)) <= min(65536, work.limits["max_serialized_bytes"]),
+                "LP03_EDGE_CONVERSION_ORIGINAL_WIRE_BYTES")
+            producer = _native_strict_json(producer_input_json, max_bytes=65536, max_nodes=4096, binary64_numbers=True)
+            raw_text = _native_strict_json(producer_raw_json, max_bytes=65536, max_nodes=4096, binary64_numbers=True)
+            receipt = _native_strict_json(conversion_receipt_json, max_bytes=65536, max_nodes=4096, binary64_numbers=True)
+            consumer = decode_evidence_public_invocation_inputs_v1("MATH-02", consumer_input_json,
+                maximum_bytes=65536, maximum_nodes=4096)
+            work._require(type(producer) is dict and set(producer) == {"contract_price", "payout_per_winning_contract"}
+                and tuple((name, producer[name]) for name in ("contract_price", "payout_per_winning_contract")) == source_texts
+                and type(raw_text) is str and raw_text == admission[2]
+                and _encode_evidence_projection_json_v1(producer, maximum_bytes=len(producer_input_json), maximum_nodes=4096) == producer_input_json
+                and _encode_evidence_projection_json_v1(raw_text, maximum_bytes=len(producer_raw_json), maximum_nodes=4096) == producer_raw_json,
+                "LP03_EDGE_CONVERSION_SOURCE_AND_RAW_JOIN")
+            work._require(type(receipt) is dict and set(receipt) == {"receipt_id", "conversion_id", "conversion_version",
+                "source", "target", "source_value", "converted_value", "rounding_and_precision", "execution_context",
+                "failure_disposition", "no_authority_flag"}
+                and receipt["conversion_id"] == "CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1"
+                and receipt["conversion_version"] == "1.0.0"
+                and receipt["source"] == dict(type_name="Decimal", shape="scalar", unit="dimensionless",
+                                             basis="winning payout-normalized probability")
+                and receipt["target"] == dict(type_name="float64", shape="scalar", unit="probability points", basis="unit interval")
+                and type(receipt["source_value"]) is str and receipt["source_value"] == raw_text
+                and receipt["rounding_and_precision"] == "EXACT_DECIMAL_TO_NEAREST_FINITE_IEEE754_BINARY64; NO_PRECONVERSION_ROUNDING"
+                and receipt["failure_disposition"] == "DEPENDENCY_UNRESOLVED_BLOCK_CONTEXT_AND_STACK"
+                and receipt["no_authority_flag"] is True
+                and type(receipt["execution_context"]) is dict
+                and receipt["execution_context"].get("dependency_graph_id") == "STACK::MATH-01::MATH-02::V3_4"
+                and receipt["execution_context"].get("dependency_graph_version") == "3.4"
+                and _encode_evidence_projection_json_v1(receipt, maximum_bytes=len(conversion_receipt_json), maximum_nodes=4096) == conversion_receipt_json,
+                "LP03_EDGE_CONVERSION_REGISTERED_RECEIPT_DATA")
+            _native_ident(receipt["receipt_id"])
+            observed, consumed = receipt["converted_value"], consumer["market_implied_probability"]
+            work._require(all(type(value) is float and isfinite(value) and 0.0 <= value <= 1.0 for value in (observed, consumed))
+                and consumer["calibration_state"] == "CALIBRATED_FOR_DECLARED_CONTEXT",
+                "LP03_EDGE_CONVERSION_TYPED_DOMAIN")
+            bits = lambda value: struct.pack(">d", value).hex()
+            work._require(bits(observed) == bits(consumed), "LP03_EDGE_CONVERSION_CONSUMER_BITS")
+            exact = admission[1]
+            # Bound all source and finite-neighbor rational text and both the
+            # fragment and complete proof before forming any midpoint.
+            magnitude_bits = max(abs(exact.numerator).bit_length(), exact.denominator.bit_length(), 1077)
+            # Original wires become JSON string fields in each retained copy;
+            # the six-byte-per-UTF-8-byte bound includes their second escaping.
+            reserve = 2 * (6 * sum(map(len, wires)) + 2048 + 8 * magnitude_bits)
+            work._require(work.consumed["serialized_bytes"] + reserve <= work.limits["max_serialized_bytes"],
+                          "LP03_EDGE_CONVERSION_COMPLETE_BYTES_EXHAUSTED")
+            zero, one = work._fraction(0), work._fraction(1)
+            work._require(work._compare(zero, exact) <= 0 and work._compare(exact, one) <= 0,
+                          "LP03_EDGE_CONVERSION_EXACT_PROBABILITY_DOMAIN")
+            work._consumed["input_values"] += 2
+            represented = work._binary64_ratio(observed, original_input=True)
+            work._binary64_ratio(consumed, original_input=True)
+            before, after = (work._binary64_ratio(value) for value in
+                (nextafter(observed, -inf), nextafter(observed, inf)))
+            two = work._fraction(2)
+            lower = work._divide(work._add(before, represented), two)
+            upper = work._divide(work._add(represented, after), two)
+            even = int(bits(observed), 16) % 2 == 0
+            low_order, high_order = work._compare(exact, lower), work._compare(exact, upper)
+            work._require((low_order > 0 or low_order == 0 and even)
+                and (high_order < 0 or high_order == 0 and even), "LP03_EDGE_CONVERSION_NEAREST_EVEN_CELL")
+            negative_zero = exact == 0 and admission[0].is_signed()
+            work._require(observed != 0.0 or (copysign(1.0, observed) < 0.0) == negative_zero,
+                          "LP03_EDGE_CONVERSION_SIGNED_ZERO")
+            fragment = work._emit(dict(original_context_step_ordinal=step[0], exact_source=exact,
+                represented=represented, lower_midpoint=lower, upper_midpoint=upper,
+                converted_bits=bits(observed), tie_flag=int(low_order == 0 or high_order == 0),
+                source_negative_zero_flag=int(negative_zero), producer_input_json=producer_input_json.decode("utf-8"),
+                producer_raw_json=producer_raw_json.decode("utf-8"), conversion_receipt_json=conversion_receipt_json.decode("utf-8"),
+                consumer_input_json=consumer_input_json.decode("utf-8")))
+            summary = {name: dict(value) if type(value) is MappingProxyType else value for name, value in fragment.items()}
+            result = dict(profile="COMPLETED_EXACT_MATH01_DECIMAL_TO_BINARY64_NEAREST_EVEN_V1",
+                conversion_id="CONVERSION::DECIMAL_PROBABILITY_TO_FINITE_FLOAT64_V1", conversion_version="1.0.0",
+                intermediate_observation_scope="ROUNDING_CELL_DERIVED_FROM_RETAINED_INDEPENDENT_DECIMAL",
+                authority_scope="SOFTWARE_ARITHMETIC_ONLY_NO_SOURCE_CALIBRATION_OR_NATIVE_EXECUTION_AUTHORITY", summary=summary)
+            work._assert_math26_context_custody_v1()
+            encoded = _encode_evidence_projection_json_v1(result,
+                maximum_bytes=work.limits["max_serialized_bytes"] - work.consumed["serialized_bytes"], maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(encoded)
+            return result
+
+    return calculate, certify_conversion
+
+
+(_bounded_evidence_market_review_v1, _bounded_evidence_probability_conversion_review_v1) = _bind_evidence_market_review_v1()
+
+
+def _evidence_kelly_source_texts_v1(math_id, source_texts, work):
+    """Closed numeric shape only, never an original producer permission."""
+    work._require(type(math_id) is str and math_id in ("MATH-27", "MATH-28"), "LP03_KELLY_CLOSED_PROFILE")
+    names = (("win_probability", "net_odds") if math_id == "MATH-27"
+             else ("full_kelly_fraction", "fraction_multiplier", "risk_caps"))
+    work._require(type(source_texts) is tuple and len(source_texts) == len(names)
+                  and all(type(row) is tuple and len(row) == 2 and type(row[0]) is str for row in source_texts)
+                  and tuple(row[0] for row in source_texts) == names, "LP03_KELLY_ORIGINAL_SOURCE_ROSTER")
+    if math_id == "MATH-27":
+        texts = tuple(row[1] for row in source_texts)
+    else:
+        caps = source_texts[2][1]
+        work._require(type(caps) is tuple and 0 < len(caps) <= 4096, "LP03_KELLY_ORIGINAL_CAP_ROSTER")
+        texts = (source_texts[0][1], source_texts[1][1], *caps)
+    work._require(all(type(text) is str and bool(text) for text in texts), "LP03_KELLY_ORIGINAL_SOURCE_TEXTS")
+    return texts
+
+
+def _evidence_kelly_domain_v1(math_id, values, lower, upper, work):
+    """Enclosures fixed before formula work, with no estimated risk policy.
+
+    M27's declared lower bound must enclose -1/odds algebraically. M28 uses
+    [0,1] even for a zero cap; actual M27 source custody separately establishes
+    its full-fraction input. No cap or multiplier is supplied by this helper.
+    """
+    zero, one = work._fraction(0), work._fraction(1)
+    work._require(work._compare(upper, one) == 0, "LP03_KELLY_DECLARED_ENCLOSURE")
+    if math_id == "MATH-27":
+        probability, odds = values
+        work._require(work._compare(zero, probability) <= 0 and work._compare(probability, one) <= 0,
+                      "LP03_KELLY_PROBABILITY_DOMAIN")
+        work._require(work._compare(odds, zero) > 0, "LP03_KELLY_ODDS_DOMAIN")
+        work._require(work._compare(lower, zero) < 0
+                      and work._compare(work._multiply(lower, odds), work._fraction(-1)) <= 0,
+                      "LP03_KELLY_DECLARED_ENCLOSURE")
+    else:
+        full, multiplier, *caps = values
+        work._require(work._compare(lower, zero) == 0, "LP03_KELLY_DECLARED_ENCLOSURE")
+        work._require(work._compare(full, one) <= 0, "LP03_KELLY_UPSTREAM_RAW_DOMAIN")
+        work._require(work._compare(multiplier, zero) > 0 and work._compare(multiplier, one) <= 0,
+                      "LP03_KELLY_MULTIPLIER_DOMAIN")
+        work._require(all(work._compare(cap, zero) >= 0 for cap in caps), "LP03_KELLY_CAP_DOMAIN")
+    return zero, one
+
+
+def _validate_evidence_kelly_bounds_v1(math_id, source_texts, *, lower_text, upper_text, expected_texts, work):
+    """Admit supplied Kelly domains without invoking either sizing formula."""
+    from .context import _native_require
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        sources = _evidence_kelly_source_texts_v1(math_id, source_texts, work)
+        work._require(type(expected_texts) is tuple and len(expected_texts) == (2 if math_id == "MATH-27" else 1),
+                      "LP03_KELLY_EXPECTATION_ROSTER")
+        work._require(all(record[3] == "KELLY_FINANCIAL_DECIMAL_V1" for record in work._decimal_admissions),
+                      "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+        texts = (*sources, lower_text, upper_text, *expected_texts)
+        work._require(len(texts) <= work._retained_input_capacity - len(work._decimal_admissions),
+                      "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+        work._require(all(type(text) is str and bool(text) for text in texts)
+                      and sum(len(text) for text in texts) <= min(65536, work.limits["max_serialized_bytes"]),
+                      "LP03_KELLY_ORIGINAL_TEXTS")
+        values = tuple(work._exact_kelly_decimal_v1(work._parse_kelly_decimal_v1(text)) for text in texts)
+        original, lower, upper = values[:len(sources)], values[len(sources)], values[len(sources)+1]
+        expected = values[len(sources)+2:]
+        zero, one = _evidence_kelly_domain_v1(math_id, original, lower, upper, work)
+        work._require(work._compare(lower, expected[0]) <= 0 and work._compare(expected[0], upper) <= 0,
+                      "LP03_KELLY_EXPECTATION_OUT_OF_BOUNDS")
+        if math_id == "MATH-27":
+            work._require(work._compare(zero, expected[1]) <= 0 and work._compare(expected[1], one) <= 0,
+                          "LP03_KELLY_SIZING_EXPECTATION_DOMAIN")
+        return work._emit(dict(profile="DECLARED_KELLY_FRACTION_ENCLOSURE_V1", math_id=math_id,
+            financial_source_count=len(sources), declared_lower=lower, declared_upper=upper))
+
+
+def _bind_evidence_kelly_review_v1():
+    # This closed producer performs the original ordered context operations.
+    # Source tags, derived tags, and first-tie selection are kept distinct.
+    from decimal import Inexact, InvalidOperation, Overflow, Underflow
+    original_context, original_localcontext, original_decimal = decimal_context_v1, localcontext, Decimal
+
+    def calculate(math_id, source_texts, *, lower_text, upper_text, raw_texts, expected_texts, projected_text, work):
+        from .context import _native_require
+        from .serialization import _encode_evidence_projection_json_v1
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            sources = _evidence_kelly_source_texts_v1(math_id, source_texts, work)
+            output_count, step_count = (2, 4) if math_id == "MATH-27" else (1, 1)
+            work._require(type(raw_texts) is tuple and type(expected_texts) is tuple
+                          and len(raw_texts) == len(expected_texts) == output_count, "LP03_KELLY_EXPECTATION_ROSTER")
+            work._require(all(record[3] in ("KELLY_FINANCIAL_DECIMAL_V1", "KELLY_CONTEXT_RESULT_V1")
+                              for record in work._decimal_admissions), "LP03_NUMERICAL_DECIMAL_PROFILE_MISMATCH")
+            work._require(len(sources) + 2 + step_count <= work._retained_input_capacity - len(work._decimal_admissions),
+                          "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+            texts = (*sources, lower_text, upper_text, *raw_texts, *expected_texts, projected_text)
+            work._require(all(type(text) is str and bool(text) for text in texts)
+                          and sum(len(text) for text in texts) <= min(65536, work.limits["max_serialized_bytes"]),
+                          "LP03_KELLY_ORIGINAL_TEXTS")
+            def admitted(text):
+                value = work._parse_kelly_decimal_v1(text)
+                return value, work._exact_kelly_decimal_v1(value)
+            inputs = tuple(admitted(text) for text in sources)
+            lower, upper = admitted(lower_text)[1], admitted(upper_text)[1]
+            zero, one = _evidence_kelly_domain_v1(math_id, tuple(value[1] for value in inputs), lower, upper, work)
+            proof_steps, selections = [], []
+            with original_localcontext(original_context()) as context:
+                work._require((context.prec, context.rounding, context.Emin, context.Emax, context.capitals, context.clamp)
+                              == (34, "ROUND_HALF_EVEN", -999999, 999999, 1, 0), "LP03_KELLY_ORIGINAL_CONTEXT")
+                context_record = dict(precision=context.prec, rounding=context.rounding, Emin=context.Emin, Emax=context.Emax,
+                    capitals=context.capitals, clamp=context.clamp,
+                    trapped_signals=tuple(sorted(signal.__name__ for signal, active in context.traps.items() if active)),
+                    flag_policy="EXACT_FINITE_ALLOW_ROUNDED_SUBNORMAL_CLAMPED_V1")
+
+                def step(label, operation, left, right):
+                    work._assert_math26_context_custody_v1()
+                    work._require(len(work._decimal_admissions) < work._retained_input_capacity,
+                                  "LP03_NUMERICAL_RETAINED_INPUT_CAPACITY_EXHAUSTED")
+                    exact = {"subtract": work._subtract, "multiply": work._multiply,
+                             "divide": work._divide}[operation](left[1], right[1])
+                    fragment_upper = 512 + max(1, exact.numerator.bit_length()) + exact.denominator.bit_length()
+                    work._require(work.consumed["serialized_bytes"] + fragment_upper <= work.limits["max_serialized_bytes"],
+                                  "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+                    work._bits(4 * context.prec)
+                    ordinal = len(work._math26_context_steps)
+                    attempt = [ordinal, label, left[0], right[0], exact, None, (), None, "ATTEMPTED"]
+                    work._math26_context_steps.append(attempt)
+                    context.clear_flags()
+                    work._consumed["decimal_constructions"] += 1
+                    try:
+                        result = getattr(context, operation)(left[0], right[0])
+                        attempt[5] = result
+                    finally:
+                        attempt[6] = tuple(sorted(signal.__name__ for signal, active in context.flags.items() if active))
+                    work._require(type(result) is original_decimal and result.is_finite()
+                                  and not any(context.flags[signal] for signal in (Inexact, InvalidOperation, Overflow, Underflow)),
+                                  "LP03_KELLY_NONEXACT_CONTEXT_STEP")
+                    shape = result.as_tuple()
+                    work._bits(max(4 * (len(shape.digits) + max(shape.exponent, 0)), 1 + 4 * max(-shape.exponent, 0)))
+                    work._consumed["integer_operations"] += 1
+                    numerator, denominator = result.as_integer_ratio()
+                    represented = work._fraction(numerator, denominator)
+                    work._require(work._compare(exact, represented) == 0, "LP03_KELLY_CONTEXT_RATIO_MISMATCH")
+                    text = str(result)
+                    attempt[7] = text
+                    work._require(len(text) <= 128, "LP03_KELLY_CONTEXT_TEXT_BOUND")
+                    work._require(id(result) not in work._decimal_inputs, "LP03_NUMERICAL_DECIMAL_IDENTITY_COLLISION")
+                    admission = (result, exact, text, "KELLY_CONTEXT_RESULT_V1")
+                    work._decimal_admissions = (*work._decimal_admissions, admission)
+                    work._decimal_inputs[id(result)] = admission
+                    work._consumed["retained_decimal_inputs"] += 1
+                    fragment = work._emit(dict(position=ordinal, operation=label, exact=exact, decimal_text=text, flags="|".join(attempt[6])))
+                    proof_steps.append({key: dict(value) if type(value) is MappingProxyType else value for key, value in fragment.items()})
+                    attempt[8] = "EXACT"
+                    retained = tuple(attempt)
+                    work._math26_context_steps[ordinal] = retained
+                    work._math26_context_prefix = (*work._math26_context_prefix, retained)
+                    return result, exact
+
+                def select(label, candidates, *, maximum):
+                    # Strict improvement preserves Python's first-on-equal max/
+                    # min behavior, including scale and signed-zero identity.
+                    selected = 0
+                    for index in range(1, len(candidates)):
+                        comparison = work._compare(candidates[index][1], candidates[selected][1])
+                        if (maximum and comparison > 0) or (not maximum and comparison < 0):
+                            selected = index
+                    chosen = candidates[selected]
+                    fragment = work._emit(dict(operation=label, selected_index=selected,
+                        decimal_text=str(chosen[0]), exact=chosen[1]))
+                    selections.append({key: dict(value) if type(value) is MappingProxyType else value for key, value in fragment.items()})
+                    return chosen
+
+                # Original mathematical zero/one, not new policy inputs or
+                # caller-created derived Decimal admissions.
+                work._bits(4 * context.prec)
+                work._consumed["decimal_constructions"] += 2 if math_id == "MATH-27" else 1
+                constant_zero = (original_decimal(0), zero)
+                if math_id == "MATH-27":
+                    constant_one = (original_decimal(1), one)
+                    won = step("ODDS_TIMES_PROBABILITY", "multiply", inputs[1], inputs[0])
+                    lost = step("ONE_MINUS_PROBABILITY", "subtract", constant_one, inputs[0])
+                    numerator = step("WEIGHTED_WIN_MINUS_LOSS", "subtract", won, lost)
+                    raw = step("NUMERATOR_DIVIDED_BY_ODDS", "divide", numerator, inputs[1])
+                    sizing = select("NONNEGATIVE_FIRST_MAX", (constant_zero, raw), maximum=True)
+                    results = (raw, sizing)
+                else:
+                    nonnegative = select("NONNEGATIVE_FIRST_MAX", (constant_zero, inputs[0]), maximum=True)
+                    candidate = step("NONNEGATIVE_TIMES_MULTIPLIER", "multiply", nonnegative, inputs[1])
+                    bounded = select("CANDIDATE_AND_CAPS_FIRST_MIN", (candidate, *inputs[2:]), maximum=False)
+                    results = (bounded,)
+                actual_texts = tuple(str(result[0]) for result in results)
+                work._require(actual_texts == raw_texts == expected_texts and projected_text == actual_texts[0],
+                              "LP03_KELLY_ORIGINAL_RESULT_TEXT_MISMATCH")
+                work._require(work._compare(lower, results[0][1]) <= 0 and work._compare(results[0][1], upper) <= 0,
+                              "LP03_KELLY_RESULT_OUT_OF_BOUNDS")
+            summary_values = dict(result=results[0][1], lower=lower, upper=upper)
+            if math_id == "MATH-27":
+                summary_values["sizing_candidate"] = results[1][1]
+            summary = work._emit(summary_values)
+            proof = dict(profile="EXACT_DECIMAL_ORDERED_KELLY_INTERMEDIATES_V1", math_id=math_id, context=context_record,
+                source_texts=source_texts, declared_lower=lower_text, declared_upper=upper_text, steps=tuple(proof_steps),
+                selections=tuple(selections),
+                summary={key: dict(value) if type(value) is MappingProxyType else value for key, value in summary.items()},
+                original_raw_texts=raw_texts, preregistered_raw_texts=expected_texts, projected_text=projected_text)
+            work._assert_math26_context_custody_v1()
+            remaining = min(1048576, work.limits["max_serialized_bytes"] - work.consumed["serialized_bytes"])
+            work._require(remaining > 0, "LP03_NUMERICAL_SERIALIZATION_EXHAUSTED")
+            raw = _encode_evidence_projection_json_v1(proof, maximum_bytes=remaining, maximum_nodes=4096)
+            work._consumed["serialized_bytes"] += len(raw)
+            return proof
+
+    return calculate
+
+
+_bounded_evidence_kelly_review_v1 = _bind_evidence_kelly_review_v1()
+
+
+def _bind_evidence_conditional_mean_v1():
+    # The shared arithmetic body is closure-private. Only these two original
+    # producers can supply its local exact values; no Boolean skips admission.
+    def calculate(observations, lo, hi, a, claim_ordinal, work):
+        zero, one = work._fraction(0), work._fraction(1)
+        work._require(work._compare(lo, hi) < 0 and work._compare(a, zero) > 0 and work._compare(a, one) < 0,
+                      "LP03_NUMERICAL_BOUND_OR_ALPHA_DOMAIN")
+        claim, n = work._ordinal(claim_ordinal), work._ordinal(len(observations))
+        total = zero
+        for observation in observations:
+            work._require(work._compare(lo, observation) <= 0 and work._compare(observation, hi) <= 0,
+                          "LP03_NUMERICAL_OBSERVATION_OUT_OF_BOUNDS")
+            total = work._add(total, observation)
+        allocation = work._int_product(work._int_product(claim, work._int_sum(claim, 1)),
+            work._int_product(n, work._int_sum(n, 1)))
+        delta = work._divide(a, work._fraction(allocation))
+        log_low, log_high = work._log_enclosure(work._divide(work._fraction(2), delta))
+        radius = work._multiply(work._subtract(hi, lo), work._sqrt_upper(work._divide(log_high, work._fraction(work._int_product(2, n)))))
+        mean = work._divide(total, work._fraction(n))
+        left, right = work._subtract(mean, radius), work._add(mean, radius)
+        clipped_lower = lo if work._compare(left, lo) < 0 else left
+        clipped_upper = hi if work._compare(right, hi) > 0 else right
+        return work._emit(dict(profile="CONDITIONAL_GROUP_MEAN_OUTWARD_64_128_V1", n=n, claim_ordinal=claim,
+            delta=delta, mean=mean, log_lower=log_low, log_upper=log_high, radius_upper=radius, lower=clipped_lower, upper=clipped_upper))
+
+    def certify(values, *, lower, upper, alpha, claim_ordinal, work):
+        """Pure §10 bound; caller must independently admit the complete prefix."""
+        from .context import _native_require
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            work._require(type(values) is tuple and bool(values) and len(values) <= work.limits["max_serialized_bytes"],
+                          "LP03_NUMERICAL_COMPLETE_PREFIX_DATA_REQUIRED")
+            lo, hi, a = work._exact(lower), work._exact(upper), work._exact(alpha)
+            observations = tuple(work._exact(value, binary64=True) for value in values)
+            return calculate(observations, lo, hi, a, claim_ordinal, work)
+
+    def recorded_dr(rows, groups, *, estimator, lower, upper, alpha, claim_ordinal, work):
+        """Form exact group means here; derived ratios never reenter input admission.
+
+        Integer index groups describe data only. Original source/policy/crossfit
+        authority and the complete ordered prefix belong to the calling owner.
+        """
+        from .context import _native_require
+        _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+        with work:
+            work._require(type(rows) is tuple and bool(rows) and len(rows) <= work.limits["max_serialized_bytes"]
+                          and all(type(value) is float for value in rows) and type(estimator) is float,
+                          "LP03_DR_ORIGINAL_BINARY64_ROWS_REQUIRED")
+            work._require(type(groups) is tuple and 0 < len(groups) <= len(rows)
+                          and all(type(group) is tuple and 0 < len(group) <= len(rows) for group in groups),
+                          "LP03_DR_COMPLETE_EQUAL_GROUPS_REQUIRED")
+            work._require(all(len(group) == len(groups[0]) for group in groups)
+                          and sum(len(group) for group in groups) == len(rows), "LP03_DR_COMPLETE_EQUAL_GROUPS_REQUIRED")
+            work._require(all(type(index) is int and 0 <= index < len(rows) for group in groups for index in group),
+                          "LP03_DR_ROW_INDEX_REQUIRED")
+            members = tuple(index for group in groups for index in group)
+            work._require(len(set(members)) == len(rows)
+                          and all(tuple(sorted(group)) == group for group in groups), "LP03_DR_COMPLETE_EQUAL_GROUPS_REQUIRED")
+            lo, hi, a = work._exact(lower), work._exact(upper), work._exact(alpha)
+            values = tuple(work._exact(value, binary64=True) for value in rows)
+            original_estimator = work._exact(estimator, binary64=True)
+            total, zero = work._fraction(0), work._fraction(0)
+            for value in values:
+                total = work._add(total, value)
+            mean = work._divide(total, work._fraction(len(values)))
+            exact_groups, group_records = [], []
+            for ordinal, group in enumerate(groups, 1):
+                subtotal = zero
+                for index in group:
+                    subtotal = work._add(subtotal, values[index])
+                group_mean = work._divide(subtotal, work._fraction(len(group)))
+                exact_groups.append(group_mean)
+                group_records.append(work._emit(dict(ordinal=ordinal, mean=group_mean)))
+            arithmetic = work._emit(dict(row_mean=mean, represented_estimator=original_estimator,
+                estimator_minus_row_mean=work._subtract(original_estimator, mean)))
+            interval = calculate(tuple(exact_groups), lo, hi, a, claim_ordinal, work)
+            return tuple(group_records), arithmetic, interval
+
+    return certify, recorded_dr
+
+
+certify_evidence_conditional_mean_v1, _measure_evidence_dr_group_arithmetic_v1 = _bind_evidence_conditional_mean_v1()
+
+
+def decode_evidence_dr_uncertainty_policy_v1(raw, *, maximum_bytes, maximum_nodes):
+    """Closed conditional-calculation data, never admission of its proof refs.
+
+    Registration/source owners must independently resolve the original policy,
+    support, bounds and exclusions before this data can support any metric.
+    Null proof/bound fields preserve an explicit unavailable calculation.
+    """
+    from .context import _native_ident, _native_require
+    from .serialization import _native_strict_json, _encode_evidence_projection_json_v1, _evidence_frozen_data_v1
+    data = _native_strict_json(raw, max_bytes=maximum_bytes, max_nodes=maximum_nodes)
+    references = ("logging_policy_ref", "support_receipt_ref", "reward_basis_ref", "crossfit_plan_ref",
+                  "conditional_target_assumption_ref", "group_bound_proof_ref")
+    fields = {"profile", "protocol_ref", "raw_receipt_ref", "input_receipt_ref", "row_ids", "groups",
+              "group_weights", "group_lower", "group_upper", "alpha", "claim_ordinal", "unit", "basis",
+              "crossfit_records", *references}
+    _native_require(type(data) is dict and set(data) == fields, "LP03_DR_POLICY_FIELDS")
+    _native_require(data["profile"] == "RECORDED_DR_EQUAL_GROUPS_V1", "LP03_DR_POLICY_PROFILE")
+    for name in ("protocol_ref", "raw_receipt_ref", "input_receipt_ref", "unit", "basis"):
+        _native_ident(data[name])
+    for name in references:
+        if data[name] is not None:
+            _native_ident(data[name])
+    for name in ("group_lower", "group_upper", "alpha"):
+        _native_require(data[name] is None or (type(data[name]) is str and bool(data[name])), "LP03_DR_POLICY_EXACT_TEXT")
+    _native_require(type(data["claim_ordinal"]) is int and 0 < data["claim_ordinal"] < 2**256, "LP03_DR_CLAIM_ORDINAL")
+
+    def identities(values):
+        _native_require(type(values) is list, "LP03_DR_ROW_IDENTITIES")
+        for value in values:
+            _native_ident(value)
+        _native_require(len(set(values)) == len(values), "LP03_DR_DUPLICATE_ROW_IDENTITY")
+
+    identities(data["row_ids"])
+    _native_require(type(data["groups"]) is list and type(data["group_weights"]) is list
+                    and type(data["crossfit_records"]) is list, "LP03_DR_POLICY_ROSTERS")
+    for group in data["groups"]:
+        _native_require(type(group) is dict and set(group) == {"ordinal", "row_ids"}, "LP03_DR_GROUP_FIELDS")
+        _native_require(type(group["ordinal"]) is int and 0 < group["ordinal"] < 2**256, "LP03_DR_GROUP_ORDINAL")
+        identities(group["row_ids"])
+    for weight in data["group_weights"]:
+        _native_require(type(weight) is str and bool(weight), "LP03_DR_POLICY_EXACT_TEXT")
+    for record in data["crossfit_records"]:
+        _native_require(type(record) is dict and set(record) == {"fold_id", "training_row_ids", "evaluation_row_ids",
+            "prediction_receipt_ref", "training_exclusion_ref"}, "LP03_DR_CROSSFIT_FIELDS")
+        _native_require(type(record["fold_id"]) is int and 0 <= record["fold_id"] < 2**256, "LP03_DR_FOLD_ID")
+        identities(record["training_row_ids"])
+        identities(record["evaluation_row_ids"])
+        for name in ("prediction_receipt_ref", "training_exclusion_ref"):
+            if record[name] is not None:
+                _native_ident(record[name])
+    _native_require(_encode_evidence_projection_json_v1(data, maximum_bytes=maximum_bytes,
+        maximum_nodes=maximum_nodes) == raw, "LP03_DR_POLICY_NONCANONICAL")
+    return _evidence_frozen_data_v1(data)
+
+
+def certify_evidence_binary64_v1(value, *, math_id, unit, basis, work):
+    """Exact-source statistical conversion only; financial values stay exact."""
+    from math import isfinite, nextafter, inf
+    import struct
+    from .context import _native_require, _native_ident
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(type(math_id) is str and math_id in ("MATH-29", "MATH-30", "MATH-31", "MATH-37"),
+                      "LP03_BINARY64_PROJECTION_ROUTE_DENIED")
+        _native_ident(unit)
+        _native_ident(basis)
+        exact = work._exact(value)
+        # Converting a rational can scale by up to the binary64 exponent range;
+        # reserve that intermediate size before asking for a candidate float.
+        work._bits(max(exact.numerator.bit_length(), exact.denominator.bit_length()) + 1076)
+        work._consumed["integer_operations"] += 1
+        try:
+            candidate = float(exact)
+        except (ValueError, OverflowError):
+            work._require(False, "LP03_NUMERICAL_BINARY64_UNREPRESENTABLE")
+        work._require(isfinite(candidate) and (exact.numerator == 0 or candidate != 0), "LP03_NUMERICAL_BINARY64_UNREPRESENTABLE")
+        previous, following = nextafter(candidate, -inf), nextafter(candidate, inf)
+        work._require(isfinite(previous) and isfinite(following), "LP03_NUMERICAL_FINITE_ROUNDING_CELL_REQUIRED")
+        actual, before, after = (work._binary64_ratio(item) for item in (candidate, previous, following))
+        two = work._fraction(2)
+        low_mid, high_mid = work._divide(work._add(before, actual), two), work._divide(work._add(actual, after), two)
+        even = struct.unpack(">Q", struct.pack(">d", candidate))[0] & 1 == 0
+        low_order, high_order = work._compare(exact, low_mid), work._compare(exact, high_mid)
+        work._require((low_order > 0 or low_order == 0 and even) and (high_order < 0 or high_order == 0 and even),
+                      "LP03_NUMERICAL_NEAREST_EVEN_CELL_UNPROVEN")
+        order = work._compare(actual, exact)
+        enclosing_lower, enclosing_upper = (actual, actual) if order == 0 else (actual, after) if order < 0 else (before, actual)
+        error = work._subtract(actual, exact)
+        return work._emit(dict(profile="EXACT_TO_BINARY64_CELL_V1", math_id=math_id, unit=unit, basis=basis,
+            exact_source=exact, analytic_value=candidate, signed_error=error, enclosing_lower=enclosing_lower, enclosing_upper=enclosing_upper))
+
+
+def _validate_evidence_probability_edge_bounds_v1(source_texts, model_input_json, *, producer_expected_raw_json,
+        consumer_expected_raw_json, lower_text, upper_text, work):
+    """Admit declared domains only; neither original formula is evaluated."""
+    from .serialization import _native_strict_json, deterministic_json
+    producer_expected = _native_strict_json(producer_expected_raw_json.encode("ascii"), max_bytes=4096, max_nodes=4)
+    market_proof = _validate_evidence_market_bounds_v1("MATH-01", source_texts, lower_text="0", upper_text="1",
+                                                    expected_texts=(producer_expected,), work=work)
+    with work:
+        work._require(lower_text == "-1" and upper_text == "1", "LP03_EDGE_DECLARED_FIXED_ENCLOSURE")
+        from math import isfinite
+        model = _native_strict_json(model_input_json.encode("utf-8"), max_bytes=65536, max_nodes=4096, binary64_numbers=True)
+        expected = _native_strict_json(consumer_expected_raw_json.encode("utf-8"), max_bytes=65536,
+                                      max_nodes=4096, binary64_numbers=True)
+        work._require(type(model) is dict and set(model) == {"calibrated_model_probability", "calibration_state"},
+                      "LP03_EDGE_DECLARED_MODEL_FIELDS")
+        probability = model["calibrated_model_probability"]
+        work._require(type(model) is dict and set(model) == {"calibrated_model_probability", "calibration_state"}
+            and model["calibration_state"] == "CALIBRATED_FOR_DECLARED_CONTEXT"
+            and type(probability) is float and isfinite(probability) and 0.0 <= probability <= 1.0
+            and type(expected) is float and isfinite(expected) and -1.0 <= expected <= 1.0
+            and deterministic_json(model) == model_input_json and deterministic_json(expected) == consumer_expected_raw_json,
+            "LP03_EDGE_DECLARED_EXPECTATION_DOMAIN")
+        work._consumed["input_values"] += 2
+        represented = work._binary64_ratio(probability, original_input=True)
+        expected_ratio = work._binary64_ratio(expected, original_input=True)
+        zero, one, minus_one = work._fraction(0), work._fraction(1), work._fraction(-1)
+        work._require(work._compare(zero,represented) <= 0 and work._compare(represented,one) <= 0
+            and work._compare(minus_one,expected_ratio) <= 0 and work._compare(expected_ratio,one) <= 0,
+            "LP03_EDGE_DECLARED_EXPECTATION_DOMAIN")
+        return work._emit(dict(profile="DECLARED_SAME_SNAPSHOT_PROBABILITY_EDGE_ENCLOSURE_V1",
+            declared_lower=minus_one, declared_upper=one, original_model_probability=represented,
+            preregistered_consumer_expectation=expected_ratio, market_bound_json=deterministic_json(market_proof),
+            producer_expected_raw_json=producer_expected_raw_json, consumer_expected_raw_json=consumer_expected_raw_json,
+            scope="DECLARED_SOFTWARE_DOMAIN_ONLY_NO_CALIBRATION_OR_EXECUTION_AUTHORITY"))
+
+
+def _admit_evidence_probability_edge_registration_v1(operation, protocol, policy, resolved):
+    from .context import _native_require
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import (_require_evidence_source_slice_roster_v1, _extract,
+        FormulaInputResolutionV1, _EvidencePendingProbabilityEdgeInputsV1)
+    from .models import _evidence_probability_edge_chain_sources_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None and type(resolved) is tuple and len(resolved) == 2
+        and type(resolved[0]) is FormulaInputResolutionV1 and type(resolved[1]) is _EvidencePendingProbabilityEdgeInputsV1
+        and resolved[0].execution_context is resolved[1].execution_context,
+        "LP03_EDGE_REGISTRATION_ORIGINAL_PENDING_ROSTER")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    rows = (*resolved[0].inputs,*resolved[1].external_inputs)
+    parts = []
+    for row in rows:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == row.packet_id
+            and part.reconstructed_canonical_events[0]["producer_receipt_id"] == row.producer_receipt_id)
+        _native_require(len(matches) == 1, "LP03_EDGE_REGISTRATION_ORIGINAL_SOURCE_JOIN")
+        parts.append(matches[0])
+    source_originals = _require_evidence_source_slice_roster_v1(preparation,tuple(parts),subject=preparation)
+    _evidence_probability_edge_chain_sources_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_SOFTWARE_MARKET_PREDICTION_AND_INDEPENDENT_CALIBRATION_CONTEXT",
+        stack_id="STACK::MATH-01::MATH-02::V3_4",edge_id="EDGE::MATH-01::MATH-02",source_slices=parts)).encode("utf-8")))
+    events = tuple(part.reconstructed_canonical_events[0] for part in parts)
+    profile, claim, comparator, bound = protocol.numeric_profile, policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(profile["contract_context"]) == deterministic_json(events[0]["values"]["contract_context"])
+        and deterministic_json(profile["model_context"]) == deterministic_json(events[2]["values"]["probability_edge_context"])
+        and members[2].accounting_definition["currency"] == profile["contract_context"]["currency"]
+        and members[2].accounting_definition["measurement_basis"] == profile["measurement_basis"]
+        and protocol.exclusive_expiry_wall_ns <= profile["contract_context"]["horizon_end_wall_ns"]
+        and claim["raw_to_analysis_rule"] == "MATH-02::RAW_IDENTITY::1.5"
+        and claim["target"] == dict(quantity="MODEL_MINUS_MARKET_PROBABILITY",unit="PROBABILITY_POINTS",
+            currency="NOT_APPLICABLE",horizon=profile["contract_context"]["horizon_ref"])
+        and set(bound) == {"rule","source_record_refs","bound_source_ref"}
+        and bound["rule"] == "ORIGINAL_MARKET_CONVERSION_AND_MODEL_UNIT_INTERVAL_DIFFERENCE"
+        and bound["bound_source_ref"] == protocol.parameter_protocol_ref
+        and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in rows)
+        and comparator["producer_expected_raw_json"] == profile["producer_expected_raw_json"],
+        "LP03_EDGE_REGISTRATION_DECLARED_ORIGINAL_CONTEXT_JOIN")
+    source_texts = tuple((row.input_name,_extract(event["values"],row.field_path))
+                        for row,event in zip(resolved[0].inputs,events[:2],strict=True))
+    policies = (protocol,deterministic_json(protocol),policy,deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation,"INITIALIZING",work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work,protocol.numerical_work_limits,retained_input_capacity=5)
+    entry = (operation,"INITIALIZED",work,work._original,work.limits,work._decimal_admissions,
+             tuple(work._decimal_inputs.items()),tuple(work.consumed.items()),None,source_originals,policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_probability_edge_bounds_v1(source_texts,resolved[1].model_input_json,
+        producer_expected_raw_json=profile["producer_expected_raw_json"],
+        consumer_expected_raw_json=comparator["expected_raw_record_json"],
+        lower_text=claim["fixed_lower"],upper_text=claim["fixed_upper"],work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3] and work.limits is entry[4],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation,"COMPLETE",work,work._original,work.limits,work._decimal_admissions,
+             tuple(work._decimal_inputs.items()),tuple(work.consumed.items()),proof,source_originals,policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation,preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_cashflow_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve one original cashflow work before exact-source enclosure checks."""
+    from .context import _native_require, _native_obj
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _extract
+    from .models import _evidence_cashflow_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    math_id = selected_inputs.math_spec_id
+    _native_require(math_id in ("MATH-06","MATH-07"), "LP03_REGISTRATION_CASHFLOW_PROFILE")
+    slices, native = [], {}
+    for resolved in selected_inputs.inputs:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_CASHFLOW_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id
+                        and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_CASHFLOW_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        native[resolved.input_name] = _extract(event["values"], resolved.field_path)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_cashflow_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_SOFTWARE_SIGNED_TOTAL_CASHFLOW_CONTEXT", math_id=math_id, source_slices=slices)).encode("utf-8")))
+    anchor = slices[0].reconstructed_canonical_events[0]
+    profile = protocol.numeric_profile
+    metadata = anchor["values"]["cashflow_context"]
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_obj(claim["target"], ("quantity","unit","currency","horizon"))
+    basis_fields = ("currency","input_snapshot_ref","event_ref","instrument_ref","horizon_ref","horizon_end_wall_ns",
+        "cashflow_basis","account_basis","account_context_ref","outcome_ids","ordered_outcome_roles")
+    _native_require(all(deterministic_json(profile[name]) == deterministic_json(metadata[name])
+            == deterministic_json(members[2].accounting_definition[name]) for name in basis_fields)
+        and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == metadata["cashflow_basis"]
+        and protocol.exclusive_expiry_wall_ns <= metadata["horizon_end_wall_ns"]
+        and claim["raw_to_analysis_rule"] == math_id + "::EXPECTED_NET_CASH_FIELD_IDENTITY::1.5"
+        and claim["target"] == dict(quantity="EXPECTED_NET_CASH",unit=profile["output_unit"],
+            currency=profile["currency"],horizon=profile["horizon_ref"])
+        and set(bound) == {"rule","source_record_refs","bound_source_ref",*basis_fields}
+        and bound["rule"] == "ORIGINAL_EXACT_SIGNED_TOTAL_CASHFLOW_SOURCE_ENCLOSURE"
+        and type(bound["source_record_refs"]) is list
+        and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+        and all(deterministic_json(bound[key]) == deterministic_json(profile[key]) for key in ("bound_source_ref",*basis_fields)),
+        "LP03_REGISTRATION_CASHFLOW_DECLARED_SOURCE_BASIS_JOIN")
+    names = (("p_win","p_void","fill_probability","entry_trade_cashflow_total",
+        "win_terminal_cashflow_total","lose_terminal_cashflow_total","void_terminal_cashflow_total",
+        "no_fill_cashflow_total","platform_fee_total","builder_fee_total","other_fee_total","expected_rebate_total",
+        "exit_slippage_reserve_total","market_impact_reserve_total","latency_adverse_selection_reserve_total",
+        "capital_time_cost_reserve_total") if math_id == "MATH-06" else
+        ("probability_simplex_tolerance","fill_probability","entry_trade_cashflow_total","no_fill_cashflow_total",
+         "platform_fee_total","builder_fee_total","other_fee_total","expected_rebate_total","exit_slippage_reserve_total",
+         "market_impact_reserve_total","latency_adverse_selection_reserve_total","capital_time_cost_reserve_total"))
+    fields = (("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","p_lose") if math_id == "MATH-06" else
+        ("expected_net_cash","expected_net_cash_if_filled","expected_terminal_cashflow","outcome_ids",
+         "normalized_probabilities","original_probability_sum","normalization_applied"))
+    from .serialization import _native_strict_json
+    expected_record = _native_strict_json(comparator["expected_raw_record_json"].encode("utf-8"),max_bytes=65536,max_nodes=4096)
+    expected = tuple((name,tuple(expected_record[name]) if name in ("outcome_ids","normalized_probabilities")
+        else expected_record[name]) for name in fields)
+    source_texts = tuple((name,native[name]) for name in names)
+    extra = ({} if math_id == "MATH-06" else dict(outcome_ids=tuple(native["outcome_ids"]),
+        probability_texts=tuple(native["outcome_probabilities"]),terminal_texts=tuple(native["outcome_terminal_cashflow_totals"])))
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits,
+        retained_input_capacity=22 if math_id == "MATH-06" else 18 + 3 * len(extra["outcome_ids"]))
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_cashflow_bounds_v1(math_id,source_texts,cashflow_basis=native["cashflow_basis"],
+        lower_text=claim["fixed_lower"],upper_text=claim["fixed_upper"],expected_fields=expected,work=work,**extra)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_market_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve one original market work object before bounded domain checks."""
+    from .context import _native_require, _native_obj
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _extract
+    from .models import _evidence_market_source_slices_v1, _LP03_MARKET_METRIC_PROFILES_V1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    math_id = selected_inputs.math_spec_id
+    _native_require(math_id in _LP03_MARKET_METRIC_PROFILES_V1, "LP03_REGISTRATION_MARKET_PROFILE")
+    slices, native = [], {}
+    for resolved in selected_inputs.inputs:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_MARKET_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id
+                        and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_MARKET_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        native[resolved.input_name] = _extract(event["values"], resolved.field_path)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_market_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_MARKET_AND_PAYOUT_CONTEXT", math_id=math_id, source_slices=slices)).encode("utf-8")))
+    anchor = slices[0].reconstructed_canonical_events[0]
+    profile = protocol.numeric_profile
+    descriptor = _LP03_MARKET_METRIC_PROFILES_V1[math_id]
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_obj(claim["target"], ("quantity", "unit", "currency", "horizon"))
+    _native_require(profile["price_currency"] == anchor["values"]["market_state"]["currency"]
+                    == members[2].accounting_definition["currency"]
+                    and profile["snapshot_ref"] == anchor["scope"]["input_snapshot_id"]
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"]
+                    and claim["raw_to_analysis_rule"] == math_id + ("::RATIO_FIELD_IDENTITY::1.5" if math_id == "MATH-05" else "::RAW_IDENTITY::1.5")
+                    and claim["target"] == dict(quantity=descriptor[4], unit=profile["output_unit"],
+                        currency=profile["price_currency"] if math_id == "MATH-04" else "NOT_APPLICABLE", horizon=profile["snapshot_ref"])
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "price_currency", "measurement_basis", "snapshot_ref"}
+                    and bound["rule"] == "ORIGINAL_MARKET_PRICE_AND_PAYOUT_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "price_currency", "measurement_basis", "snapshot_ref")),
+                    "LP03_REGISTRATION_MARKET_DECLARED_SOURCE_BASIS_JOIN")
+    names = ("contract_price", "payout_per_winning_contract") if math_id == "MATH-01" else ("best_bid", "best_ask", "payout")
+    source_texts = tuple((name, native[name]) for name in names)
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    expected = tuple(comparator["expected_raw_texts"])
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits,
+        retained_input_capacity=len(source_texts) + 2 + len(expected))
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_market_bounds_v1(math_id, source_texts, lower_text=claim["fixed_lower"],
+        upper_text=claim["fixed_upper"], expected_texts=expected, work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_kelly27_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve the original M27 work and declared enclosure before sizing."""
+    from .context import _native_require, _native_obj
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _evidence_kelly27_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-27"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("win_probability", "net_odds"),
+                    "LP03_REGISTRATION_KELLY27_PROFILE")
+    slices, native = [], {}
+    for resolved in selected_inputs.inputs:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_KELLY27_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_KELLY27_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        native[resolved.input_name] = event["values"][resolved.input_name]
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_kelly27_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_KELLY_PROBABILITY_PAYOFF_CONTEXT", source_slices=slices)).encode("utf-8")))
+    metadata = slices[0].reconstructed_canonical_events[0]["values"]["private_source_context"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_obj(claim["target"], ("quantity", "unit", "currency", "horizon"))
+    basis_fields = ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")
+    _native_require(all(profile[name] == metadata[name] == members[2].accounting_definition[name] for name in basis_fields)
+                    and profile["risk_capital_currency"] == members[2].accounting_definition["currency"]
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "wealth_fraction"
+                    and claim["raw_to_analysis_rule"] == "MATH-27::RAW_FRACTION_FIELD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="RAW_KELLY_FRACTION", unit=profile["output_unit"],
+                        currency="NOT_APPLICABLE", horizon=profile["horizon_ref"])
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", *basis_fields}
+                    and bound["rule"] == "ORIGINAL_PROBABILITY_PAYOFF_KELLY_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", *basis_fields)),
+                    "LP03_REGISTRATION_KELLY27_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=6)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_kelly_bounds_v1("MATH-27", tuple((name, native[name]) for name in ("win_probability", "net_odds")),
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"], expected_texts=tuple(comparator["expected_raw_texts"]), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _validate_evidence_log_loss_bounds_v1(epsilon, *, observation_count, lower_text, upper_text, expected_json, work):
+    """Bound binary64 losses from the original clipping policy before outcomes.
+
+    The declared upper bound encloses the logarithm plus three conservative
+    binary64 roundings (loss, sum, division). It is not fitted to observed loss.
+    """
+    from math import isfinite
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(type(epsilon) is float and isfinite(epsilon) and 0 < epsilon < .5
+            and type(observation_count) is int and 0 < observation_count <= 4096,
+            "LP03_LOG_LOSS_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_LOG_LOSS_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-09", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        work._require(len(expected["per_observation"]) == observation_count, "LP03_LOG_LOSS_EXPECTATION_ROSTER")
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        zero, one = work._fraction(0), work._fraction(1)
+        work._consumed["input_values"] += 1
+        original_epsilon = work._binary64_ratio(epsilon, original_input=True)
+        log_lower, log_upper = work._log_enclosure(work._divide(one, original_epsilon))
+        factor = work._add(one, work._fraction(1, work._shift(1, 52)))
+        subnormal = work._fraction(1, work._shift(1, 1074))
+        rounded_upper = log_upper
+        for _ in range(3):
+            rounded_upper = work._add(work._multiply(rounded_upper, factor), subnormal)
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, rounded_upper) >= 0,
+            "LP03_LOG_LOSS_DECLARED_ENCLOSURE")
+        for value in (*expected["per_observation"], expected["mean_log_loss"]):
+            work._consumed["input_values"] += 1
+            actual = work._binary64_ratio(value, original_input=True)
+            work._require(work._compare(actual, lower) >= 0 and work._compare(actual, upper) <= 0,
+                "LP03_LOG_LOSS_EXPECTATION_OUT_OF_BOUNDS")
+        return work._emit(dict(profile="DECLARED_CLIP_POLICY_LOG_LOSS_ENCLOSURE_V1", math_id="MATH-09",
+            epsilon=original_epsilon, observation_count=observation_count, log_lower=log_lower, log_upper=log_upper,
+            rounded_upper=rounded_upper, fixed_lower=lower, fixed_upper=upper,
+            rounding_enclosure="THREE_TIMES_X_MULTIPLIED_BY_ONE_PLUS_2_POW_MINUS_52_PLUS_2_POW_MINUS_1074"))
+
+
+def _validate_evidence_sharpe_bounds_v1(native, *, math_id, lower_text, upper_text, expected_json, work):
+    """Declare the projected probability's codomain; no statistical support."""
+    import struct
+    from math import isfinite
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        work._require(type(math_id) is str and math_id in ("MATH-17", "MATH-18"), "LP03_SHARPE_DECLARED_PROFILE")
+        bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+        work._require(isinstance(native, Mapping) and len(native) == len(bindings)
+            and all(type(key) is str for key in native)
+            and set(native) == {binding.input_name for binding in bindings}, "LP03_SHARPE_DECLARED_INPUT_FIELDS")
+        count_name = "independent_equivalent_observations" if math_id == "MATH-17" else "candidate_independent_equivalent_observations"
+        kurtosis_name = "sample_non_excess_kurtosis" if math_id == "MATH-17" else "candidate_sample_non_excess_kurtosis"
+        count = native[count_name]
+        scalars = tuple((binding.input_name, native[binding.input_name]) for binding in bindings if binding.input_type == "float64")
+        work._require(type(count) is int and 2 <= count <= 2**53
+            and all(type(value) is float and isfinite(value) for name, value in scalars)
+            and native[kurtosis_name] >= 1.0, "LP03_SHARPE_DECLARED_INPUT_DOMAIN")
+        sharpes = native["complete_material_trial_sharpes"] if math_id == "MATH-18" else ()
+        if math_id == "MATH-18":
+            work._require(type(sharpes) is tuple and 2 <= len(sharpes) <= 5
+                and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for value in sharpes)
+                and 1.0 < native["effective_independent_trial_count"] <= len(sharpes), "LP03_SHARPE_DECLARED_TRIAL_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_SHARPE_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1(math_id, expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        zero, one = work._fraction(0), work._fraction(1)
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, one) == 0,
+            "LP03_SHARPE_DECLARED_PROBABILITY_ENCLOSURE")
+        work._exact(count)
+        for value in (*(value for name, value in scalars), *sharpes):
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(value, original_input=True)
+        probability_name = "probabilistic_sharpe_ratio" if math_id == "MATH-17" else "deflated_sharpe_ratio"
+        # Only the psr/dsr projection is probability-bounded. Auxiliary raw
+        # coordinates remain complete and are independently recomputed by
+        # the ordered arithmetic/erfc review; this is not that verification.
+        for value in expected.values():
+            work._require(type(value) is float and isfinite(value), "LP03_SHARPE_EXPECTATION_RAW_TYPES")
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(value, original_input=True)
+        probability = work._binary64_ratio(expected[probability_name])
+        work._require(work._compare(probability, zero) >= 0 and work._compare(probability, one) <= 0,
+            "LP03_SHARPE_EXPECTATION_PROBABILITY_BOUNDS")
+        return work._emit(dict(profile="DECLARED_SHARPE_PROJECTED_PROBABILITY_CODOMAIN_V1", math_id=math_id,
+            original_integer_support=count, integer_support_field=count_name,
+            scalar_input_bits_json=deterministic_json(tuple((name, struct.pack(">d", value).hex()) for name, value in scalars)),
+            complete_material_trial_bits_json=deterministic_json(tuple(struct.pack(">d", value).hex() for value in sharpes)),
+            expected_raw_bits_json=deterministic_json(tuple((name, struct.pack(">d", value).hex()) for name, value in expected.items())),
+            fixed_lower=lower, fixed_upper=upper, bound_scope="PROJECTED_PSR_OR_DSR_PROBABILITY_ONLY",
+            result_direction="HIGHER_IS_BETTER", projection_field="psr" if math_id == "MATH-17" else "dsr",
+            arithmetic_requirement="ORDERED_BINARY64_SHARPE_ERFC_SOURCE_MODEL_WITH_ALL_RAW_COORDINATES_REVIEWED",
+            statistical_authority="NO_EMPIRICAL_INDEPENDENCE_TRIAL_SUPPORT_OR_CONFIDENCE_CERTIFICATION"))
+
+
+def _validate_evidence_spa_bounds_v1(native, *, lower_text, upper_text, expected_json, work):
+    """Fixed finite binary64 enclosure, without RNG, variance floor or statistical authority."""
+    from math import isfinite
+    import struct
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        matrix, sign, seed, replicates, block, alpha, variant = (native[name] for name in (
+            "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha", "recenter_variant"))
+        work._require(type(matrix) is tuple and 3 <= len(matrix) <= 4
+            and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+            and all(len(row) == len(matrix[0]) for row in matrix)
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+            and type(sign) is str and sign == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+            and type(seed) is int and seed.bit_length() <= 256 and type(replicates) is int
+            and 1 <= replicates <= 4 and len(matrix) * replicates <= 16
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(matrix)
+            and type(alpha) is float and isfinite(alpha) and 0.0 < alpha < 1.0
+            and type(variant) is str and variant == "HANSEN_CONSISTENT_LOG_LOG_THRESHOLD",
+            "LP03_SPA_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_SPA_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-16", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        enclosure = work._shift(1, 540)
+        work._require(work._compare(lower, work._fraction(-enclosure)) == 0
+            and work._compare(upper, work._fraction(enclosure)) == 0, "LP03_SPA_DECLARED_BINARY64_ENCLOSURE")
+        work._exact(seed)
+        work._exact(replicates)
+        for value in (*(value for row in matrix for value in row), block, alpha):
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(value, original_input=True)
+        work._require(all(type(expected[name]) is tuple for name in (
+                "candidate_means", "long_run_variances", "consistent_valid_columns", "simulated_statistics"))
+            and len(expected["candidate_means"]) == len(expected["long_run_variances"])
+                == len(expected["consistent_valid_columns"]) == len(matrix[0])
+            and len(expected["simulated_statistics"]) == replicates
+            and type(expected["reject"]) is bool and all(type(value) is bool for value in expected["consistent_valid_columns"])
+            and type(expected["recenter_variant"]) is str and expected["recenter_variant"] == variant,
+            "LP03_SPA_EXPECTATION_COMPLETE_RECORD")
+        # This is a representation enclosure, not a variance floor. A positive
+        # binary64 variance is at least 2**-1074, hence its certified square
+        # root is at least 2**-537. Means are in [-1,1], centered means [-2,2]
+        # and sqrt(n) <= 2. Even the simulated ratio is <= 2**539; 2**540 is
+        # a fixed conservative enclosure including the rounded quotient.
+        # Demeaned cells lie in [-2,2]. With at most three lag terms and
+        # nonnegative stationary weights at most one, the variance expression
+        # is bounded by 28 before rounding; 32 bounds its rounded operations.
+        coordinates = ((expected["statistic"], 0, enclosure), (expected["p_value"], 0, 1),
+            *((value, -1, 1) for value in expected["candidate_means"]),
+            *((value, 0, 32) for value in expected["long_run_variances"]),
+            *((value, 0, enclosure) for value in expected["simulated_statistics"]))
+        for value, low, high in coordinates:
+            work._require(type(value) is float and isfinite(value), "LP03_SPA_EXPECTATION_COORDINATE_TYPE")
+            work._consumed["input_values"] += 1
+            ratio = work._binary64_ratio(value, original_input=True)
+            work._require(work._compare(ratio, work._fraction(low)) >= 0
+                and work._compare(ratio, work._fraction(high)) <= 0, "LP03_SPA_EXPECTATION_MEMBER_BOUNDS")
+        work._require(expected["p_value"] > 0.0 and expected["reject"] is (expected["p_value"] <= alpha),
+            "LP03_SPA_EXPECTATION_REJECT_JOIN")
+        return work._emit(dict(profile="DECLARED_NORMALIZED_SPA_BINARY64_COORDINATE_ENCLOSURE_V1", math_id="MATH-16",
+            observations=len(matrix), candidates=len(matrix[0]), seed=seed, replicates=replicates,
+            block_bits=struct.pack(">d", block).hex(), alpha_bits=struct.pack(">d", alpha).hex(),
+            fixed_lower=lower, fixed_upper=upper, bound_scope="ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS",
+            result_direction="RECORD", arithmetic_requirement="ORDERED_BINARY64_MT19937_SPA_STUDENTIZATION_LOG_LOG_PLUS_ONE",
+            statistical_authority="NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"))
+
+
+def _validate_evidence_reality_check_bounds_v1(native, *, lower_text, upper_text, expected_json, work):
+    """Structural complete-record enclosure, without RNG or statistical authority."""
+    from math import isfinite
+    import struct
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        matrix, sign, seed, replicates, block, alpha = (native[name] for name in (
+            "loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha"))
+        work._require(type(matrix) is tuple and 2 <= len(matrix) <= 4
+            and all(type(row) is tuple and 1 <= len(row) <= 2 for row in matrix)
+            and all(len(row) == len(matrix[0]) for row in matrix)
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for row in matrix for value in row)
+            and type(sign) is str and sign == "BENCHMARK_LOSS_MINUS_CANDIDATE_LOSS_POSITIVE_IS_BETTER"
+            and type(seed) is int and seed.bit_length() <= 256 and type(replicates) is int
+            and 1 <= replicates <= 4 and len(matrix) * replicates <= 16
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(matrix)
+            and type(alpha) is float and isfinite(alpha) and 0.0 < alpha < 1.0,
+            "LP03_REALITY_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_REALITY_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-15", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        work._require(work._compare(lower, work._fraction(-4)) == 0 and work._compare(upper, work._fraction(4)) == 0,
+            "LP03_REALITY_DECLARED_NORMALIZED_ENCLOSURE")
+        work._exact(seed)
+        work._exact(replicates)
+        for value in (*(value for row in matrix for value in row), block, alpha):
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(value, original_input=True)
+        work._require(type(expected["candidate_means"]) is tuple and len(expected["candidate_means"]) == len(matrix[0])
+            and type(expected["simulated_statistics"]) is tuple and len(expected["simulated_statistics"]) == replicates
+            and type(expected["reject"]) is bool and type(expected["recenter_policy"]) is str
+            and expected["recenter_policy"] == "CENTER_EACH_COMPLETE_MATERIAL_CANDIDATE_AT_ITS_SAMPLE_MEAN",
+            "LP03_REALITY_EXPECTATION_COMPLETE_RECORD")
+        # RN is monotone and the extremal bounds are representable: FSUM/n
+        # remains in [-1,1], centered means in [-2,2], sqrt(n) in [0,2].
+        # Thus all simulated products lie in [0,4] after the original clamp;
+        # no source outcome, seed or replay is used to choose these bounds.
+        coordinates = ((expected["statistic"], 0, 2), (expected["p_value"], 0, 1),
+            *((value, -1, 1) for value in expected["candidate_means"]),
+            *((value, 0, 4) for value in expected["simulated_statistics"]))
+        for value, low, high in coordinates:
+            work._require(type(value) is float and isfinite(value), "LP03_REALITY_EXPECTATION_COORDINATE_TYPE")
+            work._consumed["input_values"] += 1
+            ratio = work._binary64_ratio(value, original_input=True)
+            work._require(work._compare(ratio, work._fraction(low)) >= 0
+                and work._compare(ratio, work._fraction(high)) <= 0, "LP03_REALITY_EXPECTATION_MEMBER_BOUNDS")
+        work._require(expected["p_value"] > 0.0 and expected["reject"] is (expected["p_value"] <= alpha),
+            "LP03_REALITY_EXPECTATION_REJECT_JOIN")
+        return work._emit(dict(profile="DECLARED_NORMALIZED_REALITY_CHECK_COORDINATE_ENCLOSURE_V1", math_id="MATH-15",
+            observations=len(matrix), candidates=len(matrix[0]), seed=seed, replicates=replicates,
+            block_bits=struct.pack(">d", block).hex(), alpha_bits=struct.pack(">d", alpha).hex(),
+            fixed_lower=lower, fixed_upper=upper, bound_scope="ALL_NUMERIC_RECORD_COORDINATES_WITH_MEMBER_DOMAINS",
+            result_direction="RECORD", arithmetic_requirement="ORDERED_BINARY64_MT19937_COMPLETE_FAMILY_CENTERING_PLUS_ONE",
+            statistical_authority="NO_EMPIRICAL_FAMILY_OR_SIGNIFICANCE_CERTIFICATION"))
+
+
+def _validate_evidence_bootstrap_bounds_v1(native, *, lower_text, upper_text, expected_json, work):
+    """Original normalized-series bounds; no replay or coverage assertion."""
+    from math import isfinite
+    import struct
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    from .serialization import deterministic_json
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        values, block, seed, replicates, confidence, method = (native[name] for name in (
+            "series", "expected_block_length", "seed", "replicates", "confidence", "interval_method"))
+        work._require(type(values) is tuple and 2 <= len(values) <= 8
+            and all(type(value) is float and isfinite(value) and -1.0 <= value <= 1.0 for value in values)
+            and type(block) is float and isfinite(block) and 1.0 <= block <= len(values)
+            and type(seed) is int and seed.bit_length() <= 256 and type(replicates) is int
+            and 1 <= replicates <= 4 and len(values) * replicates <= 16
+            and type(confidence) is float and isfinite(confidence) and 0.0 < confidence < 1.0
+            and type(method) is str and method == "PERCENTILE_TYPE7", "LP03_BOOTSTRAP_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_BOOTSTRAP_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-14", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        negative_one, one = work._fraction(-1), work._fraction(1)
+        work._require(work._compare(lower, negative_one) == 0 and work._compare(upper, one) == 0,
+            "LP03_BOOTSTRAP_DECLARED_NORMALIZED_ENCLOSURE")
+        work._exact(seed)
+        work._exact(replicates)
+        for value in (*values, block, confidence):
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(value, original_input=True)
+        work._require(type(expected["bootstrap_distribution"]) is tuple and len(expected["bootstrap_distribution"]) == replicates
+            and deterministic_json({key:expected[key] for key in ("seed", "replicates", "expected_block_length", "interval_method")})
+                == deterministic_json(dict(seed=seed, replicates=replicates, expected_block_length=block, interval_method=method)),
+            "LP03_BOOTSTRAP_EXPECTATION_ORIGINAL_METHOD_JOIN")
+        for value in (expected["sample_mean"], expected["lower"], expected["upper"], *expected["bootstrap_distribution"]):
+            work._require(type(value) is float and isfinite(value), "LP03_BOOTSTRAP_EXPECTATION_COORDINATE_TYPE")
+            work._consumed["input_values"] += 1
+            ratio = work._binary64_ratio(value, original_input=True)
+            work._require(work._compare(ratio, lower) >= 0 and work._compare(ratio, upper) <= 0,
+                "LP03_BOOTSTRAP_EXPECTATION_COORDINATE_BOUNDS")
+        work._require(expected["lower"] <= expected["upper"], "LP03_BOOTSTRAP_EXPECTATION_ENDPOINT_ORDER")
+        return work._emit(dict(profile="DECLARED_NORMALIZED_STATIONARY_BOOTSTRAP_ENCLOSURE_V1", math_id="MATH-14",
+            series_count=len(values), seed=seed, replicates=replicates,
+            block_bits=struct.pack(">d", block).hex(), confidence_bits=struct.pack(">d", confidence).hex(),
+            fixed_lower=lower, fixed_upper=upper, bound_scope="ALL_MEAN_AND_INTERVAL_COORDINATES", result_direction="RECORD",
+            arithmetic_requirement="ORDERED_BINARY64_MT19937_STATIONARY_TYPE7",
+            statistical_authority="NO_COVERAGE_OR_EMPIRICAL_CERTIFICATION"))
+
+
+def _validate_evidence_wilson_bounds_v1(native, *, lower_text, upper_text, expected_json, work):
+    """Declare original endpoint bounds, without claiming statistical coverage."""
+    from math import isfinite
+    import struct
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        successes, trials, confidence = (native[name] for name in ("successes", "trials", "confidence"))
+        work._require(type(successes) is int and type(trials) is int and 0 <= successes <= trials <= 2**53
+            and trials > 0 and type(confidence) is float and isfinite(confidence) and 0.0 < confidence < 1.0,
+            "LP03_WILSON_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_WILSON_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-11", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        zero, one = work._fraction(0), work._fraction(1)
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, one) == 0,
+            "LP03_WILSON_DECLARED_ENDPOINT_ENCLOSURE")
+        original_successes, original_trials = work._exact(successes), work._exact(trials)
+        work._consumed["input_values"] += 1
+        original_confidence = work._binary64_ratio(confidence, original_input=True)
+        # For native binary64 c, the original ordered 1-(1-c)/2 lies in
+        # (.5,1) exactly on this closed represented-confidence interval.
+        # At the lower tie, 1-c rounds to even 1-2**-52; immediately below,
+        # the final subtraction ties back to .5. At the upper boundary p
+        # is 1-2**-53; the next representable c ties p up to even 1.
+        # REVIEW separately retains all three derived rounding cells.
+        confidence_minimum = work._fraction(3, work._shift(1, 54))
+        confidence_maximum = work._subtract(one, work._fraction(1, work._shift(1, 52)))
+        work._require(work._compare(original_confidence, confidence_minimum) >= 0
+            and work._compare(original_confidence, confidence_maximum) <= 0,
+            "LP03_WILSON_ROUNDED_QUANTILE_DOMAIN")
+        endpoints = []
+        for name in ("lower", "upper"):
+            work._consumed["input_values"] += 1
+            value = work._binary64_ratio(expected[name], original_input=True)
+            work._require(work._compare(value, zero) >= 0 and work._compare(value, one) <= 0,
+                "LP03_WILSON_EXPECTATION_ENDPOINT_BOUNDS")
+            endpoints.append(value)
+        work._require(work._compare(endpoints[0], endpoints[1]) <= 0, "LP03_WILSON_EXPECTATION_ENDPOINT_ORDER")
+        return work._emit(dict(profile="DECLARED_WILSON_ENDPOINT_ENCLOSURE_V1", math_id="MATH-11",
+            successes=successes, trials=trials, confidence=original_confidence,
+            confidence_bits=struct.pack(">d", confidence).hex(), fixed_lower=lower, fixed_upper=upper,
+            rounded_domain_confidence_minimum=confidence_minimum,
+            rounded_domain_confidence_maximum=confidence_maximum,
+            bound_scope="INTERVAL_ENDPOINTS_ONLY", result_direction="INTERVAL",
+            arithmetic_requirement="ORDERED_AS241_BINARY64_WITH_CERTIFIED_LOG_AND_SQRT_CELLS",
+            statistical_authority="NO_EXACT_QUANTILE_OR_COVERAGE_CERTIFICATION"))
+
+
+def _validate_evidence_calibration_bounds_v1(native, *, lower_text, upper_text, expected_json, work):
+    """Preregister the structural [0,1] bound for the exact-only ECE profile.
+
+    Binary outcomes and probabilities in [0,1] give bin gaps in [0,1].
+    Complete disjoint membership makes the nonnegative bin weights sum to one.
+    REVIEW must separately certify that every native intermediate is exact.
+    """
+    from math import isfinite
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        ps, ys, policy, count = (native[name] for name in ("probabilities", "outcomes", "bin_policy", "bin_count"))
+        work._require(type(ps) is tuple and 0 < len(ps) <= 4096 and type(ys) is tuple and len(ys) == len(ps)
+            and all(type(p) is float and isfinite(p) and 0 <= p <= 1 for p in ps)
+            and all(type(y) is int and y in (0, 1) for y in ys)
+            and type(policy) is str and policy in ("EQUAL_WIDTH", "EQUAL_FREQUENCY_TYPE7_COLLAPSE_DUPLICATES")
+            and type(count) is int and 0 < count <= 4096 and (policy == "EQUAL_WIDTH" or count <= len(ps)),
+            "LP03_CALIBRATION_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_CALIBRATION_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1("MATH-10", expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        work._require(expected["bin_policy"] == policy and type(expected["requested_bin_count"]) is int
+            and expected["requested_bin_count"] == count, "LP03_CALIBRATION_EXPECTATION_POLICY")
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        zero, one = work._fraction(0), work._fraction(1)
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, one) == 0,
+            "LP03_CALIBRATION_DECLARED_ENCLOSURE")
+        # Source ratios, including signed input zero, use the original finite
+        # work limits. No formula or expected-result-derived bound is computed.
+        for p in ps:
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(p, original_input=True)
+        for y in ys:work._exact(y)
+        work._exact(count);work._exact(len(ps))
+        value = work._binary64_ratio(expected["expected_calibration_error"], original_input=True)
+        work._require(work._compare(value, zero) >= 0 and work._compare(value, one) <= 0,
+            "LP03_CALIBRATION_EXPECTATION_OUT_OF_BOUNDS")
+        return work._emit(dict(profile="DECLARED_EXACT_CALIBRATION_UNIT_ENCLOSURE_V1", math_id="MATH-10",
+            observation_count=len(ps), requested_bin_count=count, bin_policy=policy,
+            fixed_lower=lower, fixed_upper=upper,
+            exactness_requirement="ALL_NATIVE_INTERMEDIATES_EXACT_WITH_COMPLETE_DISJOINT_MEMBERSHIP"))
+
+
+def _validate_evidence_multiple_testing_bounds_v1(native, *, math_id, lower_text, upper_text, expected_json, work):
+    """Bound adjusted-p coordinates separately from the typed CONTROL result.
+
+    Nonnegative p-values and finite positive n/correction keep the ordered
+    products and quotients nonnegative; the original final min(1, running)
+    encloses each adjusted coordinate. This establishes no FDR validity.
+    """
+    from math import isfinite
+    from .context import _native_require
+    from .specification import decode_evidence_raw_output_v1
+    _native_require(type(work) is _EvidenceNumericalWorkV1, "LP03_ORIGINAL_NUMERICAL_WORK_REQUIRED")
+    with work:
+        ps, q = native["p_values"], native["q"]
+        work._require(math_id in ("MATH-12", "MATH-13") and type(ps) is tuple and 0 < len(ps) <= 32
+            and all(type(p) is float and isfinite(p) and 0.0 <= p <= 1.0 for p in ps)
+            and type(q) is float and isfinite(q) and 0.0 < q < 1.0, "LP03_MULTIPLE_DECLARED_INPUT_DOMAIN")
+        work._require(type(expected_json) is bytes and len(expected_json) <= work.limits["max_serialized_bytes"],
+            "LP03_MULTIPLE_EXPECTATION_BYTES")
+        expected = decode_evidence_raw_output_v1(math_id, expected_json, maximum_bytes=65536, maximum_nodes=4096)
+        work._require(len(expected["adjusted_p_values"]) == len(ps), "LP03_MULTIPLE_EXPECTATION_ROSTER")
+        rejected, rank = expected["rejected_original_indices"], expected["largest_rank"]
+        work._require(type(rank) is int and 0 <= rank <= len(ps) and type(rejected) is tuple
+            and len(rejected) == rank and all(type(index) is int and 0 <= index < len(ps) for index in rejected)
+            and rejected == tuple(sorted(set(rejected))), "LP03_MULTIPLE_EXPECTATION_REJECTION_ROSTER")
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (lower_text, upper_text))
+        zero, one, count = work._fraction(0), work._fraction(1), work._exact(len(ps))
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, one) == 0,
+            "LP03_MULTIPLE_ADJUSTED_COORDINATE_ENCLOSURE")
+        for p in (*ps, q):
+            work._consumed["input_values"] += 1
+            work._binary64_ratio(p, original_input=True)
+        for adjusted in expected["adjusted_p_values"]:
+            work._consumed["input_values"] += 1
+            value = work._binary64_ratio(adjusted, original_input=True)
+            work._require(work._compare(value, zero) >= 0 and work._compare(value, one) <= 0,
+                "LP03_MULTIPLE_EXPECTATION_COORDINATE_BOUNDS")
+        work._consumed["input_values"] += 1
+        correction = work._binary64_ratio(expected["correction"], original_input=True)
+        work._require(work._compare(correction, one) >= 0 and work._compare(correction, count) <= 0
+            and (math_id != "MATH-12" or work._compare(correction, one) == 0), "LP03_MULTIPLE_EXPECTATION_CORRECTION_BOUNDS")
+        return work._emit(dict(profile="DECLARED_MULTIPLE_ADJUSTED_COORDINATE_ENCLOSURE_V1", math_id=math_id,
+            hypothesis_count=len(ps), fixed_lower=lower, fixed_upper=upper, bound_scope="ADJUSTED_P_COORDINATES_ONLY",
+            correction_lower=one, correction_upper=count, rank_upper=len(ps), result_direction="CONTROL",
+            rejection_rule="ORIGINAL_THRESHOLD_MAXIMUM_RANK_PREFIX_NOT_ADJUSTED_P_COMPARISON",
+            arithmetic_requirement="ORDERED_NEAREST_EVEN_WITH_INDEPENDENT_HARMONIC_SUM_PROOF"))
+
+
+def _admit_evidence_multiple_testing_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M12/M13 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_multiple_testing_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    math_id = selected_inputs.math_spec_id
+    scope = operation.envelope_entry[3].assembly_scope
+    _native_require(math_id in ("MATH-12", "MATH-13")
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("p_values", "q"),
+                    "LP03_REGISTRATION_MULTIPLE_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_MULTIPLE_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_MULTIPLE_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_multiple_testing_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_DECLARED_SOFTWARE_TRIAL_LEDGER_AND_Q_POLICY", math_id=math_id,
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns, source_slices=slices)).encode("utf-8")))
+    ledger = slices[0].reconstructed_canonical_events[0]["values"]["material_trial_ledger"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["ledger_source_ref"] == selected_inputs.inputs[0].packet_id
+                    and profile["q_policy_source_ref"] == selected_inputs.inputs[1].packet_id
+                    and all(profile[name] == ledger[name] for name in ("candidate_universe_id", "evidence_window_id"))
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "adjusted_p_and_rejection_mask"
+                    and claim["raw_to_analysis_rule"] == math_id + "::INDEXED_ADJUSTED_P_MASK_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="INDEXED_ADJUSTED_P_AND_REJECTION_MASK", unit="probability",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_TRIAL_UNIVERSE")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "ledger_source_ref", "q_policy_source_ref",
+                        "candidate_universe_id", "evidence_window_id", "unit", "bound_scope", "result_direction"}
+                    and bound["rule"] == "ORIGINAL_ORDERED_ADJUSTED_P_COORDINATE_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "ledger_source_ref", "q_policy_source_ref",
+                        "candidate_universe_id", "evidence_window_id", "bound_scope", "result_direction"))
+                    and bound["unit"] == profile["output_unit"], "LP03_REGISTRATION_MULTIPLE_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_multiple_testing_bounds_v1(native, math_id=math_id,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_original_private_registration_v1(operation, protocol, policy, selected_inputs):
+    """Seal the selected original source scope and the separate conversion allowance."""
+    from math import isfinite
+    import struct
+
+    from .context import _native_obj, _native_require
+    from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1, IndependentEvidenceReviewV1
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _LP03_ORIGINAL_PRIVATE_ANALYTIC_IDS_V1, _evidence_original_private_input_profile_v1, _evidence_original_private_inputs_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import _evidence_canonical_object_v1, _native_strict_json, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None, "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    math_id = selected_inputs.math_spec_id
+    source_profile, _, analysis_profile = _evidence_original_private_input_profile_v1(math_id)
+    _native_require(protocol.analysis_profile == analysis_profile, "LP03_PRIVATE_REGISTRATION_MATH")
+    quantum = analysis_profile == "DETERMINISTIC_ORIGINAL_QUANTUM_CONSTRUCTOR_CONFORMANCE_V1"
+    analytic = math_id in _LP03_ORIGINAL_PRIVATE_ANALYTIC_IDS_V1
+    projection = EVIDENCE_PROJECTION_CONTRACTS_V1[math_id]
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    scope = operation.envelope_entry[3].assembly_scope
+    profile = protocol.numeric_profile
+    ids = selected_inputs.packet_refs if math_id == "MATH-39" else tuple(row.packet_id for row in selected_inputs.inputs)
+    _native_require(ids == protocol.coverage_eligibility["source_record_refs"]
+        and profile["math_id"] == math_id and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (),
+        "LP03_ANALYTIC_REGISTRATION_ORIGINAL_INPUT")
+    parts = []
+    for source_id in ids:
+        matched = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == source_id)
+        _native_require(len(matched) == 1, "LP03_ANALYTIC_REGISTRATION_ORIGINAL_SOURCE_ROSTER")
+        parts.append(matched[0])
+    custody = _require_evidence_source_slice_roster_v1(preparation, tuple(parts), subject=preparation)
+    data = _evidence_canonical_object_v1(deterministic_json(dict(
+        profile=source_profile, math_id=math_id,
+        decision_wall_ns=scope.snapshot_decision_wall_ns, cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns,
+        source_slices=tuple(parts))).encode("utf-8"))
+    original_parts, inputs, source_scope = _evidence_original_private_inputs_v1(data, math_id=math_id)
+    _native_require(deterministic_json(inputs) == deterministic_json(selected_inputs.authoritative_values)
+        and (profile["output_basis"], profile["output_unit"], profile["ordered_coordinate_ids"],
+            profile["quantity_scope_ref"], profile["horizon_ref"])
+        == tuple(source_scope[name] for name in ("basis", "unit", "ordered_coordinate_ids", "quantity_scope_ref", "horizon_ref"))
+        and profile["output_basis"] == members[2].accounting_definition["measurement_basis"],
+        "LP03_ANALYTIC_REGISTRATION_ORIGINAL_QUANTITY_SCOPE")
+    claim, comparator = policy["claim"], policy["comparator_plan"]
+    bounds = _native_obj(policy["bound_proof"], ("rule", "source_record_refs", "output_basis"))
+    currency = source_scope["unit"] if math_id in ("MATH-32", "MATH-33", "MATH-35", "MATH-40") else "NOT_APPLICABLE"
+    analysis_rule = ("::ORIGINAL_QUANTUM_CONSTRUCTOR::1.5" if quantum else "::CERTIFIED_EXACT_TO_BINARY64_CELL::1.5" if analytic
+        else "::ORIGINAL_EXECUTION_VALUE_PROJECTION::1.5")
+    if quantum:
+        from .models import _evidence_quantum_original_lock_pins_v1, _evidence_quantum_source_epochs_v1
+
+        basis = source_scope["original_economic_basis"]
+        _native_require(deterministic_json(profile["economic_basis"]) == deterministic_json(basis),
+            "LP03_QUANTUM_REGISTRATION_ORIGINAL_ECONOMIC_BASIS")
+        quantum_lock = dict(scenario_set_ref=members[2].scenario_set_id,
+            source_epoch_pairs=_evidence_quantum_source_epochs_v1(members[1]))
+        _evidence_quantum_original_lock_pins_v1(quantum_lock, basis=basis)
+    _native_require(bounds == dict(rule="ORIGINAL_FINITE_EXACT_DECIMAL_INTERVAL", output_basis=source_scope["basis"],
+        source_record_refs=list(ids))
+        and claim["target"] == dict(quantity=source_scope["basis"], unit=source_scope["unit"],
+            currency=currency, horizon=source_scope["horizon_ref"])
+        and claim["raw_to_analysis_rule"] == math_id+analysis_rule,
+        "LP03_ANALYTIC_REGISTRATION_ORIGINAL_BOUND_AND_TARGET")
+    expected = comparator["expected_raw_record_json"].encode("utf-8")
+    result = decode_evidence_raw_output_v1(math_id, expected, maximum_bytes=65536, maximum_nodes=4096)
+    expected_bits = comparator["expected_analytic_binary64_bits"] if analytic else None
+    if analytic:
+        projected = struct.unpack(">d", bytes.fromhex(expected_bits))[0]
+        _native_require(isfinite(projected), "LP03_ANALYTIC_REGISTRATION_EXPECTED_BINARY64")
+    _native_require(deterministic_json(result).encode("utf-8") == expected,
+        "LP03_ANALYTIC_REGISTRATION_ORIGINAL_EXPECTATION")
+    raw = _native_strict_json(expected, max_bytes=65536, max_nodes=4096,
+        binary64_numbers=math_id in ("MATH-41", "MATH-42", "MATH-43", "MATH-44"))
+    quantum_field = {"MATH-50": "trace_expected_locked_cost", "MATH-51": "trace_expectation",
+        "MATH-52": "delta_quantum_vs_no_trade"}.get(math_id)
+    original_text = (raw[quantum_field] if quantum else raw["lcb_net"] if math_id == "MATH-45"
+        else raw if projection.original_field == "$" else raw[projection.original_field])
+    original_policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=7 if math_id == "MATH-36" else 3)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions, tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()), None, custody, original_policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    with work:
+        lower, upper = (work._exact(work.parse_decimal_v1(claim[name])) for name in ("fixed_lower", "fixed_upper"))
+        if math_id == "MATH-36":
+            payout = work._exact_private_execution_decimal_v1(work._parse_private_execution_decimal_v1(inputs["payout"]))
+            work._require(lower == 0 and upper == payout
+                and raw["book_sequence"] == source_scope["exact_original_authority"]["agreed_original_sequence"],
+                "LP03_BINARY_BOOK_REGISTERED_PAYOUT_AND_SEQUENCE")
+            values = tuple(raw[name] for name in ("best_yes_bid", "best_no_bid", "derived_yes_ask", "derived_no_ask"))
+        elif math_id == "MATH-44":
+            _native_require(len(raw) == len(profile["ordered_coordinate_ids"]) and
+                all(len(row) == len(raw) for row in raw), "LP03_EXECUTION_REGISTERED_MATRIX_SCOPE")
+            values = tuple(value for row in raw for value in row)
+        else:
+            values = (original_text,)
+        for value in values:
+            if math_id in ("MATH-41", "MATH-42", "MATH-43", "MATH-44"):
+                expected_exact = work._binary64_ratio(value, original_input=True)
+            else:
+                expected_exact = work._exact_private_execution_decimal_v1(work._parse_private_execution_decimal_v1(value))
+            work._require(work._compare(lower, upper) < 0 and work._compare(lower, expected_exact) <= 0
+                and work._compare(expected_exact, upper) <= 0, "LP03_ANALYTIC_REGISTRATION_DECLARED_EXACT_BOUND")
+        source_text = deterministic_json(data)
+        work._require(len(source_text.encode("utf-8")) <= min(65536, work.limits["max_serialized_bytes"]),
+            "LP03_ANALYTIC_REGISTRATION_SOURCE_WIRE_BOUND")
+        proof_data = dict(
+            profile="ORIGINAL_QUANTUM_CONSTRUCTOR_ADMISSION_V1" if quantum else "ORIGINAL_PRIVATE_ANALYTIC_ADMISSION_V1" if analytic
+                else "ORIGINAL_PRIVATE_EXECUTION_ADMISSION_V1",
+            math_id=math_id, original_source_refs=ids,
+            ordered_coordinate_ids=source_scope["ordered_coordinate_ids"], quantity_scope_ref=source_scope["quantity_scope_ref"],
+            horizon_ref=source_scope["horizon_ref"], unit=source_scope["unit"], basis=source_scope["basis"],
+            original_input_weights_ref_or_absence=ids[0] if math_id == "MATH-29" else "NO_INPUT_WEIGHTS_FOR_SELECTED_FORMULA",
+            claim_bounds=(claim["fixed_lower"], claim["fixed_upper"]), declared_raw_projection_field=projection.original_field,
+            metric=projection.output_name, expected_raw_record_json=expected.decode("utf-8"))
+        if analytic:
+            proof_data.update(conversion_work_limits=dict(profile["conversion_work_limits"]), expected_analytic_binary64_bits=expected_bits)
+        elif quantum:
+            from .models import _evidence_original_execution_source_material_digest_v1
+
+            proof_data.update(original_quantum_source_material_sha256=
+                _evidence_original_execution_source_material_digest_v1(data, original_parts),
+                original_economic_basis=dict(source_scope["original_economic_basis"].as_mapping()),
+                trace_origin=source_scope["origin_profile"],
+                original_lock_id=source_scope["original_lock_id"], original_quantum_lock=quantum_lock,
+                original_review_bound_field=quantum_field)
+        elif math_id in ("MATH-36", "MATH-39", "MATH-41", "MATH-42", "MATH-43", "MATH-44"):
+            from .models import _evidence_original_execution_source_material_digest_v1
+
+            material_field = ("original_queue_source_material_sha256" if math_id == "MATH-39"
+                else "original_binary_book_source_material_sha256" if math_id == "MATH-36"
+                else "original_binary64_source_material_sha256")
+            proof_data[material_field] = _evidence_original_execution_source_material_digest_v1(data, original_parts)
+        proof = IndependentEvidenceReviewV1._charge_brier_review_artifact_v1(proof_data, work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    completed = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions, tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()), proof, custody, original_policies)
+    operation.numerical_original = preparation.registration_numerical_original = completed
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return completed
+
+
+def _admit_evidence_recorded_ope_point_registration_v1(operation, protocol, policy, selected_inputs):
+    """Seal exact recorded OPE uncertainty-free inputs and ordered source identities."""
+    from .context import _native_obj, _native_require
+    from .evidence import IndependentEvidenceReviewV1
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _evidence_recorded_ope_source_data_v1, _LP03_OPE_POINT_PROJECTION_PROFILES_V1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None, "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    math_id = selected_inputs.math_spec_id
+    _native_require(math_id in _LP03_OPE_POINT_PROJECTION_PROFILES_V1, "LP03_OPE_POINT_REGISTRATION_MATH")
+    field, metric, basis, _ = _LP03_OPE_POINT_PROJECTION_PROFILES_V1[math_id]
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    scope = operation.envelope_entry[3].assembly_scope
+    profile = protocol.numeric_profile
+    source_ids = tuple(row.packet_id for row in selected_inputs.inputs)
+    _native_require(source_ids == protocol.coverage_eligibility["source_record_refs"]
+        and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (),
+        "LP03_OPE_POINT_REGISTRATION_ORIGINAL_INPUT")
+    parts = []
+    for source_id in source_ids:
+        originals = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == source_id)
+        _native_require(len(originals) == 1, "LP03_OPE_POINT_REGISTRATION_ORIGINAL_SOURCE_ROSTER")
+        parts.append(originals[0])
+    custody = _require_evidence_source_slice_roster_v1(preparation, tuple(parts), subject=preparation)
+    source = dict(profile="ORIGINAL_SOFTWARE_OPE_POINT_ESTIMATION", selected_math_id=math_id,
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns, consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns,
+        source_slices=tuple(parts))
+    data = _evidence_canonical_object_v1(deterministic_json(source).encode("utf-8"))
+    _, inputs, row_ids, fit_roster = _evidence_recorded_ope_source_data_v1(data, math_id=math_id)
+    _native_require(deterministic_json(inputs) == deterministic_json(selected_inputs.authoritative_values)
+        and row_ids == profile["ordered_original_row_ids"] and basis == profile["output_basis"]
+        == members[2].accounting_definition["measurement_basis"],
+        "LP03_OPE_POINT_REGISTRATION_ORIGINAL_INPUT_JOIN")
+    claim, comparator = policy["claim"], policy["comparator_plan"]
+    expected = comparator["expected_raw_record_json"].encode("utf-8")
+    result = decode_evidence_raw_output_v1(math_id, expected, maximum_bytes=65536, maximum_nodes=4096)
+    _native_require(deterministic_json(result).encode("utf-8") == expected
+        and claim["target"] == dict(quantity=basis, unit=profile["output_unit"],
+            currency="NOT_APPLICABLE", horizon=profile["evaluation_horizon_ref"])
+        and claim["raw_to_analysis_rule"] == math_id + "::ORIGINAL_POINT_ESTIMATOR_PROJECTION::1.5",
+        "LP03_OPE_POINT_REGISTRATION_EXPECTATION_AND_TARGET")
+    bounds = _native_obj(policy["bound_proof"], ("rule", "source_record_refs", "output_basis"))
+    _native_require(bounds == dict(rule="ORIGINAL_FINITE_POINT_VALUE_IDENTITY", output_basis=basis, source_record_refs=list(source_ids)),
+        "LP03_OPE_POINT_REGISTRATION_BOUND_SOURCE")
+    original_policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions, tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()), None, custody, original_policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    with work:
+        lower, upper = (work._exact(work.parse_decimal_v1(claim[name])) for name in ("fixed_lower", "fixed_upper"))
+        work._require(work._compare(lower, upper) < 0, "LP03_OPE_POINT_REGISTRATION_DECLARED_BOUND")
+        claim_fields = (field,) if field != "$" else ("switch_ope_estimate",)
+        for name in claim_fields:
+            value = work._binary64_ratio(result[name], original_input=True)
+            work._require(work._compare(lower, value) <= 0 and work._compare(value, upper) <= 0,
+                "LP03_OPE_POINT_REGISTRATION_ORIGINAL_EXPECTATION_OUTSIDE_CLAIM")
+        proof = IndependentEvidenceReviewV1._charge_brier_review_artifact_v1(dict(
+            profile="ORIGINAL_RECORDED_OPE_POINT_ADMISSION_V1", math_id=math_id, original_source_refs=source_ids,
+            ordered_original_row_ids=row_ids, original_fit_receipt_refs=tuple(
+                fit["nuisance_prediction_receipt_ref"] for fit in fit_roster),
+            original_output_basis=basis, claim_bounds=(claim["fixed_lower"], claim["fixed_upper"]),
+            declared_raw_projection_field=field, metric=metric, effect_authority_ref="ABSENT_SOFTWARE_CONFORMANCE_ONLY"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    completed = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions, tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()), proof, custody, original_policies)
+    operation.numerical_original = preparation.registration_numerical_original = completed
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return completed
+
+
+def _admit_evidence_recorded_dr_registration_v1(operation, protocol, policy, selected_inputs):
+    """Seal original logged rows, uncertainty policy and real assumption refs."""
+    from .context import _native_require
+    from .evidence import IndependentEvidenceReviewV1
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _evidence_dr_original_source_data_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None, "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    scope = operation.envelope_entry[3].assembly_scope
+    profile = protocol.numeric_profile
+    wanted = (profile["logged_row_source_ref"],profile["uncertainty_source_ref"],*profile["assumption_source_refs"])
+    _native_require(selected_inputs.math_spec_id == "MATH-22"
+        and tuple(row.packet_id for row in selected_inputs.inputs) == wanted[:1]
+        and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (),
+        "LP03_DR_REGISTRATION_ORIGINAL_INPUT")
+    parts = []
+    for source_ref in wanted:
+        originals = tuple(part for part in members[1] if len(part.original_record_refs)==1
+            and part.original_record_refs[0].record_id == source_ref)
+        _native_require(len(originals)==1, "LP03_DR_REGISTRATION_ORIGINAL_SOURCE_ROSTER")
+        parts.append(originals[0])
+    custody = _require_evidence_source_slice_roster_v1(preparation,tuple(parts),subject=preparation)
+    source = dict(profile="ORIGINAL_SOFTWARE_MATH22_RECORDED_DR_UNCERTAINTY",
+        decision_wall_ns=scope.snapshot_decision_wall_ns,cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns,
+        estimator_original_raw_ref="ORIGINAL_ATTEMPT_RAW_RESULT_REQUIRED",
+        original_logged_input_slice=parts[0],original_policy_slice=parts[1],original_assumption_slices=parts[2:])
+    data = _evidence_canonical_object_v1(deterministic_json(source).encode("utf-8"))
+    _, native, uncertainty, _, original_fit_after_first_label = _evidence_dr_original_source_data_v1(data,
+        original_raw_ref="ORIGINAL_ATTEMPT_RAW_RESULT_REQUIRED")
+    claim, comparator = policy["claim"], policy["comparator_plan"]
+    outcome = comparator["expected_uncertainty_disposition"]
+    _native_require(policy["bound_proof"] == dict(rule="ORIGINAL_CONDITIONAL_GROUP_BOUNDS",
+        source_record_refs=list(wanted), bound_and_error_allocation_ref=uncertainty["group_bound_proof_ref"]),
+        "LP03_DR_REGISTRATION_ORIGINAL_BOUND_PROOF")
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+        and parts[0].reconstructed_canonical_events[0]["producer_receipt_id"] == profile["logged_row_receipt_ref"]
+        and parts[1].reconstructed_canonical_events[0]["producer_receipt_id"] == profile["uncertainty_policy_receipt_ref"]
+        and uncertainty["protocol_ref"] == protocol.parameter_protocol_ref
+        and uncertainty["basis"] == profile["output_basis"]
+        and uncertainty["unit"] == profile["output_unit"]
+        and profile["target"] == members[2].accounting_definition["measurement_basis"]
+        and outcome in ("ORIGINAL_CONDITIONAL_RECORDED_SCORE_INTERVAL","UNCERTAINTY_UNAVAILABLE")
+        and claim["target"] == dict(quantity=profile["target"],unit=profile["output_unit"],
+            currency="NOT_APPLICABLE",horizon=profile["evaluation_horizon_ref"])
+        and claim["raw_to_analysis_rule"] == "MATH-22::ORIGINAL_ESTIMATOR_AND_RECORDED_SCORE_UNCERTAINTY::1.5",
+        "LP03_DR_REGISTRATION_ORIGINAL_POLICY_JOIN")
+    expected_wire = comparator["expected_raw_record_json"].encode("utf-8","strict")
+    expected = decode_evidence_raw_output_v1("MATH-22",expected_wire,maximum_bytes=65536,maximum_nodes=4096)
+    _native_require(deterministic_json(expected).encode("utf-8") == expected_wire
+        and len(expected["row_values"]) == len(native["logged_rows"]),
+        "LP03_DR_REGISTRATION_ORIGINAL_EXPECTATION")
+    original_policies = (protocol,deterministic_json(protocol),policy,deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation,"INITIALIZING",work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work,protocol.numerical_work_limits,retained_input_capacity=3)
+    entry = (operation,"INITIALIZED",work,work._original,work.limits,work._decimal_admissions,tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()),None,custody,original_policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    with work:
+        lower,upper=tuple(work._exact(work.parse_decimal_v1(claim[name])) for name in ("fixed_lower","fixed_upper"))
+        work._require(work._compare(lower,upper)<0,"LP03_DR_REGISTRATION_DECLARED_BOUND")
+        original_group_bounds = uncertainty["group_lower"],uncertainty["group_upper"]
+        if outcome == "ORIGINAL_CONDITIONAL_RECORDED_SCORE_INTERVAL":
+            work._require(not original_fit_after_first_label and len(profile["assumption_source_refs"]) == 6
+                and original_group_bounds == (claim["fixed_lower"],claim["fixed_upper"])
+                and uncertainty["group_bound_proof_ref"]==profile["bound_and_error_allocation_source_ref"]
+                and uncertainty["alpha"] is not None, "LP03_DR_REGISTRATION_CONDITIONAL_ASSUMPTION_AND_BOUNDS")
+            alpha=work._exact(work.parse_decimal_v1(uncertainty["alpha"]))
+            work._require(work._compare(work._fraction(0),alpha)<0 and work._compare(alpha,work._fraction(1))<0,
+                "LP03_DR_REGISTRATION_DECLARED_ALPHA")
+        proof = IndependentEvidenceReviewV1._charge_brier_review_artifact_v1(dict(
+            profile="ORIGINAL_RECORDED_DR_UNCERTAINTY_ADMISSION_V1", declared_disposition=outcome,
+            original_source_refs=wanted, target=profile["target"], ordered_original_row_ids=uncertainty["row_ids"],
+            claim_bounds=(claim["fixed_lower"],claim["fixed_upper"]), group_bounds=original_group_bounds,
+            error_allocation=uncertainty["alpha"], bound_and_error_allocation_ref=profile["bound_and_error_allocation_source_ref"]),
+            work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    completed=(operation,"COMPLETE",work,work._original,work.limits,work._decimal_admissions,tuple(work._decimal_inputs.items()),
+        tuple(work.consumed.items()),proof,custody,original_policies)
+    operation.numerical_original=preparation.registration_numerical_original=completed
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation,preparation.input_assembly_outcome)
+    return completed
+
+
+def _admit_evidence_heldout_registration_v1(operation, protocol, policy, selected_inputs):
+    """Bind the preregistered scorer and exact original source roster for every split."""
+    from .context import _native_require
+    from .evidence import IndependentEvidenceReviewV1
+    from .evidence_execution import _prepare_evidence_heldout_scorer_inputs_v1
+    from .implementation_registry import resolve_evidence_invocation_v1
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _evidence_heldout_source_data_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import _evidence_canonical_object_v1, deterministic_json
+    from .specification import decode_evidence_raw_output_v1
+
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+        "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    profile = protocol.numeric_profile
+    math_id, scorer_id = profile["topology_math_id"], profile["scorer_math_id"]
+    scope = operation.envelope_entry[3].assembly_scope
+    _native_require(selected_inputs.math_spec_id == math_id
+        and tuple(row.packet_id for row in selected_inputs.inputs) == profile["topology_source_refs"]
+        and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (),
+        "LP03_REGISTRATION_HELD_OUT_TOPOLOGY_ORIGINAL")
+    wanted = (*profile["topology_source_refs"], profile["prediction_trace_source_ref"], profile["outcome_label_source_ref"])
+    parts = []
+    for ref in wanted:
+        match = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == ref)
+        _native_require(len(match) == 1, "LP03_MISSING_PREDICTION_PRODUCER"
+            if ref == profile["prediction_trace_source_ref"] else "LP03_REGISTRATION_HELD_OUT_SOURCE_ROSTER")
+        parts.append(match[0])
+    originals = _require_evidence_source_slice_roster_v1(preparation, tuple(parts), subject=preparation)
+    for part, resolved in zip(parts[:-2], selected_inputs.inputs, strict=True):
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["owner_id"] == resolved.owner_id
+            and event["producer_receipt_id"] == resolved.producer_receipt_id
+            and event["context_id"] == selected_inputs.context_id,
+            "LP03_REGISTRATION_HELD_OUT_TOPOLOGY_RECEIPT")
+    receipts = tuple(part.reconstructed_canonical_events[0]["producer_receipt_id"] for part in parts[-2:])
+    _native_require(receipts == (profile["prediction_trace_receipt_ref"], profile["outcome_label_receipt_ref"]),
+        "LP03_REGISTRATION_HELD_OUT_AUXILIARY_RECEIPT")
+    source = dict(association_profile="ORIGINAL_SOFTWARE_HELD_OUT_TOPOLOGY_TRACE_AND_LABELS",
+        topology_math_id=math_id, scorer_math_id=scorer_id,
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns,
+        topology_source_slices=parts[:-2], prediction_trace_slice=parts[-2], outcome_label_slice=parts[-1],
+        clip_epsilon_json_or_absence=profile["clip_epsilon_json_or_absence"])
+    canonical = _evidence_canonical_object_v1(deterministic_json(source).encode("utf-8"))
+    _, values, scored_trace = _evidence_heldout_source_data_v1(canonical)
+    _native_require(deterministic_json(selected_inputs.authoritative_values) == deterministic_json(values)
+        and scored_trace["prediction_model_id"] == profile["prediction_model_id"]
+        and scored_trace["prediction_model_version"] == profile["prediction_model_version"],
+        "LP03_REGISTRATION_HELD_OUT_MODEL_AND_INPUT_JOIN")
+    scorer = resolve_evidence_invocation_v1(scorer_id, implementation_pin=profile["scorer_implementation_id"],
+        specification_pin=profile["scorer_specification_id"], resource_policy_ref=protocol.parameter_protocol_ref,
+        origin=scope.origin)
+    claim = policy["claim"]
+    bound = policy["bound_proof"]
+    upper = "4" if scorer_id == "MATH-08" else "1074"
+    claim_unit = "SQUARED_PROBABILITY_ERROR" if scorer_id == "MATH-08" else "nats/sample"
+    _native_require(claim["target"] == dict(quantity="COMPLETE_HELD_OUT_SCORE_DISTRIBUTION", unit=claim_unit,
+            currency="NOT_APPLICABLE", horizon=profile["evaluation_horizon_ref"])
+        and claim["raw_to_analysis_rule"] == math_id + "::ORIGINAL_COMPLETE_HELD_OUT_SCORES::1.5"
+        and (claim["fixed_lower"], claim["fixed_upper"]) == ("0", upper)
+        and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"]
+        and bound == dict(rule="ORIGINAL_FINITE_SCORER_DOMAIN", scorer_math_id=scorer_id, source_record_refs=list(wanted),
+            bound_source_ref=protocol.parameter_protocol_ref),
+        "LP03_REGISTRATION_HELD_OUT_DECLARED_BOUND")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    comparator = policy["comparator_plan"]
+    topology_wire = comparator["expected_raw_record_json"].encode("utf-8")
+    input_wire = deterministic_json(values).encode("utf-8")
+    with work:
+        topology_proof = IndependentEvidenceReviewV1._bounded_review_fold_topology_v1(math_id, input_wire, topology_wire, work=work)
+        prepared = _prepare_evidence_heldout_scorer_inputs_v1(topology_math_id=math_id, topology_raw_json=topology_wire,
+            scored_trace=scored_trace, scorer_contract=scorer, maximum_input_bytes=65536, maximum_nodes=4096)
+        expected_folds = comparator["expected_fold_raw_json"]
+        work._require(type(expected_folds) is list and len(expected_folds) == len(prepared),
+            "LP03_REGISTRATION_HELD_OUT_EXPECTED_SCORE_ROSTER")
+        maximum_score = int(upper)
+        for (_, _, sample_refs, _), text in zip(prepared, expected_folds, strict=True):
+            work._require(type(text) is str and 0 < len(text) <= 4096, "LP03_REGISTRATION_HELD_OUT_EXPECTED_SCORE_WIRE")
+            decoded = decode_evidence_raw_output_v1(scorer_id, text.encode("utf-8"), maximum_bytes=4096, maximum_nodes=32)
+            mean_member = "mean_brier_score" if scorer_id == "MATH-08" else "mean_log_loss"
+            scores = (decoded[mean_member], *decoded["per_observation"])
+            work._require(deterministic_json(decoded) == text and len(scores) == 1 + len(sample_refs)
+                and all(0 <= score <= maximum_score for score in scores), "LP03_REGISTRATION_HELD_OUT_EXPECTED_SCORE_BOUND")
+        proof = IndependentEvidenceReviewV1._charge_brier_review_artifact_v1(dict(
+            profile="ORIGINAL_HELD_OUT_SCORING_ADMISSION_V1", topology=topology_proof,
+            topology_math_id=math_id, scorer_math_id=scorer_id, declared_fold_count=len(prepared),
+            ordered_source_refs=wanted, prediction_trace_receipt_ref=receipts[0], outcome_label_receipt_ref=receipts[1],
+            model_id=profile["prediction_model_id"], model_version=profile["prediction_model_version"],
+            fixed_lower="0", fixed_upper=upper), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3] and work.limits is entry[4],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    completed = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = completed
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return completed
+
+
+def _admit_evidence_cscv_registration_v1(operation, protocol, policy, selected_inputs):
+    """Join the original declared CSCV matrix, independent group policy and bound."""
+    import struct
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .context import _native_require
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1
+    from .models import _evidence_cscv_source_slices_v1, _evidence_cscv_result_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    from .specification import decode_evidence_raw_output_v1
+
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None, "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    scope = operation.envelope_entry[3].assembly_scope
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-19"]
+    _native_require(selected_inputs.math_spec_id == "MATH-19" and tuple(row.input_name for row in selected_inputs.inputs)
+        == tuple(binding.input_name for binding in bindings), "LP03_REGISTRATION_CSCV_BINDING_ORDER")
+    selected_sources = []
+    for row, binding in zip(selected_inputs.inputs, bindings, strict=True):
+        selected = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == row.packet_id)
+        _native_require(len(selected) == 1, "LP03_REGISTRATION_CSCV_SOURCE_ROSTER")
+        part = selected[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(row.binding_id == binding.binding_id and row.field_path == binding.exact_field_path
+            and row.owner_id == event["owner_id"] and row.producer_receipt_id == event["producer_receipt_id"]
+            and event["context_id"] == selected_inputs.context_id, "LP03_REGISTRATION_CSCV_SOURCE_ASSOCIATION")
+        selected_sources.append(part)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(selected_sources), subject=preparation)
+    source_payload = _evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_DECLARED_SOFTWARE_CSCV_MATRIX_AND_GROUP_POLICY",
+        row_identity_profile="COMPLETE_DECLARED_CHRONOLOGICAL_MATRIX_AND_STRATEGY_ROSTER",
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns, consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns,
+        source_slices=selected_sources)).encode("utf-8"))
+    decoded = _evidence_cscv_source_slices_v1(source_payload)
+    native = {binding.input_name: _evidence_decode_source_values_v1(part.reconstructed_canonical_events[0])[binding.exact_field_path]
+        for part, binding in zip(decoded, bindings, strict=True)}
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values),
+        "LP03_REGISTRATION_CSCV_SOURCE_VALUES")
+    ledger = decoded[0].reconstructed_canonical_events[0]["values"]["material_trial_ledger"]
+    profile, claim, bound = protocol.numeric_profile, policy["claim"], policy["bound_proof"]
+    refs = tuple(row.packet_id for row in selected_inputs.inputs)
+    declared = ("candidate_universe_id", "evidence_window_id", "return_basis_id", "ordered_strategy_ids",
+        "ordered_strategy_dispositions", "ordered_time_ids")
+    _native_require(profile["original_source_refs"] == refs
+        and profile["S"] == native["S"] and all(profile[key] == ledger[key] for key in declared)
+        and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == ()
+        and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"]
+            == "probability_of_backtest_overfitting"
+        and claim["candidate_ref"] == policy["semantic_variant_ref"] == ledger["candidate_universe_id"]
+        and claim["raw_to_analysis_rule"] == "MATH-19::COMPLETE_RECORD_IDENTITY::1.5"
+        and claim["target"] == dict(quantity="COMPLETE_DECLARED_CSCV_SPLIT_AND_LOGIT_RECORD",
+            unit="MEMBER_SPECIFIC_CSCV_COORDINATES", currency="NOT_APPLICABLE", horizon="DECLARED_CHRONOLOGICAL_STRATEGY_MATRIX")
+        and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "S", "bound_scope", "result_direction",
+            *declared}
+        and bound["rule"] == "ORIGINAL_CSCV_PROJECTED_PROBABILITY_CODOMAIN"
+        and type(bound["source_record_refs"]) is list and tuple(bound["source_record_refs"]) == refs
+        and all(deterministic_json(bound[key]) == deterministic_json(profile[key]) for key in
+            ("bound_source_ref", "S", "bound_scope", "result_direction", *declared)),
+        "LP03_REGISTRATION_CSCV_DECLARED_PROFILE_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    with work:
+        expected_wire = policy["comparator_plan"]["expected_raw_record_json"].encode("utf-8")
+        work._require(len(expected_wire) <= work.limits["max_serialized_bytes"], "LP03_CSCV_EXPECTATION_BYTES")
+        expected = _evidence_cscv_result_v1(decode_evidence_raw_output_v1("MATH-19", expected_wire,
+            maximum_bytes=65536, maximum_nodes=4096))
+        lower, upper = (work._exact(work.parse_decimal_v1(text)) for text in (claim["fixed_lower"], claim["fixed_upper"]))
+        zero, one = (work._fraction(value) for value in (0, 1))
+        work._require(work._compare(lower, zero) == 0 and work._compare(upper, one) == 0
+            and expected["S"] == native["S"], "LP03_CSCV_DECLARED_PROBABILITY_ENCLOSURE")
+        probability = expected["probability_of_backtest_overfitting"]
+        work._consumed["input_values"] += 1
+        probability_ratio = work._binary64_ratio(probability, original_input=True)
+        work._require(work._compare(probability_ratio, lower) >= 0 and work._compare(probability_ratio, upper) <= 0,
+            "LP03_CSCV_EXPECTATION_PROBABILITY_DOMAIN")
+        proof = work._emit(dict(profile="DECLARED_CSCV_PROBABILITY_CODOMAIN_V1", math_id="MATH-19", groups=native["S"],
+            observation_count=len(native["performance_matrix"]), strategy_count=len(native["strategy_ids"]),
+            projected_probability_bits=struct.pack(">d", probability).hex(), fixed_lower=lower, fixed_upper=upper,
+            bound_scope="PROBABILITY_OF_BACKTEST_OVERFITTING_COORDINATE_ONLY", result_direction="LOWER_IS_BETTER",
+            arithmetic_requirement="ORDERED_BINARY64_COMPLETE_CSCV_SPLIT_AND_LOG_MODEL",
+            statistical_authority="NO_EMPIRICAL_OVERFITTING_OR_GENERALIZATION_CERTIFICATION"))
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry and work._original is entry[3] and work.limits is entry[4],
+        "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    completed = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = completed
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return completed
+
+
+
+
+def _admit_evidence_sharpe_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original Sharpe source identity and projected bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_sharpe_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+        "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    math_id = selected_inputs.math_spec_id
+    scope = operation.envelope_entry[3].assembly_scope
+    _native_require(math_id in ("MATH-17", "MATH-18"), "LP03_REGISTRATION_SHARPE_PROFILE")
+    bindings = FORMULA_INPUT_AUTHORITY_BY_MATH_ID[math_id]
+    _native_require(tuple(row.input_name for row in selected_inputs.inputs) == tuple(binding.input_name for binding in bindings),
+        "LP03_REGISTRATION_SHARPE_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, bindings, strict=True):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_SHARPE_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(resolved.binding_id == binding.binding_id and resolved.field_path == binding.exact_field_path
+            and event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id
+            and event["context_id"] == selected_inputs.context_id, "LP03_REGISTRATION_SHARPE_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_sharpe_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_DECLARED_SOFTWARE_SHARPE_LEDGER_AND_MOMENTS", math_id=math_id,
+        row_identity_profile="COMPLETE_DECLARED_ATTEMPTED_AND_PRUNED_ROSTER_NO_STATISTICAL_SUPPORT_CLAIM",
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns, source_slices=slices)).encode("utf-8")))
+    ledger = slices[0].reconstructed_canonical_events[0]["values"]["material_trial_ledger"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    declared_keys = ("candidate_universe_id", "evidence_window_id", "return_basis_id", "annualization_basis_id",
+        "support_input_declaration_ref", "support_scope", "candidate_trial_id", "ordered_trial_ids")
+    measurement = "probability_sharpe_exceeds_benchmark" if math_id == "MATH-17" else "multiple_testing_adjusted_sharpe_probability"
+    original_refs = tuple(row.packet_id for row in selected_inputs.inputs)
+    _native_require(claim["candidate_ref"] == policy["semantic_variant_ref"] == ledger["candidate_trial_id"],
+        "LP03_REGISTRATION_SHARPE_ORIGINAL_CANDIDATE_JOIN")
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+        and profile["math_id"] == math_id and profile["ledger_source_ref"] == original_refs[0]
+        and profile["original_source_refs"] == original_refs
+        and all(profile[name] == ledger[name] for name in declared_keys)
+        and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == ()
+        and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == measurement
+        and claim["raw_to_analysis_rule"] == math_id + "::SELECT_PROBABILITY_COORDINATE::1.5"
+        and claim["target"] == dict(quantity="DECLARED_SOFTWARE_SHARPE_PROBABILITY_COORDINATE", unit="probability",
+            currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_TRIAL_UNIVERSE")
+        and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "math_id", "ledger_source_ref", "original_source_refs",
+            "candidate_universe_id", "evidence_window_id", "return_basis_id", "annualization_basis_id", "support_input_declaration_ref",
+            "support_scope", "candidate_trial_id", "ordered_trial_ids", "unit", "bound_scope", "result_direction"}
+        and bound["rule"] == "ORIGINAL_SHARPE_PROJECTED_PROBABILITY_CODOMAIN"
+        and type(bound["source_record_refs"]) is list and tuple(bound["source_record_refs"]) == original_refs
+        and all(deterministic_json(bound[key]) == deterministic_json(profile[key]) for key in
+            ("bound_source_ref", "math_id", "ledger_source_ref", "original_source_refs", "bound_scope", "result_direction", *declared_keys))
+        and bound["unit"] == profile["output_unit"], "LP03_REGISTRATION_SHARPE_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_sharpe_bounds_v1(native, math_id=math_id,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+        and preparation.registration_numerical_original is entry
+        and work._original is entry[3] and work.limits is entry[4], "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_spa_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M16 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_spa_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    scope = operation.envelope_entry[3].assembly_scope
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-16"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha", "recenter_variant"),
+                    "LP03_REGISTRATION_SPA_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-16"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_SPA_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_SPA_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_spa_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_DECLARED_SOFTWARE_LOSS_FAMILY_AND_SPA_POLICY",
+        row_identity_profile="COMPLETE_DECLARED_CANDIDATE_TIME_GRID_NO_EMPIRICAL_UNIVERSE_CLAIM",
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns, source_slices=slices)).encode("utf-8")))
+    ledger = slices[0].reconstructed_canonical_events[0]["values"]["material_trial_ledger"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["family_source_ref"] == selected_inputs.inputs[0].packet_id
+                    and profile["sign_policy_source_ref"] == selected_inputs.inputs[1].packet_id
+                    and profile["seed_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["replicates_policy_source_ref"] == selected_inputs.inputs[3].packet_id
+                    and profile["block_policy_source_ref"] == selected_inputs.inputs[4].packet_id
+                    and profile["alpha_policy_source_ref"] == selected_inputs.inputs[5].packet_id
+                    and profile["variant_policy_source_ref"] == selected_inputs.inputs[6].packet_id
+                    and all(profile[key] == ledger[key] for key in ("candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"))
+                    and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (("MATH-16", native["seed"]),)
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "studentized_loss_differential_spa_p_value"
+                    and claim["raw_to_analysis_rule"] == "MATH-16::COMPLETE_RECORD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="BOUNDED_COMPLETE_FAMILY_SPA_RECORD", unit="MEMBER_SPECIFIC_SPA_STATISTIC_LOSS_VARIANCE_AND_PROBABILITY",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_CANDIDATE_TIME_GRID")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "block_policy_source_ref", "alpha_policy_source_ref", "variant_policy_source_ref", "bound_scope", "result_direction", "unit", "candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"}
+                    and bound["rule"] == "ORIGINAL_NORMALIZED_SPA_BINARY64_COORDINATE_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(deterministic_json(bound[key]) == deterministic_json(profile[key]) for key in ("bound_source_ref", "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "block_policy_source_ref", "alpha_policy_source_ref", "variant_policy_source_ref", "bound_scope", "result_direction", "candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_SPA_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_spa_bounds_v1(native,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_reality_check_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M15 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_reality_check_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    scope = operation.envelope_entry[3].assembly_scope
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-15"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("loss_differentials", "sign_convention", "seed", "replicates", "expected_block_length", "alpha"),
+                    "LP03_REGISTRATION_REALITY_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-15"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_REALITY_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_REALITY_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_reality_check_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_DECLARED_SOFTWARE_LOSS_FAMILY_AND_REALITY_CHECK_POLICY",
+        row_identity_profile="COMPLETE_DECLARED_CANDIDATE_TIME_GRID_NO_EMPIRICAL_UNIVERSE_CLAIM",
+        consumer_decision_wall_ns=scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=scope.snapshot_pit_cutoff_wall_ns, source_slices=slices)).encode("utf-8")))
+    ledger = slices[0].reconstructed_canonical_events[0]["values"]["material_trial_ledger"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["family_source_ref"] == selected_inputs.inputs[0].packet_id
+                    and profile["sign_policy_source_ref"] == selected_inputs.inputs[1].packet_id
+                    and profile["seed_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["replicates_policy_source_ref"] == selected_inputs.inputs[3].packet_id
+                    and profile["block_policy_source_ref"] == selected_inputs.inputs[4].packet_id
+                    and profile["alpha_policy_source_ref"] == selected_inputs.inputs[5].packet_id
+                    and all(profile[key] == ledger[key] for key in ("candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"))
+                    and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (("MATH-15", native["seed"]),)
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "benchmark_candidate_loss_differential_p_value"
+                    and claim["raw_to_analysis_rule"] == "MATH-15::COMPLETE_RECORD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="BOUNDED_COMPLETE_FAMILY_REALITY_CHECK_RECORD", unit="MEMBER_SPECIFIC_PROBABILITY_AND_LOSS_DIFFERENTIAL",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_CANDIDATE_TIME_GRID")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "block_policy_source_ref", "alpha_policy_source_ref", "bound_scope", "result_direction", "unit", "candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"}
+                    and bound["rule"] == "ORIGINAL_NORMALIZED_COMPLETE_FAMILY_COORDINATE_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(deterministic_json(bound[key]) == deterministic_json(profile[key]) for key in ("bound_source_ref", "family_source_ref", "sign_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "block_policy_source_ref", "alpha_policy_source_ref", "bound_scope", "result_direction", "candidate_universe_id", "evidence_window_id", "benchmark_id", "ordered_trial_ids", "ordered_time_ids"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_REALITY_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_reality_check_bounds_v1(native,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_bootstrap_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M14 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_bootstrap_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-14"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("series", "expected_block_length", "seed", "replicates", "confidence", "interval_method"),
+                    "LP03_REGISTRATION_BOOTSTRAP_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-14"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_BOOTSTRAP_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_BOOTSTRAP_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_bootstrap_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_ORDERED_SERIES_AND_BOOTSTRAP_POLICY_CONTEXT",
+        row_identity_profile="ORDERED_SYNTHETIC_SERIES_NO_EMPIRICAL_DEPENDENCE_CLAIM", source_slices=slices)).encode("utf-8")))
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["series_source_ref"] == selected_inputs.inputs[0].packet_id
+                    and profile["block_policy_source_ref"] == selected_inputs.inputs[1].packet_id
+                    and profile["seed_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["replicates_policy_source_ref"] == selected_inputs.inputs[3].packet_id
+                    and profile["confidence_policy_source_ref"] == selected_inputs.inputs[4].packet_id
+                    and profile["interval_method_policy_source_ref"] == selected_inputs.inputs[5].packet_id
+                    and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings == (("MATH-14", native["seed"]),)
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "bootstrap_statistic_distribution_and_interval"
+                    and claim["raw_to_analysis_rule"] == "MATH-14::COMPLETE_RECORD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="BOUNDED_STATIONARY_BOOTSTRAP_RECORD", unit="statistic_unit",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_ORDERED_SERIES")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "series_source_ref", "block_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "confidence_policy_source_ref", "interval_method_policy_source_ref", "bound_scope", "result_direction", "unit"}
+                    and bound["rule"] == "ORIGINAL_NORMALIZED_BOOTSTRAP_COORDINATE_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "series_source_ref", "block_policy_source_ref", "seed_policy_source_ref", "replicates_policy_source_ref", "confidence_policy_source_ref", "interval_method_policy_source_ref", "bound_scope", "result_direction"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_BOOTSTRAP_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_bootstrap_bounds_v1(native,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_wilson_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M11 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_wilson_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-11"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("successes", "trials", "confidence"),
+                    "LP03_REGISTRATION_WILSON_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-11"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_WILSON_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_WILSON_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_wilson_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_COUNTS_AND_CONFIDENCE_POLICY_CONTEXT",
+        row_identity_profile="AGGREGATE_SYNTHETIC_BERNOULLI_COUNTS_NO_TRIAL_OBSERVATIONS", source_slices=slices)).encode("utf-8")))
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["successes_source_ref"] == selected_inputs.inputs[0].packet_id
+                    and profile["trials_source_ref"] == selected_inputs.inputs[1].packet_id
+                    and profile["confidence_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "lower_upper_probability_interval"
+                    and claim["raw_to_analysis_rule"] == "MATH-11::ORDERED_ENDPOINTS_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="ORDERED_WILSON_INTERVAL_ENDPOINTS", unit="probability",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_BERNOULLI_COUNTS")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "successes_source_ref", "trials_source_ref", "confidence_policy_source_ref", "bound_scope", "result_direction", "unit"}
+                    and bound["rule"] == "ORIGINAL_WILSON_ENDPOINT_UNIT_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "successes_source_ref", "trials_source_ref", "confidence_policy_source_ref", "bound_scope", "result_direction"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_WILSON_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_wilson_bounds_v1(native,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_calibration_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M10 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_calibration_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-10"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("probabilities", "outcomes", "bin_policy", "bin_count"),
+                    "LP03_REGISTRATION_CALIBRATION_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-10"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_CALIBRATION_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_CALIBRATION_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_calibration_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_DATASET_AND_BIN_POLICY_CONTEXT",
+        row_identity_profile="ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS", source_slices=slices)).encode("utf-8")))
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["bin_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["bin_count_source_ref"] == selected_inputs.inputs[3].packet_id
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "absolute_calibration_gap"
+                    and claim["raw_to_analysis_rule"] == "MATH-10::ECE_FIELD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="EXPECTED_CALIBRATION_ERROR", unit="probability",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_DATASET")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "bin_policy_source_ref", "bin_count_source_ref", "unit"}
+                    and bound["rule"] == "ORIGINAL_EXACT_CALIBRATION_UNIT_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "bin_policy_source_ref", "bin_count_source_ref"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_CALIBRATION_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_calibration_bounds_v1(native,
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_log_loss_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve original M09 work and its source-declared bounds before lanes."""
+    from .context import _native_require
+    from .bindings import FORMULA_INPUT_AUTHORITY_BY_MATH_ID
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1, _evidence_decode_source_values_v1, _parse_typed
+    from .models import _evidence_log_loss_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-09"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("probability_rows", "outcome_indices", "clip_epsilon"),
+                    "LP03_REGISTRATION_LOG_LOSS_PROFILE")
+    slices, native = [], {}
+    for resolved, binding in zip(selected_inputs.inputs, FORMULA_INPUT_AUTHORITY_BY_MATH_ID["MATH-09"]):
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_LOG_LOSS_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_LOG_LOSS_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        values = _evidence_decode_source_values_v1(event)
+        native[binding.input_name] = _parse_typed(values[binding.exact_field_path], binding)
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_log_loss_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="SHARED_ORIGINAL_DATASET_AND_CLIP_POLICY_CONTEXT",
+        row_identity_profile="ORDERED_SYNTHETIC_ROWS_NO_SAMPLE_IDS", source_slices=slices)).encode("utf-8")))
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_require(deterministic_json(native) == deterministic_json(selected_inputs.authoritative_values)
+                    and profile["clip_policy_source_ref"] == selected_inputs.inputs[2].packet_id
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "per_sample_natural_log_loss"
+                    and claim["raw_to_analysis_rule"] == "MATH-09::MEAN_FIELD_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="MEAN_LOG_LOSS", unit="nats/sample",
+                        currency="NOT_APPLICABLE", horizon="DECLARED_SYNTHETIC_DATASET")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "clip_policy_source_ref", "unit"}
+                    and bound["rule"] == "ORIGINAL_CLIP_POLICY_ROUNDED_LOG_LOSS_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", "clip_policy_source_ref"))
+                    and bound["unit"] == profile["output_unit"],
+                    "LP03_REGISTRATION_LOG_LOSS_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=2)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_log_loss_bounds_v1(native["clip_epsilon"], observation_count=len(native["probability_rows"]),
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"],
+        expected_json=comparator["expected_raw_record_json"].encode("utf-8"), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_kelly28_registration_v1(operation, protocol, policy, selected_inputs):
+    """Reserve the original M28 work and declared enclosure before sizing."""
+    from .context import _native_require, _native_obj
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .models import _evidence_kelly28_source_slices_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    _native_require(selected_inputs.math_spec_id == "MATH-28"
+                    and tuple(row.input_name for row in selected_inputs.inputs) == ("full_kelly_fraction", "fraction_multiplier", "risk_caps"),
+                    "LP03_REGISTRATION_KELLY28_PROFILE")
+    slices, native = [], {}
+    for resolved in selected_inputs.inputs:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+                        and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_KELLY28_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id and event["owner_id"] == resolved.owner_id,
+                        "LP03_REGISTRATION_KELLY28_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        native[resolved.input_name] = event["values"][resolved.input_name]
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    _evidence_kelly28_source_slices_v1(_evidence_canonical_object_v1(deterministic_json(dict(
+        association_profile="ORIGINAL_PUBLISHED_KELLY_AND_CURRENT_CONSTRAINTS",
+        source_slice_jsons=tuple(entry[5].decode("utf-8", "strict") for entry in source_originals),
+        consumer_decision_wall_ns=operation.envelope_entry[3].assembly_scope.snapshot_decision_wall_ns,
+        consumer_cutoff_wall_ns=operation.envelope_entry[3].assembly_scope.snapshot_pit_cutoff_wall_ns)).encode("utf-8")))
+    metadata = slices[1].reconstructed_canonical_events[0]["values"]["private_source_context"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_obj(claim["target"], ("quantity", "unit", "currency", "horizon"))
+    basis_fields = ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")
+    _native_require(all(profile[name] == metadata[name] == members[2].accounting_definition[name] for name in basis_fields)
+                    and profile["risk_capital_currency"] == members[2].accounting_definition["currency"]
+                    and profile["measurement_basis"] == members[2].accounting_definition["measurement_basis"] == "bounded_fractional_wealth_fraction"
+                    and claim["raw_to_analysis_rule"] == "MATH-28::RAW_IDENTITY::1.5"
+                    and claim["target"] == dict(quantity="BOUNDED_FRACTIONAL_KELLY", unit=profile["output_unit"],
+                        currency="NOT_APPLICABLE", horizon=profile["horizon_ref"])
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", *basis_fields}
+                    and bound["rule"] == "ORIGINAL_PUBLISHED_KELLY_CURRENT_CONSTRAINT_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and all(bound[key] == profile[key] for key in ("bound_source_ref", *basis_fields)),
+                    "LP03_REGISTRATION_KELLY28_DECLARED_SOURCE_BASIS_JOIN")
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=5 + len(native["risk_caps"]))
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_kelly_bounds_v1("MATH-28", tuple((name, native[name]) for name in ("full_kelly_fraction", "fraction_multiplier", "risk_caps")),
+        lower_text=claim["fixed_lower"], upper_text=claim["fixed_upper"], expected_texts=tuple(comparator["expected_raw_texts"]), work=work)
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _admit_evidence_math26_registration_v1(operation, protocol, policy, selected_inputs):
+    """Bound the three original input texts on the already-latched registration."""
+    from .context import _native_require, _native_obj
+    from .input_lock import _original_input_assembly_members_v1
+    from .input_resolver import _require_evidence_source_slice_roster_v1
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .serialization import deterministic_json
+    original = _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _native_require(original[1] == "ABSENT" and operation.protocol is None,
+                    "LP03_REGISTRATION_NUMERICAL_WORK_ALREADY_RESERVED")
+    preparation = operation.preparation
+    members = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    slices, native = [], {}
+    for resolved in selected_inputs.inputs:
+        matches = tuple(part for part in members[1] if len(part.original_record_refs) == 1
+            and part.original_record_refs[0].record_id == resolved.packet_id)
+        _native_require(len(matches) == 1, "LP03_REGISTRATION_MATH26_ORIGINAL_SOURCE_JOIN")
+        part = matches[0]
+        event = part.reconstructed_canonical_events[0]
+        _native_require(event["producer_receipt_id"] == resolved.producer_receipt_id
+                        and event["owner_id"] == resolved.owner_id and resolved.input_name in event["values"],
+                        "LP03_REGISTRATION_MATH26_ORIGINAL_SOURCE_JOIN")
+        slices.append(part)
+        native[resolved.input_name] = event["values"][resolved.input_name]
+    _native_require(tuple(native) == ("current_action_values", "new_information_scenarios", "acquisition_cost"),
+                    "LP03_REGISTRATION_MATH26_ORIGINAL_SOURCE_JOIN")
+    source_originals = _require_evidence_source_slice_roster_v1(preparation, tuple(slices), subject=preparation)
+    metadata = slices[0].reconstructed_canonical_events[0]["values"]["private_source_context"]
+    profile = protocol.numeric_profile
+    claim, comparator, bound = policy["claim"], policy["comparator_plan"], policy["bound_proof"]
+    _native_obj(claim["target"], ("quantity", "unit", "currency", "horizon"))
+    _native_require(all(profile[key] == metadata[key] for key in (
+                        "utility_unit", "utility_basis_ref", "horizon_ref", "research_decision_ref"))
+                    and claim["target"]["unit"] == metadata["utility_unit"]
+                    and claim["target"]["horizon"] == metadata["horizon_ref"]
+                    and claim["target"]["currency"] == (metadata["utility_currency_or_absence"]
+                        if type(metadata["utility_currency_or_absence"]) is str else "NOT_APPLICABLE")
+                    and set(bound) == {"rule", "source_record_refs", "bound_source_ref", "utility_unit", "utility_basis_ref", "horizon_ref"}
+                    and bound["rule"] == "DECLARED_UTILITY_AND_COST_ENCLOSURE"
+                    and type(bound["source_record_refs"]) is list
+                    and tuple(bound["source_record_refs"]) == tuple(row.packet_id for row in selected_inputs.inputs)
+                    and bound["bound_source_ref"] == profile["bound_source_ref"] == protocol.parameter_protocol_ref
+                    and all(bound[key] == profile[key] for key in ("utility_unit", "utility_basis_ref", "horizon_ref")),
+                    "LP03_REGISTRATION_MATH26_DECLARED_SOURCE_BASIS_JOIN")
+    # Capture policy identity before any native observation can intervene.
+    policies = (protocol, deterministic_json(protocol), policy, deterministic_json(policy))
+    # The natural-key reservation already exists. Retain even a constructor
+    # failure on that same operation; no later attempt can supply fresh work.
+    work = object.__new__(_EvidenceNumericalWorkV1)
+    operation.numerical_work = work
+    entry = (operation, "INITIALIZING", work)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    current, scenarios, cost = (native[name] for name in (
+        "current_action_values", "new_information_scenarios", "acquisition_cost"))
+    count = len(current) + len(scenarios) * (len(current) + 1) + 7
+    _EvidenceNumericalWorkV1.__init__(work, protocol.numerical_work_limits, retained_input_capacity=count)
+    entry = (operation, "INITIALIZED", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), None, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    proof = _validate_evidence_math26_bounds_v1(current, scenarios, cost, lower_text=profile["utility_lower"],
+        upper_text=profile["utility_upper"], cost_cap_text=profile["cost_cap"], fixed_lower_text=claim["fixed_lower"],
+        fixed_upper_text=claim["fixed_upper"], work=work)
+    with work:
+        # This is the original independently declared expectation, never an EVI
+        # computed before preregistration. Its own external text is also bounded.
+        expected = work._exact_math26_decimal_v1(work._parse_math26_decimal_v1(comparator["expected_raw_value"]))
+        lower, upper = work._decimal_admissions[3][1], work._decimal_admissions[4][1]
+        work._require(work._compare(lower, expected) <= 0 and work._compare(expected, upper) <= 0,
+                      "LP03_REGISTRATION_MATH26_EXPECTATION_OUT_OF_BOUNDS")
+    _native_require(operation.numerical_work is work and operation.numerical_original is entry
+                    and preparation.registration_numerical_original is entry
+                    and work._original is entry[3] and work.limits is entry[4],
+                    "LP03_REGISTRATION_ORIGINAL_NUMERICAL_WORK_CHANGED")
+    entry = (operation, "COMPLETE", work, work._original, work.limits, work._decimal_admissions,
+        tuple(work._decimal_inputs.items()), tuple(work.consumed.items()), proof, source_originals, policies)
+    operation.numerical_original = preparation.registration_numerical_original = entry
+    _EvidenceRegistrationOperationV1._assert_numerical_original_v1(operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    return entry
+
+
+def _resolve_evidence_registration_policies_v1(registry, *, operation):
+    """Resolve the two original, prerevealed policies through this READY owner.
+
+    Neither a caller mapping nor the parameter-reference inventory is policy.
+    Reads use the original signed selection and fresh registration authority.
+    """
+    from dataclasses import fields
+    from .context import _native_require, _native_obj, _native_ident
+    from .models import (EvidenceAbsenceV1, EvidenceCausalTimelineScopeV1, EvidenceOriginV1,
+                         EvidenceClaimRecordV1, EvidenceRecordHeaderV1)
+    from .persistence import _EvidenceRegistrationOperationV1
+    from .input_resolver import _EvidenceOwnerPacketCustodyV1, _evidence_original_timeline_inputs_v1
+    from .input_lock import EvidenceAssemblerContextV1, _original_input_assembly_members_v1
+    from .serialization import deterministic_json, _evidence_canonical_object_v1, _evidence_frozen_data_v1
+
+    _native_require(type(operation) is _EvidenceRegistrationOperationV1
+                    and operation.commit_state == "PARENT_READBACK_CONFIRMED"
+                    and operation.parent_readback_observation is not None and operation.protocol is None
+                    and not operation.policy_slices, "LP03_REGISTRATION_POLICY_ADMISSION")
+    state, preparation = operation.issuer, operation.preparation
+    assembler = state.assembler_context
+    _native_require(EvidenceAssemblerContextV1._require_original_v1(assembler) is state
+                    and registry is assembler._parameter_resolver
+                    and _st12f_parameter_registry_build_receipt_v1(registry) is assembler._parameter_receipt,
+                    "LP03_REGISTRATION_ORIGINAL_PARAMETER_OWNER")
+    envelope = operation.envelope_entry[3]
+    assembly = _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)[3]
+    _native_require(envelope.component_closure in (("MATH-06",), ("MATH-07",), ("MATH-01",), ("MATH-03",), ("MATH-04",), ("MATH-05",), ("MATH-08",), ("MATH-09",), ("MATH-10",), ("MATH-11",), ("MATH-14",), ("MATH-15",), ("MATH-16",), ("MATH-17",), ("MATH-18",), ("MATH-19",), ("MATH-20",), ("MATH-21",), ("MATH-22",), ("MATH-23",), ("MATH-24",), ("MATH-25",), ("MATH-12",), ("MATH-13",), ("MATH-26",), ("MATH-27",), ("MATH-28",), ("MATH-29",), ("MATH-30",), ("MATH-31",), ("MATH-37",), ("MATH-32",), ("MATH-33",), ("MATH-35",), ("MATH-36",), ("MATH-38",), ("MATH-39",), ("MATH-40",), ("MATH-41",), ("MATH-42",), ("MATH-43",), ("MATH-44",), ("MATH-45",), ("MATH-50",), ("MATH-51",), ("MATH-52",), ("MATH-01", "MATH-02"))
+                    and (not envelope.callback_pins or envelope.component_closure == ("MATH-03",))
+                    and assembly.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE,
+                    "LP03_REGISTRATION_PROFILE_UNAVAILABLE")
+    edge = envelope.component_closure == ("MATH-01", "MATH-02")
+    brier = envelope.component_closure == ("MATH-08",)
+    multiple = envelope.component_closure in (("MATH-12",), ("MATH-13",))
+    pbo = envelope.component_closure == ("MATH-19",)
+    held_out = envelope.component_closure in (("MATH-20",), ("MATH-21",))
+    recorded_dr = envelope.component_closure == ("MATH-22",)
+    analytic = envelope.component_closure in (("MATH-29",), ("MATH-30",), ("MATH-31",), ("MATH-37",))
+    private_execution = envelope.component_closure in (("MATH-32",), ("MATH-33",), ("MATH-35",), ("MATH-36",), ("MATH-38",), ("MATH-39",), ("MATH-40",), ("MATH-41",), ("MATH-42",), ("MATH-43",), ("MATH-44",), ("MATH-45",))
+    quantum = envelope.component_closure in (("MATH-50",), ("MATH-51",), ("MATH-52",))
+    private_values = analytic or private_execution or quantum
+    if private_values:
+        from .evidence import EVIDENCE_PROJECTION_CONTRACTS_V1
+        analytic_projection = EVIDENCE_PROJECTION_CONTRACTS_V1[envelope.component_closure[0]]
+    ope_point = envelope.component_closure in (("MATH-23",), ("MATH-24",), ("MATH-25",))
+    if ope_point:
+        from .models import _LP03_OPE_POINT_PROJECTION_PROFILES_V1
+        point_metric = _LP03_OPE_POINT_PROJECTION_PROFILES_V1[envelope.component_closure[0]][1]
+    sharpe = envelope.component_closure in (("MATH-17",), ("MATH-18",), ("MATH-19",))
+    spa = envelope.component_closure == ("MATH-16",)
+    reality = envelope.component_closure == ("MATH-15",)
+    bootstrap = envelope.component_closure == ("MATH-14",)
+    wilson = envelope.component_closure == ("MATH-11",)
+    calibration = envelope.component_closure == ("MATH-10",)
+    log_loss = envelope.component_closure == ("MATH-09",)
+    research = envelope.component_closure == ("MATH-26",)
+    kelly27 = envelope.component_closure == ("MATH-27",)
+    kelly28 = envelope.component_closure == ("MATH-28",)
+    kelly = kelly27 or kelly28
+    cashflow = envelope.component_closure in (("MATH-06",),("MATH-07",))
+    market = envelope.component_closure in (("MATH-01",), ("MATH-04",), ("MATH-05",))
+    math_id = envelope.component_closure[-1] if edge else envelope.component_closure[0]
+    from .models import _LP03_MARKET_METRIC_PROFILES_V1
+    events = []
+    for owner, kind, schema in (("QKU_COMPUTATION_CONTROL_PLANE", "EvidenceClaimPolicyV1", "QTT_LP03_CLAIM_POLICY_V1"),
+                                ("ComputationParameterPolicyV1", "EvidenceProtocolParametersV1", "QTT_LP03_PARAMETER_PROTOCOL_V1")):
+        selections = tuple(selection for selection in envelope.assembly_scope.source_selections
+                           if selection.original_owner_id == owner and selection.permitted_record_kinds == (kind,))
+        _native_require(len(selections) == 1 and len(selections[0].selection.record_refs) == 1,
+                        "LP03_REGISTRATION_EXACT_POLICY_SELECTION")
+        selection = selections[0]
+        custodies = tuple(custody for custody, policies in operation.policies
+                          if any(policy.source_selection == selection for policy in policies))
+        _native_require(len(custodies) == 1, "LP03_REGISTRATION_POLICY_OWNER_AMBIGUOUS")
+        part = _EvidenceOwnerPacketCustodyV1._read_registration_policy_v1(custodies[0], operation, selection)
+        from .input_resolver import _require_evidence_source_slice_roster_v1
+        _require_evidence_source_slice_roster_v1(operation, operation.policy_slices,
+            originals=operation.policy_source_originals, subject=operation)
+        part_original = _require_evidence_source_slice_roster_v1(operation, (part,), subject=operation)
+        _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+        operation.policy_slices = (*operation.policy_slices, part)
+        operation.policy_source_originals = (*operation.policy_source_originals, *part_original)
+        _native_require(all(ref in assembly.owner_packet_refs for ref in part.original_record_refs),
+                        "LP03_REGISTRATION_POLICY_NOT_IN_SEALED_INPUT")
+        event = part.reconstructed_canonical_events[0]
+        _native_require((event["owner_id"], event["record_kind"], event["schema_id"], event["schema_version"],
+                         event["producer_receipt_type"], event["source_state_and_claim_lineage"])
+                        == (owner, kind, schema, "1.0", kind + "Receipt", "ORIGINAL_SOFTWARE_CONFORMANCE_POLICY"),
+                        "LP03_REGISTRATION_POLICY_OWNER_SCHEMA")
+        original_events = tuple(item for original in preparation.input_assembly_members[1]
+                                for item in original.reconstructed_canonical_events if item["record_ref"] == event["record_ref"])
+        _native_require(len(original_events) == 1 and event == original_events[0], "LP03_REGISTRATION_POLICY_CHANGED_AFTER_SEAL")
+        events.append(event)
+    claim_event, protocol_event = events
+    _native_require(claim_event["record_ref"] == envelope.claim_policy_ref
+                    and set(claim_event["values"]) == {"trial_family", "registration"}
+                    and set(protocol_event["values"]) == {"protocol"}, "LP03_REGISTRATION_POLICY_FIELDS")
+    protocol_data = _evidence_canonical_object_v1(deterministic_json(protocol_event["values"]["protocol"]).encode("utf-8"), max_bytes=1048576)
+    protocol = EvidenceProtocolParametersV1.from_canonical_mapping(protocol_data)
+    _native_require(protocol.selected_metric_ids == (("CONFORMANCE::"+math_id+"::expected_net_cash",) if cashflow else ("CONFORMANCE::MATH-02::edge",) if edge else ("CONFORMANCE::MATH-28::bounded_fraction",) if kelly28 else
+                        ("CONFORMANCE::MATH-27::full_kelly_fraction",) if kelly27 else
+                        ("CONFORMANCE::" + math_id + "::" + _LP03_MARKET_METRIC_PROFILES_V1[math_id][0],) if market else
+                        ("CONFORMANCE::MATH-26::evi",) if research else
+                        ("CONFORMANCE::MATH-22::dr_value_and_uncertainty",) if recorded_dr else (f"CONFORMANCE::{math_id}::{point_metric}",) if ope_point else (f"CONFORMANCE::{math_id}::{analytic_projection.output_name}",) if private_values else (_LP03_HELDOUT_PROTOCOL_METRICS_V1[math_id][0],) if held_out else ("CONFORMANCE::MATH-19::pbo_receipt",) if pbo else ("CONFORMANCE::" + math_id + ("::psr" if math_id == "MATH-17" else "::dsr"),) if sharpe else ("CONFORMANCE::" + math_id + "::rejections_and_adjusted_p",) if multiple else ("CONFORMANCE::MATH-16::spa_receipt",) if spa else ("CONFORMANCE::MATH-15::reality_check_receipt",) if reality else ("CONFORMANCE::MATH-14::bootstrap_distribution_and_interval",) if bootstrap else ("CONFORMANCE::MATH-11::interval",) if wilson else ("CONFORMANCE::MATH-10::ece",) if calibration else ("CONFORMANCE::MATH-09::log_loss",) if log_loss else
+                        ("CONFORMANCE::MATH-08::brier_score",) if brier else
+                        ("CONFORMANCE::MATH-03::mid",)), "LP03_PARAMETER_COMPONENT_PROFILE_JOIN")
+    _native_require((protocol.parameter_protocol_ref, protocol.source_receipt_ref, protocol.owner_envelope_ref,
+                     protocol.experiment_id, protocol.experiment_revision, protocol.scenario_plan_ref, protocol.origin)
+                    == (protocol_event["record_ref"], protocol_event["producer_receipt_id"], envelope.envelope_ref,
+                        envelope.experiment_id, envelope.experiment_revision, preparation.plan.record_id, assembly.origin),
+                    "LP03_PARAMETER_PROTOCOL_ORIGINAL_JOIN")
+    _native_require(protocol.per_attempt_limits == envelope.per_attempt_limits
+                    and protocol.aggregate_execution_limits == envelope.aggregate_execution_limits
+                    and protocol.formula_seed_bindings == preparation.plan.formula_seed_bindings
+                    and protocol.review_ack_policy["required_receiver_ids"] == envelope.required_receiver_ids
+                    and protocol.exclusive_expiry_wall_ns <= envelope.exclusive_expiry_wall_ns,
+                    "LP03_PARAMETER_PROTOCOL_ENVELOPE_LIMIT_JOIN")
+    policy = _evidence_canonical_object_v1(deterministic_json(claim_event["values"]["registration"]).encode("utf-8"), max_bytes=1048576)
+    _native_obj(policy, ("registration_ordinal", "semantic_variant_ref", "selection_history", "observation_plan",
+                        "comparator_plan", "accounting_policy_ref", "parameter_protocol_ref", "claim", "bound_proof"))
+    _native_ident(policy["semantic_variant_ref"])
+    history = _native_obj(policy["selection_history"], ("history_ref", "prior_candidate_refs", "outcomes_inspected"))
+    _native_ident(history["history_ref"])
+    _native_require(type(policy["registration_ordinal"]) is int and policy["registration_ordinal"] == 1
+                    and history["prior_candidate_refs"] == [] and history["outcomes_inspected"] is False,
+                    "LP03_REGISTRATION_FIRST_UNSEEN_PROFILE_ONLY")
+    causal = bool(envelope.callback_pins)
+    observation_fields = ("source_record_refs", "group_rule_ref", "first_unrevealed_group_ordinal", "origin", "reveal_rule", "grouping")
+    observation = _native_obj(policy["observation_plan"], observation_fields + (("causal_timeline",) if causal else ()))
+    resolved = preparation.input_assembly_members[4]
+    _native_require(tuple(row.math_spec_id for row in resolved) == envelope.component_closure,
+                    "LP03_REGISTRATION_PROFILE_UNAVAILABLE")
+    selected_inputs = resolved[1] if edge else resolved[0]
+    if selected_inputs.math_spec_id == "MATH-39":
+        # Four formula arguments are derived from two original owner
+        # packets. The preregistration roster names the original packets.
+        original_input_refs = selected_inputs.packet_refs
+    else:
+        original_input_refs = tuple(row.packet_id for resolution in resolved for row in (
+            resolution.external_inputs if edge and resolution.math_spec_id == "MATH-02" else resolution.inputs))
+    if recorded_dr:
+        profile = protocol.numeric_profile
+        original_input_refs = (*original_input_refs,profile["uncertainty_source_ref"],*profile["assumption_source_refs"])
+    if held_out:
+        original_input_refs = (*original_input_refs, protocol.numeric_profile["prediction_trace_source_ref"],
+            protocol.numeric_profile["outcome_label_source_ref"])
+    if causal:
+        from ...agents.pr169_agent_orch1_resolvers import _EvidenceIssuerStateV1
+
+        timeline = EvidenceCausalTimelineScopeV1.from_canonical_mapping(observation["causal_timeline"])
+        cash_basis = timeline.accepted_cash_basis_or_none
+        _native_require(timeline.scenario_plan == preparation.plan and timeline.numerical_work_limits == protocol.numerical_work_limits
+                        and tuple(row.source_record_ref.record_id for row in timeline.component_input_pins)
+                            == tuple(dict.fromkeys(original_input_refs))
+                        and len(timeline.event_pins) <= envelope.per_attempt_limits.max_events
+                        and len(timeline.coordinates) <= envelope.per_attempt_limits.max_coordinates
+                        and (cash_basis is None or cash_basis.source_record_ref.record_id ==
+                            preparation.input_assembly_members[2].portfolio_and_cash_context["permanent_no_trade_baseline_ref"]),
+                        "LP03_REGISTRATION_ORIGINAL_TIMELINE_PLAN")
+        _EvidenceIssuerStateV1._require_original_callbacks_v1(state, operation.envelope_entry, timeline.callbacks)
+        _evidence_original_timeline_inputs_v1(timeline, preparation.input_assembly_members[1])
+    coverage = protocol.coverage_eligibility
+    _native_require(type(observation["source_record_refs"]) is list
+                    and tuple(observation["source_record_refs"]) == coverage["source_record_refs"] == original_input_refs
+                    and observation["group_rule_ref"] == coverage["group_rule_ref"]
+                    and type(observation["first_unrevealed_group_ordinal"]) is int
+                    and observation["first_unrevealed_group_ordinal"] == coverage["first_unrevealed_group_ordinal"]
+                    == claim_event["values"]["trial_family"]["first_unrevealed_group_ordinal"]
+                    and observation["origin"] == assembly.origin.value
+                    and observation["reveal_rule"] == "AFTER_PREREGISTRATION_AND_ATTEMPT_ADMISSION"
+                    and observation["grouping"] == ("ONE_ORIGINAL_SIGNED_TOTAL_CASHFLOW_CONTEXT" if cashflow else "ONE_ORIGINAL_SAME_SNAPSHOT_MARKET_PREDICTION_CALIBRATION_CONTEXT" if edge else
+                        "ONE_ORIGINAL_PUBLISHED_KELLY_CURRENT_CONSTRAINT_CONTEXT" if kelly28 else
+                        "ONE_ORIGINAL_SYNTHETIC_KELLY_PROBABILITY_PAYOFF_CONTEXT" if kelly27 else
+                        "ONE_ORIGINAL_SYNTHETIC_MARKET_CONTEXT" if market else
+                        "ONE_ORDERED_SYNTHETIC_RESEARCH_DECISION" if research else
+                        "ONE_COMPLETE_ORDERED_ORIGINAL_RECORDED_DR_GROUP_SET" if recorded_dr else "ONE_COMPLETE_ORDERED_ORIGINAL_OPE_POINT_ROSTER" if ope_point else "ONE_COMPLETE_ORIGINAL_PRIVATE_ANALYTIC_INPUT_ROSTER" if analytic else "ONE_COMPLETE_ORIGINAL_PRIVATE_EXECUTION_SOURCE_SET" if private_execution else "ONE_COMPLETE_ORIGINAL_QUANTUM_SOURCE_ROSTER" if quantum else "ONE_COMPLETE_ORIGINAL_HELD_OUT_SCORING_ROSTER" if held_out else "ONE_COMPLETE_DECLARED_CHRONOLOGICAL_CSCV_MATRIX_AND_GROUP_POLICY" if pbo else "ONE_COMPLETE_DECLARED_SYNTHETIC_SHARPE_LEDGER_AND_MOMENTS" if sharpe else "ONE_COMPLETE_DECLARED_SYNTHETIC_TRIAL_LEDGER_AND_Q_POLICY" if multiple else "ONE_COMPLETE_DECLARED_SYNTHETIC_LOSS_FAMILY_AND_SPA_POLICY" if spa else "ONE_COMPLETE_DECLARED_SYNTHETIC_LOSS_FAMILY_AND_REALITY_CHECK_POLICY" if reality else "ONE_ORIGINAL_ORDERED_SYNTHETIC_SERIES_AND_BOOTSTRAP_POLICY" if bootstrap else "ONE_ORIGINAL_SYNTHETIC_BERNOULLI_COUNT_AND_CONFIDENCE_CONTEXT" if wilson else "ONE_ORDERED_SYNTHETIC_DATASET_AND_BIN_POLICY" if calibration else "ONE_ORDERED_SYNTHETIC_DATASET_AND_CLIP_POLICY" if log_loss else "ONE_ORDERED_SYNTHETIC_DATASET" if brier else "ONE_SYNTHETIC_EVENT"),
+                    "LP03_REGISTRATION_OBSERVATION_JOIN")
+    snapshot = preparation.input_assembly_members[2]
+    if edge:
+        from .specification import decode_evidence_raw_output_v1
+        comparator = _native_obj(policy["comparator_plan"],(
+            "expectation_owner_ref","comparison","producer_expected_raw_json","expected_raw_record_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_MARKET_REGISTERED_CONVERSION_BINARY64_EDGE_IDENTITY"
+            and comparator["producer_expected_raw_json"] == protocol.numeric_profile["producer_expected_raw_json"]
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 128
+            and comparator["expected_raw_record_json"].isascii(),"LP03_EDGE_REGISTRATION_COMPARATOR")
+        expected = decode_evidence_raw_output_v1("MATH-02",comparator["expected_raw_record_json"].encode("ascii"),
+            maximum_bytes=128,maximum_nodes=4)
+        _native_require(deterministic_json(expected) == comparator["expected_raw_record_json"],
+                        "LP03_EDGE_REGISTRATION_EXPECTATION_CANONICAL")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif cashflow:
+        from .specification import decode_evidence_raw_output_v1
+        comparator = _native_obj(policy["comparator_plan"],("expectation_owner_ref","comparison","expected_raw_record_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORDERED_DECIMAL_SIGNED_TOTAL_CASHFLOW_IDENTITY"
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 65536,
+            "LP03_CASHFLOW_REGISTRATION_COMPARATOR")
+        expected = decode_evidence_raw_output_v1(math_id,comparator["expected_raw_record_json"].encode("utf-8"),
+            maximum_bytes=65536,maximum_nodes=4096)
+        _native_require(deterministic_json(expected) == comparator["expected_raw_record_json"],
+            "LP03_CASHFLOW_REGISTRATION_EXPECTATION_CANONICAL")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif market or kelly:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_texts"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+                        and comparator["comparison"] == ("EXACT_ORDERED_DECIMAL_KELLY_IDENTITY" if kelly else "EXACT_ORDERED_DECIMAL_MARKET_IDENTITY")
+                        and type(comparator["expected_raw_texts"]) is list
+                        and len(comparator["expected_raw_texts"]) == (2 if kelly27 or math_id == "MATH-05" else 1)
+                        and all(type(text) is str and 0 < len(text) <= 4096 for text in comparator["expected_raw_texts"]),
+                        "LP03_REGISTRATION_COMPARATOR_JOIN")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif research:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_value"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+                        and comparator["comparison"] == "EXACT_ORDERED_DECIMAL_EVI_IDENTITY"
+                        and type(comparator["expected_raw_value"]) is str and 0 < len(comparator["expected_raw_value"]) <= 4096,
+                        "LP03_REGISTRATION_COMPARATOR_JOIN")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif quantum:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_record_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORIGINAL_QUANTUM_RAW_AND_CONSTRUCTOR_IDENTITY"
+            and type(comparator["expected_raw_record_json"]) is str and 0 < len(comparator["expected_raw_record_json"]) <= 65536,
+            "LP03_QUANTUM_REGISTRATION_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif private_execution:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_record_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == ("EXACT_ORIGINAL_PRIVATE_EXECUTION_BINARY64_IDENTITY"
+                if protocol.analysis_profile == "DETERMINISTIC_ORIGINAL_PRIVATE_BINARY64_EXECUTION_CONFORMANCE_V1" else "EXACT_ORIGINAL_PRIVATE_EXECUTION_DECIMAL_IDENTITY")
+            and type(comparator["expected_raw_record_json"]) is str and 0 < len(comparator["expected_raw_record_json"]) <= 65536,
+            "LP03_PRIVATE_EXECUTION_REGISTRATION_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif analytic:
+        import re
+
+        comparator = _native_obj(policy["comparator_plan"], (
+            "expectation_owner_ref", "comparison", "expected_raw_record_json", "expected_analytic_binary64_bits"))
+        bits = comparator["expected_analytic_binary64_bits"]
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORIGINAL_DECIMAL_AND_CERTIFIED_STATISTICAL_CONVERSION"
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 65536
+            and type(bits) is str and re.fullmatch(r"[0-9a-f]{16}", bits) is not None,
+            "LP03_ANALYTIC_REGISTRATION_ORIGINAL_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif ope_point:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_record_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORIGINAL_RECORDED_OPE_POINT_IDENTITY"
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 65536,
+            "LP03_OPE_POINT_REGISTRATION_ORIGINAL_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif recorded_dr:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison",
+            "expected_raw_record_json", "expected_uncertainty_disposition"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORIGINAL_DR_AND_CONDITIONAL_SCORE_INTERVAL"
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 65536,
+            "LP03_DR_REGISTRATION_ORIGINAL_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif held_out:
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison",
+            "expected_raw_record_json", "expected_fold_raw_json"))
+        _native_require(comparator["expectation_owner_ref"] == claim_event["record_ref"]
+            and comparator["comparison"] == "EXACT_ORIGINAL_TOPOLOGY_AND_COMPLETE_HELD_OUT_SCORE_IDENTITY"
+            and type(comparator["expected_raw_record_json"]) is str
+            and 0 < len(comparator["expected_raw_record_json"]) <= 65536
+            and type(comparator["expected_fold_raw_json"]) is list and 2 <= len(comparator["expected_fold_raw_json"]) <= 6,
+            "LP03_REGISTRATION_HELD_OUT_COMPARATOR")
+        comparator_ref = comparator["expectation_owner_ref"]
+    elif brier or log_loss or calibration or wilson or bootstrap or reality or spa or multiple or sharpe or pbo:
+        from .specification import decode_evidence_raw_output_v1
+        comparator = _native_obj(policy["comparator_plan"], ("expectation_owner_ref", "comparison", "expected_raw_record_json"))
+        _native_require(type(comparator["expected_raw_record_json"]) is str
+                        and len(comparator["expected_raw_record_json"]) <= 65536
+                        and comparator["expectation_owner_ref"] == claim_event["record_ref"]
+                        and comparator["comparison"] == ("ORDERED_BINARY64_CSCV_COMPLETE_RAW_IDENTITY" if pbo else "ORDERED_BINARY64_SHARPE_COMPLETE_RAW_IDENTITY" if sharpe else "ORDERED_BINARY64_MULTIPLE_TESTING_IDENTITY" if multiple else "ORDERED_COMPLETE_FAMILY_SPA_RECORD_IDENTITY" if spa else "ORDERED_COMPLETE_FAMILY_REALITY_CHECK_RECORD_IDENTITY" if reality else "ORDERED_STATIONARY_BOOTSTRAP_RECORD_IDENTITY" if bootstrap else "ORDERED_AS241_WILSON_ENDPOINT_IDENTITY" if wilson else "EXACT_BINARY64_CALIBRATION_IDENTITY" if calibration else "CERTIFIED_BINARY64_LOG_LOSS_IDENTITY" if log_loss else "EXACT_BINARY64_BRIER_IDENTITY"),
+                        "LP03_REGISTRATION_COMPARATOR_JOIN")
+        expected = decode_evidence_raw_output_v1(math_id, comparator["expected_raw_record_json"].encode("utf-8"),
+            maximum_bytes=65536, maximum_nodes=4096)
+        _native_require(pbo or sharpe or multiple or calibration or wilson or bootstrap or reality or spa or len(expected["per_observation"]) == len(selected_inputs.authoritative_values["probability_rows"]),
+                        "LP03_REGISTRATION_BRIER_EXPECTED_ROSTER")
+        comparator_ref = comparator["expectation_owner_ref"]
+    else:
+        comparator = _native_obj(policy["comparator_plan"], ("baseline_ref", "comparison", "expected_raw_value"))
+        expected = exact_decimal(comparator["expected_raw_value"])
+        _native_require(type(comparator["expected_raw_value"]) is str and str(expected) == comparator["expected_raw_value"]
+                        and comparator["baseline_ref"] == snapshot.portfolio_and_cash_context["permanent_no_trade_baseline_ref"]
+                        and comparator["comparison"] == "ANALYTIC_IDENTITY", "LP03_REGISTRATION_COMPARATOR_JOIN")
+        comparator_ref = comparator["baseline_ref"]
+    _native_require(policy["accounting_policy_ref"] == dict(assembly.ordered_field_lineage)["accounting_definition"][0]
+                    and policy["parameter_protocol_ref"] == protocol.parameter_protocol_ref,
+                    "LP03_REGISTRATION_POLICY_REFERENCE_JOIN")
+    claim_data = dict(_native_obj(policy["claim"], ("immutable_claim_ordinal", "target", "candidate_ref", "lane_or_paired", "metric_id",
+        "comparator_ref", "observation_group_rule", "raw_to_analysis_rule", "fixed_lower", "fixed_upper", "alpha_ref",
+        "success_hurdle_ref", "futility_hurdle_ref", "coverage_rule_ref", "first_unrevealed_group_ordinal")))
+    if edge:
+        _admit_evidence_probability_edge_registration_v1(operation,protocol,policy,resolved)
+    elif private_values:
+        _admit_evidence_original_private_registration_v1(operation, protocol, policy, selected_inputs)
+    elif ope_point:
+        _admit_evidence_recorded_ope_point_registration_v1(operation, protocol, policy, selected_inputs)
+    elif recorded_dr:
+        _admit_evidence_recorded_dr_registration_v1(operation, protocol, policy, selected_inputs)
+    elif held_out:
+        _admit_evidence_heldout_registration_v1(operation, protocol, policy, selected_inputs)
+    elif pbo:
+        _admit_evidence_cscv_registration_v1(operation, protocol, policy, selected_inputs)
+    elif sharpe:
+        _admit_evidence_sharpe_registration_v1(operation, protocol, policy, selected_inputs)
+    elif multiple:
+        _admit_evidence_multiple_testing_registration_v1(operation, protocol, policy, selected_inputs)
+    elif spa:
+        _admit_evidence_spa_registration_v1(operation, protocol, policy, selected_inputs)
+    elif reality:
+        _admit_evidence_reality_check_registration_v1(operation, protocol, policy, selected_inputs)
+    elif bootstrap:
+        _admit_evidence_bootstrap_registration_v1(operation, protocol, policy, selected_inputs)
+    elif wilson:
+        _admit_evidence_wilson_registration_v1(operation, protocol, policy, selected_inputs)
+    elif calibration:
+        _admit_evidence_calibration_registration_v1(operation, protocol, policy, selected_inputs)
+    elif log_loss:
+        _admit_evidence_log_loss_registration_v1(operation, protocol, policy, selected_inputs)
+    elif cashflow:
+        _admit_evidence_cashflow_registration_v1(operation,protocol,policy,selected_inputs)
+    elif market:
+        _admit_evidence_market_registration_v1(operation, protocol, policy, selected_inputs)
+    elif kelly27:
+        _admit_evidence_kelly27_registration_v1(operation, protocol, policy, selected_inputs)
+    elif kelly28:
+        _admit_evidence_kelly28_registration_v1(operation, protocol, policy, selected_inputs)
+    elif research:
+        _admit_evidence_math26_registration_v1(operation, protocol, policy, selected_inputs)
+    wall, _mono, _cpu = _EvidenceRegistrationOperationV1._check_current_v1(operation)
+    _native_require(protocol.valid_from_wall_ns <= wall < protocol.exclusive_expiry_wall_ns,
+                    "LP03_PARAMETER_PROTOCOL_EXPIRED")
+    header = {member.name: getattr(assembly, member.name) for member in fields(EvidenceRecordHeaderV1) if member.name != "kind"}
+    header.update(record_id=assembly.record_id + "::CLAIM:1", causation_ref=assembly.record_id,
+                  producing_owner=state.host.public_configuration.service_owner,
+                  producing_principal=state.host.public_configuration.service_principal, created_wall_ns=wall,
+                  source_lineage_refs=(assembly.record_id, claim_event["record_ref"], protocol_event["record_ref"]))
+    for name in ("alpha_ref", "success_hurdle_ref", "futility_hurdle_ref"):
+        claim_data[name] = EvidenceAbsenceV1.from_canonical_mapping(claim_data[name])
+    claim = EvidenceClaimRecordV1(**header, family_ref=envelope.claim_policy_ref, preregistered_at_ns=wall, **claim_data)
+    _native_require(claim.immutable_claim_ordinal == 1 and claim.candidate_ref == policy["semantic_variant_ref"]
+                    and claim.metric_id == protocol.selected_metric_ids[0] and claim.lane_or_paired == "PAIRED"
+                    and claim.comparator_ref == comparator_ref
+                    and claim.observation_group_rule == coverage["group_rule_ref"]
+                    and claim.coverage_rule_ref == coverage["coverage_rule_ref"]
+                    and claim.first_unrevealed_group_ordinal == coverage["first_unrevealed_group_ordinal"]
+                    and all(type(value) is EvidenceAbsenceV1 and value == protocol.statistical_policy_or_absence
+                            for value in (claim.alpha_ref, claim.success_hurdle_ref, claim.futility_hurdle_ref))
+                    and (cashflow or edge or research or market or kelly or bootstrap or reality or spa or recorded_dr or ope_point or private_values or exact_decimal(claim.fixed_lower) == 0), "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    if edge:
+        _native_require(claim.fixed_lower == "-1" and claim.fixed_upper == "1"
+            and claim.target["quantity"] == "MODEL_MINUS_MARKET_PROBABILITY"
+            and claim.target["unit"] == "PROBABILITY_POINTS", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif private_values:
+        _native_require(claim.target["quantity"] == protocol.numeric_profile["output_basis"],
+            "LP03_ANALYTIC_REGISTRATION_CLAIM_TARGET")
+    elif ope_point:
+        _native_require(claim.target["quantity"] == protocol.numeric_profile["output_basis"],
+            "LP03_OPE_POINT_REGISTRATION_CLAIM_TARGET")
+    elif recorded_dr:
+        _native_require(claim.target["quantity"] == "MEAN_CONDITIONAL_RECORDED_DR_SCORE", "LP03_DR_REGISTRATION_CLAIM_TARGET")
+    elif held_out:
+        _native_require(claim.target["quantity"] == "COMPLETE_HELD_OUT_SCORE_DISTRIBUTION",
+            "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif pbo:
+        _native_require(claim.target["quantity"] == "COMPLETE_DECLARED_CSCV_SPLIT_AND_LOGIT_RECORD", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif sharpe:
+        _native_require(claim.target["quantity"] == "DECLARED_SOFTWARE_SHARPE_PROBABILITY_COORDINATE", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif multiple:
+        _native_require(claim.target["quantity"] == "INDEXED_ADJUSTED_P_AND_REJECTION_MASK", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif spa:
+        _native_require(claim.target["quantity"] == "BOUNDED_COMPLETE_FAMILY_SPA_RECORD", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif reality:
+        _native_require(claim.target["quantity"] == "BOUNDED_COMPLETE_FAMILY_REALITY_CHECK_RECORD", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif bootstrap:
+        _native_require(claim.target["quantity"] == "BOUNDED_STATIONARY_BOOTSTRAP_RECORD", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif wilson:
+        _native_require(claim.target["quantity"] == "ORDERED_WILSON_INTERVAL_ENDPOINTS", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif calibration:
+        _native_require(claim.target["quantity"] == "EXPECTED_CALIBRATION_ERROR", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif log_loss:
+        _native_require(claim.target["quantity"] == "MEAN_LOG_LOSS", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif kelly:
+        _native_require(claim.target["quantity"] == ("RAW_KELLY_FRACTION" if kelly27 else "BOUNDED_FRACTIONAL_KELLY"),
+                        "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif cashflow:
+        _native_require(claim.target["quantity"] == "EXPECTED_NET_CASH", "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif market:
+        _native_require(claim.target["quantity"] == _LP03_MARKET_METRIC_PROFILES_V1[math_id][4],
+                        "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif research:
+        _native_require(claim.target["quantity"] == "EXPECTED_VALUE_OF_INFORMATION",
+                        "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    elif brier:
+        proof = _native_obj(policy["bound_proof"], ("rule", "source_record_refs", "unit"))
+        _native_require(exact_decimal(claim.fixed_upper) == 2 and 0 <= expected["mean_brier_score"] <= 2
+                        and claim.target["currency"] == "NOT_APPLICABLE" and proof["unit"] == "SQUARED_PROBABILITY_ERROR"
+                        and proof["rule"] == "MULTICLASS_SIMPLEX_SQUARED_ERROR_ENCLOSURE"
+                        and type(proof["source_record_refs"]) is list and tuple(proof["source_record_refs"]) == original_input_refs,
+                        "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    else:
+        proof = _native_obj(policy["bound_proof"], ("rule", "payout_ref", "currency"))
+        payout = selected_inputs.authoritative_values["payout"]
+        _native_require(claim.target["currency"] == snapshot.accounting_definition["currency"]
+                        and exact_decimal(claim.fixed_upper) == payout and 0 <= expected <= payout
+                        and proof["rule"] == "CONTRACT_PAYOUT_ENCLOSURE"
+                        and proof["payout_ref"] == next(row.packet_id for row in selected_inputs.inputs if row.input_name == "payout")
+                        and proof["currency"] == claim.target["currency"], "LP03_REGISTRATION_CLAIM_BOUND_OR_TARGET_JOIN")
+    operation.protocol = protocol
+    operation.registration_policy = (_evidence_frozen_data_v1(policy), claim)
+    operation.resolved_policy_original = (protocol, operation.registration_policy,
+        deterministic_json(protocol), deterministic_json(operation.registration_policy), operation.policy_source_originals)
+    if cashflow or edge or research or market or kelly or log_loss or calibration or wilson or bootstrap or reality or spa or multiple or sharpe or pbo or held_out or recorded_dr or ope_point or private_values:
+        operation.resolved_policy_original = (*operation.resolved_policy_original, operation.numerical_original)
+    _EvidenceRegistrationOperationV1._check_current_v1(operation)
+    _require_evidence_source_slice_roster_v1(operation, operation.policy_slices,
+        originals=operation.resolved_policy_original[4], subject=operation)
+    _original_input_assembly_members_v1(preparation, preparation.input_assembly_outcome)
+    operation.commit_state = "POLICIES_RESOLVED"
+
+
 @dataclass(frozen=True, slots=True)
 class SourceClaimJustificationV1:
     binding_rule_ref: str

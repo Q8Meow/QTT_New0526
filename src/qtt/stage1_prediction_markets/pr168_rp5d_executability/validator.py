@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from functools import lru_cache
 from pathlib import Path
+from tempfile import TemporaryDirectory, gettempdir
 from typing import Any
 
 from .models import (
@@ -35,21 +36,12 @@ class RP5DValidationError(AssertionError):
     """Raised when RP5D generated surfaces violate their contract."""
 
 
-def _generated_file_texts() -> dict[str, str]:
+def _generated_file_texts(generated_dir: Path) -> dict[str, str]:
     return {
         path.name: path.read_text(encoding="utf-8")
-        for path in sorted(GENERATED_DIR.glob("*"), key=lambda p: p.name)
+        for path in sorted(generated_dir.glob("*"), key=lambda p: p.name)
         if path.is_file()
     }
-
-
-def _restore_generated_file_texts(snapshot: dict[str, str]) -> None:
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
-    for path in GENERATED_DIR.iterdir():
-        if path.is_file() and path.name not in snapshot:
-            path.unlink()
-    for name, text in snapshot.items():
-        (GENERATED_DIR / name).write_text(text, encoding="utf-8")
 
 
 def _row_files() -> dict[str, list[dict[str, Any]]]:
@@ -341,18 +333,23 @@ def _failures() -> list[str]:
 
 
 def _assert_deterministic() -> None:
-    from .runner import run_layer
+    from .models import REPO_ROOT as source_repo_root
+    from .runner import _run_layer_at
 
-    before = _generated_file_texts()
-    try:
-        run_layer(offline=True)
-        middle = _generated_file_texts()
-        run_layer(offline=True)
-        after = _generated_file_texts()
-    finally:
-        _restore_generated_file_texts(before)
-    if middle != after:
-        raise RP5DValidationError("RP5D generated outputs are not deterministic across repeated runs")
+    parent = Path(gettempdir()).resolve(strict=True)
+    if parent.is_relative_to(source_repo_root):
+        raise RP5DValidationError("RP5D determinism workspace must be outside the checkout")
+    before = _generated_file_texts(GENERATED_DIR)
+    with TemporaryDirectory(prefix="rp5d-validate-", dir=parent) as temporary:
+        output_dir = Path(temporary)
+        for name, body in before.items():
+            with (output_dir / name).open("x", encoding="utf-8") as output:
+                output.write(body)
+        _run_layer_at(output_dir, logical_output_dir=GENERATED_DIR)
+        middle = _generated_file_texts(output_dir)
+        _run_layer_at(output_dir, logical_output_dir=GENERATED_DIR)
+        if middle != _generated_file_texts(output_dir):
+            raise RP5DValidationError("RP5D generated outputs are not deterministic across repeated runs")
 
 
 @lru_cache(maxsize=1)

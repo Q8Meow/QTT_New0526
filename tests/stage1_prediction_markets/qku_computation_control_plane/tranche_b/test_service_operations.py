@@ -589,6 +589,7 @@ def _service() -> QKUComputationControlPlaneV1:
 def test_service_exposes_exact_fifteen_operations_and_preserves_tranche_b_projection() -> None:
     _assert_lp02_frozen_public_bindings()
     _assert_lp02_public_owner_topology_guard()
+    _assert_lp03_local_native_topology_guard()
     _assert_lp02_selected_package_materialization()
     service = _service()
     exact_operation_names = (
@@ -753,6 +754,19 @@ def _assert_lp02_public_owner_topology_guard():
     assert len(owner._public_owner_thread_imports_v1(relative,ast.parse(text)))==5
     assert owner._no_runtime_topology()
     assert not _runtime_topology_failures('source_policy.py',ast.parse(text))
+    sqlite_cases = (
+        ("input_resolver.py", "sqlite3.Connection.execute(reader, sql,", "sqlite3.Connection.executescript(reader, sql,"),
+        ("persistence.py", "?mode=ro", "?mode=rw"),
+        ("sqlite_reference.py", "connect = _sqlite3.connect", "connect = untrusted_factory"),
+    )
+    for file_name, exact, changed in sqlite_cases:
+        sqlite_source = (path.parent/file_name).read_text(encoding="utf-8")
+        assert sqlite_source.count(exact) == 1
+        assert not _runtime_topology_failures(file_name,ast.parse(sqlite_source))
+        assert _runtime_topology_failures(file_name,ast.parse(sqlite_source.replace(exact,changed)))
+        neighbor = sqlite_source + "\ndef neighboring_sqlite_reader():\n    import _sqlite3\n    return _sqlite3.connect('unowned.db')\n"
+        assert _runtime_topology_failures(file_name,ast.parse(neighbor))
+
     assert not owner._public_owner_thread_imports_v1(relative.replace('source_policy.py','service.py'),ast.parse(text))
     mutations=(
         text.replace('import threading','import threading as threads',1),
@@ -783,6 +797,32 @@ def _assert_lp02_public_owner_topology_guard():
         with pytest.MonkeyPatch.context() as patch:
             patch.setattr(owner,'_package_ast',lambda:tuple((p,mutated if p==path else tree) for p,tree in trees))
             assert not owner._no_runtime_topology()
+
+
+def _assert_lp03_local_native_topology_guard():
+    """Keep each native call bound to its complete implementation and path."""
+    import ast
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.validation import REPO_ROOT
+    from tools.validate_no_runtime_artifacts import source_use_native_contract_v1
+
+    package = "src/qtt/stage1_prediction_markets/qku_computation_control_plane/"
+    owners = (
+        ("src/qtt/service/pr169_svc1_resolvers.py", 'ctypes.WinDLL("kernel32", use_last_error=True)'),
+        (package + "latency_policy.py", 'ctypes.WinDLL("ntdll.dll", use_last_error=True, winmode=0x800)'),
+        (package + "persistence.py", 'ctypes.WinDLL("kernel32.dll", use_last_error=True, winmode=0x800)'),
+    )
+    for path, approved_call in owners:
+        source = (REPO_ROOT / path).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        assert not source_use_native_contract_v1(path, tree)
+        assert "SOURCE_USE_NATIVE_DLL_BOUNDARY" in source_use_native_contract_v1(package + "alternate.py", tree)
+        assert source.count(approved_call) == 1
+        for changed in (
+            source.replace(approved_call, 'ctypes.WinDLL("other.dll")'),
+            source.replace(approved_call, approved_call + " if False else None"),
+            source + "\ndef neighboring_native_owner():\n    " + approved_call + "\n",
+        ):
+            assert "SOURCE_USE_NATIVE_DLL_BOUNDARY" in source_use_native_contract_v1(path, ast.parse(changed))
 
 
 def _assert_lp02_frozen_public_bindings():

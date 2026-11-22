@@ -1775,6 +1775,30 @@ def selected_component_package_projection_v1(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _ResolvedEvidenceCallbackV1:
+    registry: object
+    callback_id: str
+    pin: object
+    adapter: PluginAdapterBase
+    implementation: object
+    implementation_code: object
+
+    def is_current_v1(self) -> bool:
+        from inspect import getattr_static
+
+        return (
+            type(self) is _ResolvedEvidenceCallbackV1
+            and self.registry.adapters.get(self.callback_id) is self.adapter
+            and getattr_static(type(self.adapter), "evidence_callback_pin_v1", None) is self.pin
+            and getattr_static(type(self.adapter), "on_event_v1", None) is self.implementation
+            and self.implementation.__code__ is self.implementation_code
+            and self.implementation.__defaults__ is None
+            and self.implementation.__kwdefaults__ is None
+            and not vars(self.adapter)
+        )
+
+
 @dataclass
 class PluginRegistry:
     adapters: dict[str, PluginAdapterBase] = field(default_factory=dict)
@@ -1789,3 +1813,38 @@ class PluginRegistry:
 
     def ids(self) -> tuple[str, ...]:
         return tuple(sorted(self.adapters))
+
+    def resolve_evidence_callback_v1(self, pin, *, callback_id, implementation_ref,
+                                     package_id, package_manifest=None, launch_projection=None):
+        """Resolve the exact immutable plugin registration and its package entry."""
+        from inspect import getattr_static, Parameter, signature
+        from types import FunctionType
+
+        if type(self) is not PluginRegistry or pin is None:
+            raise ValueError("LP03_CALLBACK_ORIGINAL_OWNER")
+        adapter = self.adapters.get(callback_id)
+        if not isinstance(adapter, PluginAdapterBase) or vars(adapter):
+            raise ValueError("LP03_CALLBACK_ORIGINAL_STATELESS_ADAPTER")
+        declared = getattr_static(type(adapter), "evidence_callback_pin_v1", None)
+        implementation = getattr_static(type(adapter), "on_event_v1", None)
+        if (declared is not pin or type(implementation) is not FunctionType
+                or implementation.__closure__ is not None):
+            raise ValueError("LP03_CALLBACK_IMPLEMENTATION_OR_VERSION")
+        parameters = tuple(signature(implementation, follow_wrapped=False).parameters.values())
+        if (tuple(row.name for row in parameters) != ("self", "event", "immutable_inputs", "lane_state", "scenario_values")
+                or any(row.kind is not Parameter.POSITIONAL_OR_KEYWORD or row.default is not Parameter.empty
+                       for row in parameters)):
+            raise ValueError("LP03_CALLBACK_EXACT_INTERFACE")
+        if package_manifest is not None or launch_projection is not None:
+            if (type(package_manifest) is not SelectedComponentPackageManifestV1
+                    or package_manifest.package_id != package_id or not isinstance(launch_projection, Mapping)):
+                raise ValueError("LP03_CALLBACK_ORIGINAL_PACKAGE_REQUIRED")
+            _require_valid_manifest(package_manifest, canonical_launch_graph_projection=launch_projection)
+            admitted = tuple(entry for entry in package_manifest.entries
+                if entry.package_component_id == implementation_ref
+                and entry.admission_state is PackageAdmissionStateV1.ADMITTED_CONTRACT_ONLY_NO_EFFECT
+                and adapter.plugin_family in (entry.primary_plugin_family_or_none, *entry.supporting_plugin_families))
+            if len(admitted) != 1:
+                raise ValueError("LP03_CALLBACK_PACKAGE_IMPLEMENTATION_NOT_ADMITTED")
+        return _ResolvedEvidenceCallbackV1(self, callback_id, declared, adapter,
+                                           implementation, implementation.__code__)

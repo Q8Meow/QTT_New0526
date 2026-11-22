@@ -8785,3 +8785,118 @@ class RetailPrivateSourceRegistryV1:
             valid_from=session.valid_from_utc.isoformat(), valid_until=session.valid_until_utc.isoformat(),
             rights_receipt_ref=session.rights_receipt.receipt_id,
             currentization_receipt_ref=session.source_receipt.receipt_id)
+
+
+def _intersect_conformance_assembly_rights_v1(policy, selection, *, scope, observed_wall_ns):
+    """Intersect original synthetic policy metadata; never issue source rights.
+
+    Only the original registry custody calls this while holding its owner lock.
+    The returned immutable policy remains data, not a read or native capability.
+    """
+    from .context import _native_require, _public_counter_v1
+    from .models import (EvidenceAbsenceV1, EvidenceAssemblyScopeV1,
+        EvidenceConformanceSourceRightsV1, EvidenceExactSelectionV1, EvidenceSourceSelectionV1)
+
+    _native_require(type(policy) is EvidenceConformanceSourceRightsV1
+                    and type(selection) is EvidenceSourceSelectionV1
+                    and type(scope) is EvidenceAssemblyScopeV1, "LP03_ORIGINAL_RIGHTS_TYPES")
+    _public_counter_v1(observed_wall_ns, allow_zero=True)
+    allowed = policy.source_selection
+    _native_require(scope.origin is policy.origin
+                    and policy.valid_from_wall_ns <= observed_wall_ns < policy.exclusive_expiry_wall_ns
+                    and observed_wall_ns < policy.exclusive_retention_wall_ns,
+                    "LP03_ORIGINAL_RIGHTS_CURRENT_USE_DENIED")
+    if scope.assembler_principal not in policy.consumer_principals or scope.source_purpose not in policy.source_purposes:
+        from .errors import ContractValidationError
+        raise ContractValidationError(ReasonCode.EVIDENCE_SOURCE_PURPOSE_DENIED, "LP03_ORIGINAL_RIGHTS_CURRENT_USE_DENIED")
+    _native_require((selection.original_store_id, selection.original_owner_id)
+                    == (allowed.original_store_id, allowed.original_owner_id)
+                    and set(selection.permitted_record_kinds) <= set(allowed.permitted_record_kinds)
+                    and set(selection.allowed_fields) <= set(allowed.allowed_fields)
+                    and selection.required_original_rights_refs == allowed.required_original_rights_refs
+                    and selection.result_limit <= allowed.result_limit,
+                    "LP03_ORIGINAL_RIGHTS_SCOPE_DENIED")
+    for name in ("profile_scope", "market_scope", "instrument_scope", "account_scope"):
+        narrower, wider = getattr(selection, name), getattr(allowed, name)
+        _native_require(narrower == wider if type(wider) is EvidenceAbsenceV1
+                        else type(narrower) is tuple and set(narrower) <= set(wider),
+                        "LP03_ORIGINAL_RIGHTS_ECONOMIC_SCOPE_DENIED")
+    _native_require(type(selection.selection) is EvidenceExactSelectionV1
+                    and set(selection.selection.record_refs) <= set(allowed.selection.record_refs)
+                    and allowed.effective_from_wall_ns <= selection.effective_from_wall_ns
+                    < selection.effective_until_wall_ns <= allowed.effective_until_wall_ns
+                    and allowed.known_from_wall_ns <= selection.known_from_wall_ns
+                    < selection.known_until_wall_ns <= allowed.known_until_wall_ns,
+                    "LP03_ORIGINAL_RIGHTS_SELECTION_DENIED")
+    clocks = dict(policy.native_clock_companions)
+    for ref in selection.selection.record_refs:
+        row = dict(clocks[ref])
+        _native_require(selection.effective_from_wall_ns <= row["effective_time"] < selection.effective_until_wall_ns
+                        and selection.known_from_wall_ns <= row["available_time"] < selection.known_until_wall_ns
+                        and max(row.values()) <= scope.snapshot_decision_wall_ns
+                        and row["available_time"] <= scope.snapshot_pit_cutoff_wall_ns,
+                        "LP03_ORIGINAL_SOURCE_POINT_IN_TIME_DENIED")
+    return policy
+
+
+class _EvidenceHistoricalReadV1:
+    """Original-owner assembly read, deliberately distinct from lane authority."""
+
+    __slots__ = ("issuer", "requester", "assembly_grant", "registry", "selection")
+
+    def __init__(self):
+        raise TypeError("historical reads require original source and assembly admission")
+
+    def __copy__(self):
+        raise TypeError("LP03 source read capability cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise TypeError("LP03 source read capability cannot be copied")
+
+    def __reduce_ex__(self, protocol):
+        raise TypeError("LP03 source read capability cannot be serialized")
+
+
+def admit_historical_evidence_read_v1(*, assembly_grant, requester_context, original_owner_registry, source_selection):
+    """Narrow the original owner policy after resolving the current assembly.
+
+    This direct synthetic branch never creates SourceUseAuthorityV1 or native
+    capture/PIT authority. Observed histories require their separate LP02 path.
+    """
+    from contextlib import ExitStack
+    from ...agents.pr169_agent_orch1_resolvers import AgentOrchService, EvidenceAssemblyGrantV1
+    from .context import _native_require
+    from .input_lock import EvidenceAssemblerContextV1
+    from .input_resolver import _require_evidence_packet_custody_v1
+    from .models import EvidenceOriginV1, EvidenceSourceSelectionV1
+
+    _native_require(type(assembly_grant) is EvidenceAssemblyGrantV1
+                    and type(requester_context) is EvidenceAssemblerContextV1
+                    and type(source_selection) is EvidenceSourceSelectionV1,
+                    "LP03_HISTORICAL_ASSEMBLY_READ_TYPES")
+    state = EvidenceAssemblerContextV1._require_original_v1(requester_context)
+    custody = _require_evidence_packet_custody_v1(original_owner_registry)
+    _native_require(assembly_grant._owner is state and any(custody is item for item in state.source_custodies),
+                    "LP03_HISTORICAL_ORIGINAL_OWNER_REQUIRED")
+    with state.lock, ExitStack() as locks:
+        state._lock_original_source_custodies_v1(locks)
+        original_grant = AgentOrchService.resolve_evidence_assembly_grant_v1(state.service, assembly_grant.grant_ref,
+            purpose="EVIDENCE_INPUT_ASSEMBLY_V1", requester_context=requester_context)
+        _native_require(original_grant is assembly_grant, "LP03_HISTORICAL_ORIGINAL_GRANT_REQUIRED")
+        operation, _, _source_original = state.preparations[assembly_grant.grant_ref]
+        scope = operation.envelope_entry[3].assembly_scope
+        selected = tuple(row for row in scope.source_selections if row == source_selection)
+        _native_require(scope.origin is EvidenceOriginV1.SOFTWARE_CONFORMANCE and len(selected) == 1
+                        and all(ref in custody.rights_by_id for ref in selected[0].required_original_rights_refs),
+                        "LP03_HISTORICAL_SOURCE_SCOPE_UNAVAILABLE")
+        for original in operation.source_read_capabilities:
+            if (original.requester is requester_context and original.registry is original_owner_registry
+                    and original.selection is selected[0]):
+                return original
+        _native_require(len(operation.source_read_capabilities) < len(scope.source_selections),
+                        "LP03_HISTORICAL_READ_ROSTER_EXHAUSTED")
+        result = object.__new__(_EvidenceHistoricalReadV1)
+        result.issuer, result.requester, result.assembly_grant = state, requester_context, assembly_grant
+        result.registry, result.selection = original_owner_registry, selected[0]
+        operation.source_read_capabilities = (*operation.source_read_capabilities, result)
+        return result
