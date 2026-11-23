@@ -7,22 +7,6 @@ on:
         description: Independently reviewed and owner-bound scratch revision
         required: true
         type: string
-      reviewed_image:
-        description: Exact approved Ubuntu runner image build
-        required: true
-        type: string
-      reviewed_kernel:
-        description: Exact approved native kernel release
-        required: true
-        type: string
-      reviewed_systemd:
-        description: Exact approved systemd version line
-        required: true
-        type: string
-      reviewed_systemd_manager:
-        description: Exact approved active system manager version
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -40,10 +24,6 @@ jobs:
         shell: bash
         env:
           APPROVED_REVISION: ${{ inputs.reviewed_revision }}
-          APPROVED_IMAGE: ${{ inputs.reviewed_image }}
-          APPROVED_KERNEL: ${{ inputs.reviewed_kernel }}
-          APPROVED_SYSTEMD: ${{ inputs.reviewed_systemd }}
-          APPROVED_MANAGER: ${{ inputs.reviewed_systemd_manager }}
         run: |
           set -euo pipefail
           test "$GITHUB_ACTOR" = Q8Meow
@@ -54,10 +34,19 @@ jobs:
           test "$GITHUB_WORKFLOW_REF" = Q8Meow/QTT_New0526/.github/workflows/qtt_validation.yml@refs/heads/codex/pr309-linux-containment-qualification
           test "$GITHUB_WORKSPACE" = /home/runner/work/QTT_New0526/QTT_New0526
           test "$RUNNER_TOOL_CACHE" = /opt/hostedtoolcache
-          test "$ImageOS" = ubuntu26
-          test "$ImageVersion" = "$APPROVED_IMAGE"
-          test "$(uname -m)" = x86_64
-          test "$(uname -r)" = "$APPROVED_KERNEL"
+          image_os=${ImageOS-}
+          image_version=${ImageVersion-}
+          kernel=$(uname -r)
+          architecture=$(uname -m)
+          printf 'LP03_QUALIFICATION_OBSERVED image_os=%q image_version=%q kernel=%q architecture=%q\n' \
+            "$image_os" "$image_version" "$kernel" "$architecture"
+          grep -E '^(NAME|PRETTY_NAME|VERSION_ID)=' /etc/os-release
+          case "$image_os,$image_version,$kernel" in
+            'ubuntu26,20261116.202.1,7.0.0-1020-azure'|'ubuntu26,20261116.88.1,7.0.0-1016-aws') ;;
+            *) printf 'LP03_QUALIFICATION_REFUSED unsupported runner context\n' >&2; exit 1 ;;
+          esac
+          test "$architecture" = x86_64
+          grep -Fxq 'PRETTY_NAME="Ubuntu 26.04.1 LTS"' /etc/os-release
           (
             shopt -s inherit_errexit
 
@@ -113,11 +102,11 @@ jobs:
             test "$read_status" = 0
             binary_output=$(printf '%s' "$read_stdout" | base64 -d)
             first_line=${binary_output%%$'\n'*}
-            test "$first_line" = "$APPROVED_SYSTEMD"
+            test "$first_line" = 'systemd 259 (259.9-0ubuntu0.1)'
             capture systemd_manager systemctl show --property=Version --value
             test "$read_status" = 0
             manager_version=$(printf '%s' "$read_stdout" | base64 -d)
-            test "$manager_version" = "$APPROVED_MANAGER"
+            test "$manager_version" = '259.9-0ubuntu0.1'
             capture systemd_package dpkg-query -W -f='${Version}\n' systemd
             test "$read_status" = 0
             package_version=$(printf '%s' "$read_stdout" | base64 -d)
@@ -127,6 +116,8 @@ jobs:
           test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs
           test "$(df -B1 --output=avail /run | tail -n 1)" -ge 1073741824
           test "$(df -B1 --output=avail "$RUNNER_TEMP" | tail -n 1)" -ge 1073741824
+          printf 'LP03_QUALIFICATION_CONTEXT_ACCEPTED image_os=%q image_version=%q kernel=%q architecture=%q\n' \
+            "$image_os" "$image_version" "$kernel" "$architecture"
 
           sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/bash -se <<'ROOT_BOOTSTRAP'
           set -euo pipefail
