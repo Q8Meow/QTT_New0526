@@ -79,6 +79,159 @@ jobs:
           python -m pip install pytest==9.1.1
           python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1
 
+      - name: Inspect LP03 Ubuntu containment capability
+        if: >-
+          ${{ github.event_name == 'pull_request'
+          && github.event.action == 'synchronize'
+          && github.repository == 'Q8Meow/QTT_New0526'
+          && github.event.number == 309
+          && github.event.pull_request.draft == true
+          && github.event.pull_request.base.repo.full_name == 'Q8Meow/QTT_New0526'
+          && github.event.pull_request.base.ref == 'main'
+          && github.event.pull_request.head.repo.full_name == 'Q8Meow/QTT_New0526'
+          && github.event.pull_request.head.ref == 's1-lp03-evidence-platform-restart'
+          && github.event.before == 'b5448eaece752382c19b8d4850cda1f2e1e6c475'
+          && github.event.after == github.event.pull_request.head.sha
+          && github.run_attempt == '1' }}
+        continue-on-error: true
+        timeout-minutes: 1
+        run: |
+          python -I -S -B - '${{ matrix.phase }}' <<'PY'
+          import errno
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import stat
+          import sys
+
+
+          def read(path, limit=65536):
+              with open(path, "rb") as stream:
+                  body = stream.read(limit + 1)
+              if len(body) > limit:
+                  raise ValueError("oversized kernel record")
+              return body.decode("ascii")
+
+
+          def flag(path):
+              try:
+                  return {"0": False, "1": True}.get(read(path, 128).strip())
+              except (OSError, ValueError):
+                  return None
+
+
+          def cgroup_mounts():
+              mounts = []
+              for line in read("/proc/self/mountinfo", 262144).splitlines():
+                  before, after = line.split(" - ", 1)
+                  fields, filesystem = before.split(), after.split()
+                  if filesystem[0] == "cgroup2":
+                      mounts.append((fields[3], fields[4], fields[5], filesystem[2]))
+              return mounts
+
+
+          def control_open(directory, name):
+              # An open without truncation or a write does not move or signal a process.
+              try:
+                  fd = os.open(name, os.O_WRONLY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=directory)
+              except OSError as error:
+                  return errno.errorcode.get(error.errno, "OS_ERROR")
+              os.close(fd)
+              return "WRITE_OPEN_ONLY"
+
+
+          def domain_type(directory):
+              fd = os.open("cgroup.type", os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=directory)
+              with os.fdopen(fd, "rb") as stream:
+                  return {
+                      b"domain\n": "domain", b"domain threaded\n": "domain_threaded",
+                      b"threaded\n": "threaded", b"domain invalid\n": "invalid",
+                  }.get(stream.read(32), "unknown")
+
+
+          def socket_owned(path, uid):
+              try:
+                  info = path.stat(follow_symlinks=False)
+              except OSError:
+                  return False
+              return stat.S_ISSOCK(info.st_mode) and info.st_uid == uid
+
+
+          def describe_cgroup(report):
+              mounts = cgroup_mounts()
+              report["cgroup2_mount_count"] = len(mounts)
+              standard = [row for row in mounts if row[:2] == ("/", "/sys/fs/cgroup")]
+              if len(standard) != 1:
+                  return "STANDARD_CGROUP2_MOUNT_UNCONFIRMED"
+              _, _, mount_options, filesystem_options = standard[0]
+              report["mount_writable"] = "rw" in mount_options.split(",") and "rw" in filesystem_options.split(",")
+              report["namespace_delegation_mount_flag"] = "nsdelegate" in filesystem_options.split(",")
+              membership = [line[3:] for line in read("/proc/self/cgroup").splitlines() if line.startswith("0::")]
+              if len(membership) != 1 or not membership[0].startswith("/"):
+                  return "UNIFIED_SELF_MEMBERSHIP_UNCONFIRMED"
+              parts = PurePosixPath(membership[0]).parts
+              if parts[0] != "/" or ".." in parts or str(PurePosixPath(membership[0])) != membership[0]:
+                  return "UNIFIED_SELF_MEMBERSHIP_UNCONFIRMED"
+
+              report["self_cgroup_depth"] = len(parts) - 1
+              flags = os.O_PATH | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+              directories = []
+              try:
+                  directories.append(os.open("/sys/fs/cgroup", flags))
+                  for part in parts[1:]:
+                      directories.append(os.open(part, flags, dir_fd=directories[-1]))
+                  current = directories[-1]
+                  report.update(
+                      current_type=domain_type(current) if len(directories) > 1 else "hierarchy_root",
+                      current_dir_create_access=os.access(".", os.W_OK | os.X_OK, dir_fd=current, effective_ids=True),
+                      current_procs_open=control_open(current, "cgroup.procs"),
+                      current_kill_open=control_open(current, "cgroup.kill"),
+                      parent_procs_open=control_open(directories[-2], "cgroup.procs") if len(directories) > 1 else None,
+                  )
+              finally:
+                  for fd in reversed(directories):
+                      os.close(fd)
+
+              if not report["mount_writable"] or not report["current_dir_create_access"]:
+                  return "CURRENT_CGROUP_HAS_NO_PRIVATE_SUBTREE_CREATION_ACCESS"
+              if report["current_type"] != "domain" or report["current_procs_open"] != "WRITE_OPEN_ONLY":
+                  return "CURRENT_CGROUP_CANNOT_ADMIT_A_CONTAINED_CHILD"
+              # A writable current group gives the same-credential payload a
+              # migration target. The mount flag alone grants no private view.
+              return "NO_PROVEN_MIGRATION_BOUNDARY_FOR_SAME_CREDENTIAL_PAYLOAD"
+
+
+          def observe(phase):
+              report = {
+                  "phase": phase, "kernel_release": os.uname().release,
+                  "payload_children": 0, "disposable_objects": 0,
+                  "cleanup": "NO_OWNED_OBJECTS_CREATED", "qualified": False,
+              }
+              try:
+                  uid = os.geteuid()
+                  report["effective_uid"] = uid
+                  fields = dict(line.split(":", 1) for line in read("/proc/self/status").splitlines() if ":" in line)
+                  capabilities = int(fields["CapEff"].strip(), 16)
+                  if not uid or os.getuid() != uid or os.getegid() != os.getgid() or capabilities:
+                      report["refusal"] = "ORDINARY_JOB_IDENTITY_UNCONFIRMED"
+                      return report
+                  report["no_new_privileges"] = fields["NoNewPrivs"].strip() == "1"
+                  report["unprivileged_user_namespaces"] = flag("/proc/sys/kernel/unprivileged_userns_clone")
+                  report["apparmor_user_namespace_restriction"] = flag("/proc/sys/kernel/apparmor_restrict_unprivileged_userns")
+                  runtime = Path("/run/user") / str(uid)
+                  report["user_bus_socket_owned"] = socket_owned(runtime / "bus", uid)
+                  report["user_manager_socket_owned"] = socket_owned(runtime / "systemd" / "private", uid)
+                  report["refusal"] = describe_cgroup(report)
+              except (OSError, ValueError, KeyError, IndexError, NotImplementedError) as error:
+                  report["refusal"] = "NATIVE_CAPABILITY_UNCONFIRMED"
+                  if isinstance(error, OSError):
+                      report["error"] = errno.errorcode.get(error.errno, "OS_ERROR")
+              return report
+
+
+          print("LP03_UBUNTU_CAPABILITY " + json.dumps(observe(sys.argv[1]), sort_keys=True))
+          PY
+
       - name: Run validation shard
         if: ${{ matrix.phase != 'pytest-shard-8' }}
         run: &validation_shard_command >
