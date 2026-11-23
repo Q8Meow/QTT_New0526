@@ -58,8 +58,71 @@ jobs:
           test "$ImageVersion" = "$APPROVED_IMAGE"
           test "$(uname -m)" = x86_64
           test "$(uname -r)" = "$APPROVED_KERNEL"
-          test "$(systemd --version | head -n 1)" = "$APPROVED_SYSTEMD"
-          test "$(systemctl show --property=Version --value)" = "$APPROVED_MANAGER"
+          (
+            shopt -s inherit_errexit
+
+            capture() {
+              local label=$1 packet
+              shift
+              # Encode each stream in its own pipe before command substitution can strip LF.
+              packet=$(
+                exec 3>&1
+                stdout_b64=$(
+                  {
+                    exec 4>&1
+                    stderr_b64=$(
+                      {
+                        if "$@" 2>&1 1>&4 3>&- 4>&-; then
+                          rc=0
+                        else
+                          rc=$?
+                        fi
+                        printf 'exit=%d\n' "$rc" >&3
+                      } | base64 -w 0
+                    )
+                    printf 'stderr=%s\n' "$stderr_b64" >&3
+                  } | base64 -w 0
+                )
+                printf 'stdout=%s\n' "$stdout_b64" >&3
+              )
+              printf 'LP03_OBSERVATION_BEGIN %s\n%s\nLP03_OBSERVATION_END %s\n' "$label" "$packet" "$label"
+              read_status=${packet%%$'\n'*}
+              read_status=${read_status#exit=}
+              read_stdout=${packet##*$'\n'stdout=}
+            }
+
+            verify_systemd_executable() {
+              local path=/usr/lib/systemd/systemd mode files
+              mode=$(stat --format='%f' -- "$path") || return "$?"
+              if [[ ! "$mode" =~ ^[0-9a-f]+$ ]] ||
+                 (( (16#$mode & 0170000) != 0100000 )) || [[ ! -x "$path" ]]; then
+                printf 'Expected an executable regular file at %s\n' "$path" >&2
+                return 1
+              fi
+              files=$(dpkg-query -L systemd) || return "$?"
+              if [[ $'\n'"$files"$'\n' != *$'\n'"$path"$'\n'* ]]; then
+                printf 'The systemd package does not list %s\n' "$path" >&2
+                return 1
+              fi
+              printf 'path=%s\nmode_hex=%s\npackage=systemd\n' "$path" "$mode"
+            }
+
+            capture systemd_path verify_systemd_executable
+            test "$read_status" = 0
+            capture systemd_binary /usr/lib/systemd/systemd --version
+            test "$read_status" = 0
+            binary_output=$(printf '%s' "$read_stdout" | base64 -d)
+            first_line=${binary_output%%$'\n'*}
+            test "$first_line" = "$APPROVED_SYSTEMD"
+            capture systemd_manager systemctl show --property=Version --value
+            test "$read_status" = 0
+            manager_version=$(printf '%s' "$read_stdout" | base64 -d)
+            test "$manager_version" = "$APPROVED_MANAGER"
+            capture systemd_package dpkg-query -W -f='${Version}\n' systemd
+            test "$read_status" = 0
+            package_version=$(printf '%s' "$read_stdout" | base64 -d)
+            test "$package_version" = 259.9-0ubuntu0.1
+          )
           grep -Fxq 'VERSION_ID="26.04"' /etc/os-release
           test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs
           test "$(df -B1 --output=avail /run | tail -n 1)" -ge 1073741824
