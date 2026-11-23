@@ -37,6 +37,17 @@ PROCESS_ROOT_ENV = "QTT_VALIDATION_PROCESS_ROOT"
 RUN_ID_ENV = "QTT_VALIDATION_RUN_ID"
 EVIDENCE_ROOT_ENV = "QTT_VALIDATION_EVIDENCE_ROOT"
 COMMAND_OWNER_CHANNEL_ENV = "QTT_VALIDATION_COMMAND_OWNER_CHANNEL"
+_LINUX_CI_CONTROLLER = "/run/qtt-lp03-containment/controller"
+_LINUX_CI_GATE = "/run/qtt-lp03-containment/gate/leaf"
+_LINUX_CI_WRITER_ID = 62041
+_LINUX_CI_PAYLOAD_ID = 62042
+_LINUX_CI_WRITER_ENVIRONMENT = frozenset({
+    "PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "TZ", "LD_LIBRARY_PATH", "PYTHONPATH",
+    PROCESS_ROOT_ENV, RUN_ID_ENV, EVIDENCE_ROOT_ENV,
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD", "QTT_TEST_LINUX_CI_NATIVE",
+    "QTT_TEST_QUALIFICATION_ROOT", "QTT_TEST_NESTED_SUPERVISION_CASE",
+    "QTT_TEST_LINUX_CI_SCRATCH", "QTT_TEST_LINUX_CI_OWNER_CASE", "PWD", "SHLVL", "_",
+})
 TERMINATION_GRACE_SECONDS = 5.0
 OUTPUT_DRAIN_INITIAL_WAIT_SECONDS = 0.5
 OUTPUT_DRAIN_COMPLETION_WAIT_SECONDS = 10.0
@@ -4796,6 +4807,204 @@ class _WindowsContainedProcess:
                 setattr(self, field, None)
 
 
+def _linux_ci_credentials(pid_ref: str) -> tuple[tuple[int, ...], tuple[int, ...], bool]:
+    fields = dict(line.split(":", 1) for line in Path(
+        f"/proc/{pid_ref}/status"
+    ).read_text(encoding="ascii").splitlines())
+    user = tuple(map(int, fields["Uid"].split()))
+    group = tuple(map(int, fields["Gid"].split()))
+    if fields["Groups"].split() or any(int(fields[name], 16) for name in (
+        "CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb",
+    )):
+        raise OSError("Linux CI credentials retain groups or capabilities")
+    no_new_privs = fields["NoNewPrivs"].strip()
+    if no_new_privs not in {"0", "1"}:
+        raise OSError("Linux CI no-new-privileges state is ambiguous")
+    return user, group, no_new_privs == "1"
+
+
+def _linux_ci_check_receipt_path(path: Path) -> None:
+    for component in (path, *path.parents):
+        entry = component.lstat()
+        if (not stat.S_ISDIR(entry.st_mode) or entry.st_uid not in {0, _LINUX_CI_WRITER_ID}
+                or entry.st_mode & 0o022):
+            raise OSError("Linux CI receipt ancestry is writable outside the trusted owner")
+    if path.lstat().st_uid != _LINUX_CI_WRITER_ID:
+        raise OSError("Linux CI evidence is not owned by the trusted writer")
+
+
+def _linux_ci_check_helper(cwd: Path, environment: Mapping[str, str]) -> None:
+    helper = cwd / "tools" / "run_pytest_fresh_basetemp.py"
+    library_path = environment.get("LD_LIBRARY_PATH")
+    if (set(environment) - _LINUX_CI_WRITER_ENVIRONMENT
+            or library_path not in {None, "/opt/hostedtoolcache/Python/3.14.6/x64/lib"}
+            or environment.get("PYTHONPATH") not in {None, "/opt/qtt-fixture-site"}):
+        raise OSError("Linux CI helper received an alternate executable or import environment")
+    for path in (helper, Path(__file__).absolute(), Path(sys.executable).resolve(strict=True)):
+        for component in (path, *path.parents):
+            entry = component.lstat()
+            if (stat.S_ISLNK(entry.st_mode) or entry.st_uid != 0 or entry.st_mode & 0o022):
+                raise OSError("Linux CI writer startup input is outside the sealed code view")
+
+
+class _LinuxCIProcess:
+    """Direct-child launch with a privileged controller limited to scope custody."""
+
+    def __init__(
+        self, *, started: float, timeout: float | None, delegated: bool,
+    ) -> None:
+        import socket
+        import struct
+
+        self.process: subprocess.Popen[bytes] | None = None
+        self.connection: socket.socket | None = None
+        self.delegated = delegated
+        self.ready = False
+        self.exec_channel_closed = False
+        self.control_lock = threading.Lock()
+        try:
+            writer = (_LINUX_CI_WRITER_ID,) * 4
+            if _linux_ci_credentials("self") != (writer, writer, False):
+                raise OSError("Linux CI caller is not the dedicated receipt writer")
+            self.connection = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+            self.connection.settimeout(5.0)
+            self.connection.connect(_LINUX_CI_CONTROLLER)
+            peer = self.connection.getsockopt(
+                socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i")
+            )
+            pid, uid, gid = struct.unpack("3i", peer)
+            if pid <= 1 or uid != 0 or gid != 0:
+                raise OSError("CI controller is not a root-owned process")
+            request = {
+                "op": "OPEN_NESTED" if delegated else "OPEN_COMMAND",
+                "started_ns": int(started * 1_000_000_000),
+                "deadline_ns": None if timeout is None else int((started + timeout) * 1_000_000_000),
+            }
+            self.connection.sendall(json.dumps(request).encode("ascii"))
+            if self.connection.recv(32) != b"READY_WITH_RECEIPT_POLICY":
+                raise OSError("CI controller refused command ownership or receipt policy")
+            self.ready = True
+        except (OSError, ValueError, KeyError) as exc:
+            self.close()
+            raise ValidationReliabilityError(
+                "ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE",
+                "protected Linux CI command owner is unavailable",
+            ) from exc
+
+    @property
+    def pid(self) -> int | None:
+        return None if self.process is None else self.process.pid
+
+    @property
+    def stdout(self) -> BinaryIO | None:
+        return None if self.process is None else self.process.stdout
+
+    @property
+    def stderr(self) -> BinaryIO | None:
+        return None if self.process is None else self.process.stderr
+
+    def start(
+        self, argv: Sequence[str], cwd: Path, environment: dict[str, str],
+        inherited_fds: tuple[int, ...], *, sealed_helper: bool,
+    ) -> None:
+        import array
+        import socket
+
+        # The leaf's native transition runs before this isolated interpreter.
+        # The interpreter waits without touching the selected environment until
+        # the controller has independently admitted this same held PID.
+        assert self.connection is not None
+        gate_script = (
+            "import json,os,sys\n"
+            "fd=int(sys.argv[1])\n"
+            "try:\n"
+            " os.write(fd,b'HELD')\n"
+            " if os.read(fd,1)!=b'Y': raise SystemExit(125)\n"
+            " os.set_inheritable(fd,False)\n"
+            " with os.fdopen(int(sys.argv[2]),'rb') as stream: env=json.load(stream)\n"
+            " os.execvpe(sys.argv[3],sys.argv[3:],env)\n"
+            "except BaseException:\n"
+            " try: os.write(fd,b'EXEC_FAILED')\n"
+            " finally: os._exit(125)\n"
+        )
+        if sealed_helper and (self.delegated or not inherited_fds):
+            raise OSError("Linux CI retained writer has no original helper binding")
+        if not sealed_helper and inherited_fds:
+            raise OSError("Linux CI leaf cannot inherit the writer's invocation channel")
+        trusted_python = ["/usr/bin/python3", "-I", "-S", "-B", "-c", gate_script]
+        launch_argv = trusted_python if sealed_helper else [_LINUX_CI_GATE, *trusted_python]
+        gate, child_gate = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        with gate, child_gate, tempfile.TemporaryFile() as payload_environment:
+            gate.settimeout(5.0)
+            payload_environment.write(json.dumps(environment).encode("ascii"))
+            payload_environment.seek(0)
+            self.process = subprocess.Popen(
+                [*launch_argv, str(child_gate.fileno()), str(payload_environment.fileno()), *argv],
+                cwd=cwd, env={"PATH": "/usr/bin:/bin", "LC_ALL": "C"}, stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                start_new_session=True,
+                pass_fds=(*inherited_fds, child_gate.fileno(), payload_environment.fileno()),
+            )
+            child_gate.close()
+            if gate.recv(32) != b"HELD":
+                raise OSError("Linux CI child did not reach the pre-exec gate")
+            pidfd = os.pidfd_open(self.process.pid)
+            try:
+                self.connection.sendmsg(
+                    [b"ADMIT_HELPER" if sealed_helper else b"ADMIT_LEAF"],
+                    [(socket.SOL_SOCKET, socket.SCM_RIGHTS, array.array("i", [pidfd]))],
+                )
+                if self.connection.recv(32) != b"ADMITTED_WITH_RECEIPT_CUSTODY":
+                    raise OSError("Linux CI admission or receipt custody was not established")
+                gate.sendall(b"Y")
+                if gate.recv(32) != b"":
+                    raise OSError("Linux CI held child could not execute the selected command")
+                self.exec_channel_closed = True
+            finally:
+                os.close(pidfd)
+
+    def poll(self) -> int | None:
+        assert self.process is not None
+        return self.process.poll()
+
+    def wait(self, timeout: float) -> int:
+        assert self.process is not None
+        return self.process.wait(timeout=timeout)
+
+    def tree_empty(self) -> bool:
+        empty, _ = self.scope_state()
+        return empty
+
+    def scope_state(self) -> tuple[bool, str]:
+        response = self._controller_reply(b"CHECK")
+        state, _, outcome = response.partition(b":")
+        if (state not in {b"EMPTY", b"POPULATED"}
+                or outcome not in {b"LIVE", b"STOP", b"DEADLINE", b"PHASE", b"OWNER_LOST"}):
+            raise OSError("Linux CI command scope custody is unproved")
+        return state == b"EMPTY", outcome.decode("ascii")
+
+    def stop_tree(self) -> tuple[str, ...]:
+        if self._controller_reply(b"STOP") != b"STOPPED":
+            raise OSError("Linux CI controller did not prove command scope stop")
+        return ("CGROUP_STOP",)
+
+    def _controller_reply(self, request: bytes) -> bytes:
+        assert self.connection is not None
+        with self.control_lock:
+            self.connection.sendall(request)
+            return self.connection.recv(32)
+
+    def close(self) -> None:
+        if self.connection is None:
+            return
+        try:
+            if self.ready and not self.delegated:
+                if self._controller_reply(b"RELEASE") != b"RELEASED":
+                    raise OSError("Linux CI command scope release is unproved")
+        finally:
+            self.connection.close()
+
+
 def hidden_subprocess_kwargs(
     *,
     platform_name: str | None = None,
@@ -4975,7 +5184,7 @@ def _finalize_owned_output_resources(
 
 
 def _supervise_native_output(
-    process: subprocess.Popen[bytes] | _WindowsContainedProcess,
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess | _LinuxCIProcess,
     *,
     stdout_stream: BinaryIO,
     stderr_stream: BinaryIO,
@@ -5036,12 +5245,19 @@ def _supervise_native_output(
                 now = time.monotonic()
                 expired = timeout_seconds is not None and now - started_monotonic >= timeout_seconds
                 capture_failed = any("evidence_error" in outcome for outcome in outcomes)
+                terminal_scope_empty = None
+                independent_abort = False
+                if polled is not None and isinstance(process, _LinuxCIProcess):
+                    terminal_scope_empty, scope_outcome = process.scope_state()
+                    expired = expired or scope_outcome == "DEADLINE"
+                    independent_abort = scope_outcome in {"PHASE", "OWNER_LOST", "STOP"}
                 if expired:
                     state["timeout_state"] = "TRIGGERED"
-                if abort.is_set() or expired or capture_failed:
+                if abort.is_set() or expired or capture_failed or independent_abort:
                     reason = (
                         "ENGVR_PROCESS_START_FAILED" if start_failure is not None else
                         "ENGVR_PROCESS_TIMEOUT" if expired else
+                        "ENGVR_PROCESS_TERMINATION_FAILED" if independent_abort else
                         "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED"
                     )
                     terminal, proven = _terminate_owned_process_tree(
@@ -5054,6 +5270,7 @@ def _supervise_native_output(
                     return
                 if polled is not None:
                     empty = (
+                        terminal_scope_empty if terminal_scope_empty is not None else
                         process.tree_empty() if isinstance(process, _WindowsContainedProcess)
                         else not _posix_process_group_exists(process.pid)
                         if platform_name != "nt" else False
@@ -5295,15 +5512,15 @@ def _posix_process_group_exists(process_group_id: int) -> bool:
 
 
 def _terminate_owned_process_tree(
-    process: subprocess.Popen[bytes] | _WindowsContainedProcess,
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess | _LinuxCIProcess,
     *,
     platform_name: str,
     grace_seconds: float,
 ) -> tuple[str, bool]:
     pid = process.pid
     actions: list[str] = []
-    if isinstance(process, _WindowsContainedProcess):
-        actions.append("JOB_TERMINATE")
+    if isinstance(process, (_WindowsContainedProcess, _LinuxCIProcess)):
+        actions.append("JOB_TERMINATE" if isinstance(process, _WindowsContainedProcess) else "CGROUP_TERMINATE")
         try:
             actions.extend(process.stop_tree())
         except OSError as exc:
@@ -5455,6 +5672,17 @@ def supervise_command(
     """Launch one shell-free child and retain PID, output, and native exit custody."""
 
     selected_platform = os.name if platform_name is None else platform_name
+    linux_ci = (
+        sys.platform == "linux"
+        and os.name == selected_platform == "posix"
+        and platform_name is None
+        and os.geteuid() == _LINUX_CI_WRITER_ID
+    )
+    if linux_ci:
+        evidence_input = Path(evidence_root).absolute()
+        if evidence_input != evidence_input.resolve(strict=True):
+            raise _evidence_failure("Linux CI receipt path contains a redirect")
+        _linux_ci_check_receipt_path(evidence_input)
     evidence_root = Path(evidence_root).resolve(strict=False)
     (
         stdout_path,
@@ -5524,7 +5752,7 @@ def supervise_command(
         "evidence_write_enabled": True,
         "mirror": sys.stderr if mirror_stderr else None,
     }
-    process: subprocess.Popen[bytes] | _WindowsContainedProcess | None = None
+    process: subprocess.Popen[bytes] | _WindowsContainedProcess | _LinuxCIProcess | None = None
     selected_argv: tuple[str, ...] | None = None
     selected_markers: tuple[str, ...] | None = None
     selected_environment: dict[str, str] | None = None
@@ -5546,7 +5774,7 @@ def supervise_command(
                 environment=environment,
             )
         )
-        if selected_platform != "nt" or os.name != "nt":
+        if not linux_ci and (selected_platform != "nt" or os.name != "nt"):
             # A process group does not contain nested supervisors that create
             # their own sessions. Do not launch while whole-descendant native
             # containment is unqualified; Windows evidence cannot authorize it.
@@ -5572,6 +5800,8 @@ def supervise_command(
                 raise _evidence_failure("unbound inherited command owner channel")
             pytest_argv = _nested_pytest_command(selected_argv, receipt_cwd)
             if pytest_argv is not None:
+                if linux_ci:
+                    _linux_ci_check_helper(receipt_cwd, selected_environment)
                 if selected_environment.get(RUN_ID_ENV) != run_id or selected_environment.get(EVIDENCE_ROOT_ENV) != str(evidence_root):
                     raise _evidence_failure("nested helper requires the actual outer run binding")
                 nested_owner = _NestedCommandOwner(
@@ -5583,6 +5813,15 @@ def supervise_command(
         if selected_platform == "nt" and os.name == "nt" and delegated_owner is None:
             process = _WindowsContainedProcess()
             process.start(selected_argv, receipt_cwd, selected_environment)
+        elif linux_ci:
+            process = _LinuxCIProcess(
+                started=started_monotonic, timeout=timeout_seconds,
+                delegated=delegated_owner is not None,
+            )
+            process.start(
+                selected_argv, receipt_cwd, selected_environment, launch_kwargs.get("pass_fds", ()),
+                sealed_helper=nested_owner is not None,
+            )
         else:
             process = subprocess.Popen(
                 list(selected_argv),
@@ -5617,6 +5856,11 @@ def supervise_command(
                     if pipe is not None:
                         pipe.close()
                 process.close_settled_handles()
+            elif isinstance(process, _LinuxCIProcess):
+                try:
+                    process.close()
+                except OSError as release_error:
+                    stdout_outcome.setdefault("evidence_error", release_error)
             process = None
             _close_prestart_evidence_stream(stdout_stream, stdout_outcome)
             _close_prestart_evidence_stream(stderr_stream, stderr_outcome)
@@ -5646,6 +5890,17 @@ def supervise_command(
                 process.close_settled_handles()
             except OSError as exc:
                 stdout_outcome.setdefault("evidence_error", exc)
+        elif isinstance(process, _LinuxCIProcess):
+            if process.exec_channel_closed and (native_exit is None or native_exit < 0 or native_exit == 125):
+                # A cold EOF and a signaled original process do not prove
+                # the selected image ever ran. The held gate cannot return 0.
+                termination_state += ";PAYLOAD_ENTRY_UNKNOWN"
+            try:
+                process.close()
+            except OSError as release_error:
+                termination_state += ";SCOPE_RELEASE_UNPROVEN"
+                failure_class = "ENGVR_PROCESS_TERMINATION_FAILED"
+                stdout_outcome.setdefault("evidence_error", release_error)
         if failure_class != "ENGVR_PROCESS_TERMINATION_FAILED" and any(
             "evidence_error" in outcome
             for outcome in (stdout_outcome, stderr_outcome)

@@ -13487,6 +13487,8 @@ def _assert_process_supervision_contract(monkeypatch, tmp_path: Path) -> None:
     assert mismatch.start_failure_class == "ValidationReliabilityError:ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE"
     assert reliability.command_terminal_custody_proven(mismatch)
 
+    _assert_linux_ci_credential_contract(monkeypatch)
+
     class WindowsStartupInfo:
         def __init__(self):
             self.dwFlags = 0
@@ -15156,6 +15158,7 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         qualification_root = Path(qualification_override).resolve()
 
     native_denials = ("peer-parent-mismatch", "peer-image-mismatch", "peer-outside-job", "launcher-exited") if os.name == "nt" else ()
+    linux_ci = sys.platform == "linux" and os.geteuid() == reliability._LINUX_CI_WRITER_ID
     for case_index, case in enumerate((
         "normal", "nonzero", "survivor", "timeout", "blocked-mirror",
         "blocked-write", "capture-failure", "abort", "publication-failure",
@@ -15177,9 +15180,19 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             reliability.EVIDENCE_ROOT_ENV: str(paths.evidence_root),
             "QTT_TEST_NESTED_SUPERVISION_CASE": case,
         })
+        fixture_root = paths.evidence_root
+        basetemp = paths.pytest_basetemp_root
+        if linux_ci:
+            environment.pop("PYTEST_CURRENT_TEST", None)
+            fixture_root = paths.process_root / "native-fixture"
+            fixture_root.mkdir()
+            fixture_root.chmod(0o777)
+            basetemp.chmod(0o777)
+            basetemp /= "leaf"
+            environment["QTT_TEST_LINUX_CI_SCRATCH"] = str(fixture_root)
         command = (sys.executable, "-B", "tools/run_pytest_fresh_basetemp.py",
                    node, "-q", "-s", "--import-mode=importlib",
-                   "--basetemp", str(paths.pytest_basetemp_root))
+                   "--basetemp", str(basetemp))
         stopped = threading.Event()
         stop_calls: list[tuple[int, int]] = []
         blocked: list[str] = []
@@ -15200,7 +15213,7 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             if b"NESTED_DESCENDANT_READY" not in data or blocked:
                 return
             if not descendant_handles and case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"}:
-                fixture = json.loads((paths.evidence_root / "native-topology.json").read_text(encoding="utf-8"))
+                fixture = json.loads((fixture_root / "native-topology.json").read_text(encoding="utf-8"))
                 if os.name == "nt":
                     import _winapi
                     handle = _winapi.OpenProcess(0x00100400, False, fixture["descendant_pid"])
@@ -15210,7 +15223,7 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
                 else:
                     handle = os.pidfd_open(fixture["descendant_pid"])
                 descendant_handles.append(handle)
-                (paths.evidence_root / "descendant-handle-bound").write_text("original handle retained\n", encoding="ascii")
+                (fixture_root / "descendant-handle-bound").write_text("original handle retained\n", encoding="ascii")
             if case == "blocked-" + operation:
                 blocked.append(operation)
                 assert stopped.wait(20), "deadline owner was blocked by output I/O"
@@ -15307,6 +15320,12 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         assert "TERMINAL:PROVEN" in receipt.termination_state, receipt
         assert not any(t.name == "qtt-command-termination" and t.is_alive() for t in threading.enumerate())
         assert len(stop_calls) <= 1, stop_calls
+        if case in native_denials:
+            assert not (fixture_root / "native-topology.json").exists()
+            assert not tuple(paths.evidence_root.glob("nested-pytest-*"))
+        elif case != "launch-abort":
+            fixture = json.loads((fixture_root / "native-topology.json").read_text(encoding="utf-8"))
+            assert len({fixture["pytest_pid"], fixture["descendant_pid"], receipt.pid}) == 3
         if case in {"normal", "nonzero", "survivor", "publication-failure"}:
             assert reliability.command_terminal_custody_proven(receipt), receipt
             expected = {"normal": None, "nonzero": "ENGVR_NATIVE_EXIT_NONZERO",
@@ -15320,7 +15339,9 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             assert b"\x00\xffNESTED_BINARY\r\n" in (roots[0] / "command-1.stdout.bin").read_bytes()
             assert b"\xfe\x00NESTED_STDERR\r\n" in (roots[0] / "command-1.stderr.bin").read_bytes()
             assert (nested["native_exit_code"] == 0) == (case != "nonzero")
-            reliability.cleanup_validation_run(paths)
+            cleanup_state = reliability.cleanup_validation_run(paths)
+            if linux_ci:
+                assert cleanup_state == "PASS_REMOVED_EXACT_RUN_ROOT", cleanup_state
         else:
             assert receipt.failure_class is not None, receipt
             assert not reliability.command_terminal_custody_proven(receipt), receipt
@@ -15332,12 +15353,6 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         if case == "launch-abort":
             assert receipt.start_failure_class is None
             assert "STARTED_LAUNCH_FAILED:KeyboardInterrupt" in receipt.termination_state
-        if case in native_denials:
-            assert not (paths.evidence_root / "native-topology.json").exists()
-            assert not tuple(paths.evidence_root.glob("nested-pytest-*"))
-        elif case != "launch-abort":
-            fixture = json.loads((paths.evidence_root / "native-topology.json").read_text(encoding="utf-8"))
-            assert len({fixture["pytest_pid"], fixture["descendant_pid"], receipt.pid}) == 3
 
     registered = tmp_path / "registered-nested"
     registered.mkdir()
@@ -15351,6 +15366,67 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         owner.verify_terminal()
 
 
+def _assert_linux_ci_credential_contract(monkeypatch) -> None:
+    import socket
+    import struct
+
+    writer = reliability._LINUX_CI_WRITER_ID
+    payload = reliability._LINUX_CI_PAYLOAD_ID
+    fields = {
+        "Uid": f"{writer} {writer} {writer} {writer}",
+        "Gid": f"{writer} {writer} {writer} {writer}",
+        "Groups": "",
+        "CapInh": "0",
+        "CapPrm": "0",
+        "CapEff": "0",
+        "CapBnd": "0",
+        "CapAmb": "0",
+        "NoNewPrivs": "0",
+    }
+
+    def status(path, *, encoding):
+        assert path == Path("/proc/self/status") and encoding == "ascii"
+        return "\n".join(f"{field}: {value}" for field, value in fields.items())
+
+    with monkeypatch.context() as observed:
+        observed.setattr(Path, "read_text", status)
+        assert reliability._linux_ci_credentials("self") == ((writer,) * 4, (writer,) * 4, False)
+        for key in ("Groups", "CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb", "NoNewPrivs"):
+            expected = fields[key]
+            fields[key] = "2"
+            with pytest.raises(OSError):
+                reliability._linux_ci_credentials("self")
+            fields[key] = expected
+
+        fields["Uid"] = f"{payload} {payload} {writer} {payload}"
+        with pytest.raises(reliability.ValidationReliabilityError, match="ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE"):
+            reliability._LinuxCIProcess(started=0, timeout=None, delegated=False)
+
+        fields["Uid"] = f"{writer} {writer} {writer} {writer}"
+        sent = []
+        closed = []
+        replies = iter((b"READY_WITH_RECEIPT_POLICY", b"EMPTY:DEADLINE", b"RELEASED"))
+        controller = SimpleNamespace(
+            settimeout=lambda timeout: None,
+            connect=lambda endpoint: None,
+            getsockopt=lambda *_args: struct.pack("3i", 2, 0, 0),
+            sendall=sent.append,
+            recv=lambda size: next(replies),
+            close=lambda: closed.append(True),
+        )
+        for name, synthetic in (("AF_UNIX", 1), ("SOCK_SEQPACKET", 5), ("SO_PEERCRED", 17)):
+            if not hasattr(socket, name):
+                observed.setattr(socket, name, synthetic, raising=False)
+        observed.setattr(socket, "socket", lambda *_args: controller)
+        process = reliability._LinuxCIProcess(started=1.25, timeout=0.75, delegated=False)
+        assert process.scope_state() == (True, "DEADLINE")
+        process.close()
+        assert json.loads(sent[0]) == {
+            "op": "OPEN_COMMAND", "started_ns": 1_250_000_000, "deadline_ns": 2_000_000_000,
+        }
+        assert sent[1:] == [b"CHECK", b"RELEASE"] and closed == [True]
+
+
 def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
     monkeypatch,
     tmp_path,
@@ -15361,6 +15437,16 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
         assert fixture_case in {"normal", "nonzero", "survivor", "timeout", "blocked-mirror",
                                 "blocked-write", "capture-failure", "abort", "publication-failure", "launch-abort"}
         retained = Path(os.environ[reliability.EVIDENCE_ROOT_ENV])
+        linux_scratch = os.environ.get("QTT_TEST_LINUX_CI_SCRATCH")
+        if linux_scratch is not None:
+            assert sys.platform == "linux"
+            payload = reliability._LINUX_CI_PAYLOAD_ID
+            assert reliability._linux_ci_credentials("self") == ((payload,) * 4, (payload,) * 4, True)
+            with pytest.raises(PermissionError):
+                (retained / "unexpected-payload-receipt.json").open("xb")
+            retained = Path(linux_scratch)
+            tmp_path.chmod(0o777)
+            tmp_path.parent.chmod(0o777)
         descendant_script = (
             "import os,time;print(os.getpid(),flush=True);os.close(1);"
             + ("time.sleep(60)" if fixture_case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"} else "")
@@ -15368,7 +15454,8 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
         descendant = subprocess.Popen(
             (sys.executable, "-c", descendant_script), stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-            **reliability.hidden_subprocess_kwargs(new_process_group=False),
+            **({"start_new_session": True} if linux_scratch is not None else
+               reliability.hidden_subprocess_kwargs(new_process_group=False)),
         )
         assert descendant.stdout is not None
         descendant_pid = int(descendant.stdout.readline())
@@ -15389,6 +15476,17 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
             assert descendant.wait(timeout=5) == 0
         assert fixture_case != "nonzero", "intentional native nonzero fixture"
         return
+    if os.environ.get("QTT_TEST_LINUX_CI_NATIVE") == "1":
+        assert sys.platform == "linux" and os.geteuid() == reliability._LINUX_CI_WRITER_ID
+        owner_case = os.environ["QTT_TEST_LINUX_CI_OWNER_CASE"]
+        if owner_case in {"stop", "death"}:
+            _assert_linux_ci_owner_challenge(monkeypatch, owner_case)
+            return
+        assert owner_case == "normal"
+        _assert_linux_ci_credential_contract(monkeypatch)
+        _assert_linux_ci_native_boundary(monkeypatch)
+        _assert_nested_process_supervision_contract(monkeypatch, tmp_path)
+        return
     _assert_nested_process_supervision_contract(monkeypatch, tmp_path)
     _assert_path_projection_contract(monkeypatch, tmp_path)
     _assert_process_supervision_contract(monkeypatch, tmp_path)
@@ -15403,6 +15501,118 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
     _assert_receipt_publication_failure_accounting(monkeypatch, tmp_path, capsys)
     _assert_exact_cleanup_contract(monkeypatch)
     _assert_unsettled_custody_blocks_mutation(monkeypatch, tmp_path)
+
+
+def _assert_linux_ci_native_boundary(monkeypatch) -> None:
+    qualification_root = Path(os.environ["QTT_TEST_QUALIFICATION_ROOT"])
+    declined = qualification_root / "unavailable-controller.evidence"
+    declined.mkdir(mode=0o700)
+    with monkeypatch.context() as missing:
+        missing.setattr(reliability, "_LINUX_CI_CONTROLLER", "/run/qtt-lp03-containment/absent-controller")
+        refusal = reliability.supervise_command(
+            (sys.executable, "-B", "-c", "raise AssertionError('controller refusal must not launch')"),
+            cwd=REPO_ROOT, run_id="run_unavailable_linux_controller", phase="linux-qualification",
+            command_index=1, evidence_root=declined, mirror_stdout=False, mirror_stderr=False,
+        )
+    assert refusal.pid is None and refusal.native_exit_code is None, refusal
+    assert refusal.start_failure_class == "ValidationReliabilityError:ENGVR_PLATFORM_CONTAINMENT_UNAVAILABLE"
+    assert reliability.command_terminal_custody_proven(refusal), refusal
+    evidence = qualification_root / "native-boundary.evidence"
+    evidence.mkdir(mode=0o700)
+    canary = evidence / "policy-canary"
+    canary.write_bytes(b"original writer bytes\n")
+    leaf = """
+import os
+from pathlib import Path
+import signal
+import sys
+
+for signum in (0, signal.SIGCONT):
+    try:
+        os.kill(os.getppid(), signum)
+    except PermissionError:
+        pass
+    else:
+        raise AssertionError('payload can signal trusted writer')
+
+canary = Path(sys.argv[1])
+for operation in (lambda: canary.open('r+b'), lambda: canary.chmod(0o777),
+                  lambda: os.utime(canary), lambda: os.setxattr(canary, 'user.leaf', b'changed')):
+    try:
+        operation()
+    except PermissionError:
+        pass
+    else:
+        raise AssertionError('payload can change writer evidence')
+
+owned = Path('/proc/self/cgroup').read_text(encoding='ascii').strip().removeprefix('0::')
+parent = Path('/sys/fs/cgroup') / Path(owned).parent.relative_to('/')
+try:
+    descriptor = os.open(parent / 'cgroup.procs', os.O_WRONLY)
+except OSError as exc:
+    import errno
+    assert exc.errno in {errno.EPERM, errno.EACCES, errno.EROFS}, exc
+else:
+    os.close(descriptor)
+    raise AssertionError('payload can open outward cgroup migration control')
+assert not Path('/run/systemd/private').exists()
+assert not Path('/run/dbus/system_bus_socket').exists()
+os.write(1, b'\\x00native payload\\xff\\n')
+os.write(2, b'\\xfenative stderr\\n')
+"""
+    receipt = reliability.supervise_command(
+        (sys.executable, "-B", "-c", leaf, str(canary)),
+        cwd=REPO_ROOT, run_id="run_linux_native_boundary", phase="linux-qualification",
+        command_index=1, evidence_root=evidence, timeout_seconds=20,
+        mirror_stdout=False, mirror_stderr=False,
+    )
+    assert receipt.native_exit_code == 0 and receipt.failure_class is None, receipt
+    assert reliability.command_terminal_custody_proven(receipt), receipt
+    assert Path(receipt.stdout_path).read_bytes() == b"\x00native payload\xff\n"
+    assert Path(receipt.stderr_path).read_bytes() == b"\xfenative stderr\n"
+    assert canary.read_bytes() == b"original writer bytes\n"
+
+
+def _assert_linux_ci_owner_challenge(monkeypatch, case: str) -> None:
+    import signal
+
+    evidence = Path(os.environ["QTT_TEST_QUALIFICATION_ROOT"]) / f"owner-{case}.evidence"
+    evidence.mkdir(mode=0o700)
+    supervise = reliability._supervise_native_output
+    mirror = reliability._mirror_bytes
+    introduced = False
+
+    def observe(process, **kwargs):
+        def challenge(data, target):
+            nonlocal introduced
+            if b"QUALIFICATION_CHILD_READY\n" in data and not introduced:
+                introduced = True
+                assert isinstance(process, reliability._LinuxCIProcess)
+                assert process.connection is not None
+                process.connection.settimeout(15.0)
+                assert process._controller_reply(b"QUALIFY_OWNER") == b"STOP_INDEPENDENTLY_SETTLED"
+                process.connection.settimeout(5.0)
+            mirror(data, target)
+
+        with monkeypatch.context() as captured:
+            captured.setattr(reliability, "_mirror_bytes", challenge)
+            return supervise(process, **kwargs)
+
+    with monkeypatch.context() as observed:
+        observed.setattr(reliability, "_supervise_native_output", observe)
+        receipt = reliability.supervise_command(
+            (sys.executable, "-B", "-c",
+             "import os,time; os.write(1,b'QUALIFICATION_CHILD_READY\\n'); time.sleep(60)"),
+            cwd=REPO_ROOT, run_id=f"run_native_owner_{case}", phase="linux-qualification",
+            command_index=1, evidence_root=evidence, timeout_seconds=8,
+            mirror_stdout=True, mirror_stderr=False,
+        )
+    assert case == "stop", "owner-death fixture returned to the original writer"
+    assert introduced and receipt.timeout_state == "TRIGGERED", receipt
+    assert receipt.failure_class == "ENGVR_PROCESS_TIMEOUT", receipt
+    assert receipt.native_exit_code == -signal.SIGKILL, receipt
+    assert reliability.command_terminal_custody_proven(receipt), receipt
+    assert Path(receipt.stdout_path).read_bytes() == b"QUALIFICATION_CHILD_READY\n"
 
 
 def test_st12h_pr152_guidance_follows_stable_outputs_before_one_full_route() -> None:

@@ -1,191 +1,836 @@
-name: QTT Validation
+name: LP03 Linux containment qualification
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
-      full_validation:
-        description: Run the full validation suite
+      reviewed_revision:
+        description: Independently reviewed and owner-bound scratch revision
         required: true
-        default: true
-        type: boolean
-  push:
-    branches:
-      - main
+        type: string
+      reviewed_image:
+        description: Exact approved Ubuntu runner image build
+        required: true
+        type: string
+      reviewed_kernel:
+        description: Exact approved native kernel release
+        required: true
+        type: string
+      reviewed_systemd:
+        description: Exact approved systemd version line
+        required: true
+        type: string
+      reviewed_systemd_manager:
+        description: Exact approved active system manager version
+        required: true
+        type: string
 
 permissions:
   contents: read
 
-env:
-  QTT_FORCE_FULL_VALIDATION: ${{ github.event_name == 'workflow_dispatch' && inputs.full_validation && '1' || '0' }}
-
 jobs:
-  validation_shards:
-    name: Validation Shard (${{ matrix.group }})
+  lp03_linux_containment_qualification:
+    name: LP03 Linux Containment Qualification
+    if: ${{ github.repository == 'Q8Meow/QTT_New0526' && github.ref == 'refs/heads/codex/pr309-linux-containment-qualification' }}
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.phase == 'pytest-shard-8' && 300 || 90 }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - phase: fast-preflight
-            group: fast-preflight
-          - phase: deterministic-validators-a
-            group: tools-generated-artifacts-a
-          - phase: deterministic-validators-b
-            group: tools-generated-artifacts-b
-          - phase: deterministic-validators-c
-            group: tools-generated-artifacts-c
-          - phase: pytest-shard-1
-            group: tools-core
-          - phase: pytest-shard-2
-            group: tools-authority-boundary
-          - phase: pytest-shard-3
-            group: pr168-rp-core
-          - phase: pytest-shard-4
-            group: pr168-rp-evidence
-          - phase: pytest-shard-5
-            group: pr168-rp-quantum
-          - phase: pytest-shard-6
-            group: pr168-rp-dag-no-orphan
-          - phase: pytest-shard-7
-            group: repo-wide-integrity-a
-          - phase: pytest-shard-8
-            group: repo-wide-integrity-b
-          - phase: post-validation
-            group: repo-wide-integrity
-
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: &checkout_full
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14.6'
-
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: &pip_cache
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-${{ hashFiles('.github/workflows/qtt_validation.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-
-
-      - name: Install test dependency
-        run: &install_pytest |
-          python -m pip install pytest==9.1.1
-          python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1
-
-      - name: Run validation shard
-        if: ${{ matrix.phase != 'pytest-shard-8' }}
-        run: &validation_shard_command >
-          python -B tools/run_validation_gates.py
-          --phase ${{ matrix.phase }}
-          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json
-          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
-
-      - name: Run validation shard 8
-        if: ${{ matrix.phase == 'pytest-shard-8' }}
-        timeout-minutes: 270
-        run: *validation_shard_command
-
-      - name: Upload validation timing artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-timing-${{ matrix.phase }}
-          path: .tmp/qtt-validation-timing/${{ matrix.phase }}.json
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload validation router artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-router-${{ matrix.phase }}
-          path: .tmp/qtt-validation-router/${{ matrix.phase }}.json
-          if-no-files-found: warn
-          retention-days: 7
-
-  validation:
-    name: Validation Gates
-    runs-on: ubuntu-latest
-    needs:
-      - validation_shards
-    if: ${{ always() }}
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14.6'
-
-      - name: Download validation shard artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: validation-*
-          path: .tmp/qtt-validation-artifacts
-
-      - name: Aggregate validation shard artifacts
-        run: >
-          python -B tools/validate_pr169_val1.py
-          --repo-root .
-          --artifact-root .tmp/qtt-validation-artifacts
-
-      - name: Verify AtomicRows bundle materialized and SHA absent
-        run: |
-          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
-          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
-          python - <<'PY'
-          from pathlib import Path
-
-          rows = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").read_text(
-              encoding="utf-8"
-          ).splitlines()
-          if len(rows) != 4183:
-              raise SystemExit(f"expected 4183 AtomicRows rows, got {len(rows)}")
-          PY
-
-      - name: Report changed-area validation scope
-        run: python -B tools/changed_area_validation_router.py --repo-root . --report-out .tmp/qtt-validation-router/validation-gates.json
-
-      - name: Fail closed unless every phase succeeded
+      - name: Check the run binding and prepare the fixed host controller
+        id: bootstrap
+        timeout-minutes: 1
+        shell: bash
         env:
-          NEEDS_JSON: ${{ toJSON(needs) }}
+          APPROVED_REVISION: ${{ inputs.reviewed_revision }}
+          APPROVED_IMAGE: ${{ inputs.reviewed_image }}
+          APPROVED_KERNEL: ${{ inputs.reviewed_kernel }}
+          APPROVED_SYSTEMD: ${{ inputs.reviewed_systemd }}
+          APPROVED_MANAGER: ${{ inputs.reviewed_systemd_manager }}
         run: |
-          python - <<'PY'
+          set -euo pipefail
+          test "$GITHUB_ACTOR" = Q8Meow
+          test "$GITHUB_TRIGGERING_ACTOR" = Q8Meow
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$GITHUB_SHA" = "$APPROVED_REVISION"
+          test "$GITHUB_WORKFLOW_SHA" = "$APPROVED_REVISION"
+          test "$GITHUB_WORKFLOW_REF" = Q8Meow/QTT_New0526/.github/workflows/qtt_validation.yml@refs/heads/codex/pr309-linux-containment-qualification
+          test "$GITHUB_WORKSPACE" = /home/runner/work/QTT_New0526/QTT_New0526
+          test "$RUNNER_TOOL_CACHE" = /opt/hostedtoolcache
+          test "$ImageOS" = ubuntu26
+          test "$ImageVersion" = "$APPROVED_IMAGE"
+          test "$(uname -m)" = x86_64
+          test "$(uname -r)" = "$APPROVED_KERNEL"
+          test "$(systemd --version | head -n 1)" = "$APPROVED_SYSTEMD"
+          test "$(systemctl show --property=Version --value)" = "$APPROVED_MANAGER"
+          grep -Fxq 'VERSION_ID="26.04"' /etc/os-release
+          test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs
+          test "$(df -B1 --output=avail /run | tail -n 1)" -ge 1073741824
+          test "$(df -B1 --output=avail "$RUNNER_TEMP" | tail -n 1)" -ge 1073741824
+
+          sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/bash -se <<'ROOT_BOOTSTRAP'
+          set -euo pipefail
+          umask 022
+          base=/run/qtt-lp03-containment
+          for identity in 62041 62042; do
+            if getent passwd "$identity" >/dev/null || getent group "$identity" >/dev/null; then
+              exit 1
+            fi
+          done
+          mkdir -m 0750 "$base"
+          jail="$base/jail"
+          install -d -m 0755 "$jail"/{usr,workspace,dev,proc,sys/fs/cgroup,run/qtt-lp03-containment,var/qtt,etc,opt/hostedtoolcache/Python/3.14.6/x64}
+          install -d -m 0700 "$base/witness"
+          install -d -m 0755 "$jail/opt/qtt-fixture-site"
+          install -d -m 0750 -o 0 -g 62041 "$jail/run/qtt-lp03-containment/gate"
+          install -d -m 0755 -o 62041 -g 62041 "$jail/var/qtt/runs"
+          install -d -m 0700 -o 62041 -g 62041 "$jail/var/qtt/home"
+          install -d -m 1777 "$jail/tmp"
+          for link in bin lib lib64 sbin; do ln -s "usr/$link" "$jail/$link"; done
+          for node in null zero urandom; do touch "$jail/dev/$node"; done
+          touch "$jail/run/qtt-lp03-containment/gate/leaf"
+          printf 'root:x:0:0:root:/root:/usr/sbin/nologin\nqttwriter:x:62041:62041:QTT writer:/var/qtt/home:/usr/sbin/nologin\nqttpayload:x:62042:62042:QTT payload:/tmp:/usr/sbin/nologin\n' > "$jail/etc/passwd"
+          printf 'root:x:0:\nqttwriter:x:62041:\nqttpayload:x:62042:\n' > "$jail/etc/group"
+          cat > "$base/gate.c" <<'GATE_C'
+          #define _GNU_SOURCE
+          #include <grp.h>
+          #include <string.h>
+          #include <sys/fsuid.h>
+          #include <sys/prctl.h>
+          #include <unistd.h>
+
+          enum { writer = 62041, payload = 62042 };
+
+          int main(int argc, char **argv) {
+              uid_t ruid, euid, suid;
+              gid_t rgid, egid, sgid;
+              if (argc < 8 || strcmp(argv[1], "/usr/bin/python3") != 0
+                  || getresuid(&ruid, &euid, &suid) || getresgid(&rgid, &egid, &sgid)
+                  || ruid != writer || euid != payload || suid != payload
+                  || rgid != writer || egid != payload || sgid != payload
+                  || getgroups(0, NULL) != 0
+                  || setresgid(payload, payload, payload)
+                  || setresuid(payload, payload, payload)
+                  || prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
+                  || getresuid(&ruid, &euid, &suid) || getresgid(&rgid, &egid, &sgid)
+                  || ruid != payload || euid != payload || suid != payload
+                  || rgid != payload || egid != payload || sgid != payload
+                  || setfsuid((uid_t)-1) != payload || setfsgid((gid_t)-1) != payload
+                  || prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) != 1)
+                  return 125;
+
+              char *const clean_env[] = {"PATH=/usr/bin:/bin", "LC_ALL=C", NULL};
+              execve(argv[1], argv + 1, clean_env);
+              return 125;
+          }
+          GATE_C
+          /usr/bin/gcc -static -std=c11 -Wall -Wextra -Werror -O2 "$base/gate.c" -o "$base/leaf"
+          chown 62042:62042 "$base/leaf"
+          chmod 6755 "$base/leaf"
+          cat > "$base/controller.py" <<'CONTROLLER'
+          import array
+          import ctypes
           import json
           import os
+          from pathlib import Path
+          import selectors
+          import signal
+          import socket
+          import stat
+          import struct
+          import subprocess
+          import sys
+          import time
+
+          ROOT = Path("/run/qtt-lp03-containment")
+          WRITER = 62041
+          PAYLOAD = 62042
+          SETTLE_NS = 5_000_000_000
+          LAUNCH_NS = 5_000_000_000
+
+
+          def proc_status(pid):
+              raw = Path(f"/proc/{pid}/status").read_text(encoding="ascii")
+              return dict(line.split(":", 1) for line in raw.splitlines())
+
+
+          def proc_scope(pid):
+              prefix = "0::"
+              row = Path(f"/proc/{pid}/cgroup").read_text(encoding="ascii")
+              if not row.startswith(prefix) or row.count("\n") != 1 or not row.endswith("\n"):
+                  raise OSError("not a single unified cgroup")
+              path = Path(row[len(prefix):-1])
+              if not path.is_absolute() or ".." in path.parts:
+                  raise OSError("unqualified cgroup path")
+              return path
+
+
+          def admit_credentials(pid, identity, parent, no_new_privs):
+              fields = proc_status(pid)
+              ids = (identity,) * 4
+              if (tuple(map(int, fields["Uid"].split())) != ids
+                      or tuple(map(int, fields["Gid"].split())) != ids
+                      or int(fields["PPid"]) != parent or fields["Groups"].strip()
+                      or fields["NoNewPrivs"].strip() != str(int(no_new_privs))
+                      or any(int(fields[name], 16) for name in (
+                          "CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb"))):
+                  raise OSError("command process credentials or original parent refused")
+
+
+          def fd_pid(fd):
+              if Path(f"/proc/self/fd/{fd}").readlink().as_posix() != "anon_inode:[pidfd]":
+                  raise OSError("received object is not a pidfd")
+              lines = Path(f"/proc/self/fdinfo/{fd}").read_text(encoding="ascii").splitlines()
+              values = [int(line.split()[1]) for line in lines if line.startswith("Pid:")]
+              if len(values) != 1 or values[0] <= 1:
+                  raise OSError("pidfd has no live local identity")
+              return values[0]
+
+
+          def receive(conn):
+              packet, controls, flags, _ = conn.recvmsg(
+                  512, socket.CMSG_SPACE(array.array("i").itemsize), socket.MSG_CMSG_CLOEXEC
+              )
+              descriptors = []
+              try:
+                  for level, kind, data in controls:
+                      if level != socket.SOL_SOCKET or kind != socket.SCM_RIGHTS:
+                          raise OSError("unexpected controller ancillary message")
+                      integers = array.array("i")
+                      integers.frombytes(data)
+                      descriptors.extend(integers)
+                  if flags & (socket.MSG_TRUNC | socket.MSG_CTRUNC) or len(descriptors) > 1:
+                      raise OSError("ambiguous controller request")
+                  return packet, descriptors
+              except BaseException:
+                  for descriptor in descriptors:
+                      os.close(descriptor)
+                  raise
+
+
+          def group_protected(group):
+              for path in (group, group / "cgroup.events", group / "cgroup.kill", group / "cgroup.procs"):
+                  entry = path.lstat()
+                  if entry.st_uid != 0 or entry.st_mode & 0o022 or stat.S_ISLNK(entry.st_mode):
+                      raise OSError("unprotected kernel scope control")
+
+
+          def witness(name, payload):
+              with (ROOT / "witness" / name).open("x", encoding="ascii") as stream:
+                  json.dump(payload, stream, sort_keys=True)
+                  stream.write("\n")
+                  stream.flush()
+                  os.fsync(stream.fileno())
+
+
+          class Scope:
+              def __init__(self, unit, serial, deadline):
+                  self.relative = unit / f"command-{serial}"
+                  self.path = Path("/sys/fs/cgroup") / self.relative.relative_to("/")
+                  self.path.mkdir(mode=0o755)
+                  self.shell_deadline = deadline
+                  self.child = None
+                  self.is_helper = False
+                  self.stop_reason = None
+                  self.stop_limit = None
+                  group_protected(self.path)
+
+              def is_empty(self):
+                  state = dict(line.split() for line in (
+                      self.path / "cgroup.events"
+                  ).read_text(encoding="ascii").splitlines()).get("populated")
+                  if state not in {"0", "1"}:
+                      raise OSError("unproved recursive cgroup state")
+                  return state == "0"
+
+              def stop(self, reason):
+                  if self.stop_reason is None:
+                      self.stop_reason = reason
+                      self.stop_limit = time.monotonic_ns() + SETTLE_NS
+                      if not self.is_empty():
+                          (self.path / "cgroup.kill").write_text("1", encoding="ascii")
+
+              def check(self):
+                  return (b"EMPTY:" if self.is_empty() else b"POPULATED:") + (
+                      (self.stop_reason or "LIVE").encode("ascii")
+                  )
+
+
+          def main():
+              if os.getresuid() != (0, 0, 0) or os.getresgid() != (0, 0, 0):
+                  raise OSError("bootstrap has no root identity")
+              if len(sys.argv) != 2 or sys.argv[1] not in {"normal", "stop", "death"}:
+                  raise OSError("no exact qualification fixture selected")
+              case = sys.argv[1]
+              # The only reaper is this process. If the held child's parent dies
+              # during cgroup.procs admission, the zombie cannot be reaped and reused
+              # between the pidfd check and the native write.
+              if ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0):
+                  raise OSError(ctypes.get_errno(), "cannot become the bound orphan reaper")
+              scope_root = proc_scope("self")
+              if scope_root != Path(f"/system.slice/qtt-lp03-qualification-{case}.service"):
+                  raise OSError("controller is outside its private manager unit")
+              staging = Scope(scope_root, 0, None)
+              if not staging.is_empty():
+                  raise OSError("new private cgroup already populated")
+
+              listener = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+              address = ROOT / "jail/run/qtt-lp03-containment/controller"
+              listener.bind(str(address))
+              os.chown(address, 0, WRITER)
+              os.chmod(address, 0o660)
+              listener.listen(2)
+              listener.setblocking(False)
+
+              start = time.monotonic_ns()
+              phase_limit = start + (7 * 60 if case == "normal" else 40) * 1_000_000_000
+              stage_gate = (
+                  "import os,sys\n"
+                  "if os.read(0,1)!=b'Y': raise SystemExit(125)\n"
+                  "os.close(0)\n"
+                  "os.execv(sys.argv[1],sys.argv[1:])\n"
+              )
+              phase = subprocess.Popen(
+                  ["/usr/bin/python3", "-I", "-S", "-B", "-c", stage_gate,
+                   "/usr/bin/unshare", "--mount", "--net", "--propagation", "private",
+                   str(ROOT / "start-writer"), case],
+                  env={"PATH": "/usr/bin:/bin", "LC_ALL": "C"}, stdin=subprocess.PIPE,
+                  start_new_session=True,
+              )
+              selector = selectors.DefaultSelector()
+              selector.register(listener, selectors.EVENT_READ)
+              current = None
+              serial = 0
+              peers = {}
+              challenged = None
+              stopped_owner_proven = False
+              phase_fd = os.pidfd_open(phase.pid)
+
+              def disconnect(conn):
+                  nonlocal current
+                  peer, delegated, launch_limit = peers.pop(conn)
+                  selector.unregister(conn)
+                  conn.close()
+                  if peer == phase.pid and not delegated and current is not None:
+                      if not current.is_empty():
+                          current.stop("OWNER_LOST")
+                          raise OSError("owner released a populated scope")
+                      current.path.rmdir()
+                      current = None
+
+              try:
+                  with phase.stdin as stage_release:
+                      if fd_pid(phase_fd) != phase.pid or proc_scope(phase.pid) != scope_root:
+                          raise OSError("original phase owner is outside its native service")
+                      (staging.path / "cgroup.procs").write_text(str(phase.pid), encoding="ascii")
+                      if fd_pid(phase_fd) != phase.pid or proc_scope(phase.pid) != staging.relative:
+                          raise OSError("original phase owner did not enter protected staging")
+                      stage_release.write(b"Y")
+                  while phase.poll() is None:
+                      now = time.monotonic_ns()
+                      if now >= phase_limit + SETTLE_NS or now >= phase_limit and current is None:
+                          raise TimeoutError("qualification phase exhausted its native bound")
+                      for _, delegated, launch_limit in peers.values():
+                          if launch_limit is not None and now >= launch_limit:
+                              if current is not None:
+                                  current.stop("STOP")
+                              if not delegated:
+                                  staging.stop("STOP")
+                              raise TimeoutError("held launch did not settle in its admission window")
+                      next_ns = min(now + 50_000_000, phase_limit)
+                      if current is not None:
+                          due = current.shell_deadline
+                          if due is not None and now >= due:
+                              current.stop("DEADLINE")
+                              if current.child is None:
+                                  staging.stop("DEADLINE")
+                                  raise TimeoutError("command expired before admission and original wait is unavailable")
+                          elif now >= phase_limit:
+                              current.stop("PHASE")
+                          if current.stop_limit is not None:
+                              if now >= current.stop_limit and not current.is_empty():
+                                  raise TimeoutError("independent cgroup stop unproved")
+                              if now >= current.stop_limit + 15_000_000_000:
+                                  raise TimeoutError("original owner did not settle after the independent stop")
+                          elif due is not None:
+                              next_ns = min(due, next_ns)
+                          if (case == "stop" and challenged is not None and not stopped_owner_proven
+                                  and current.stop_reason == "DEADLINE" and current.is_empty()):
+                              if proc_status(phase.pid)["State"].split()[0] != "T":
+                                  raise OSError("writer was not independently observed signal-stopped")
+                              witness("stopped-owner.json", {
+                                  "owner_pid": phase.pid, "observed_owner_state": "T",
+                                  "command_pid": current.child, "stop_reason": "DEADLINE",
+                                  "recursive_populated": 0,
+                              })
+                              challenged.sendall(b"STOP_INDEPENDENTLY_SETTLED")
+                              signal.pidfd_send_signal(phase_fd, signal.SIGCONT)
+                              stopped_owner_proven = True
+                      for key, _ in selector.select(max(0, (next_ns - time.monotonic_ns()) / 1e9)):
+                          conn = key.fileobj
+                          if conn is listener:
+                              client, _ = listener.accept()
+                              client.setblocking(False)
+                              peer, uid, gid = struct.unpack("3i", client.getsockopt(
+                                  socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i")
+                              ))
+                              if (uid != WRITER or gid != WRITER or len(peers) >= 2
+                                      or any(entry[0] == peer for entry in peers.values())
+                                      or not (peer == phase.pid or current is not None
+                                              and current.is_helper and peer == current.child)):
+                                  client.close()
+                                  continue
+                              peers[client] = peer, None, time.monotonic_ns() + LAUNCH_NS
+                              selector.register(client, selectors.EVENT_READ)
+                              continue
+                          message, fds = receive(conn)
+                          try:
+                              peer, delegated, launch_limit = peers[conn]
+                              now = time.monotonic_ns()
+                              if not message:
+                                  if case == "death" and conn is challenged:
+                                      peers.pop(conn)
+                                      selector.unregister(conn)
+                                      conn.close()
+                                  else:
+                                      disconnect(conn)
+                                  continue
+                              if delegated is None:
+                                  if fds or now >= launch_limit:
+                                      raise OSError("invalid opening request")
+                                  opening = json.loads(message)
+                                  begin, limit = opening["started_ns"], opening["deadline_ns"]
+                                  if (set(opening) != {"op", "started_ns", "deadline_ns"}
+                                          or type(begin) is not int or not start <= begin <= now
+                                          or (limit is not None and (type(limit) is not int or limit <= now))):
+                                      raise OSError("invalid command clock")
+                                  if opening["op"] == "OPEN_COMMAND" and peer == phase.pid and current is None:
+                                      serial += 1
+                                      current = Scope(scope_root, serial, limit)
+                                      delegated = False
+                                  elif (opening["op"] == "OPEN_NESTED" and limit is None and current is not None
+                                        and current.is_helper and peer == current.child
+                                        and current.stop_reason is None and proc_scope(peer) == current.relative):
+                                      delegated = True
+                                  else:
+                                      raise OSError("unbound command owner")
+                                  peers[conn] = peer, delegated, now + LAUNCH_NS
+                                  conn.sendall(b"READY_WITH_RECEIPT_POLICY")
+                              elif message in {b"ADMIT_HELPER", b"ADMIT_LEAF"}:
+                                  if (len(fds) != 1 or launch_limit is None or current is None or current.stop_reason is not None
+                                          or now >= launch_limit or now >= phase_limit
+                                          or (current.shell_deadline is not None and now >= current.shell_deadline)):
+                                      raise OSError("expired or unauthenticated before-exec admission")
+                                  child = fd_pid(fds[0])
+                                  helper = message == b"ADMIT_HELPER"
+                                  if helper and delegated or not delegated and current.child is not None:
+                                      raise OSError("writer retention or repeat admission refused")
+                                  expected = WRITER if helper else PAYLOAD
+                                  admit_credentials(child, expected, peer, not helper)
+                                  if os.getsid(child) != child:
+                                      raise OSError("command child lacks a private session")
+                                  if not delegated:
+                                      if proc_scope(child) != staging.relative:
+                                          raise OSError("child did not originate in the bound phase")
+                                      (current.path / "cgroup.procs").write_text(str(child), encoding="ascii")
+                                  if fd_pid(fds[0]) != child or proc_scope(child) != current.relative:
+                                      raise OSError("held command did not enter its owned cgroup")
+                                  admit_credentials(child, expected, peer, not helper)
+                                  if not delegated:
+                                      current.child, current.is_helper = child, helper
+                                  peers[conn] = peer, delegated, None
+                                  conn.sendall(b"ADMITTED_WITH_RECEIPT_CUSTODY")
+                              elif not fds and current is not None and not delegated and message == b"CHECK":
+                                  conn.sendall(current.check())
+                              elif not fds and current is not None and not delegated and message == b"STOP":
+                                  current.stop("STOP")
+                                  conn.sendall(b"STOPPED")
+                              elif (not fds and current is not None and not delegated and peer == phase.pid
+                                    and message == b"QUALIFY_OWNER" and case != "normal"
+                                    and challenged is None and serial == 1 and current.child is not None
+                                    and current.stop_reason is None and not current.is_empty()):
+                                  challenged = conn
+                                  which = signal.SIGSTOP if case == "stop" else signal.SIGKILL
+                                  signal.pidfd_send_signal(phase_fd, which)
+                              elif not fds and current is not None and not delegated and message == b"RELEASE":
+                                  if not current.is_empty():
+                                      raise OSError("owner cannot release a populated command cgroup")
+                                  current.path.rmdir()
+                                  witness(f"{case}-scope-{serial}.json", {
+                                      "command_pid": current.child, "stop_reason": current.stop_reason,
+                                      "recursive_populated": 0,
+                                  })
+                                  current = None
+                                  conn.sendall(b"RELEASED")
+                                  disconnect(conn)
+                              else:
+                                  raise OSError("undocumented controller operation")
+                          finally:
+                              for fd in fds:
+                                  os.close(fd)
+                  if case == "death" and challenged is not None and phase.returncode == -signal.SIGKILL:
+                      if current is None:
+                          raise OSError("owner-death fixture did not retain a command scope")
+                      current.stop("OWNER_LOST")
+                      end = time.monotonic_ns() + SETTLE_NS
+                      while not current.is_empty() and time.monotonic_ns() < end:
+                          time.sleep(0.01)
+                      receipt = ROOT / "jail/var/qtt/runs/owner-death.evidence/command-1.json"
+                      if not current.is_empty() or os.path.lexists(receipt):
+                          raise OSError("owner death has incomplete cleanup or a fabricated wait")
+                      current.path.rmdir()
+                      current = None
+                      witness("owner-death.json", {
+                          "owner_pid": phase.pid, "owner_wait": phase.returncode,
+                          "recursive_populated": 0, "payload_wait": None,
+                      })
+                      return 0
+                  if case != "normal" and not stopped_owner_proven:
+                      raise OSError("requested original-owner transition was not observed")
+                  if current is not None:
+                      current.stop("OWNER_LOST")
+                      raise OSError("phase exited without releasing exact command custody")
+                  return phase.returncode if phase.returncode >= 0 else 1
+              finally:
+                  # A root failure can only yield a negative job result. The parent
+                  # never writes a native command receipt for a lost ordinary writer.
+                  if current is not None:
+                      current.stop("OWNER_LOST")
+                      end = time.monotonic_ns() + SETTLE_NS
+                      while not current.is_empty() and time.monotonic_ns() < end:
+                          time.sleep(0.01)
+                      if not current.is_empty():
+                          raise OSError("recursive terminal custody unproved")
+                      current.path.rmdir()
+                      print(f"LP03 native scope {serial} recursively empty after {current.stop_reason}", flush=True)
+                  if not staging.is_empty():
+                      staging.stop("OWNER_LOST")
+                  if phase.poll() is None:
+                      phase.kill()
+                  phase.wait(timeout=5)
+                  end = time.monotonic_ns() + SETTLE_NS
+                  while not staging.is_empty() and time.monotonic_ns() < end:
+                      time.sleep(0.01)
+                  if not staging.is_empty():
+                      raise OSError("staging cgroup retained an unauthenticated process")
+                  staging.path.rmdir()
+                  os.close(phase_fd)
+                  for conn in peers:
+                      conn.close()
+                  selector.close()
+                  listener.close()
+                  address.unlink()
+
+
+          raise SystemExit(main())
+          CONTROLLER
+          cat > "$base/start-writer" <<'WRITER_VIEW'
+          #!/usr/bin/bash
+          set -euo pipefail
+          base=/run/qtt-lp03-containment
+          jail="$base/jail"
+          case "$1" in normal|stop|death) owner_case=$1 ;; *) exit 1 ;; esac
+
+          readonly_mount() {
+            local src=$1 dst=$2
+            /usr/bin/mount --bind "$src" "$dst"
+            /usr/bin/mount -o remount,bind,ro,nosuid,nodev "$dst"
+          }
+
+          /usr/bin/mount --make-rprivate /
+          /usr/bin/findmnt -T "$jail" -n -o VFS-OPTIONS | /usr/bin/grep -Eq '(^|,)nosuid(,|$)'
+          readonly_mount /usr "$jail/usr"
+          readonly_mount "$base/sealed/workspace" "$jail/workspace"
+          python=/opt/hostedtoolcache/Python/3.14.6/x64
+          readonly_mount "$base/sealed/python" "$jail$python"
+          readonly_mount "$base/sealed/site" "$jail/opt/qtt-fixture-site"
+          readonly_mount /sys/fs/cgroup "$jail/sys/fs/cgroup"
+          /usr/bin/mount -t proc -o nosuid,nodev,noexec proc "$jail/proc"
+          /usr/bin/mount --bind /dev/null "$jail/dev/null"
+          /usr/bin/mount --bind /dev/zero "$jail/dev/zero"
+          /usr/bin/mount --bind /dev/urandom "$jail/dev/urandom"
+          /usr/bin/mount --bind "$base/leaf" "$jail/run/qtt-lp03-containment/gate/leaf"
+          /usr/bin/mount -o remount,bind,ro,suid,nodev "$jail/run/qtt-lp03-containment/gate/leaf"
+
+          # This writer sandbox contains only the copied root directory and the exact
+          # selected nonrecursive mounts. No host /run, /tmp, /etc, or home is exposed.
+          for path in "$jail/usr" "$jail/workspace" "$jail$python" "$jail/opt/qtt-fixture-site" "$jail/sys/fs/cgroup"; do
+            /usr/bin/findmnt -M "$path" -n -o VFS-OPTIONS | /usr/bin/grep -Eq '(^|,)nosuid(,|$)'
+            /usr/bin/findmnt -M "$path" -n -o VFS-OPTIONS | /usr/bin/grep -Eq '(^|,)ro(,|$)'
+          done
+          /usr/bin/findmnt -M "$jail/run/qtt-lp03-containment/gate/leaf" -n -o VFS-OPTIONS |
+            /usr/bin/grep -Eq '(^|,)ro(,|$)'
+          if /usr/bin/findmnt -M "$jail/run/qtt-lp03-containment/gate/leaf" -n -o VFS-OPTIONS |
+               /usr/bin/grep -Eq '(^|,)nosuid(,|$)'; then
+            exit 1
+          fi
+
+          exec /usr/sbin/chroot "$jail" /usr/bin/setpriv --reuid=62041 --regid=62041 \
+            --clear-groups --inh-caps=-all --ambient-caps=-all --bounding-set=-all \
+            /usr/bin/env -i PATH=/usr/bin:/bin LANG=C LC_ALL=C HOME=/var/qtt/home TMPDIR=/tmp \
+            LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.14.6/x64/lib \
+            PYTHONPATH=/opt/qtt-fixture-site \
+            PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 QTT_TEST_LINUX_CI_NATIVE=1 \
+            QTT_TEST_LINUX_CI_OWNER_CASE="$owner_case" \
+            QTT_TEST_QUALIFICATION_ROOT=/var/qtt/runs QTT_VALIDATION_PROCESS_ROOT=/var/qtt/runs \
+            /usr/bin/bash --noprofile --norc -euc \
+            'cd /workspace && exec /opt/hostedtoolcache/Python/3.14.6/x64/bin/python3.14 -B -m pytest -q -s --basetemp "/var/qtt/home/pytest-$1" tests/fail_closed/test_run_validation_gates.py::test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry' -- "$owner_case"
+          WRITER_VIEW
+          chmod 0700 "$base/start-writer"
+          ROOT_BOOTSTRAP
+      - name: Check out the exact scratch revision
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -c core.hooksPath=/dev/null init --quiet .
+          git remote add origin https://github.com/Q8Meow/QTT_New0526.git
+          git config --local remote.origin.promisor true
+          git config --local remote.origin.partialclonefilter blob:none
+          printf '%s\n' '/.github/workflows/qtt_validation.yml' '/tools/' '/src/' \
+            '/tests/fail_closed/test_run_validation_gates.py' '/pytest.ini' |
+            git sparse-checkout set --no-cone --stdin
+          git -c core.hooksPath=/dev/null fetch --no-tags --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git -c core.hooksPath=/dev/null -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --quiet HEAD --
+          git show HEAD:.github/workflows/qtt_validation.yml | cmp - .github/workflows/qtt_validation.yml
+          test "$RUNNER_TEMP" = /home/runner/work/_temp
+          tracked="$RUNNER_TEMP/qtt-pr309-tracked"
+          mkdir "$tracked"
+          git archive --format=tar HEAD -- .github/workflows/qtt_validation.yml tools src \
+            tests/fail_closed/test_run_validation_gates.py pytest.ini |
+            tar --extract --no-same-owner --no-same-permissions -C "$tracked"
+      - name: Prepare the verified interpreter for setup-python
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=/opt/hostedtoolcache/Python/3.14.6
+          test ! -e "$version" && test ! -L "$version"
+          input=$(mktemp -d "$RUNNER_TEMP/qtt-lp03-python.XXXXXXXX")
+          mkdir "$input/release" "$input/wheels"
+          curl --proto '=https' --fail --silent --show-error --location \
+            'https://github.com/actions/python-versions/releases/download/3.14.6-27283001424/python-3.14.6-linux-26.04-x64.tar.gz' \
+            --output "$input/release.tar.gz"
+          printf '%s  %s\n' '55cfde07795c60a573e466b645ce654d8a3de37b6a7cada8ce9dd67933717e1a' "$input/release.tar.gz" | sha256sum --check --status
+          printf '%s\n' 'pip==26.3 --hash=sha256:f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13' > "$input/pip.txt"
+          /usr/bin/python3 -m pip --isolated download --disable-pip-version-check \
+            --no-deps --only-binary=:all: --require-hashes --index-url https://pypi.org/simple \
+            --dest "$input/wheels" -r "$input/pip.txt"
+          tar -xzf "$input/release.tar.gz" -C "$input/release"
+          (
+            cd "$input/release"
+            /usr/bin/setpriv --no-new-privs /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C \
+              HOME="$input" AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache LD_LIBRARY_PATH="$PWD/lib" \
+              PIP_NO_INDEX=1 PIP_FIND_LINKS="$input/wheels" PIP_CONFIG_FILE=/dev/null \
+              /usr/bin/bash --noprofile --norc ./setup.sh
+          )
+          test -f "$version/x64.complete" && test ! -L "$version/x64.complete"
+          test -x "$version/x64/bin/python3.14"
+          sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/bash -se <<'SEAL_RUNTIME'
+          set -euo pipefail
+          umask 022
+          sealed=/run/qtt-lp03-containment/sealed
+          runtime=/opt/hostedtoolcache/Python/3.14.6/x64
+          runtime_size=$(du -sb -- "$runtime" | cut -f1)
+          test "$runtime_size" -le 805306368
+          test "$(df -B1 --output=avail /run | tail -n 1)" -ge "$((runtime_size + 201326592))"
+          mkdir -m 0750 "$sealed"
+          mkdir -m 0755 "$sealed/python"
+          cp -a --reflink=never --no-preserve=ownership,mode,xattr "$runtime/." "$sealed/python/"
+          diff -qr --no-dereference "$runtime" "$sealed/python" >/dev/null
+          SEAL_RUNTIME
+      - name: Select the verified Python toolcache entry
+        id: sealed_python
+        timeout-minutes: 1
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.6'
+          check-latest: false
+      - name: Install the locked qualification dependencies
+        timeout-minutes: 1
+        env:
+          SETUP_PYTHON_PATH: ${{ steps.sealed_python.outputs.python-path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(readlink -f "$SETUP_PYTHON_PATH")" = /opt/hostedtoolcache/Python/3.14.6/x64/bin/python3.14
+          test "$(command -v python)" = /opt/hostedtoolcache/Python/3.14.6/x64/bin/python
+          test "$(python -V)" = 'Python 3.14.6'
+          lock="$(mktemp "$RUNNER_TEMP/qtt-lp03-deps.XXXXXXXX")"
+          cat > "$lock" <<'WHEELS'
+          pytest==9.1.1 --hash=sha256:37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c
+          iniconfig==2.3.1 --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+          packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+          pluggy==1.7.0 --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+          pygments==2.21.0 --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+          WHEELS
+          site="$RUNNER_TEMP/qtt-pr309-site"
+          mkdir "$site"
+          python -B -m pip --isolated install --disable-pip-version-check --require-hashes \
+            --no-deps --only-binary=:all: --no-compile --ignore-installed --target "$site" \
+            --index-url https://pypi.org/simple -r "$lock"
+      - name: Run the existing native supervision fixtures
+        id: native_qualification
+        timeout-minutes: 11
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --quiet HEAD --
+          git show HEAD:.github/workflows/qtt_validation.yml | cmp - .github/workflows/qtt_validation.yml
+          tracked=/home/runner/work/_temp/qtt-pr309-tracked
+          /usr/bin/python3 -I -B - "$tracked" <<'VERIFY_TRACKED'
+          from pathlib import Path
+          import os
+          import stat
+          import subprocess
           import sys
 
-          router_report = ".tmp/qtt-validation-router/validation-gates.json"
-          with open(router_report, encoding="utf-8") as handle:
-              router = json.load(handle)
-          print("required_jobs=" + ",".join(router["required_jobs"]))
-          print("full_validation_required=" + str(router["full_validation_required"]))
-          print("full_validation_reason=" + router["full_validation_reason"])
-          print("skipped_validator_count=" + str(len(router["skipped_validators"])))
+          root = Path(sys.argv[1])
+          projection = ('.github/workflows/qtt_validation.yml', 'tools', 'src',
+                        'tests/fail_closed/test_run_validation_gates.py', 'pytest.ini')
+          records = subprocess.check_output(
+              ['git', 'ls-tree', '-r', '-z', 'HEAD', '--', *projection]
+          ).split(b'\0')[:-1]
+          expected = {}
+          for record in records:
+              metadata, path = record.split(b'\t', 1)
+              mode, kind, identity = metadata.split()
+              relative = Path(os.fsdecode(path))
+              if (kind != b'blob' or mode not in {b'100644', b'100755'}
+                      or relative.is_absolute() or '..' in relative.parts or relative in expected):
+                  raise SystemExit('Unsupported tracked qualification input')
+              expected[relative] = identity
+          actual = set()
+          for directory, children, files in os.walk(root, followlinks=False):
+              for name in children + files:
+                  path = Path(directory) / name
+                  observed = path.lstat()
+                  if not (stat.S_ISDIR(observed.st_mode) or stat.S_ISREG(observed.st_mode)):
+                      raise SystemExit('Linked or special qualification input')
+                  if stat.S_ISREG(observed.st_mode):
+                      actual.add(path.relative_to(root))
+          if actual != set(expected):
+              raise SystemExit('Extracted qualification paths differ from the Git roster')
+          batch = subprocess.Popen(['git', 'cat-file', '--batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+          try:
+              for relative, object_id in expected.items():
+                  batch.stdin.write(object_id + b'\n')
+                  batch.stdin.flush()
+                  observed, kind, size = batch.stdout.readline().split()
+                  if kind != b'blob' or observed != object_id:
+                      raise SystemExit('Git blob association failed')
+                  with (root / relative).open('rb') as installed:
+                      remaining = int(size)
+                      while remaining:
+                          chunk = batch.stdout.read(min(remaining, 1_048_576))
+                          if not chunk or installed.read(len(chunk)) != chunk:
+                              raise SystemExit('Extracted qualification bytes differ from Git')
+                          remaining -= len(chunk)
+                      if installed.read(1) or batch.stdout.read(1) != b'\n':
+                          raise SystemExit('Extracted qualification length differs from Git')
+          finally:
+              batch.stdin.close()
+              batch.stdout.close()
+              if batch.wait(timeout=5):
+                  raise SystemExit('Git batch verification failed')
+          VERIFY_TRACKED
+          sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/bash -se <<'SEAL_INPUTS'
+          set -euo pipefail
+          umask 022
+          sealed=/run/qtt-lp03-containment/sealed
+          workspace=/home/runner/work/_temp/qtt-pr309-tracked
+          site=/home/runner/work/_temp/qtt-pr309-site
+          runtime=/opt/hostedtoolcache/Python/3.14.6/x64
+          diff -qr --no-dereference "$runtime" "$sealed/python" >/dev/null
+          workspace_size=$(du -sb -- "$workspace" | cut -f1)
+          site_size=$(du -sb -- "$site" | cut -f1)
+          test "$workspace_size" -le 104857600
+          test "$site_size" -le 33554432
+          test "$(df -B1 --output=avail /run | tail -n 1)" -ge "$((workspace_size + site_size + 67108864))"
+          for name in workspace site; do
+            case "$name" in workspace) source=$workspace ;; site) source=$site ;; esac
+            mkdir -m 0755 "$sealed/$name"
+            cp -a --reflink=never --no-preserve=ownership,mode,xattr "$source/." "$sealed/$name/"
+            diff -qr --no-dereference "$source" "$sealed/$name" >/dev/null
+          done
+          if find "$sealed" \( -type d -o -type f \) \( ! -uid 0 -o -perm /022 -o -perm /6000 \) -print -quit | grep -q .; then
+            exit 1
+          fi
+          SEAL_INPUTS
+          qualify() {
+            local fixture=$1 limit=$2
+            sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/systemd-run \
+              --unit="qtt-lp03-qualification-$fixture" --service-type=exec --wait --pipe \
+              --property=Delegate=yes --property="RuntimeMaxSec=$limit" \
+              --property=TimeoutStopSec=5s --property=KillMode=control-group \
+              --property=WorkingDirectory=/ \
+              --property='UnsetEnvironment=LD_PRELOAD LD_LIBRARY_PATH LD_AUDIT PYTHONHOME PYTHONPATH' \
+              /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C \
+              /usr/bin/python3 -I -B /run/qtt-lp03-containment/controller.py "$fixture"
+          }
+          qualify normal 8min
+          qualify stop 1min
+          qualify death 1min
+      - name: Retain exact fixture receipt and stream bytes
+        if: ${{ always() && steps.bootstrap.outcome == 'success' && steps.native_qualification.outcome != 'skipped' }}
+        timeout-minutes: 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo -n /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/bash -se <<'RETAIN'
+          set -euo pipefail
+          base=/run/qtt-lp03-containment
+          for fixture in normal stop death; do
+            case "$(systemctl show -p ActiveState --value "qtt-lp03-qualification-$fixture.service")" in
+              inactive|failed) ;;
+              *) exit 1 ;;
+            esac
+          done
+          for witness in "$base"/witness/*.json; do
+            test -e "$witness" || continue
+            test -f "$witness" && test ! -L "$witness" && test "$(stat -c '%u' "$witness")" = 0
+            printf 'LP03_ROOT_WITNESS %s ' "${witness##*/}"
+            /usr/bin/base64 -w 0 "$witness"
+            printf '\n'
+          done
+          cd "$base/jail/var/qtt/runs"
+          exec /usr/bin/setpriv --reuid=62041 --regid=62041 --clear-groups --no-new-privs \
+            --inh-caps=-all --ambient-caps=-all --bounding-set=-all /usr/bin/python3 -I -B - <<'EXPORT'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import stat
 
-          needs = json.loads(os.environ["NEEDS_JSON"])
-          failures = []
-          for job_id, data in sorted(needs.items()):
-              result = data.get("result")
-              print(f"{job_id}: {result}")
-              if result != "success":
-                  failures.append(f"{job_id}={result}")
-          if failures:
-              print(
-                  "Validation phase failure(s): " + ", ".join(failures),
-                  file=sys.stderr,
-              )
-              raise SystemExit(1)
-          print("All validation phase jobs succeeded.")
-          PY
+          bound = 1_048_576
+          total = 0
+          roots = sorted(path for path in Path('.').iterdir() if path.name.endswith('.evidence'))
+          for root in roots:
+              original = root.lstat()
+              if not stat.S_ISDIR(original.st_mode) or original.st_uid != 62041 or original.st_mode & 0o022:
+                  raise SystemExit('Untrusted evidence root')
+              nested = [path for path in root.iterdir() if re.fullmatch(r'nested-pytest-\d+-\d+', path.name)]
+              for directory in (root, *sorted(nested)):
+                  own = directory.lstat()
+                  if not stat.S_ISDIR(own.st_mode) or own.st_uid != 62041 or own.st_mode & 0o022:
+                      raise SystemExit('Untrusted nested evidence root')
+                  for file in sorted(directory.iterdir()):
+                      if not re.fullmatch(r'[a-z0-9-]+\.(json|stdout\.bin|stderr\.bin)', file.name):
+                          continue
+                      fd = os.open(file, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+                      with os.fdopen(fd, 'rb') as stream:
+                          item = os.fstat(stream.fileno())
+                          if not stat.S_ISREG(item.st_mode) or item.st_uid != 62041 or item.st_nlink != 1:
+                              raise SystemExit('Untrusted retained evidence file')
+                          data = stream.read(min(bound, 2_097_152 - total) + 1)
+                      total += len(data)
+                      if len(data) != item.st_size or len(data) > bound or total > 2_097_152:
+                          raise SystemExit('Evidence export bound or identity changed')
+                      for offset in range(0, max(len(data), 1), 12_000):
+                          print('LP03_NATIVE_BYTES ' + json.dumps({
+                              'file': str(file), 'offset': offset, 'length': len(data),
+                              'data': base64.b64encode(data[offset:offset + 12_000]).decode('ascii'),
+                          }, separators=(',', ':')), flush=True)
+          EXPORT
+          RETAIN
