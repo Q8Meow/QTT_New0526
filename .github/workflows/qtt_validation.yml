@@ -111,6 +111,99 @@ jobs:
             test "$read_status" = 0
             package_version=$(printf '%s' "$read_stdout" | base64 -d)
             test "$package_version" = 259.9-0ubuntu0.1
+
+            capture native_tools /usr/bin/python3 -I -S -B - <<'HOST_TOOLS'
+          import ctypes
+          import os
+          from pathlib import Path
+          import signal
+          import socket
+          import stat
+          import subprocess
+          import sys
+
+          # Fixed host commands used before checkout, by the manager, or after the /usr bind.
+          names = (
+              "base64 bash cat chmod chown chroot cmp cp curl cut df diff dpkg-query du env find "
+              "findmnt gcc getent git grep gzip install ln mkdir mktemp mount python3 readlink "
+              "setpriv sha256sum stat sudo systemctl systemd-run tail tar touch uname unshare"
+          )
+          for name in names.split():
+              executable = Path("/usr/bin") / name
+              if not executable.is_file() or not os.access(executable, os.X_OK):
+                  raise SystemExit(f"Unavailable host executable: {executable}")
+
+          def output(*args):
+              result = subprocess.run(args, stdout=subprocess.PIPE, env={"PATH": "/usr/bin:/bin", "LC_ALL": "C"})
+              if result.returncode:
+                  sys.stdout.buffer.write(result.stdout)
+                  raise SystemExit(f"{args[0]} {args[1:]} returned {result.returncode}")
+              return result.stdout
+
+          # Check every selector link against the installed package manifests. Run the applet
+          # by its original basename even when the final ELF implements several utilities.
+          selector = Path("/usr/bin/chroot")
+          def package_files(name):
+              return set(output("/usr/bin/dpkg-query", "-L", name).decode().splitlines())
+
+          selectors = package_files("coreutils-from-uutils")
+          implementation = package_files("rust-coreutils")
+          if str(selector) not in selectors:
+              raise SystemExit("The installed coreutils selector does not own /usr/bin/chroot")
+          path = selector
+          seen = set()
+          while True:
+              if path in seen or str(path) not in selectors | implementation or not path.is_relative_to("/usr"):
+                  raise SystemExit(f"Unexpected chroot package path: {path}")
+              seen.add(path)
+              for parent in path.parents:
+                  entry = parent.lstat()
+                  if not stat.S_ISDIR(entry.st_mode) or entry.st_uid or entry.st_mode & 0o022:
+                      raise SystemExit(f"Unprotected chroot path component: {parent}")
+              entry = path.lstat()
+              if entry.st_uid:
+                  raise SystemExit(f"Unowned chroot path component: {path}")
+              if not stat.S_ISLNK(entry.st_mode):
+                  break
+              path = Path(os.path.normpath(path.parent / path.readlink()))
+          if (path != selector.resolve(strict=True) or str(path) not in implementation
+                  or not stat.S_ISREG(entry.st_mode) or entry.st_mode & 0o022 or not os.access(path, os.X_OK)):
+              raise SystemExit("Unqualified chroot executable")
+          version = output(str(selector), "--version").splitlines()[0]
+          if not version.startswith(b"chroot (uutils coreutils) "):
+              raise SystemExit(f"Unexpected chroot applet: {version!r}")
+          print(f"chroot={selector} target={path} version={version!r}")
+
+          # Read-only checks for option parsing and ABI availability. The actual credential
+          # transition, mount operations and command waits still run in the native fixtures.
+          for name, options in {
+              "setpriv": ("--reuid", "--regid", "--clear-groups", "--no-new-privs", "--inh-caps", "--ambient-caps", "--bounding-set"),
+              "unshare": ("--mount", "--net", "--propagation"),
+              "systemd-run": ("--unit", "--service-type", "--wait", "--pipe", "--property"),
+              "cp": ("--reflink", "--no-preserve"),
+              "diff": ("--no-dereference",),
+          }.items():
+              help_text = output("/usr/bin/" + name, "--help")
+              for option in options:
+                  if option.encode() not in help_text:
+                      raise SystemExit(f"{name} lacks {option}")
+          if not output("/usr/bin/findmnt", "-T", "/", "-n", "-o", "VFS-OPTIONS").strip():
+              raise SystemExit("Mount option inventory unavailable")
+          archive = Path(os.fsdecode(output("/usr/bin/gcc", "-print-file-name=libc.a").rstrip(b"\n")))
+          if not archive.is_absolute() or not archive.is_file():
+              raise SystemExit("Static libc for the credential gate is unavailable")
+          fd = os.pidfd_open(os.getpid())
+          try:
+              signal.pidfd_send_signal(fd, 0)
+          finally:
+              os.close(fd)
+          with socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET):
+              pass
+          PR_GET_CHILD_SUBREAPER = 37
+          if ctypes.CDLL(None).prctl(PR_GET_CHILD_SUBREAPER, ctypes.byref(ctypes.c_int()), 0, 0, 0) != 0:
+              raise SystemExit("Cannot read the kernel subreaper state")
+          HOST_TOOLS
+            test "$read_status" = 0
           )
           grep -Fxq 'VERSION_ID="26.04"' /etc/os-release
           test "$(stat -fc %T /sys/fs/cgroup)" = cgroup2fs
@@ -616,7 +709,7 @@ jobs:
             exit 1
           fi
 
-          exec /usr/sbin/chroot "$jail" /usr/bin/setpriv --reuid=62041 --regid=62041 \
+          exec /usr/bin/chroot "$jail" /usr/bin/setpriv --reuid=62041 --regid=62041 \
             --clear-groups --inh-caps=-all --ambient-caps=-all --bounding-set=-all \
             /usr/bin/env -i PATH=/usr/bin:/bin LANG=C LC_ALL=C HOME=/var/qtt/home TMPDIR=/tmp \
             LD_LIBRARY_PATH=/opt/hostedtoolcache/Python/3.14.6/x64/lib \
@@ -625,7 +718,14 @@ jobs:
             QTT_TEST_LINUX_CI_OWNER_CASE="$owner_case" \
             QTT_TEST_QUALIFICATION_ROOT=/var/qtt/runs QTT_VALIDATION_PROCESS_ROOT=/var/qtt/runs \
             /usr/bin/bash --noprofile --norc -euc \
-            'cd /workspace && exec /opt/hostedtoolcache/Python/3.14.6/x64/bin/python3.14 -B -m pytest -q -s --basetemp "/var/qtt/home/pytest-$1" tests/fail_closed/test_run_validation_gates.py::test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry' -- "$owner_case"
+            'test "$$" = "$2"
+             cd /workspace
+             unset OLDPWD
+             test -x /run/qtt-lp03-containment/gate/leaf
+             /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/python3 -I -S -B -c "import json, os, sys; assert os.getresuid() == (62041,) * 3 and os.getresgid() == (62041,) * 3"
+             runtime=/opt/hostedtoolcache/Python/3.14.6/x64/bin/python3.14
+             "$runtime" -P -B -c "import ctypes, hashlib, select, socket, subprocess, sys, pytest; assert sys.version_info[:3] == (3, 14, 6) and pytest.__version__ == \"9.1.1\""
+             exec "$runtime" -B -m pytest -q -s --basetemp "/var/qtt/home/pytest-$1" tests/fail_closed/test_run_validation_gates.py::test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry' -- "$owner_case" "$$"
           WRITER_VIEW
           chmod 0700 "$base/start-writer"
           ROOT_BOOTSTRAP
@@ -807,9 +907,8 @@ jobs:
             cp -a --reflink=never --no-preserve=ownership,mode,xattr "$source/." "$sealed/$name/"
             diff -qr --no-dereference "$source" "$sealed/$name" >/dev/null
           done
-          if find "$sealed" \( -type d -o -type f \) \( ! -uid 0 -o -perm /022 -o -perm /6000 \) -print -quit | grep -q .; then
-            exit 1
-          fi
+          unsafe_input=$(find "$sealed" \( -type d -o -type f \) \( ! -uid 0 -o -perm /022 -o -perm /6000 \) -print -quit)
+          test -z "$unsafe_input"
           SEAL_INPUTS
           qualify() {
             local fixture=$1 limit=$2

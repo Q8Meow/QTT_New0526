@@ -15184,6 +15184,7 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         basetemp = paths.pytest_basetemp_root
         if linux_ci:
             environment.pop("PYTEST_CURRENT_TEST", None)
+            environment.pop("PYTEST_VERSION", None)
             fixture_root = paths.process_root / "native-fixture"
             fixture_root.mkdir()
             fixture_root.chmod(0o777)
