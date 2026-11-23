@@ -77,15 +77,36 @@ jobs:
               printf 'stdout=%s\n' "$stdout_b64" >&3
             )
             printf 'LP03_OBSERVATION_BEGIN %s\n%s\nLP03_OBSERVATION_END %s\n' "$label" "$packet" "$label"
-            if [[ "$packet" != $'exit=0\n'* ]]; then
+            read_status=${packet%%$'\n'*}
+            read_status=${read_status#exit=}
+            if [[ "$read_status" != 0 ]]; then
               read_failed=1
             fi
+          }
+
+          verify_systemd_executable() {
+            local path=/usr/lib/systemd/systemd mode files
+            mode=$(stat --format='%f' -- "$path") || return "$?"
+            if [[ ! "$mode" =~ ^[0-9a-f]+$ ]] ||
+               (( (16#$mode & 0170000) != 0100000 )) || [[ ! -x "$path" ]]; then
+              printf 'Expected an executable regular file at %s\n' "$path" >&2
+              return 1
+            fi
+            files=$(dpkg-query -L systemd) || return "$?"
+            if [[ $'\n'"$files"$'\n' != *$'\n'"$path"$'\n'* ]]; then
+              printf 'The systemd package does not list %s\n' "$path" >&2
+              return 1
+            fi
+            printf 'path=%s\nmode_hex=%s\npackage=systemd\n' "$path" "$mode"
           }
 
           capture os_release grep -E '^(NAME|VERSION|VERSION_ID|PRETTY_NAME)=' /etc/os-release
           capture architecture uname -m
           capture kernel uname -r
-          capture systemd_binary systemd --version
+          capture systemd_path verify_systemd_executable
+          if [[ "$read_status" == 0 ]]; then
+            capture systemd_binary /usr/lib/systemd/systemd --version
+          fi
           capture systemd_manager systemctl show --property=Version --value
           capture systemd_package dpkg-query -W -f='${Version}\n' systemd
           exit "$read_failed"
