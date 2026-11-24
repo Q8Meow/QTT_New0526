@@ -797,6 +797,55 @@ def test_input_lock_and_lane_contract_matrix(tmp_path: Path) -> None:
     assert type(_lane(PaperResultContractV1)) is PaperResultContractV1
 
 
+# Successful fixture variants that perform the ordinary independent review
+# and four receiver acknowledgements. Other cuts retain their original limits.
+_LP03_POSITIVE_REVIEW_CASES = frozenset((
+    None, "causal_timeline", "causal_public_timeline", "capture_partial_fills",
+    "cscv_s4", "decimal34_tail", "decimal34_covariance", "gate_tie", "sell_zero",
+    "decimal34_fill_tolerance", "book_grid_decimal34",
+))
+
+
+def _note_lp03_review_expiry(error, math_id, case):
+    import sys
+    import traceback
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceReviewedConformanceOperationV1
+
+    # Read the original failed decision. An observation after unwinding would
+    # sample a different instant, especially when the final ACK was in progress.
+    marker = "LP03_FIXTURE_REVIEW_CURRENTNESS="
+    seen = set()
+    while error is not None and id(error) not in seen:
+        seen.add(id(error))
+        if str(error).endswith(": LP03_REVIEWED_CONFORMANCE_REVIEW_EXPIRED"):
+            if any(note.startswith(marker) for note in getattr(error, "__notes__", ())):
+                return
+            path = []
+            for frame, line in traceback.walk_tb(error.__traceback__):
+                code = frame.f_code
+                local = frame.f_locals
+                if code is _EvidenceReviewedConformanceOperationV1._check_current_v1.__code__:
+                    key, = local["keys"]
+                    wall, mono = local["observed"][:2]
+                    review = local["review"]
+                    expiry = review.record.expiry
+                    deadline = review.deadline.exclusive_deadline_monotonic_ns
+                    note = marker + deterministic_json(dict(math_id=math_id, case=case, callers=path[-10:],
+                        observed_wall_ns=wall, observed_monotonic_ns=mono, key_valid_from_wall_ns=key.valid_from_wall_ns,
+                        key_exclusive_expiry_wall_ns=key.exclusive_expiry_wall_ns, signed_review_expiry_wall_ns=expiry,
+                        review_exclusive_deadline_monotonic_ns=deadline,
+                        key_current=key.valid_from_wall_ns <= wall < key.exclusive_expiry_wall_ns,
+                        signed_review_current=wall < expiry, monotonic_current=mono < deadline))
+                    error.add_note(note)
+                    print(note, file=sys.stderr, flush=True)
+                    return
+                caller = dict(call=code.co_qualname, line=line)
+                if code.co_filename.endswith("sqlite_reference.py") and isinstance(local.get("stage"), str):
+                    caller["stage"] = local["stage"]
+                path.append(caller)
+        error = error.__cause__ if error.__cause__ is not None else error.__context__
+
+
 def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="MATH-03", review_cut=None, published_kelly_source=None, edge_native_failure=False,
         measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False) -> None:
     """Data/authentication only; these placeholder file IDs authorize no store.
@@ -819,11 +868,9 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
 
     now = time.time_ns()
-    # The full MATH-03 role-store fixture reuses one signed envelope through
-    # sequential native checks. Cover that fixture's elapsed wall time before
-    # signing. The individual operation budgets are declared separately.
-    full_role_store_fixture = selected_math == "MATH-03" and review_cut is None and not cold_native_writer
-    validity_seconds = 600 if full_role_store_fixture else 300
+    # Set the parent envelope and verification-key horizon before signing.
+    positive_review = review_cut in _LP03_POSITIVE_REVIEW_CASES and not (edge_native_failure or cold_native_writer)
+    validity_seconds = 600 if positive_review else 300
     expiry = now + validity_seconds * 1_000_000_000
     origin = m.EvidenceOriginV1.SOFTWARE_CONFORMANCE
     env = m.EvidenceEnvironmentIdentityV1(
@@ -1185,9 +1232,13 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
         EvidenceHostBindingV1.for_software_conformance_v1(observed_config, role_signing_key=fixture_keys["issuer"])
     with pytest.raises(ComputationControlPlaneError, match="EVIDENCE_AUTHORITY_UNAVAILABLE"):
         EvidenceHostBindingV1.load_protected_configuration_v1(observed_config)
-    _assert_lp03_role_store_binding_contract(tmp_path, config, fixture_keys, envelope, message,
-        selected_math=selected_math, review_cut=review_cut, published_kelly_source=published_kelly_source, edge_native_failure=edge_native_failure,
-        measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer)
+    try:
+        _assert_lp03_role_store_binding_contract(tmp_path, config, fixture_keys, envelope, message,
+            selected_math=selected_math, review_cut=review_cut, published_kelly_source=published_kelly_source, edge_native_failure=edge_native_failure,
+            measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer)
+    except Exception as error:
+        _note_lp03_review_expiry(error, selected_math, review_cut)
+        raise
 
 
 def _assert_lp03_original_source_metadata_contract(host, scope):
@@ -4493,11 +4544,13 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             # Fixed engineering inputs before envelope/protocol signing and
             # admission; these never alter a live grant or refill its reserve.
             execution = replace(execution, **capacity_limits[attempt_cut])
+        positive_review = (review_cut in _LP03_POSITIVE_REVIEW_CASES and not cold_native_writer
+            and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
+        # The two 30s lanes plus one review and four ACK reservations at 60s
+        # reserve 360s. Measured work also counts against the 480s aggregate.
+        aggregate_wall_ns = 480_000_000_000 if positive_review else 240_000_000_000
         envelope = replace(envelope, per_attempt_limits=execution,
-            # Prospectively fund the complete two-lane/review/four-receiver scope.
-            # All seven original per-role limits are unchanged; retained full
-            # reservations and actual measured work both encumber this envelope.
-            aggregate_execution_limits=replace(execution, max_attempts=2, max_wall_ns=240_000_000_000,
+            aggregate_execution_limits=replace(execution, max_attempts=2, max_wall_ns=aggregate_wall_ns,
                 # Prospectively cover both original 10s attempt reserves.
                 # B204 retained M15 at 40,015,625,000 ns with closeout rolled
                 # back. B192 M16 fit its 40s ceiling by only 15,625,000 ns.
@@ -5484,6 +5537,12 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                 output_unit="fraction_of_approved_risk_capital", measurement_basis="bounded_fractional_wealth_fraction", bound_source_ref=protocol_ref,
                 registration_and_review_serialization="CUMULATIVE_ORIGINAL_ALLOWANCE",
                 **{name: shared_context[name] for name in ("risk_capital_basis_ref", "risk_capital_currency", "instrument_ref", "horizon_ref", "sizing_decision_ref")})
+        if positive_review:
+            review_wall_ns = 60_000_000_000
+        elif causal_public or cashflow or edge or bootstrap or reality or spa or sharpe or pbo or held_out or recorded_dr or ope_point or analytic or private_execution:
+            review_wall_ns = 20_000_000_000
+        else:
+            review_wall_ns = 10_000_000_000
         parameter_protocol = EvidenceProtocolParametersV1(parameter_protocol_ref=protocol_ref, schema_version="1.0",
             origin=envelope.assembly_scope.origin, experiment_id=envelope.experiment_id,
             experiment_revision=envelope.experiment_revision, source_receipt_ref=protocol_ref + "::RECEIPT",
@@ -5504,15 +5563,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                 complete_prefix_required=True, censoring_rule="BLOCK_INCOMPLETE_PREFIX"),
             numeric_profile=numerical_profile, numerical_work_limits=numerical_limits,
             per_attempt_limits=envelope.per_attempt_limits, aggregate_execution_limits=envelope.aggregate_execution_limits,
-            # Prospective finite cashflow/edge/resampling lifetime before signing.
-            # B191 retains edge10s expiry while reading R2parents, with no commit.
-            # B188 preserves cashflow expiry; B189/B190 preserve bootstrap/reality
-            # R2 commits before10s expiry with no final readback. SPA receives the
-            # same finite prospective input; no SPA expiry is inferred. No live
-            # grant is renewed. Two30s lanes +five20s roles reserve160s within240s;
-            # actual work remains additional, with no future timing guarantee.
             review_ack_policy=dict(maximum_delivery_attempts=1,
-                maximum_wall_ns=20_000_000_000 if causal_public or cashflow or edge or bootstrap or reality or spa or sharpe or pbo or held_out or recorded_dr or ope_point or analytic or private_execution else 10_000_000_000,
+                maximum_wall_ns=review_wall_ns,
                  maximum_input_reads=160 if held_out or recorded_dr or ope_point or analytic or private_execution else 104 if edge else 100,
                  # B219 committed the CPCV decision with 866,549 review-local
                  # bytes. Its exact 139,221-byte readback preflight needed 1,005,770.
