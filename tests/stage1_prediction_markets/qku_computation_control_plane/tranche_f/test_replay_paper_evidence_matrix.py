@@ -4549,15 +4549,19 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         # The two 30s lanes plus one review and four ACK reservations at 60s
         # reserve 360s. Measured work also counts against the 480s aggregate.
         aggregate_wall_ns = 480_000_000_000 if positive_review else 240_000_000_000
+        aggregate_cpu_ns = (60_000_000_000 if causal or edge or cashflow or sharpe or pbo or held_out or
+            recorded_dr or ope_point or analytic or private_execution or reality or spa else 40_000_000_000)
+        if positive_review and review_cut is None and selected_math in ("MATH-02", "MATH-35", "MATH-52"):
+            # Completed hosted lanes used up to 7.1875s CPU. Run 845 exceeded
+            # the ordinary 8s allowance before final readback. Allow 16s for
+            # normal work and retain the original 2s failure reserve per lane.
+            execution = replace(execution, max_cpu_ns=18_000_000_000)
+            # Two larger reservations and their actual charges can each cost
+            # another 8s per lane. Preserve the previous closeout headroom.
+            aggregate_cpu_ns += 2 * (8_000_000_000 + 8_000_000_000)
         envelope = replace(envelope, per_attempt_limits=execution,
             aggregate_execution_limits=replace(execution, max_attempts=2, max_wall_ns=aggregate_wall_ns,
-                # Prospectively cover both original 10s attempt reserves.
-                # B204 retained M15 at 40,015,625,000 ns with closeout rolled
-                # back. B192 M16 fit its 40s ceiling by only 15,625,000 ns.
-                # Each new fixture declares a finite 60s ceiling before signing.
-                # The two decay attempt reservations and four exact receiver
-                # readbacks share this prospective aggregate byte limit.
-                max_cpu_ns=(60_000_000_000 if causal or edge or cashflow or sharpe or pbo or held_out or recorded_dr or ope_point or analytic or private_execution or reality or spa else 40_000_000_000), max_input_reads=8000, max_input_bytes=40_000_000 if measured_decay else 32_000_000,
+                max_cpu_ns=aggregate_cpu_ns, max_input_reads=8000, max_input_bytes=40_000_000 if measured_decay else 32_000_000,
                 max_persistent_operations=8000, max_persistent_bytes=16_000_000, max_events=40,
                 max_computations=40, max_callbacks=40, max_coordinates=48 if causal_public else 40, max_output_bytes=4_000_000,
                 reserved_failure_wall_ns=10_000_000_000, reserved_failure_cpu_ns=4_000_000_000,
@@ -6001,10 +6005,9 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     limits = m.EvidencePreparationLimitsV1(max_record_reads=2048 if cashflow_capacity else 1000,
         max_read_bytes=8_000_000,max_owner_queries=1280 if cashflow_capacity else 1000,
         max_query_result_records=2048 if cashflow_capacity else 1000, max_control_writes=128, max_control_bytes=2_000_000,
-        # The public causal fixture seals twelve coordinates. Its final control
-        # readback exhausted the five-second preparation CPU budget in run 843.
-        # Use the larger fixture allowance before signing, for CPU alone.
-        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public else 5_000_000_000,
+        # Fund the public timeline and the setup preceding the OP14 callback
+        # rejection. Both exceeded 5s in hosted preparation before completion.
+        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection else 5_000_000_000,
         max_wall_ns=5_000_000_000 if seal_cut == "tail_expiry" else 30_000_000_000,
         aggregate_budget_ref="LP03-BUDGET::original-assembly")
     scope = replace(selected_scope, source_selections=selections,
@@ -7008,6 +7011,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                 ("control_bytes", attempt.prefix["control_bytes"], 1_000_000),
                 ("cpu_ns", attempt.started[2] - registered.started_cpu_ns + attempt.child_cpu_prefix, 8_000_000_000),
                 ("wall_ns", attempt.started[1] - registered.deadline.admitted_monotonic_ns, 24_000_000_000)):
+            if counter == "cpu_ns":
+                assert (attempt.limits.max_cpu_ns, attempt.limits.reserved_failure_cpu_ns) == (10_000_000_000, 2_000_000_000)
             proposed = dict(accounting_before, **{counter: prefix + positive_allowance + 1})
             expected = "LP03_ATTEMPT_EXPIRED" if counter == "wall_ns" else "LP03_ATTEMPT_RESOURCE_EXHAUSTED"
             with pytest.raises(ComputationControlPlaneError, match=expected):
