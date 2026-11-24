@@ -22,7 +22,10 @@ env:
 jobs:
   validation_shards:
     name: Validation Shard (${{ matrix.group }})
-    runs-on: ubuntu-latest
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: ${{ matrix.phase == 'pytest-shard-8' && 300 || 90 }}
     strategy:
       fail-fast: false
@@ -58,6 +61,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        env:
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: core.autocrlf
+          GIT_CONFIG_VALUE_0: 'false'
         with: &checkout_full
           fetch-depth: 0
 
@@ -75,6 +82,9 @@ jobs:
             ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-
 
       - name: Install test dependency
+        id: install
+        env:
+          PIP_CACHE_DIR: ~/.cache/pip
         run: &install_pytest |
           python -m pip install pytest==9.1.1
           python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1
@@ -92,12 +102,108 @@ jobs:
         timeout-minutes: 270
         run: *validation_shard_command
 
+      - name: Record native phase outcome
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        env:
+          VALIDATION_PHASE: ${{ matrix.phase }}
+        run: |
+          python -B - <<'PY'
+          import os
+          import re
+          import tempfile
+          from collections import Counter
+          from pathlib import Path
+
+          from tools.validation_reliability import (
+              CommandExecutionReceiptV1, ValidationCompletionReceiptV1, _nested_pytest_command, _read_evidence_json,
+              _require_direct_regular_evidence_file, command_receipt_file_indexes,
+              command_terminal_custody_proven, validate_published_completion_receipt,
+          )
+
+          phase = os.environ["VALIDATION_PHASE"]
+          parents = {Path(os.environ["SystemDrive"] + "/qttv"), Path(tempfile.gettempdir()) / "qttv"}
+          matches = []
+          for parent in parents:
+              for directory in parent.glob("run_*.evidence"):
+                  if not re.fullmatch(r"run_\d{8}T\d{12}Z_\d+_\d+\.evidence", directory.name):
+                      continue
+                  record = _read_evidence_json(directory, "run.json")
+                  paths = record["paths"]
+                  if record["phase"] == phase and Path(paths["repo_root"]) == Path.cwd():
+                      if (directory.name != record["run_id"] + ".evidence" or paths["run_id"] != record["run_id"]
+                              or Path(paths["evidence_root"]) != directory):
+                          raise SystemExit("Validation run identity mismatch")
+                      target = Path(paths["cleanup_target"])
+                      if target.parent != parent or target != Path(paths["process_root"]):
+                          raise SystemExit("Unexpected native cleanup target")
+                      matches.append((directory, record["run_id"], target))
+          if len(matches) != 1:
+              raise SystemExit("Expected one original evidence directory for this phase")
+          directory, run_id, target = matches[0]
+          receipt = ValidationCompletionReceiptV1(**_read_evidence_json(directory, "completion.json"))
+          validate_published_completion_receipt(directory, receipt)
+          cleanup = _read_evidence_json(directory, "cleanup.json")
+          if (receipt.run_id != run_id or receipt.phase != phase or cleanup["run_id"] != run_id
+                  or Path(cleanup["cleanup_target"]) != target
+                  or cleanup["cleanup_state"] != receipt.process_root_cleanup_state):
+              raise SystemExit("Validation completion and cleanup receipts disagree")
+          print(f"QTT_HOSTED_COMPLETION phase={phase} run={run_id} planned={receipt.command_count_planned} "
+                f"started={receipt.command_count_started} completed={receipt.command_count_completed} "
+                f"first_failed={receipt.first_failed_command_index_or_null} exit={receipt.terminal_native_exit_code} "
+                f"state={receipt.final_state} text={receipt.text_integrity_preflight_state} "
+                f"cleanup={receipt.process_root_cleanup_state.split(':', 1)[0]}")
+          if receipt.final_state != "PASS" or receipt.command_count_planned == 0:
+              raise SystemExit("The phase has no passing native completion")
+          try:
+              target.lstat()
+          except FileNotFoundError:
+              pass
+          else:
+              raise SystemExit("The completed phase retained its process root")
+          indexes = command_receipt_file_indexes(directory)
+          if indexes != tuple(range(1, receipt.command_count_completed + 1)):
+              raise SystemExit("The published command receipt roster differs from completion")
+          nested = list(directory.glob("nested-pytest-*"))
+          expected_nested, observed_nested = Counter(), Counter()
+          sizes = {"stdout": 0, "stderr": 0}
+          for folder in (directory, *nested):
+              outer = folder == directory
+              if not outer and (folder.is_symlink() or folder.is_junction() or
+                                not re.fullmatch(r"nested-pytest-\d+-\d+", folder.name) or
+                                command_receipt_file_indexes(folder) != (1,)):
+                  raise SystemExit("Unexpected nested receipt directory")
+              for index in indexes if outer else (1,):
+                  cmd = CommandExecutionReceiptV1(**_read_evidence_json(folder, f"command-{index}.json"))
+                  terminal = (command_terminal_custody_proven(cmd) if outer else
+                              cmd.termination_state == "DELEGATED_TO_AUTHENTICATED_OUTER;PIPES:EOF")
+                  if (not terminal or cmd.run_id != run_id or cmd.command_index != index or cmd.pid is None
+                          or cmd.phase != (phase if outer else "nested-pytest") or Path(cmd.cwd) != Path.cwd()
+                          or cmd.native_exit_code != 0 or cmd.failure_class is not None):
+                      raise SystemExit("A native command receipt lacks successful terminal custody")
+                  if outer:
+                      child_argv = _nested_pytest_command(cmd.argv, Path(cmd.cwd))
+                      if child_argv is not None:
+                          expected_nested[child_argv] += 1
+                  else:
+                      observed_nested[tuple(cmd.argv)] += 1
+                  for stream in sizes:
+                      path, info = _require_direct_regular_evidence_file(folder, f"command-{index}.{stream}.bin")
+                      if Path(getattr(cmd, stream + "_path")) != path or getattr(cmd, stream + "_byte_count") != info.st_size:
+                          raise SystemExit("A native stream differs from its receipt")
+                      sizes[stream] += info.st_size
+          if expected_nested != observed_nested:
+              raise SystemExit("Published nested command receipts differ from the supervised helper commands")
+          print(f"QTT_HOSTED_NATIVE_VERIFIED phase={phase} commands={len(indexes)} nested={len(nested)} "
+                f"stdout_bytes={sizes['stdout']} stderr_bytes={sizes['stderr']} process_root_absent=true")
+          PY
+
       - name: Upload validation timing artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: validation-timing-${{ matrix.phase }}
           path: .tmp/qtt-validation-timing/${{ matrix.phase }}.json
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
 
@@ -107,6 +213,7 @@ jobs:
         with:
           name: validation-router-${{ matrix.phase }}
           path: .tmp/qtt-validation-router/${{ matrix.phase }}.json
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
 
