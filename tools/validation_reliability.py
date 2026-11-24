@@ -6073,6 +6073,68 @@ def _path_is_junction(path: Path) -> bool:
     return bool(predicate()) if callable(predicate) else False
 
 
+def _linux_ci_fixture_cleanup(target: Path, repository: Path) -> bool:
+    return (
+        sys.platform == "linux" and os.environ.get("QTT_TEST_LINUX_CI_NATIVE") == "1"
+        and os.environ.get("QTT_TEST_LINUX_CI_OWNER_CASE") == "normal"
+        and target.parent == Path("/var/qtt/runs") and repository == Path("/workspace")
+    )
+
+
+def _linux_ci_scratch_request(connection, directory: int) -> bytes:
+    import array
+    import socket
+
+    connection.sendmsg(
+        [b"DISPOSE_REGISTERED_SCRATCH"],
+        [(socket.SOL_SOCKET, socket.SCM_RIGHTS, array.array("i", [directory]))],
+    )
+    return connection.recv(32)
+
+
+def _linux_ci_remove_registered_scratch(target: Path) -> None:
+    import socket
+    import struct
+
+    writer = (_LINUX_CI_WRITER_ID,) * 4
+    if _linux_ci_credentials("self") != (writer, writer, False):
+        raise OSError("Scratch disposal is restricted to the original receipt writer")
+    flags = os.O_DIRECTORY | os.O_RDONLY | os.O_NOFOLLOW
+
+    def mount_identity(fd: int) -> tuple[int, int, int]:
+        entry = os.fstat(fd)
+        entries = Path(f"/proc/self/fdinfo/{fd}").read_text(encoding="ascii").splitlines()
+        mounts = [int(line.split()[1]) for line in entries if line.startswith("mnt_id:")]
+        if len(mounts) != 1 or mounts[0] <= 0:
+            raise OSError("Scratch directory mount identity is unavailable")
+        return mounts[0], entry.st_dev, entry.st_ino
+
+    with ExitStack() as stack:
+        parent = os.open(target.parent, flags)
+        stack.callback(os.close, parent)
+        root = os.open(target.name, flags, dir_fd=parent)
+        stack.callback(os.close, root)
+        conn = stack.enter_context(socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET))
+        conn.settimeout(6)
+        conn.connect(_LINUX_CI_CONTROLLER)
+        peer = conn.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i"))
+        pid, uid, gid = struct.unpack("3i", peer)
+        if pid <= 1 or (uid, gid) != (0, 0):
+            raise OSError("Scratch controller peer is untrusted")
+        reply = _linux_ci_scratch_request(conn, root)
+        if reply != b"DISPOSED":
+            raise OSError(f"Registered scratch disposal refused: {reply!r}")
+        observed_parent = os.open(target.parent, flags)
+        stack.callback(os.close, observed_parent)
+        if mount_identity(parent) != mount_identity(observed_parent) or os.fstat(root).st_nlink:
+            raise OSError("Original scratch root or parent identity is unresolved")
+        try:
+            os.stat(target.name, dir_fd=observed_parent, follow_symlinks=False)
+        except FileNotFoundError:
+            return
+        raise OSError("Registered scratch name remains after controller disposal")
+
+
 def remove_exact_run_owned_process_tree(
     target: Path | str,
     *,
@@ -6138,6 +6200,10 @@ def remove_exact_run_owned_process_tree(
                 "cleanup target conflicts with the retained evidence root",
             )
 
+    if _linux_ci_fixture_cleanup(cleanup_target, repository):
+        _linux_ci_remove_registered_scratch(cleanup_target)
+        return 0
+
     retried_paths: set[str] = set()
 
     def recover_windows_read_only(
@@ -6189,7 +6255,7 @@ def cleanup_validation_run(paths: ValidationRunPathsV1) -> str:
     state = "PASS_ALREADY_ABSENT"
     read_only_retry_count = 0
     try:
-        if os.path.lexists(target):
+        if os.path.lexists(target) or _linux_ci_fixture_cleanup(target, paths.repo_root):
             read_only_retry_count = remove_exact_run_owned_process_tree(
                 target,
                 expected_run_root=paths.process_root,

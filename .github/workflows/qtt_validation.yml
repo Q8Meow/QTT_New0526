@@ -276,10 +276,12 @@ jobs:
           chmod 6755 "$base/leaf"
           cat > "$base/controller.py" <<'CONTROLLER'
           import array
+          from contextlib import ExitStack, contextmanager
           import ctypes
           import json
           import os
           from pathlib import Path
+          import re
           import selectors
           import signal
           import socket
@@ -403,6 +405,257 @@ jobs:
                   )
 
 
+          DIRECTORY = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+          ENTRY = os.O_PATH | os.O_NOFOLLOW
+          PUBLIC_RUNS = Path("/var/qtt/runs")
+
+          def identity(fd):
+              entry = os.fstat(fd)
+              ids = [int(line.split()[1]) for line in Path(f"/proc/self/fdinfo/{fd}").read_text().splitlines()
+                     if line.startswith("mnt_id:")]
+              if len(ids) != 1 or ids[0] <= 0:
+                  raise OSError("Missing native mount identity")
+              return ids[0], entry.st_dev, entry.st_ino
+
+          def metadata(fd):
+              entry = os.fstat(fd)
+              return {"identity": identity(fd), "uid": entry.st_uid, "gid": entry.st_gid,
+                      "mode": oct(entry.st_mode), "links": entry.st_nlink}
+
+          @contextmanager
+          def opened(parent, name, flags):
+              fd = os.open(name, flags, dir_fd=parent)
+              try:
+                  yield fd
+              finally:
+                  os.close(fd)
+
+          def trusted_entry(fd, mount, kind):
+              entry = os.fstat(fd)
+              if (identity(fd)[0] != mount or stat.S_IFMT(entry.st_mode) != kind
+                      or entry.st_uid != WRITER or entry.st_gid != WRITER or entry.st_mode & 0o022
+                      or kind == stat.S_IFREG and entry.st_nlink != 1):
+                  raise OSError(f"Untrusted scratch binding: {metadata(fd)}")
+
+          def trusted_json(directory, name, mount):
+              with opened(directory, name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK) as fd:
+                  trusted_entry(fd, mount, stat.S_IFREG)
+                  size = os.fstat(fd).st_size
+                  if not 0 < size <= 65_536:
+                      raise OSError("Unbounded scratch binding record")
+                  with os.fdopen(os.dup(fd), "rb") as stream:
+                      raw = stream.read(size + 1)
+                  if len(raw) != size:
+                      raise OSError("Scratch binding length changed")
+                  return json.loads(raw)
+
+          class RegisteredScratch:
+              """One fixture allocation, bound by the original writer's pre-exec helper admission."""
+
+              def __init__(self, phase_pid, ordinal, retired):
+                  self.held = ExitStack()
+                  self.used = False
+                  self.helper = self.leaf = None
+                  self.released = False
+                  self.ordinal = ordinal
+                  self.run_id = f"run_native_nested_{ordinal}"
+                  self.evidence_name = self.run_id + ".evidence"
+                  self.runs_path = Path(f"/proc/{phase_pid}/root/var/qtt/runs")
+                  try:
+                      self.parent = self.held.enter_context(opened(None, self.runs_path, DIRECTORY))
+                      self.mount = identity(self.parent)[0]
+                      trusted_entry(self.parent, self.mount, stat.S_IFDIR)
+                      # The two views can have different mount IDs. Subsequent comparisons
+                      # use only the original writer's mount, held through the directory fd.
+                      control_view = (ROOT / "jail/var/qtt/runs").stat()
+                      if identity(self.parent)[1:] != (control_view.st_dev, control_view.st_ino):
+                          raise OSError("Writer is outside the private runs directory")
+                      self.evidence = self.held.enter_context(opened(self.parent, self.evidence_name, DIRECTORY))
+                      trusted_entry(self.evidence, self.mount, stat.S_IFDIR)
+                      provenance = trusted_json(self.evidence, "run.json", self.mount)
+                      paths = provenance["paths"]
+                      self.name = paths["process_child_name"]
+                      root = PUBLIC_RUNS / self.name
+                      if (not re.fullmatch(rf"r[0-9]{{12}}_{phase_pid}_[0-9]+(?:_[0-9]+)?", self.name)
+                              or self.name in retired or provenance["phase"] != "native-nested-qualification"
+                              or provenance["command_count"] != 1 or paths["repo_root"] != "/workspace"
+                              or paths["run_id"] != self.run_id or provenance["run_id"] != self.run_id
+                              or paths["cleanup_target"] != str(root) or paths["process_root"] != str(root)
+                              or paths["evidence_root"] != str(PUBLIC_RUNS / self.evidence_name)
+                              or paths["pytest_basetemp_root"] != str(root / "p")
+                              or paths["validation_output_root"] != str(root / "v")
+                              or paths["filesystem_probe_state"] != "PASS"):
+                          raise OSError("Scratch is not the fresh bound run allocation")
+                      self.root = self.held.enter_context(opened(self.parent, self.name, DIRECTORY))
+                      trusted_entry(self.root, self.mount, stat.S_IFDIR)
+                      access_acl = "system.posix_acl_access"
+                      default_acl = "system.posix_acl_default"
+                      permissions = ((1, 7, 0xffffffff), (2, 7, PAYLOAD), (4, 0, 0xffffffff),
+                                     (16, 7, 0xffffffff), (32, 0, 0xffffffff))
+                      payload_acl = struct.pack("<I", 2) + b"".join(struct.pack("<HHI", *row) for row in permissions)
+                      for fd in (self.parent, self.root, self.evidence):
+                          if {access_acl, default_acl}.intersection(os.listxattr(fd)):
+                              raise OSError(f"Unexpected registered directory ACL: {metadata(fd)}")
+                      if stat.S_IMODE(os.fstat(self.evidence).st_mode) != 0o700:
+                          raise OSError(f"Unprotected evidence directory: {metadata(self.evidence)}")
+                      if set(os.listdir(self.root)) != {"v", "p", "native-fixture"}:
+                          raise OSError("Unexpected initial scratch entries")
+                      for name in ("p", "v", "native-fixture"):
+                          with opened(self.root, name, DIRECTORY) as fd:
+                              initial = os.fstat(fd)
+                              attrs = os.listxattr(fd)
+                              shared = name in {"p", "native-fixture"}
+                              if (default_acl in attrs or (access_acl in attrs) != shared
+                                      or shared and (os.getxattr(fd, access_acl) != payload_acl
+                                                     or stat.S_IMODE(initial.st_mode) != 0o770)
+                                      or not shared and initial.st_mode & 0o022):
+                                  raise OSError(f"Unexpected initial scratch ACL: {name} {metadata(fd)}")
+                              if (identity(fd)[0] != self.mount or initial.st_uid != WRITER
+                                      or initial.st_gid != WRITER or os.listdir(fd)):
+                                  raise OSError(f"Unexpected initial scratch directory: {name}")
+                      retired.add(self.name)
+                  except BaseException:
+                      self.held.close()
+                      raise
+
+              def check_names(self, *, root_linked=True):
+                  for parent, name, original in ((None, self.runs_path, self.parent),
+                                                 (self.parent, self.evidence_name, self.evidence),
+                                                 (self.parent, self.name, self.root)):
+                      if original == self.root and not root_linked:
+                          continue
+                      with opened(parent, name, DIRECTORY) as fd:
+                          if identity(fd) != identity(original):
+                              raise OSError("Previously registered scratch/evidence binding changed")
+                          trusted_entry(fd, self.mount, stat.S_IFDIR)
+
+              def terminal_receipts(self):
+                  if self.ordinal not in {1, 2, 3}:
+                      # Report a missing outer publication independently of the case policy.
+                      trusted_json(self.evidence, "command-1.json", self.mount)
+                      raise OSError("Qualification case requires preservation")
+                  nested_name = f"nested-pytest-{self.helper}-0"
+                  with opened(self.evidence, nested_name, DIRECTORY) as nested:
+                      trusted_entry(nested, self.mount, stat.S_IFDIR)
+                      for fd, pid, phase in ((self.evidence, self.helper, "native-nested-qualification"),
+                                             (nested, self.leaf, "nested-pytest")):
+                          data = trusted_json(fd, "command-1.json", self.mount)
+                          outer = fd == self.evidence
+                          directory = PUBLIC_RUNS / self.evidence_name
+                          expected_exit = int(self.ordinal == 2)
+                          expected_failure = "ENGVR_NATIVE_EXIT_NONZERO" if expected_exit else None
+                          terminal = "TERMINAL:PROVEN;PIPES:EOF" if outer else "DELEGATED_TO_AUTHENTICATED_OUTER;PIPES:EOF"
+                          if not outer:
+                              directory /= nested_name
+                          elif self.ordinal == 3:
+                              expected_failure = "ENGVR_PROCESS_TERMINATION_FAILED"
+                              terminal = "EXIT_WITH_SURVIVORS;CGROUP_TERMINATE;CGROUP_STOP;" + terminal
+                          if (pid is None or data["pid"] != pid or type(data["native_exit_code"]) != int
+                                  or data["native_exit_code"] != expected_exit or data["termination_state"] != terminal
+                                  or data["phase"] != phase or data["cwd"] != "/workspace"
+                                  or data["command_index"] != 1 or data["run_id"] != self.run_id
+                                  or data["start_failure_class"] is not None or data["failure_class"] != expected_failure
+                                  or data["timeout_state"] != ("NOT_TRIGGERED" if outer else "NOT_CONFIGURED")):
+                              raise OSError("Published original terminal wait and custody are incomplete")
+                          for stream in ("stdout", "stderr"):
+                              with opened(fd, f"command-1.{stream}.bin", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK) as raw:
+                                  trusted_entry(raw, self.mount, stat.S_IFREG)
+                                  if (data[stream + "_path"] != str(directory / f"command-1.{stream}.bin")
+                                          or data[stream + "_byte_count"] != os.fstat(raw).st_size):
+                                      raise OSError("Published terminal stream length differs")
+
+              def dispose(self, descriptor, limit):
+                  if not self.released or self.used:
+                      return b"CUSTODY_REFUSED"
+                  if identity(descriptor) != identity(self.root):
+                      return b"TARGET_REFUSED"
+                  self.check_names()
+                  try:
+                      self.terminal_receipts()
+                  except (OSError, ValueError, KeyError, TypeError) as exc:
+                      print("LP03_SCRATCH_REFUSED", self.run_id, "published custody", repr(exc), flush=True)
+                      return b"CUSTODY_REFUSED"
+                  self.used = True
+                  inventory = {}
+                  restrictive_directories = 0
+                  position = {"operation": "scan", "run": self.run_id}
+                  def walk(directory, prefix, removing):
+                      nonlocal restrictive_directories
+                      if len(prefix) > 32:
+                          raise OSError("Scratch depth exceeded")
+                      # Snapshot only this bounded set before mutating the directory.
+                      names = []
+                      available = len(inventory) if removing else 4096 - len(inventory)
+                      with os.scandir(directory) as listing:
+                          for entry in listing:
+                              if len(names) >= available or time.monotonic_ns() >= limit:
+                                  raise OSError("Scratch inventory limit exceeded")
+                              names.append(entry.name)
+                      for name in names:
+                          relative = (*prefix, name)
+                          position.update(operation="open-entry", path=relative, parent=metadata(directory), entry=None)
+                          if (not removing and len(inventory) >= 4096) or time.monotonic_ns() >= limit:
+                              raise TimeoutError("Scratch operation bound exceeded")
+                          with opened(directory, name, ENTRY) as child:
+                              native = os.fstat(child)
+                              info = metadata(child)
+                              position["entry"] = info
+                              kind = stat.S_IFMT(native.st_mode)
+                              if (info["identity"][0] != self.mount or native.st_uid not in {WRITER, PAYLOAD}
+                                      or native.st_gid not in {WRITER, PAYLOAD}
+                                      or kind not in {stat.S_IFDIR, stat.S_IFREG, stat.S_IFLNK}
+                                      or kind != stat.S_IFDIR and native.st_nlink != 1):
+                                  raise OSError("Cross-mount, aliased or foreign scratch entry")
+                              if removing:
+                                  if inventory.pop(relative, None) != (info["identity"], kind):
+                                      raise OSError("Scratch entry changed after preflight")
+                              else:
+                                  inventory[relative] = (info["identity"], kind)
+                                  if kind == stat.S_IFDIR and native.st_uid == PAYLOAD and stat.S_IMODE(native.st_mode) == 0:
+                                      restrictive_directories += 1
+                              if kind == stat.S_IFDIR:
+                                  with opened(directory, name, DIRECTORY) as sub:
+                                      if identity(sub) != info["identity"]:
+                                          raise OSError("Scratch directory exchanged")
+                                      walk(sub, relative, removing)
+                              if removing:
+                                  position.update(operation="rmdir" if kind == stat.S_IFDIR else "unlink",
+                                                  path=relative, parent=metadata(directory), entry=info)
+                                  with opened(directory, name, ENTRY) as match:
+                                      if identity(match) != info["identity"]:
+                                          raise OSError("Scratch entry changed before removal")
+                                      (os.rmdir if kind == stat.S_IFDIR else os.unlink)(name, dir_fd=directory)
+                  try:
+                      walk(self.root, (), False)
+                      entries = len(inventory)
+                      self.check_names()
+                      walk(self.root, (), True)
+                      with os.scandir(self.root) as remaining:
+                          populated = next(remaining, None) is not None
+                      if inventory or populated:
+                          raise OSError("Scratch inventory changed")
+                      self.check_names()
+                      position.update(operation="rmdir-root", path=self.name, parent=metadata(self.parent), entry=metadata(self.root))
+                      os.rmdir(self.name, dir_fd=self.parent)
+                      try:
+                          os.stat(self.name, dir_fd=self.parent, follow_symlinks=False)
+                      except FileNotFoundError:
+                          self.check_names(root_linked=False)
+                          if os.fstat(self.root).st_nlink != 0:
+                              raise OSError("Original scratch directory is still linked")
+                      else:
+                          raise OSError("Scratch name persists after removal")
+                      witness(f"scratch-{self.run_id}.json", {"run": self.run_id, "root": identity(self.root),
+                              "parent": identity(self.parent), "entries": entries, "recursive_populated": 0,
+                              "original_name_absent": True, "mode_zero_payload_dirs": restrictive_directories,
+                              "helper_pid": self.helper, "leaf_pid": self.leaf})
+                      return b"DISPOSED"
+                  except OSError as exc:
+                      print("LP03_SCRATCH_FAILURE", json.dumps({**position, "errno": exc.errno, "error": repr(exc)}), flush=True)
+                      raise
+
+
+
           def main():
               if os.getresuid() != (0, 0, 0) or os.getresgid() != (0, 0, 0):
                   raise OSError("bootstrap has no root identity")
@@ -449,12 +702,14 @@ jobs:
               current = None
               serial = 0
               peers = {}
+              scratch = None
+              registered_names = set()
               challenged = None
               stopped_owner_proven = False
               phase_fd = os.pidfd_open(phase.pid)
 
               def disconnect(conn):
-                  nonlocal current
+                  nonlocal current, scratch
                   peer, delegated, launch_limit = peers.pop(conn)
                   selector.unregister(conn)
                   conn.close()
@@ -464,6 +719,9 @@ jobs:
                           raise OSError("owner released a populated scope")
                       current.path.rmdir()
                       current = None
+                      if scratch is not None:
+                          scratch.held.close()
+                          scratch = None
 
               try:
                   with phase.stdin as stage_release:
@@ -542,6 +800,26 @@ jobs:
                                   else:
                                       disconnect(conn)
                                   continue
+                              if message == b"DISPOSE_REGISTERED_SCRATCH":
+                                  reply = b"CUSTODY_REFUSED"
+                                  if (len(fds) == 1 and case == "normal" and peer == phase.pid
+                                          and delegated is None and current is None and scratch is not None
+                                          and scratch.released and fd_pid(phase_fd) == phase.pid
+                                          and proc_scope(phase.pid) == staging.relative):
+                                      admit_credentials(phase.pid, WRITER, os.getpid(), False)
+                                      service = staging.path.parent
+                                      if ((service / "cgroup.procs").read_text().split() != [str(os.getpid())]
+                                              or (staging.path / "cgroup.procs").read_text().split() != [str(phase.pid)]
+                                              or {p.name for p in service.iterdir() if p.is_dir()} != {staging.path.name}
+                                              or any(p.is_dir() for p in staging.path.iterdir())):
+                                          raise OSError("Private writer custody changed before scratch disposal")
+                                      reply = scratch.dispose(fds[0], min(phase_limit, now + SETTLE_NS))
+                                  conn.sendall(reply)
+                                  if delegated is None:
+                                      peers.pop(conn)
+                                      selector.unregister(conn)
+                                      conn.close()
+                                  continue
                               if delegated is None:
                                   if fds or now >= launch_limit:
                                       raise OSError("invalid opening request")
@@ -552,6 +830,9 @@ jobs:
                                           or (limit is not None and (type(limit) is not int or limit <= now))):
                                       raise OSError("invalid command clock")
                                   if opening["op"] == "OPEN_COMMAND" and peer == phase.pid and current is None:
+                                      if scratch is not None:
+                                          scratch.held.close()
+                                          scratch = None
                                       serial += 1
                                       current = Scope(scope_root, serial, limit)
                                       delegated = False
@@ -585,6 +866,15 @@ jobs:
                                   admit_credentials(child, expected, peer, not helper)
                                   if not delegated:
                                       current.child, current.is_helper = child, helper
+                                  if helper:
+                                      if case != "normal" or scratch is not None or len(registered_names) >= 10:
+                                          raise OSError("Unbound scratch helper")
+                                      scratch = RegisteredScratch(phase.pid, len(registered_names) + 1, registered_names)
+                                      scratch.helper = child
+                                  elif delegated:
+                                      if scratch is None or scratch.helper != peer or scratch.leaf is not None:
+                                          raise OSError("Unbound scratch leaf")
+                                      scratch.leaf = child
                                   peers[conn] = peer, delegated, None
                                   conn.sendall(b"ADMITTED_WITH_RECEIPT_CUSTODY")
                               elif not fds and current is not None and not delegated and message == b"CHECK":
@@ -607,6 +897,8 @@ jobs:
                                       "command_pid": current.child, "stop_reason": current.stop_reason,
                                       "recursive_populated": 0,
                                   })
+                                  if scratch is not None and current.child == scratch.helper:
+                                      scratch.released = True
                                   current = None
                                   conn.sendall(b"RELEASED")
                                   disconnect(conn)
@@ -661,6 +953,8 @@ jobs:
                   if not staging.is_empty():
                       raise OSError("staging cgroup retained an unauthenticated process")
                   staging.path.rmdir()
+                  if scratch is not None:
+                      scratch.held.close()
                   os.close(phase_fd)
                   for conn in peers:
                       conn.close()

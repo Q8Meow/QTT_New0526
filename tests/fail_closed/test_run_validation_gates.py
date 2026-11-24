@@ -15169,6 +15169,8 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             run_id=f"run_native_nested_{case_index}",
             projected_relative_paths=("nested-pytest/command-1.stdout.bin",),
         )
+        if linux_ci:
+            paths.evidence_root.chmod(0o700)
         reliability.write_run_provenance(
             paths, probe, phase="native-nested-qualification", command_count=1,
             text_integrity_preflight_state="NOT_APPLICABLE",
@@ -15187,8 +15189,19 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             environment.pop("PYTEST_VERSION", None)
             fixture_root = paths.process_root / "native-fixture"
             fixture_root.mkdir()
-            fixture_root.chmod(0o777)
-            basetemp.chmod(0o777)
+            # Only the payload UID can write alongside the writer in these two
+            # empty fixture directories. Descendants inherit no default ACL.
+            import struct
+            undefined = 0xffffffff
+            acl = struct.pack("<I", 2) + b"".join(
+                struct.pack("<HHI", tag, perms, identity) for tag, perms, identity in (
+                    (1, 7, undefined), (2, 7, reliability._LINUX_CI_PAYLOAD_ID),
+                    (4, 0, undefined), (16, 7, undefined), (32, 0, undefined),
+                )
+            )
+            for directory in (fixture_root, basetemp):
+                os.setxattr(directory, "system.posix_acl_access", acl, follow_symlinks=False)
+                assert os.getxattr(directory, "system.posix_acl_access", follow_symlinks=False) == acl
             basetemp /= "leaf"
             environment["QTT_TEST_LINUX_CI_SCRATCH"] = str(fixture_root)
         command = (sys.executable, "-B", "tools/run_pytest_fresh_basetemp.py",
@@ -15256,6 +15269,20 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             patch.setattr(reliability, "_write_evidence_chunk", intercepted_write)
             patch.setattr(reliability, "_mirror_bytes", intercepted_mirror)
             patch.setattr(reliability, "atomic_write_json", intercepted_publish)
+            if linux_ci and case == "normal":
+                original_start = reliability._LinuxCIProcess.start
+
+                def check_live_custody(process, *args, **kwargs):
+                    original_start(process, *args, **kwargs)
+                    directory = os.open(paths.process_root, os.O_DIRECTORY | os.O_NOFOLLOW)
+                    try:
+                        with process.control_lock:
+                            reply = reliability._linux_ci_scratch_request(process.connection, directory)
+                        assert reply == b"CUSTODY_REFUSED" and paths.process_root.is_dir()
+                    finally:
+                        os.close(directory)
+
+                patch.setattr(reliability._LinuxCIProcess, "start", check_live_custody)
             if case in native_denials:
                 real_binding = reliability._WindowsContainedProcess.bind_helper_peer
                 real_identity = reliability._windows_native_process_identity
@@ -15340,9 +15367,30 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
             assert b"\x00\xffNESTED_BINARY\r\n" in (roots[0] / "command-1.stdout.bin").read_bytes()
             assert b"\xfe\x00NESTED_STDERR\r\n" in (roots[0] / "command-1.stderr.bin").read_bytes()
             assert (nested["native_exit_code"] == 0) == (case != "nonzero")
-            cleanup_state = reliability.cleanup_validation_run(paths)
             if linux_ci:
-                assert cleanup_state == "PASS_REMOVED_EXACT_RUN_ROOT", cleanup_state
+                protected = {file: file.read_bytes() for directory in (paths.evidence_root, roots[0])
+                             for file in directory.iterdir() if file.is_file()}
+                neighbor = paths.process_root.parent / (paths.run_id + ".neighbor")
+                neighbor.write_bytes(b"neighbor retained")
+                if case == "publication-failure":
+                    assert not (paths.evidence_root / "command-1.json").exists()
+                    with pytest.raises(reliability.ValidationReliabilityError, match="CUSTODY_REFUSED"):
+                        reliability.cleanup_validation_run(paths)
+                    assert paths.process_root.is_dir()
+                    assert not (paths.evidence_root / "command-1.json").exists()
+                else:
+                    if case == "normal":
+                        with pytest.raises(OSError, match="TARGET_REFUSED"):
+                            reliability._linux_ci_remove_registered_scratch(paths.evidence_root)
+                    assert reliability.cleanup_validation_run(paths) == "PASS_REMOVED_EXACT_RUN_ROOT"
+                    assert not os.path.lexists(paths.process_root)
+                cleanup = json.loads((paths.evidence_root / "cleanup.json").read_bytes())
+                assert cleanup["read_only_retry_count"] == 0
+                assert cleanup["cleanup_state"].startswith("FAIL:" if case == "publication-failure" else "PASS_REMOVED")
+                assert neighbor.read_bytes() == b"neighbor retained"
+                assert all(file.read_bytes() == original for file, original in protected.items())
+            else:
+                reliability.cleanup_validation_run(paths)
         else:
             assert receipt.failure_class is not None, receipt
             assert not reliability.command_terminal_custody_proven(receipt), receipt
@@ -15354,6 +15402,8 @@ def _assert_nested_process_supervision_contract(monkeypatch, tmp_path: Path) -> 
         if case == "launch-abort":
             assert receipt.start_failure_class is None
             assert "STARTED_LAUNCH_FAILED:KeyboardInterrupt" in receipt.termination_state
+        if linux_ci:
+            print("LP03_NESTED_CASE_VERIFIED", case, receipt.pid, receipt.native_exit_code, flush=True)
 
     registered = tmp_path / "registered-nested"
     registered.mkdir()
@@ -15446,8 +15496,11 @@ def test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry(
             with pytest.raises(PermissionError):
                 (retained / "unexpected-payload-receipt.json").open("xb")
             retained = Path(linux_scratch)
-            tmp_path.chmod(0o777)
-            tmp_path.parent.chmod(0o777)
+            private = tmp_path / "restrictive-payload-space"
+            private.mkdir(mode=0o700)
+            (private / "owned").write_bytes(b"disposable")
+            (private / "outside-link").symlink_to(Path(os.environ[reliability.EVIDENCE_ROOT_ENV]))
+            private.chmod(0)
         descendant_script = (
             "import os,time;print(os.getpid(),flush=True);os.close(1);"
             + ("time.sleep(60)" if fixture_case in {"survivor", "timeout", "blocked-mirror", "blocked-write", "capture-failure", "abort"} else "")
