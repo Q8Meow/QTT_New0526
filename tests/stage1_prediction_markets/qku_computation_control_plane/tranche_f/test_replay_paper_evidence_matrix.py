@@ -708,6 +708,7 @@ def test_input_lock_and_lane_contract_matrix(tmp_path: Path) -> None:
     from contextlib import redirect_stdout
     from io import StringIO
 
+    _assert_lp03_cpu_boundary_witness(tmp_path / "wfill", "capture_partial_fills")
     capture_root = tmp_path / "capture_partial_fills"
     capture_root.mkdir()
     # The shared fixture also prints raw capture records. Expose only the
@@ -722,6 +723,7 @@ def test_input_lock_and_lane_contract_matrix(tmp_path: Path) -> None:
                 if line.startswith("LP03_MATH03_CAPTURE_BOUNDARY="):
                     print(line, end="")
     # Exercise the corrected source census before repeating native lanes.
+    _assert_lp03_cpu_boundary_witness(tmp_path / "wplain", None)
     _assert_lp03_authorization_data_contract(tmp_path)
     for queue_cut in (None, "queue_ack_1ns"):
         queue_root = tmp_path / ("queue_original" if queue_cut is None else queue_cut)
@@ -806,6 +808,56 @@ _LP03_POSITIVE_REVIEW_CASES = frozenset((
 ))
 
 
+_LP03_MATH03_COMPLETION_CASES = (None, "capture_partial_fills", "causal_public_timeline", "causal_timeline")
+
+
+def _assert_lp03_cpu_boundary_witness(root, case):
+    import os
+    from contextlib import redirect_stdout
+    from io import StringIO
+
+    assert case in _LP03_MATH03_COMPLETION_CASES
+    if os.name != "nt":
+        return  # The original cases below still exercise native store admission refusal.
+    root.mkdir()
+    with StringIO() as report:
+        try:
+            with redirect_stdout(report):
+                _assert_lp03_authorization_data_contract(root, review_cut=case, cpu_boundary_witness=True)
+        finally:
+            report.seek(0)
+            markers = [line for line in report if line.startswith("LP03_MATH03_CPU_BOUNDARY=")]
+            for line in markers:
+                print(line, end="")
+    assert len(markers) == 1
+
+
+def _lp03_completion_cpu_case(math_id, case):
+    # Some original numerical/refusal assertions require two completed lanes.
+    if case is None:
+        return True  # The sealer checks the explicit formula roster.
+    if case == "cumulative_serialization":
+        return math_id in ("MATH-02", "MATH-05", "MATH-06", "MATH-07", "MATH-09", "MATH-10",
+                           "MATH-11", "MATH-12", "MATH-13", "MATH-14", "MATH-15", "MATH-16",
+                           "MATH-18", "MATH-19", "MATH-26", "MATH-27")
+    cases = {
+        "MATH-03": _LP03_MATH03_COMPLETION_CASES,
+        "MATH-08": ("numerical_init",),
+        "MATH-19": ("cscv_s4",),
+        "MATH-22": ("missing_assumption", "unequal_groups", "outcome_leak", "unknown_group_bound"),
+        "MATH-29": ("decimal34_covariance",),
+        "MATH-30": ("decimal34_tail",),
+        "MATH-31": ("decimal34_tail",),
+        "MATH-33": ("sell_zero",),
+        "MATH-36": ("book_grid_decimal34",),
+        "MATH-37": ("conversion_budget",),
+        "MATH-38": ("decimal34_fill_tolerance",),
+        "MATH-43": ("capacity_power_unproven",),
+        "MATH-45": ("gate_tie",),
+    }
+    return case in cases.get(math_id, ())
+
+
 def _note_lp03_review_expiry(error, math_id, case):
     import sys
     import traceback
@@ -847,7 +899,7 @@ def _note_lp03_review_expiry(error, math_id, case):
 
 
 def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="MATH-03", review_cut=None, published_kelly_source=None, edge_native_failure=False,
-        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False) -> None:
+        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False) -> None:
     """Data/authentication only; these placeholder file IDs authorize no store.
 
     Real admission/publication/receiver tests must bind actual original stores.
@@ -1235,7 +1287,8 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
     try:
         _assert_lp03_role_store_binding_contract(tmp_path, config, fixture_keys, envelope, message,
             selected_math=selected_math, review_cut=review_cut, published_kelly_source=published_kelly_source, edge_native_failure=edge_native_failure,
-            measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer)
+            measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer,
+            cpu_boundary_witness=cpu_boundary_witness)
     except Exception as error:
         _note_lp03_review_expiry(error, selected_math, review_cut)
         raise
@@ -4395,7 +4448,7 @@ def _lp03_causal_callbacks_v1(package, origin):
 
 
 def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, message, hosts, bindings, parameters, adapters,
-                                          *, baseline_currency="USD", expect_rejection=None, seal_cut=None, register=False,
+                                          *, requested_case, cpu_boundary_witness, baseline_currency="USD", expect_rejection=None, seal_cut=None, register=False,
                                           registration_cut=None, compilation_cut=None, attempt_cut=None, selected_math="MATH-03", review_cut=None,
                                           private26_cut=None, published_kelly_source=None,
                                           measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False):
@@ -4551,14 +4604,23 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         aggregate_wall_ns = 480_000_000_000 if positive_review else 240_000_000_000
         aggregate_cpu_ns = (60_000_000_000 if causal or edge or cashflow or sharpe or pbo or held_out or
             recorded_dr or ope_point or analytic or private_execution or reality or spa else 40_000_000_000)
-        if positive_review and review_cut is None and selected_math in ("MATH-02", "MATH-35", "MATH-52"):
-            # Completed hosted lanes used up to 7.1875s CPU. Run 845 exceeded
-            # the ordinary 8s allowance before final readback. Allow 16s for
-            # normal work and retain the original 2s failure reserve per lane.
+        edge_failure = attempt_cut == "edge_native_finish_failure" and edge and review_cut is None
+        cold_cases = ("complete", "before_data", "data_only", "publication_pending_readback")
+        completion_cpu = (
+            not cpu_boundary_witness
+            and requested_case == (selected_math, review_cut, edge_failure, cold_native_writer)
+            and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, private26_cut))
+            and (attempt_cut is None or edge_failure)
+            and (cold_native_writer is False or
+                 (selected_math == "MATH-35" and review_cut is None and cold_native_writer in cold_cases))
+            and _lp03_completion_cpu_case(selected_math, review_cut)
+        )
+        if completion_cpu:
+            # Completed hosted lanes used 7.625s; other 8s grants exhausted during
+            # publication. Reserve 16s of ordinary CPU and 2s of failure CPU per lane.
             execution = replace(execution, max_cpu_ns=18_000_000_000)
-            # Two larger reservations and their actual charges can each cost
-            # another 8s per lane. Preserve the previous closeout headroom.
-            aggregate_cpu_ns += 2 * (8_000_000_000 + 8_000_000_000)
+            # Two extra 8s reservations plus up to 8s of extra charges per lane.
+            aggregate_cpu_ns += 32_000_000_000
         envelope = replace(envelope, per_attempt_limits=execution,
             aggregate_execution_limits=replace(execution, max_attempts=2, max_wall_ns=aggregate_wall_ns,
                 max_cpu_ns=aggregate_cpu_ns, max_input_reads=8000, max_input_bytes=40_000_000 if measured_decay else 32_000_000,
@@ -7005,14 +7067,16 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             replace(attempt.grant_record, component_and_callback_pins=dict(components=(("MATH-03", "changed", "1.1R1"),), callbacks=()))
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceAttemptOperationV1
         accounting_before = dict(registered.consumed)
+        signed_cpu_ns = 18_000_000_000 if completion_cpu else 10_000_000_000
+        assert attempt.limits.max_cpu_ns == signed_cpu_ns
+        assert attempt.limits.reserved_failure_cpu_ns == 2_000_000_000
+        ordinary_cpu_ns = signed_cpu_ns - 2_000_000_000
         for counter, prefix, positive_allowance in (
                 ("record_reads", attempt.prefix["record_reads"], 1500),
                 ("read_bytes", attempt.prefix["read_bytes"], 2_000_000),
                 ("control_bytes", attempt.prefix["control_bytes"], 1_000_000),
-                ("cpu_ns", attempt.started[2] - registered.started_cpu_ns + attempt.child_cpu_prefix, 8_000_000_000),
+                ("cpu_ns", attempt.started[2] - registered.started_cpu_ns + attempt.child_cpu_prefix, ordinary_cpu_ns),
                 ("wall_ns", attempt.started[1] - registered.deadline.admitted_monotonic_ns, 24_000_000_000)):
-            if counter == "cpu_ns":
-                assert (attempt.limits.max_cpu_ns, attempt.limits.reserved_failure_cpu_ns) == (10_000_000_000, 2_000_000_000)
             proposed = dict(accounting_before, **{counter: prefix + positive_allowance + 1})
             expected = "LP03_ATTEMPT_EXPIRED" if counter == "wall_ns" else "LP03_ATTEMPT_RESOURCE_EXHAUSTED"
             with pytest.raises(ComputationControlPlaneError, match=expected):
@@ -7200,12 +7264,18 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             copy(packet)
         with pytest.raises(ComputationControlPlaneError, match="LP03_ORIGINAL_INVOCATION_INPUTS_CHANGED"):
             EvidenceInvocationInputsV1._require_original_v1(object.__new__(EvidenceInvocationInputsV1), attempt)
-        if attempt_cut == "forged_terminal":
+        if attempt_cut == "forged_terminal" or cpu_boundary_witness:
             attempt.terminal_proof = object()
             with pytest.raises(ComputationControlPlaneError, match="LP03_ATTEMPT_PRIOR_CUSTODY_UNRESOLVED"):
                 issuer.issue_evidence_attempt_v1(replace(attempt_request, lane=m.EvidenceLaneV1.PAPER,
                     idempotency_key="LP03-ATTEMPT-REQUEST::forged-terminal"), issuer_context=issuer_context)
             attempt.terminal_proof = None
+            if cpu_boundary_witness:
+                assert ordinary_cpu_ns == 8_000_000_000 and not supervisor._retained and supervisor._active is None
+                print("LP03_MATH03_CPU_BOUNDARY=" + deterministic_json(dict(
+                    case=review_cut or "plain", signed_ns=signed_cpu_ns, reserve_ns=attempt.limits.reserved_failure_cpu_ns,
+                    refused_ordinary_ns=ordinary_cpu_ns + 1, native_count=len(supervisor._retained),
+                    paper_reissue="LP03_ATTEMPT_PRIOR_CUSTODY_UNRESOLVED")))
             return
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceAttemptObservationAppendV1
         observation_probes = []
@@ -7691,6 +7761,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         paper_grant = issuer.issue_evidence_attempt_v1(paper_request, issuer_context=issuer_context)
         paper_attempt = paper_grant._attempt
         assert paper_attempt is not attempt and paper_grant is not attempt_grant
+        assert paper_attempt.limits.max_cpu_ns == signed_cpu_ns
         assert paper_attempt.child_cpu_prefix >= terminal[0]["cpu_ns"]
         assert paper_attempt.limits.max_input_reads == min(actual_envelope.per_attempt_limits.max_input_reads,
             actual_envelope.aggregate_execution_limits.max_input_reads - before_paper["record_reads"] - reserved["max_input_reads"])
@@ -14484,8 +14555,9 @@ def _assert_lp03_worker_data_protocol(attempt, envelope, inputs):
 
 
 def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_keys, envelope, owner_message, *, selected_math="MATH-03", review_cut=None, published_kelly_source=None, edge_native_failure=False,
-        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False) -> None:
+        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False) -> None:
     """Actual role-file/schema setup and denial, not grant/readback acceptance."""
+    from functools import partial
     import os
     import pytest
     from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService, EvidenceHostBindingV1, EvidenceIssuerContextV1
@@ -14586,11 +14658,18 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             adapter._connection.set_trace_callback(None)
         assert len({item.database_file_identity for item in bindings}) == 8
         actual_envelope = replace(envelope, store_bindings=bindings)
-        if review_cut in ("causal_timeline", "causal_public_timeline", "causal_callback_rejection", "capture_partial_fills"):
+        # Bind the original request even for branches which translate or omit the cut.
+        seal_snapshot = partial(_assert_lp03_original_snapshot_and_seal,
+            requested_case=(selected_math, review_cut, edge_native_failure, cold_native_writer),
+            cpu_boundary_witness=cpu_boundary_witness)
+        if cpu_boundary_witness:
+            assert selected_math == "MATH-03" and review_cut in _LP03_MATH03_COMPLETION_CASES
+            assert not edge_native_failure and not cold_native_writer
+        if cpu_boundary_witness or review_cut in ("causal_timeline", "causal_public_timeline", "causal_callback_rejection", "capture_partial_fills"):
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
 
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True, review_cut=review_cut)
             return
         if selected_math in ("MATH-06","MATH-07"):
@@ -14600,7 +14679,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             assert review_cut in (None,"cumulative_serialization","assembly_record_reads")
             assert review_cut!="assembly_record_reads" or selected_math=="MATH-06"
             for cut in ((None,) if review_cut else (None,"wrong_bounds","expectation_outside","zero_budget")):
-                _assert_lp03_original_snapshot_and_seal(tmp_path,fixture_keys,actual_envelope,actual_message,
+                seal_snapshot(tmp_path,fixture_keys,actual_envelope,actual_message,
                     hosts,bindings,initialize_st12f_parameter_registry_v1(),adapters,selected_math=selected_math,
                     register=True,review_cut=review_cut,registration_cut=cut)
             return
@@ -14608,7 +14687,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope=replace(actual_envelope,component_closure=("MATH-01","MATH-02"))
             actual_message=replace(owner_message,payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path,fixture_keys,actual_envelope,actual_message,
+            seal_snapshot(tmp_path,fixture_keys,actual_envelope,actual_message,
                 hosts,bindings,initialize_st12f_parameter_registry_v1(),adapters,
                 selected_math="MATH-02",register=True,review_cut=review_cut,
                 attempt_cut="edge_native_finish_failure" if edge_native_failure else None,
@@ -14619,7 +14698,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             assert published_kelly_source is not None and review_cut is None
             actual_envelope = replace(actual_envelope, component_closure=("MATH-28",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                 selected_math="MATH-28", register=True, published_kelly_source=published_kelly_source)
             return
@@ -14629,12 +14708,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
             if review_cut is not None:
                 assert review_cut == "cumulative_serialization"
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                     selected_math="MATH-27", register=True, review_cut=review_cut)
             else:
                 for cut in (None,"wrong_bounds","expectation_outside","zero_budget","probability_domain","odds_domain"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                         selected_math="MATH-27", register=True, registration_cut=cut)
             return
@@ -14644,12 +14723,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
             if review_cut is not None:
                 assert selected_math == "MATH-05" and review_cut == "cumulative_serialization"
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                     selected_math=selected_math, register=True, review_cut=review_cut)
             else:
                 for cut in (None, "wrong_bounds", "expectation_outside", *(("zero_budget",) if selected_math == "MATH-05" else ())):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                         selected_math=selected_math, register=True, registration_cut=cut)
             return
@@ -14659,7 +14738,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
             if review_cut is not None:
                 assert review_cut == "cumulative_serialization"
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                     selected_math="MATH-26", register=True, review_cut=review_cut)
                 return
@@ -14697,11 +14776,11 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
                         "equal_admissions_after_native", "reset_counter_after_native", "replace_work_root_after_native",
                         "replace_numerical_entry_after_native", "changed_protocol_after_native",
                         "equal_admissions_before_native", "reset_counter_before_native"):
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, selected_math="MATH-26",
                     register=True, registration_cut=cut)
             for cut, reason in cases:
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters,
                     selected_math="MATH-26", private26_cut=cut, expect_rejection=reason)
             return
@@ -14711,7 +14790,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
             for cut in ((None,) if review_cut else (None,"zero_budget","wrong_bounds","serialization","expectation_outside",
                     "rank_outside","rank_count","duplicate_index","index_outside","index_order")):
-                _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                     hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                     selected_math=selected_math, review_cut=review_cut, registration_cut=cut)
             return
@@ -14733,7 +14812,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
                 else "LP03_QUANTUM_ORIGINAL_ROLE_AND_ORIGIN" if selected_math == "MATH-50" and review_cut == "observed_quantum_claim"
                 else "LP03_QUANTUM_ORIGINAL_SAME_BASIS_ALTERNATIVES" if selected_math == "MATH-52" and review_cut == "quantum_basis_mismatch"
                 else None)
-            _assert_lp03_original_snapshot_and_seal(tmp_path,fixture_keys,actual_envelope,actual_message,hosts,bindings,
+            seal_snapshot(tmp_path,fixture_keys,actual_envelope,actual_message,hosts,bindings,
                 initialize_st12f_parameter_registry_v1(),adapters,register=True,selected_math=selected_math,review_cut=review_cut,
                 expect_rejection=source_denial,
                 registration_cut=review_cut if review_cut == "quantum_lock_epoch_stale" else None,
@@ -14743,7 +14822,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=(selected_math,))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True, selected_math=selected_math,
                 registration_cut=review_cut if review_cut in ("training_leak","outcome_leak") else None,
                 expect_rejection="LP03_MISSING_PREDICTION_PRODUCER" if review_cut=="missing_producer" else None)
@@ -14754,7 +14833,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message=replace(owner_message,payload=json.loads(deterministic_json(actual_envelope)))
             cuts=(None,"wrong_bounds","group_policy_substitution") if review_cut is None else (None,)
             for cut in cuts:
-                _assert_lp03_original_snapshot_and_seal(tmp_path,fixture_keys,actual_envelope,actual_message,
+                seal_snapshot(tmp_path,fixture_keys,actual_envelope,actual_message,
                     hosts,bindings,initialize_st12f_parameter_registry_v1(),adapters,register=True,selected_math=selected_math,
                     registration_cut=cut,review_cut=review_cut)
             return
@@ -14762,13 +14841,13 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=(selected_math,))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True, selected_math=selected_math,
                 review_cut=review_cut)
             if review_cut is None:
                 cuts = ("wrong_bounds", "retarget_candidate") if selected_math == "MATH-17" else ("zero_budget",)
                 for cut in cuts:
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math=selected_math, registration_cut=cut)
             return
@@ -14776,12 +14855,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-16",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-16", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-16", registration_cut=cut)
             return
@@ -14789,12 +14868,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-15",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-15", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-15", registration_cut=cut)
             return
@@ -14802,12 +14881,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-14",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-14", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-14", registration_cut=cut)
             return
@@ -14815,12 +14894,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-11",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-11", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-11", registration_cut=cut)
             return
@@ -14828,12 +14907,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-10",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-10", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-10", registration_cut=cut)
             return
@@ -14841,12 +14920,12 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-09",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-09", review_cut=review_cut)
             if review_cut is None:
                 for cut in ("zero_budget", "wrong_bounds", "serialization", "expectation_outside"):
-                    _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+                    seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                         selected_math="MATH-09", registration_cut=cut)
             return
@@ -14854,7 +14933,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
             actual_envelope = replace(actual_envelope, component_closure=("MATH-08",))
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
                 selected_math="MATH-08", review_cut=review_cut)
             return
@@ -15142,14 +15221,14 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
         return_operation = return_state.preparations[return_grant.grant_ref][0]
         assert delayed_return == [True] and return_operation.commit_state == "SOURCE_READ_FAILED_REQUIRES_AUDIT"
         assert return_operation.consumed["wall_ns"] >= 1_000_000_000
-        _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+        seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                                                hosts, bindings, original_parameters, adapters)
-        _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+        seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                                                hosts, bindings, original_parameters, adapters, register=True)
         for cut in ("final_payload_substitution", "postcommit_attempt_reader_failure", "earlier_input_slice_substitution",
                     "resolved_member_at_first_observation", "cached_input_member_substitution", "cached_input_resolution_substitution",
                     "cached_source_member_substitution", "forged_terminal"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut)
         for cut in ("failure_before_controller", "failure_after_resume", "failure_cancellation_settlement", "failure_before_audit_commit",
                     "failure_audit_commit_observation", "failure_audit_readback", "failure_final_accounting", "failure_final_slot",
@@ -15159,23 +15238,23 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
                     "failure_lane_before_commit", "failure_lane_commit_observation", "failure_lane_readback", "failure_lane_final_return",
                     "failure_process_prefix_omitted_before", "failure_process_prefix_omitted_after",
                     "failure_lane_association_omitted_before", "failure_lane_association_omitted_after"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut)
         for cut in ("capacity_zero_reserve", "capacity_input_reads", "capacity_input_bytes", "capacity_persistent_operations",
                     "capacity_persistent_bytes", "capacity_header", "capacity_roster", "capacity_manifest", "capacity_body"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut)
         for cut in ("protocol_expiry", "postcommit_reader_failure", "protocol_final_return_expiry", "source_metadata_after_seal",
                     "policy_source_member_after_native"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, registration_cut=cut)
         for cut in ("snapshot_substitution", "binding_return_expiry"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, compilation_cut=cut)
-        _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+        seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
             hosts, bindings, original_parameters, adapters, baseline_currency="EUR", expect_rejection="LP03_ASSEMBLY_CURRENCY_BASIS_MISMATCH")
         for cut in ("tail_expiry", "tail_commit_observation_failure"):
-            _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, actual_envelope, actual_message,
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, seal_cut=cut)
 
         # Unanchored history, including an ID in another ledger table, cannot
@@ -18061,9 +18140,11 @@ def test_op14_atomic_restart_conflict_and_fixture_non_poisoning(tmp_path: Path) 
         rejected = tmp_path / "causal_rejected"
         rejected.mkdir()
         _assert_lp03_authorization_data_contract(rejected, review_cut="causal_callback_rejection")
+        _assert_lp03_cpu_boundary_witness(tmp_path / "wpub", "causal_public_timeline")
         public = tmp_path / "causal_book"
         public.mkdir()
         _assert_lp03_authorization_data_contract(public, review_cut="causal_public_timeline")
+        _assert_lp03_cpu_boundary_witness(tmp_path / "wcaus", "causal_timeline")
         causal = tmp_path / "causal"
         causal.mkdir()
         _assert_lp03_authorization_data_contract(causal, review_cut="causal_timeline")
