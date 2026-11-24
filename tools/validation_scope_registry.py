@@ -136,6 +136,7 @@ S1_LP03_EVIDENCE_PLATFORM_RESTART_ALLOWED_EXACT_PATHS = frozenset(
         "src/qtt/stage1_prediction_markets/pr168_rp5d_executability/models.py",
         "tools/run_validation_gates.py",
         ".github/workflows/qtt_validation.yml",
+        ".gitignore",
     }
 )
 

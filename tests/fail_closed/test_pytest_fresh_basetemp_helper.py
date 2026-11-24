@@ -871,7 +871,10 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
                 run_id="run_system_temp_fallback",
             )
         try:
-            assert fallback_paths.process_root.parent == fallback_parent / "qttv"
+            expected_parent = fallback_parent / "qttv"
+            actual_parent = fallback_paths.process_root.parent
+            assert actual_parent == expected_parent.resolve(strict=True)
+            assert actual_parent.samefile(expected_parent)
         finally:
             reliability.cleanup_validation_run(fallback_paths)
 

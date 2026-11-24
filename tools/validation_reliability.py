@@ -4739,8 +4739,9 @@ class _WindowsContainedProcess:
                     or self._winapi.WaitForSingleObject(handle, 0) != self._winapi.WAIT_TIMEOUT):
                 raise _evidence_failure("native channel peer is outside the original containment")
             if peer_pid == self.pid:
-                if peer[1] != os.getpid():
-                    raise _evidence_failure("original helper parent differs")
+                if (peer != original or original[:2] != (self.pid, os.getpid())
+                        or original[3] != Path(self.args[0]).resolve(strict=True)):
+                    raise _evidence_failure("original helper process, parent or executable differs")
             elif (peer[1] != self.pid or original[:2] != (self.pid, os.getpid())
                   or peer[2] < original[2] or original[3] != Path(self.args[0]).resolve()
                   or peer[3] != Path(sys._base_executable).resolve()

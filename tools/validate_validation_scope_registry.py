@@ -50,6 +50,7 @@ def lp03_restart_scope_failures() -> tuple[str, ...]:
     rp5d_runner = f"{rp5d_layer}/runner.py"
     rp5d_models = f"{rp5d_layer}/models.py"
     supplements = {
+        ".gitignore",
         roster_test,
         agent_import_test,
         pr96_validator,
@@ -70,7 +71,7 @@ def lp03_restart_scope_failures() -> tuple[str, ...]:
     exact_manifest = "\n".join(sorted(paths - supplements)).encode("utf-8")
     failures = []
     if (
-        len(paths) != 108
+        len(paths) != 109
         or not supplements <= paths
         or sha256(exact_manifest).hexdigest() != "1064f7f73bd7b3241d65cd379ffb71f170419d38c31b68b64fb8303bbf8631be"
     ):
@@ -83,6 +84,7 @@ def lp03_restart_scope_failures() -> tuple[str, ...]:
         "docs/master_plan/QTT_MasterPlan_Current.md",
         "tools/currentize_pr152_after_generated_artifacts.py",
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/evidence_execution.py.copy",
+        ".gitignore.copy",
         agent_import_test + ".copy",
         pr96_validator + ".copy",
         pr97_validator + ".copy",

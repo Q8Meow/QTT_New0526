@@ -1122,10 +1122,14 @@ def validate_upstream_reports(repo_root: pathlib.Path) -> tuple[list[str], dict[
 
 def _is_unchanged_lp03_atomicrows_builder(repo_root: pathlib.Path) -> bool:
     """Recognize the specific inherited builder without granting PR99 authority."""
-    def identity(info: os.stat_result) -> tuple[int, ...]:
+    def identity(info: os.stat_result, *, across_apis: bool = False) -> tuple[int, ...]:
+        # On Windows lstat reports creation time as ctime, while fstat can
+        # report change time. Compare birth times across the two APIs and
+        # retain each API's own ctime for its before/after checks.
+        timestamp = info.st_birthtime_ns if across_apis and os.name == "nt" else info.st_ctime_ns
         return (
             info.st_dev, info.st_ino, info.st_mode, info.st_nlink, info.st_size,
-            info.st_mtime_ns, info.st_ctime_ns, getattr(info, "st_file_attributes", 0),
+            info.st_mtime_ns, timestamp, getattr(info, "st_file_attributes", 0),
         )
 
     source = repo_root / _ATOMICROWS_BUILDER
@@ -1151,10 +1155,11 @@ def _is_unchanged_lp03_atomicrows_builder(repo_root: pathlib.Path) -> bool:
         if (index_rc, index_entry) != (0, f"100644 {blob} 0\t{name}\0"):
             return False
         with source.open("rb") as stream:
-            if identity(os.fstat(stream.fileno())) != identity(original):
+            opened = os.fstat(stream.fileno())
+            if identity(opened, across_apis=True) != identity(original, across_apis=True):
                 return False
             contents = stream.read(_LP03_ATOMICROWS_BUILDER_SIZE + 1)
-            if identity(os.fstat(stream.fileno())) != identity(original):
+            if identity(os.fstat(stream.fileno())) != identity(opened):
                 return False
         current = source.lstat()
         current_parent = source.parent.lstat()

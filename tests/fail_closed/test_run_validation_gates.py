@@ -15559,7 +15559,10 @@ def _assert_repository_local_layout_contract() -> int:
      clean_env.update(GIT_CONFIG_NOSYSTEM='1',GIT_CONFIG_GLOBAL=os.devnull,GIT_TERMINAL_PROMPT='0')
      c=subprocess.run(['git','-c','init.templateDir=','-c','commit.gpgSign=false','-C',str(p),*a],env=clean_env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True);return c.stdout
     with tempfile.TemporaryDirectory(prefix='qtt-local-layout-contract-') as t:
-     root=Path(t)/'repo';root.mkdir()
+     fixture_root = Path(t) / 'repo'
+     fixture_root.mkdir()
+     root = fixture_root.resolve(strict=True)
+     assert root.samefile(fixture_root)
      git(root,'init','-q');git(root,'config','user.name','Synthetic');git(root,'config','user.email','local@example.invalid')
      (root/'.gitignore').write_text('/.qtt/\n',encoding='utf-8');(root/'protected.txt').write_bytes(b'preserve')
      git(root,'add','.');git(root,'commit','-qm','synthetic')
