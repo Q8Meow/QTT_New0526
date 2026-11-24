@@ -125,7 +125,7 @@ jobs:
           # Fixed host commands used before checkout, by the manager, or after the /usr bind.
           names = (
               "base64 bash cat chmod chown chroot cmp cp curl cut df diff dpkg-query du env find "
-              "findmnt gcc getent git grep gzip install ln mkdir mktemp mount python3 readlink "
+              "findmnt gcc getent git grep gzip install ln mkdir mktemp mount python3 readelf readlink "
               "setpriv sha256sum stat sudo systemctl systemd-run tail tar touch uname unshare"
           )
           for name in names.split():
@@ -189,6 +189,9 @@ jobs:
                       raise SystemExit(f"{name} lacks {option}")
           if not output("/usr/bin/findmnt", "-T", "/", "-n", "-o", "VFS-OPTIONS").strip():
               raise SystemExit("Mount option inventory unavailable")
+          if b"Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]" not in output(
+                  "/usr/bin/readelf", "-lW", "/usr/bin/python3"):
+              raise SystemExit("System Python ELF interpreter could not be identified")
           archive = Path(os.fsdecode(output("/usr/bin/gcc", "-print-file-name=libc.a").rstrip(b"\n")))
           if not archive.is_absolute() or not archive.is_file():
               raise SystemExit("Static libc for the credential gate is unavailable")
@@ -668,6 +671,132 @@ jobs:
 
           raise SystemExit(main())
           CONTROLLER
+          cat > "$jail/etc/qtt-python-check.py" <<'ISOLATED_CHECK'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import stat
+          import subprocess
+          import sys
+
+          runtime = Path("/opt/hostedtoolcache/Python/3.14.6/x64")
+          binary = runtime / "bin/python3.14"
+          gate = Path("/run/qtt-lp03-containment/gate/leaf")
+          if (os.getresuid() != (62041,) * 3 or os.getresgid() != (62041,) * 3 or os.getgroups()
+                  or sys.argv[1:] != [str(runtime / "lib")] or "LD_LIBRARY_PATH" in os.environ):
+              raise SystemExit("Isolated writer identity or runtime binding refused")
+          clean = {"PATH": "/usr/bin:/bin", "LC_ALL": "C"}
+          writer_env = dict(os.environ, LD_LIBRARY_PATH=sys.argv[1])
+          print("LP03_WRITER_IDENTITY", os.getresuid(), os.getresgid(), flush=True)
+
+          def execute(stage, args, environment):
+              try:
+                  run = subprocess.run(args, env=environment, capture_output=True, timeout=5)
+              except subprocess.TimeoutExpired as exc:
+                  print("LP03_EXEC_TIMEOUT", json.dumps({
+                      "stage": stage, "path": str(args[0]), "exit": None,
+                      "stdout": base64.b64encode(exc.stdout or b"").decode("ascii"),
+                      "stderr": base64.b64encode(exc.stderr or b"").decode("ascii"),
+                  }), flush=True)
+                  raise
+              except OSError as exc:
+                  print("LP03_EXEC_REFUSED", stage, repr(args[0]), repr(exc), flush=True)
+                  raise
+              print("LP03_EXEC_PROBE", json.dumps({
+                  "stage": stage, "path": str(args[0]), "exit": run.returncode,
+                  "stdout": base64.b64encode(run.stdout).decode("ascii"),
+                  "stderr": base64.b64encode(run.stderr).decode("ascii"),
+              }, separators=(",", ":")), flush=True)
+              run.check_returncode()
+              return run.stdout.decode("utf-8")
+
+          mounts = {}
+          for line in Path("/proc/self/mountinfo").read_text().splitlines():
+              fields = line.split(" - ", 1)[0].split()
+              mount = Path(re.sub(r"\\([0-7]{3})", lambda m: chr(int(m[1], 8)), fields[4]))
+              if mount in mounts:
+                  raise OSError(f"Ambiguous isolated mount: {mount}")
+              mounts[mount] = set(fields[5].split(","))
+
+          reported = set()
+          def inspect(path, executable):
+              original = Path(path)
+              final = original.resolve(strict=True)
+              mount = next((p for p in (final, *final.parents) if p in mounts), None)
+              allowed = {Path("/usr"), runtime, gate}
+              flags = mounts.get(mount, set())
+              print("LP03_EXEC_PATH", str(original), str(final), str(mount), sorted(flags), flush=True)
+              if mount not in allowed or not {"ro", "nodev"} <= flags or "noexec" in flags:
+                  raise OSError(f"Unqualified executable mount: {original}")
+              if ("nosuid" in flags) != (mount != gate):
+                  raise OSError(f"Unexpected set-ID mount policy: {original}")
+              current = Path("/")
+              pending = list(original.parts[1:])
+              hops = 0
+              while True:
+                  info = current.lstat()
+                  kind = stat.S_IFMT(info.st_mode)
+                  target = os.readlink(current) if kind == stat.S_IFLNK else None
+                  if current not in reported:
+                      print("LP03_EXEC_COMPONENT", str(current), f"{info.st_mode:o}",
+                            info.st_uid, info.st_gid, repr(target), flush=True)
+                      reported.add(current)
+                  if current != gate and (info.st_uid != 0 or (target is None and info.st_mode & 0o022)):
+                      raise OSError(f"Unprotected executable path: {current}")
+                  if target is not None:
+                      hops += 1
+                      if hops > 40:
+                          raise OSError(f"Too many executable links: {original}")
+                      link = Path(target)
+                      current = Path("/") if link.is_absolute() else current.parent
+                      pending = list(link.parts[1:] if link.is_absolute() else link.parts) + pending
+                      continue
+                  if not pending:
+                      if (current != final or kind != stat.S_IFREG or not os.access(current, os.R_OK)
+                              or executable and not os.access(current, os.X_OK)):
+                          raise OSError(f"Isolated executable or library access refused: {current}")
+                      if current == gate and (info.st_uid, info.st_gid, stat.S_IMODE(info.st_mode)) != (62042, 62042, 0o6755):
+                          raise OSError("Unexpected credential gate metadata")
+                      return
+                  if kind != stat.S_IFDIR or not os.access(current, os.X_OK):
+                      raise OSError(f"Isolated writer cannot traverse: {current}")
+                  part = pending.pop(0)
+                  current = current.parent if part == ".." else current / part
+
+          for exe in (Path("/usr/bin/setpriv"), Path("/usr/bin/env"), Path("/usr/bin/bash"),
+                      Path("/usr/bin/python3"), Path("/usr/bin/readelf"), gate, binary):
+              inspect(exe, True)
+              headers = execute("elf:" + exe.name, ["/usr/bin/readelf", "-lW", exe], clean)
+              loaders = re.findall(r"Requesting program interpreter: ([^\]]+)\]", headers)
+              if exe == gate:
+                  if loaders:
+                      raise OSError("The fixed credential gate must be static")
+                  continue
+              if loaders != ["/lib64/ld-linux-x86-64.so.2"]:
+                  raise OSError(f"Unexpected ELF interpreter for {exe}: {loaders}")
+              loader, = loaders
+              inspect(loader, True)
+              deps = execute("dependencies:" + exe.name, [loader, "--list", exe],
+                             writer_env if exe in {binary, Path("/usr/bin/bash")} else clean)
+              if "not found" in deps:
+                  raise OSError(f"Unresolved native dependency for {exe}")
+              for path in re.findall(r"(/\S+)\s+\(0x[0-9a-f]+\)", deps):
+                  inspect(path, False)
+
+          imports = (
+              "import ctypes, hashlib, json, os, select, socket, subprocess, sys, pytest\n"
+              "assert os.getresuid() == (62041,)*3 and os.getresgid() == (62041,)*3\n"
+              "assert sys.version_info[:3] == (3,14,6) and pytest.__version__ == '9.1.1'\n"
+              "with open('/proc/self/maps') as f: mappings=[line.split(None,5) for line in f]\n"
+              "print(json.dumps(sorted({m[5].strip() for m in mappings if len(m)==6 and 'x' in m[1] and m[5].startswith('/')})))"
+          )
+          for path in json.loads(execute("sealed-python-imports", [binary, "-P", "-B", "-c", imports], writer_env)):
+              inspect(path, False)
+          print("LP03_SEALED_PYTHON_READY", str(binary), "3.14.6 pytest 9.1.1", flush=True)
+          ISOLATED_CHECK
+          chmod 0444 "$jail/etc/qtt-python-check.py"
           cat > "$base/start-writer" <<'WRITER_VIEW'
           #!/usr/bin/bash
           set -euo pipefail
@@ -676,9 +805,12 @@ jobs:
           case "$1" in normal|stop|death) owner_case=$1 ;; *) exit 1 ;; esac
 
           readonly_mount() {
-            local src=$1 dst=$2
+            local src=$1 dst=$2 flags=remount,bind,ro,nosuid,nodev
+            if [[ "$src" = "$base/sealed/python" && "$dst" = "$jail/opt/hostedtoolcache/Python/3.14.6/x64" ]]; then
+              flags+=,exec
+            fi
             /usr/bin/mount --bind "$src" "$dst"
-            /usr/bin/mount -o remount,bind,ro,nosuid,nodev "$dst"
+            /usr/bin/mount -o "$flags" "$dst"
           }
 
           /usr/bin/mount --make-rprivate /
@@ -722,9 +854,8 @@ jobs:
              cd /workspace
              unset OLDPWD
              test -x /run/qtt-lp03-containment/gate/leaf
-             /usr/bin/env -i PATH=/usr/bin:/bin LC_ALL=C /usr/bin/python3 -I -S -B -c "import json, os, sys; assert os.getresuid() == (62041,) * 3 and os.getresgid() == (62041,) * 3"
              runtime=/opt/hostedtoolcache/Python/3.14.6/x64/bin/python3.14
-             "$runtime" -P -B -c "import ctypes, hashlib, select, socket, subprocess, sys, pytest; assert sys.version_info[:3] == (3, 14, 6) and pytest.__version__ == \"9.1.1\""
+             /usr/bin/env -u LD_LIBRARY_PATH /usr/bin/python3 -I -S -B /etc/qtt-python-check.py "$LD_LIBRARY_PATH"
              exec "$runtime" -B -m pytest -q -s --basetemp "/var/qtt/home/pytest-$1" tests/fail_closed/test_run_validation_gates.py::test_st12h_runner_enforces_exact_timeouts_one_process_and_zero_retry' -- "$owner_case" "$$"
           WRITER_VIEW
           chmod 0700 "$base/start-writer"
@@ -760,6 +891,43 @@ jobs:
           version=/opt/hostedtoolcache/Python/3.14.6
           test ! -e "$version" && test ! -L "$version"
           input=$(mktemp -d "$RUNNER_TEMP/qtt-lp03-python.XXXXXXXX")
+          /usr/bin/python3 -I -S -B - "$input" <<'COPY_REPRO'
+          import os
+          from pathlib import Path
+          import stat
+          import subprocess
+          import sys
+          import tempfile
+
+          cp = Path("/usr/bin/cp")
+          real = cp.resolve(strict=True)
+          if os.geteuid() == 0:
+              raise SystemExit("Copy reproduction requires the ordinary setup identity")
+          os.umask(0o022)
+          for path in (cp, real):
+              subprocess.run(["/usr/bin/dpkg-query", "-S", str(path)], check=True)
+          print("LP03_CP_IMPLEMENTATION", cp, real, subprocess.check_output([cp, "--version"]).splitlines()[0], flush=True)
+          with tempfile.TemporaryDirectory(dir=sys.argv[1]) as folder:
+              root = Path(folder)
+              src, dst = root / "source", root / "copy"
+              src.mkdir()
+              dst.mkdir()
+              for name, mode in (("executable", 0o755), ("data", 0o644)):
+                  file = src / name
+                  file.write_bytes(b"LP03 inert copy fixture\n")
+                  file.chmod(mode)
+              subprocess.run([cp, "-a", "--reflink=never", "--no-preserve=ownership,mode,xattr",
+                              str(src) + "/.", str(dst) + "/"], check=True)
+              for name in ("executable", "data"):
+                  a, b = src / name, dst / name
+                  info = b.lstat()
+                  permitted = {0o755, 0o644} if name == "executable" else {0o644}
+                  if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) not in permitted
+                          or b.read_bytes() != a.read_bytes()):
+                      raise SystemExit(f"Copy fixture type, mode or byte mismatch: {name} {info.st_mode:o}")
+                  print(f"LP03_CP_REPRO {name} source={stat.S_IMODE(a.stat().st_mode):04o} "
+                        f"copied={stat.S_IMODE(info.st_mode):04o} bytes=identical", flush=True)
+          COPY_REPRO
           mkdir "$input/release" "$input/wheels"
           curl --proto '=https' --fail --silent --show-error --location \
             'https://github.com/actions/python-versions/releases/download/3.14.6-27283001424/python-3.14.6-linux-26.04-x64.tar.gz' \
@@ -788,9 +956,113 @@ jobs:
           test "$runtime_size" -le 805306368
           test "$(df -B1 --output=avail /run | tail -n 1)" -ge "$((runtime_size + 201326592))"
           mkdir -m 0750 "$sealed"
-          mkdir -m 0755 "$sealed/python"
-          cp -a --reflink=never --no-preserve=ownership,mode,xattr "$runtime/." "$sealed/python/"
+          cat > /run/qtt-lp03-containment/seal.py <<'SEAL_TREE'
+          import os
+          from pathlib import Path
+          import stat
+          import sys
+
+          base = Path("/run/qtt-lp03-containment/sealed")
+          roots = {
+              "python": (Path("/opt/hostedtoolcache/Python/3.14.6/x64"), 805306368),
+              "workspace": (Path("/home/runner/work/_temp/qtt-pr309-tracked"), 104857600),
+              "site": (Path("/home/runner/work/_temp/qtt-pr309-site"), 33554432),
+          }
+          name, = sys.argv[1:]
+          source, budget = roots[name]
+          destination = base / name
+          # Exact relative aliases from the pinned release and its verified setup.sh.
+          links = {
+              "python": "./bin/python3.14", "bin/python": "python3.14",
+              "bin/python3": "python3.14", "bin/python314": "python3.14",
+              "bin/pydoc3": "pydoc3.14", "bin/idle3": "idle3.14",
+              "bin/python3-config": "python3.14-config",
+              "share/man/man1/python3.1": "python3.14.1",
+              "lib/pkgconfig/python3.pc": "python-3.14.pc",
+              "lib/pkgconfig/python3-embed.pc": "python-3.14-embed.pc",
+              "lib/libpython3.14.so": "libpython3.14.so.1.0",
+          } if name == "python" else {}
+          seen_links = set()
+          counts = {"directories": 0, "executable": 0, "data": 0, "bytes": 0}
+
+          def verify(path, kind, mode):
+              entry = path.lstat()
+              if (entry.st_uid != 0 or entry.st_gid != 0 or stat.S_IFMT(entry.st_mode) != kind
+                      or stat.S_IMODE(entry.st_mode) != mode or (kind == stat.S_IFREG and entry.st_nlink != 1)
+                      or os.listxattr(path, follow_symlinks=False)):
+                  raise OSError(f"Unexpected sealed metadata: {path!s} mode={entry.st_mode:o}")
+
+          def copy_directory(srcfd, target):
+              target.mkdir(mode=0o700)
+              for leaf in sorted(os.listdir(srcfd)):
+                  out = target / leaf
+                  fd = os.open(leaf, os.O_PATH | os.O_NOFOLLOW, dir_fd=srcfd)
+                  try:
+                      item = os.fstat(fd)
+                      held = f"/proc/self/fd/{fd}"
+                      if stat.S_ISLNK(item.st_mode):
+                          rel = out.relative_to(destination).as_posix()
+                          link = os.readlink("", dir_fd=fd)
+                          if links.get(rel) != link:
+                              raise OSError(f"Unapproved seal link: {rel} -> {link!r}")
+                          out.symlink_to(link)
+                          verify(out, stat.S_IFLNK, 0o777)
+                          seen_links.add(rel)
+                      elif stat.S_ISDIR(item.st_mode):
+                          child = os.open(held, os.O_RDONLY | os.O_DIRECTORY)
+                          try:
+                              copy_directory(child, out)
+                          finally:
+                              os.close(child)
+                      elif stat.S_ISREG(item.st_mode) and item.st_nlink == 1 and not item.st_mode & 0o7000:
+                          counts["bytes"] += item.st_size
+                          if counts["bytes"] > budget:
+                              raise OSError(f"Seal size limit exceeded: {name}")
+                          with open(held, "rb") as original, out.open("xb") as installed:
+                              remaining = item.st_size
+                              while remaining:
+                                  block = original.read(min(remaining, 1048576))
+                                  if not block:
+                                      raise OSError(f"Short seal source: {out}")
+                                  installed.write(block)
+                                  remaining -= len(block)
+                              if original.read(1) or os.fstat(fd).st_ctime_ns != item.st_ctime_ns:
+                                  raise OSError(f"Seal source changed: {out}")
+                          mode = 0o555 if item.st_mode & 0o111 else 0o444
+                          out.chmod(mode)
+                          verify(out, stat.S_IFREG, mode)
+                          if name == "python" and out.relative_to(destination).as_posix() in {
+                                  "bin/python3.14", "lib/libpython3.14.so.1.0"}:
+                              print(f"LP03_SEAL_MODE {out.relative_to(destination)} "
+                                    f"source={stat.S_IMODE(item.st_mode):04o} sealed={mode:04o}", flush=True)
+                          counts["executable" if mode == 0o555 else "data"] += 1
+                      else:
+                          raise OSError(f"Unsupported seal source type, links or mode: {out}")
+                  finally:
+                      os.close(fd)
+              target.chmod(0o555)
+              verify(target, stat.S_IFDIR, 0o555)
+              counts["directories"] += 1
+
+          if os.getresuid() != (0, 0, 0) or source.resolve(strict=True) != source:
+              raise SystemExit("Sealing requires the fixed source and original bootstrap owner")
+          top = os.open(source, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+          try:
+              copy_directory(top, destination)
+          finally:
+              os.close(top)
+          if seen_links != links.keys():
+              raise OSError(f"Sealed {name} symlink set differs from reviewed inputs")
+          for rel in sorted(links):
+              real = (destination / rel).resolve(strict=True)
+              if not real.is_relative_to(destination) or not real.is_file():
+                  raise OSError(f"Sealed alias has no internal regular target: {rel}")
+          print("LP03_SEALED", name, counts, "links", len(links), flush=True)
+          SEAL_TREE
+          chmod 0400 /run/qtt-lp03-containment/seal.py
+          /usr/bin/python3 -I -S -B /run/qtt-lp03-containment/seal.py python
           diff -qr --no-dereference "$runtime" "$sealed/python" >/dev/null
+          printf 'LP03_SEAL_BYTES_VERIFIED python\n'
           SEAL_RUNTIME
       - name: Select the verified Python toolcache entry
         id: sealed_python
@@ -853,7 +1125,7 @@ jobs:
               if (kind != b'blob' or mode not in {b'100644', b'100755'}
                       or relative.is_absolute() or '..' in relative.parts or relative in expected):
                   raise SystemExit('Unsupported tracked qualification input')
-              expected[relative] = identity
+              expected[relative] = (identity, mode)
           actual = set()
           for directory, children, files in os.walk(root, followlinks=False):
               for name in children + files:
@@ -867,13 +1139,16 @@ jobs:
               raise SystemExit('Extracted qualification paths differ from the Git roster')
           batch = subprocess.Popen(['git', 'cat-file', '--batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
           try:
-              for relative, object_id in expected.items():
+              for relative, (object_id, mode) in expected.items():
                   batch.stdin.write(object_id + b'\n')
                   batch.stdin.flush()
                   observed, kind, size = batch.stdout.readline().split()
                   if kind != b'blob' or observed != object_id:
                       raise SystemExit('Git blob association failed')
                   with (root / relative).open('rb') as installed:
+                      actual_mode = os.fstat(installed.fileno()).st_mode
+                      if bool(actual_mode & 0o111) != (mode == b'100755'):
+                          raise SystemExit(f'Extracted executable mode differs from Git: {relative}')
                       remaining = int(size)
                       while remaining:
                           chunk = batch.stdout.read(min(remaining, 1_048_576))
@@ -903,9 +1178,9 @@ jobs:
           test "$(df -B1 --output=avail /run | tail -n 1)" -ge "$((workspace_size + site_size + 67108864))"
           for name in workspace site; do
             case "$name" in workspace) source=$workspace ;; site) source=$site ;; esac
-            mkdir -m 0755 "$sealed/$name"
-            cp -a --reflink=never --no-preserve=ownership,mode,xattr "$source/." "$sealed/$name/"
+            /usr/bin/python3 -I -S -B /run/qtt-lp03-containment/seal.py "$name"
             diff -qr --no-dereference "$source" "$sealed/$name" >/dev/null
+            printf 'LP03_SEAL_BYTES_VERIFIED %s\n' "$name"
           done
           unsafe_input=$(find "$sealed" \( -type d -o -type f \) \( ! -uid 0 -o -perm /022 -o -perm /6000 \) -print -quit)
           test -z "$unsafe_input"
