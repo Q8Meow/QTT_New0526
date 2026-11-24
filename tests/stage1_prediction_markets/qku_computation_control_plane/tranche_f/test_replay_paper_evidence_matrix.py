@@ -705,6 +705,22 @@ def test_input_lock_and_lane_contract_matrix(tmp_path: Path) -> None:
         edge_root.mkdir()
         _assert_lp03_authorization_data_contract(edge_root, selected_math="MATH-02", review_cut=cut,
             measured_decay_fit=fitted_decay if cut is None else None)
+    from contextlib import redirect_stdout
+    from io import StringIO
+
+    capture_root = tmp_path / "capture_partial_fills"
+    capture_root.mkdir()
+    # The shared fixture also prints raw capture records. Expose only the
+    # two size checks from this additional worker in the grouped pytest log.
+    with StringIO() as report:
+        try:
+            with redirect_stdout(report):
+                _assert_lp03_authorization_data_contract(capture_root, review_cut="capture_partial_fills")
+        finally:
+            report.seek(0)
+            for line in report:
+                if line.startswith("LP03_MATH03_CAPTURE_BOUNDARY="):
+                    print(line, end="")
     # Exercise the corrected source census before repeating native lanes.
     _assert_lp03_authorization_data_contract(tmp_path)
     for queue_cut in (None, "queue_ack_1ns"):
@@ -4234,9 +4250,23 @@ def _lp03_causal_fixture_reality_v1(event, immutable_inputs, lane_state):
             for suffix, leg in (("A", primary), ("B", parallel)))
     if event.local_ordinal == 1:
         assert tuple(row["state"] for row in lane_state["domain"]["legs"]) == ("ACKNOWLEDGED", "ACKNOWLEDGED")
+        fills = []
+        if event.payload["timer_ref"] == "LP03-TIMER::PARTIAL_FILLS":
+            quantities = ("0.10", "0.20", "0.15", "0.30", "0.25")
+            for sequence, quantity in enumerate(quantities, 1):
+                prior = "ACKNOWLEDGED" if sequence == 1 else "PARTIALLY_FILLED"
+                state = "FILLED" if sequence == len(quantities) else "PARTIALLY_FILLED"
+                receipt = custody(primary, "FILL", prior, state)
+                for field in ("custody_receipt_id", "event_identity", "sequence_ref"):
+                    receipt[field] += f":{sequence}"
+                fills.append(observation("SYNTHETIC_FILL", f"FILL:A:{sequence}", dict(custody=receipt,
+                    fill=dict(fill_id=primary + f"::FILL:{sequence}", sequence=sequence, quantity_text=quantity,
+                        payload_json=deterministic_json(dict(leg="A", match=sequence, quantity=quantity))))))
+        else:
+            fills.append(observation("SYNTHETIC_FILL", "FILL:A", dict(custody=custody(primary, "FILL", "ACKNOWLEDGED", "FILLED"),
+                fill=dict(fill_id=primary + "::FILL:1", sequence=1, quantity_text="1.00", payload_json='{"fixture":"first-leg"}'))))
         return (
-            observation("SYNTHETIC_FILL", "FILL:A", dict(custody=custody(primary, "FILL", "ACKNOWLEDGED", "FILLED"),
-                fill=dict(fill_id=primary + "::FILL:1", sequence=1, quantity_text="1.00", payload_json='{"fixture":"first-leg"}'))),
+            *fills,
             observation("SYNTHETIC_MULTILEG_OUTCOME", "AFTER_FILL", dict(candidate_ref=grant_ref + "::BUNDLE", legs=(
                 dict(intent_ref=primary, state="FILLED", filled_quantity_text="1.00", remaining_quantity_text="0.00"),
                 dict(intent_ref=parallel, state="ACKNOWLEDGED", filled_quantity_text="0", remaining_quantity_text="2.00")))),
@@ -4338,7 +4368,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
     causal_public = review_cut == "causal_public_timeline"
     causal_rejection = review_cut == "causal_callback_rejection"
-    causal = causal_public or causal_rejection or review_cut == "causal_timeline"
+    capture_partial_fills = review_cut == "capture_partial_fills"
+    causal = causal_public or causal_rejection or capture_partial_fills or review_cut == "causal_timeline"
     assert selected_math in ("MATH-06","MATH-07","MATH-02", "MATH-01", "MATH-03", "MATH-04", "MATH-05", "MATH-08", "MATH-09", "MATH-10", "MATH-11", "MATH-14", "MATH-15", "MATH-16", "MATH-17", "MATH-18", "MATH-19", "MATH-20", "MATH-21", "MATH-22", "MATH-23", "MATH-24", "MATH-25", "MATH-12", "MATH-13", "MATH-26", "MATH-27", "MATH-28", "MATH-29", "MATH-30", "MATH-31", "MATH-37", "MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45", "MATH-50", "MATH-51", "MATH-52")
     cashflow=selected_math in ("MATH-06","MATH-07")
     edge = selected_math == "MATH-02"
@@ -4509,6 +4540,11 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             callback_pins=tuple(sorted((row.callback_id, row.version) for row in callbacks)))
     else:
         registry = None
+    if measured_decay:
+        published_measurement, fitted, decision = measured_edge_source
+        selected_scope = replace(selected_scope, snapshot_decision_wall_ns=decision,
+            snapshot_pit_cutoff_wall_ns=decision)
+        envelope = replace(envelope, assembly_scope=selected_scope)
     if multiple or reality or spa or sharpe or pbo or held_out or recorded_dr or ope_point:
         from time import time_ns
         # Fix the decision before constructing the original empty owner. A
@@ -4529,7 +4565,6 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         event_scope_id="LP03-EVENT::midpoint", instrument_or_contract_scope_id="LP03-CONTRACT::binary",
         mode_context_id="LP03-MODE::synthetic", input_snapshot_id="LP03-SNAPSHOT::original")
     if measured_decay:
-        published_measurement, fitted = measured_edge_source
         prior_context = published_measurement._evidence_published_edge_latency_v1.prepared[3]
         economic_scope = prior_context.scope
     if private26:
@@ -5833,6 +5868,11 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                    {"timer_ref": "LP03-TIMER::REJECT" if causal_rejection and local == 0 else f"LP03-TIMER::{local}",
                     "due_wall_ns": source_ns + elapsed})
                   for local, (elapsed, sequence) in enumerate(((1, 3), (0, 2), (0, 1)))))
+        if capture_partial_fills:
+            # Sign the distinct partial-fill input before either lane starts.
+            elapsed, sequence, epoch, identity, kind, timer = source_rows[1]
+            source_rows = (source_rows[0], (elapsed, sequence, epoch, identity, kind,
+                {**timer, "timer_ref": "LP03-TIMER::PARTIAL_FILLS"}), source_rows[2])
         for local, (elapsed, provider, epoch, identity, kind, body) in enumerate(source_rows):
             availability = source_ns + elapsed
             ref = f"LP03-TIMELINE-INPUT::{local}"
@@ -5909,10 +5949,10 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     limits = m.EvidencePreparationLimitsV1(max_record_reads=2048 if cashflow_capacity else 1000,
         max_read_bytes=8_000_000,max_owner_queries=1280 if cashflow_capacity else 1000,
         max_query_result_records=2048 if cashflow_capacity else 1000, max_control_writes=128, max_control_bytes=2_000_000,
-        # Prospective finite CPU input for the larger cashflow source roster;
-        # B184 retained the actual old5b exhaustion after19of21 acquisitions.
-        # This new declaration precedes signing and does not assert timing.
-        max_cpu_ns=10_000_000_000 if cashflow_capacity else 5_000_000_000,
+        # The public causal fixture seals twelve coordinates. Its final control
+        # readback exhausted the five-second preparation CPU budget in run 843.
+        # Use the larger fixture allowance before signing, for CPU alone.
+        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public else 5_000_000_000,
         max_wall_ns=5_000_000_000 if seal_cut == "tail_expiry" else 30_000_000_000,
         aggregate_budget_ref="LP03-BUDGET::original-assembly")
     scope = replace(selected_scope, source_selections=selections,
@@ -7469,7 +7509,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert terminal[0]["exit_code"] == 0 and terminal[0]["active_processes"] == 0 and terminal[0]["total_processes"] == 1
         assert terminal[0]["cpu_ns"] > 0 and terminal[0]["process_memory_high_water_bytes"] > 0
         assert terminal[1:3] == (True, True) and not terminal[3] and not terminal[5] and not terminal[7] and not terminal[8]
-        replay_capture_segments, replay_capture_manifest = _assert_lp03_native_capture_snapshot(native, attempt.payload)
+        replay_capture_segments, replay_capture_manifest = _assert_lp03_native_capture_snapshot(native, attempt.payload,
+            require_manifest_boundaries=capture_partial_fills)
         results = tuple(frame["payload"] for frame in terminal[4] if frame["kind"] == "COMPUTATION_RESULT")
         assert len(results) == 1 and results[0]["raw_output_json"] == '"0.50"'
         assert all(not thread.is_alive() for thread in (*native._io["threads"], native._controller))
@@ -7617,6 +7658,22 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert paper.raw is not lane_operation.raw and paper.raw.record_id != lane_operation.raw.record_id
         if causal:
             paper_segment = paper.records.receipt_records[2].typed_payload.record
+            if capture_partial_fills:
+                for retained in (segment, paper_segment):
+                    events = retained.exact_ordered_events
+                    observations = events[1]["outcomes"][-1]["generated_observations"]
+                    fills = [item for item in observations if item["kind"] == "SYNTHETIC_FILL"]
+                    receipts = [item["payload"]["custody"] for item in fills]
+                    matches = [item["payload"]["fill"] for item in fills]
+                    assert [row["sequence"] for row in matches] == [1, 2, 3, 4, 5]
+                    assert [row["quantity_text"] for row in matches] == ["0.10", "0.20", "0.15", "0.30", "0.25"]
+                    assert sum(Decimal(row["quantity_text"]) for row in matches) == Decimal("1.00")
+                    assert len({row["fill_id"] for row in matches}) == len({row["observation_id"] for row in fills}) == 5
+                    for field in ("custody_receipt_id", "event_identity", "sequence_ref"):
+                        assert len({row[field] for row in receipts}) == 5
+                    assert [row["prior_state"] for row in receipts] == ["ACKNOWLEDGED"] + ["PARTIALLY_FILLED"] * 4
+                    assert [row["candidate_state"] for row in receipts] == ["PARTIALLY_FILLED"] * 4 + ["FILLED"]
+                    assert [leg["state"] for leg in events[-1]["domain_state"]["legs"]] == ["SETTLED", "VOIDED"]
             for replay_event, paper_event in zip(segment.exact_ordered_events, paper_segment.exact_ordered_events, strict=True):
                 assert replay_event["event"] == paper_event["event"]
                 assert replay_event["scenario_values"] == paper_event["scenario_values"]
@@ -9411,6 +9468,22 @@ def _assert_lp03_brier_measured_flow(tmp_path, fixture_keys, hosts, bindings, ad
                 review_record_absent=True, retry_denied=True, cumulative_consumption=dict(registered.consumed))))
             return
         assert review_cut is None or (pbo and review_cut == "cscv_s4") or (analytic and review_cut in ("decimal34_tail", "decimal34_covariance")) or (private_execution and review_cut in ("gate_tie", "sell_zero", "decimal34_fill_tolerance")) or (math_id == "MATH-36" and review_cut == "book_grid_decimal34")
+        # Open and bind the four role stores before independent review starts
+        # its signed lifetime. Delivery and acceptance use the reviewed candidate.
+        receivers = []
+        for owner, receiver, role, key in (
+            ("READINESS1", CandidateReadinessResolverV1(()), m.EvidenceStoreRoleV1.READINESS_ACK, "readiness"),
+            ("PRETRADE1", PreTradeRegistryView(()), m.EvidenceStoreRoleV1.PRETRADE_ACK, "pretrade"),
+            ("AGENT_ORCH1", AgentOrchService(), m.EvidenceStoreRoleV1.AGENT_ACK, "agent_receiver"),
+            ("SVC1", DashboardReadModelService(), m.EvidenceStoreRoleV1.SVC_ACK, "svc_receiver")):
+            receiver_host = EvidenceHostBindingV1.for_software_conformance_v1(
+                replace(hosts[role].public_configuration, store_bindings=bindings), role_signing_key=fixture_keys[key])
+            binding = next(row for row in bindings if row.role is role)
+            store = SQLiteReferenceAdapterV1.open_evidence_store_v1(host_binding=receiver_host, store_binding=binding,
+                owned_role_root=tmp_path / role.value.lower(), busy_timeout_ms=0, max_transaction_attempts=1)
+            adapters.append(store)
+            context = receiver.bind_evidence_receiver_v1(parent_resolver=service, host_binding=receiver_host, persistence_adapter=store)
+            receivers.append((owner, receiver, binding, context))
         reviewed = reviewer.review_measured_conformance_v1(ready_ref)
         review = registered.review_operation
         assert reviewed.decision == "PASS_SOFTWARE_CONFORMANCE" and review.numerical_work.state == "OPEN"
@@ -9609,18 +9682,7 @@ def _assert_lp03_brier_measured_flow(tmp_path, fixture_keys, hosts, bindings, ad
         assert candidate.terminal_state == "REVIEWED_FOR_DELIVERY"
         candidate_ref = m.EvidenceRecordRefV1(control_id, candidate.record_id)
         acknowledgements, ack_refs = [], []
-        for owner, receiver, role, key in (
-            ("READINESS1", CandidateReadinessResolverV1(()), m.EvidenceStoreRoleV1.READINESS_ACK, "readiness"),
-            ("PRETRADE1", PreTradeRegistryView(()), m.EvidenceStoreRoleV1.PRETRADE_ACK, "pretrade"),
-            ("AGENT_ORCH1", AgentOrchService(), m.EvidenceStoreRoleV1.AGENT_ACK, "agent_receiver"),
-            ("SVC1", DashboardReadModelService(), m.EvidenceStoreRoleV1.SVC_ACK, "svc_receiver")):
-            receiver_host = EvidenceHostBindingV1.for_software_conformance_v1(
-                replace(hosts[role].public_configuration, store_bindings=bindings), role_signing_key=fixture_keys[key])
-            binding = next(row for row in bindings if row.role is role)
-            store = SQLiteReferenceAdapterV1.open_evidence_store_v1(host_binding=receiver_host, store_binding=binding,
-                owned_role_root=tmp_path / role.value.lower(), busy_timeout_ms=0, max_transaction_attempts=1)
-            adapters.append(store)
-            context = receiver.bind_evidence_receiver_v1(parent_resolver=service, host_binding=receiver_host, persistence_adapter=store)
+        for owner, receiver, binding, context in receivers:
             delivery = service.create_measured_delivery_v1(candidate_ref, receiver_context=context)
             ack = receiver.receive_evidence_delivery_v1(delivery, receiver_context=context)
             operation = registered.receiver_operations[owner]
@@ -9996,11 +10058,17 @@ def _assert_lp03_measured_edge_latency_bridge(tmp_path, lane, fit):
         registry.bind_evidence_conformance_source_v1(host_binding=lane.platform._host, original_rights=(adjacent,rights[1]))
     registry.bind_evidence_conformance_source_v1(host_binding=lane.platform._host, original_rights=tuple(rights))
 
+    # Both consumers evaluate the same published packets at one decision time.
+    # Capture it while the source and fit are available, before running either.
+    from time import time_ns
+    decision = time_ns()
+    assert max(max(original_time.values()), fit[1]) <= decision
+    measured_source = (registry, fit, decision)
     for name, cut in (("measured_decay", None), ("decay_missing_tau", "missing_fitted_tau")):
         root = tmp_path/name
         root.mkdir()
         _assert_lp03_authorization_data_contract(root, selected_math="MATH-41", review_cut=cut,
-            measured_edge_source=(registry, fit))
+            measured_edge_source=measured_source)
     reads = association.reads
     assert len(reads) >= 8 and all(read.phase == "READBACK_CONFIRMED" and read.source_result is not None for read in reads)
     assert all(read.observations and all(row[3][0] >= visibility[0] for row in read.observations) for read in reads)
@@ -10012,7 +10080,7 @@ def _assert_lp03_measured_edge_latency_bridge(tmp_path, lane, fit):
     denied_root = tmp_path/"decay_withdrawn"
     denied_root.mkdir()
     with pytest.raises(ComputationControlPlaneError, match="LP03_MEASURED_EDGE_ORIGINAL_UPSTREAM_RIGHTS_DENIED") as denied:
-        _assert_lp03_authorization_data_contract(denied_root, selected_math="MATH-41", measured_edge_source=(registry, fit))
+        _assert_lp03_authorization_data_contract(denied_root, selected_math="MATH-41", measured_edge_source=measured_source)
     assert association.reads is reads
     print("LP03_MEASURED_EDGE_LATENCY_SOURCE_CUSTODY="+deterministic_json(dict(
         formula="MATH-41", prior_math="MATH-02", prior_raw=lane.raw.record_id, old_publication=lane.publication_ref,
@@ -13588,7 +13656,78 @@ def _assert_lp03_native_failure_audit_cut(case, grant, supervisor, svc, store, r
         no_child=native._no_child_original is not None, released=supervisor._active is None)))
 
 
-def _assert_lp03_native_capture_snapshot(native, grant):
+def _assert_lp03_math03_manifest_bounds(native, grant, segments, manifest_raw, require_both):
+    import base64
+    import pytest
+    from unittest.mock import patch
+    from src.qtt.service.pr169_svc1_resolvers import EvidenceProcessSupervisorV1
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ComputationControlPlaneError
+
+    assert grant.lane.value == "REPLAY" and grant.component_closure == ("MATH-03",)
+    capture = native._terminal_original[9]
+    assert capture["complete"] and not capture["stderr"]
+    size = len(capture["stdout"])
+    manifest = json.loads(manifest_raw)
+    stdout, stderr = manifest["streams"]
+    assert stdout["stream"] == "STDOUT" and stderr["stream"] == "STDERR" and not stderr["segment_refs"]
+
+    # Derive the conservative header width from the genuine first segment.
+    # All seven counters and the ordinal suffix use the signed 64-bit maximum
+    # width. Both boolean flags use the longer JSON spelling in the bound.
+    first = json.loads(segments[0])
+    assert first["stream"] == "STDOUT" and first["segment_ordinal"] == 0
+    width = len(str(2**63 - 1))
+    counters = ("segment_ordinal", "stream_segment_count", "first_byte_offset", "captured_byte_count",
+                "stream_captured_byte_count", "stream_observed_byte_count", "stream_discarded_byte_count")
+    header = len(segments[0]) - len(first["data_base64"]) + width - 1
+    header += sum(width - len(str(first[key])) for key in counters)
+    header += int(first["stream_eof"]) + int(first["capture_complete"])
+    limit = 16_384
+    def json_bytes(value):
+        return len(deterministic_json(value).encode("utf-8"))
+
+    if require_both:
+        # With this much actual output each target has a three-byte-aligned
+        # chunk width. These read-only narrowings never affect the worker.
+        assert size >= 39_330
+        cases = [(header + 4 * ((size - 1) // (3 * (count - 1))), count) for count in (114, 115)]
+    else:
+        cases = [(1161, None)]
+    for cap, required_count in cases:
+        assert header < cap <= min(grant.budgets.segment_max_bytes, grant.budgets.frame_byte_limit)
+        chunk = 3 * ((cap - header) // 4)
+        count = (size + chunk - 1) // chunk
+        refs = [f'{manifest["observation_ref"]}::CAPTURE:STDOUT:{ordinal}' for ordinal in range(count)]
+        refs_size = json_bytes(refs)
+        refs_bound = 2 + count - 1 + count * json_bytes(refs[-1])
+        full_size = len(manifest_raw) - json_bytes(stdout["segment_refs"]) + refs_size
+        assert refs_size <= refs_bound
+        if required_count is not None:
+            assert count == required_count
+            if count == 114:
+                assert refs_bound <= limit < full_size
+            else:
+                assert refs_bound > limit
+        planner = EvidenceProcessSupervisorV1._capture_manifest_v1
+        if refs_bound > limit or full_size > limit:
+            diagnostic = "LP03_CAPTURE_MANIFEST_BYTES" if refs_bound > limit else "LP03_PROJECTION_JSON_BYTES"
+            with patch.object(base64, "b64encode", side_effect=AssertionError("encoded before rejection")) as encoding:
+                with pytest.raises(ComputationControlPlaneError, match=diagnostic):
+                    planner(native.original[0], native, maximum_segment_bytes=cap)
+                encoding.assert_not_called()
+        else:
+            diagnostic = "ACCEPTED"
+            raw, bodies = planner(native.original[0], native, maximum_segment_bytes=cap)
+            assert len(raw) == full_size and json.loads(raw)["streams"][0]["segment_refs"] == refs
+            assert b"".join(base64.b64decode(json.loads(body)["data_base64"], validate=True)
+                            for body in bodies) == capture["stdout"]
+        assert native._terminal_original[9] is capture
+        print("LP03_MATH03_CAPTURE_BOUNDARY=" + deterministic_json(dict(stdout_bytes=size,
+            segment_limit=cap, chunk_bytes=chunk, segment_count=count, reference_list_bytes=refs_size,
+            reference_upper_bound=refs_bound, full_manifest_bytes=full_size, result=diagnostic)))
+
+
+def _assert_lp03_native_capture_snapshot(native, grant, *, require_manifest_boundaries=False):
     import base64
     import io
     import json
@@ -13635,19 +13774,15 @@ def _assert_lp03_native_capture_snapshot(native, grant):
         with pytest.raises(ComputationControlPlaneError, match="LP03_CAPTURE_MANIFEST_TOTAL_BYTES"):
             EvidenceProcessSupervisorV1._capture_manifest_v1(supervisor, native,
                 maximum_total_bytes=sum(len(body) for body in segments))
-        if grant.lane.value == "REPLAY" and grant.component_closure == ("MATH-03",) and grant.causal_timeline_v1() is None:
-            # This finite native fixture has 114 segments under the narrower
-            # 1161-byte cap: references alone fit, but the full manifest does
-            # not. No signed grant or active resource allowance is changed.
-            assert 5424 < len(captured["stdout"]) <= 5472
-            with pytest.raises(ComputationControlPlaneError, match="LP03_PROJECTION_JSON_BYTES"):
-                EvidenceProcessSupervisorV1._capture_manifest_v1(supervisor, native, maximum_segment_bytes=1161)
         for narrowed in ({"maximum_total_bytes": True}, {"maximum_segment_bytes": True},
                 {"maximum_total_bytes": grant.budgets.max_persistent_bytes + 1},
                 {"maximum_segment_bytes": min(grant.budgets.frame_byte_limit, grant.budgets.segment_max_bytes) + 1}):
             with pytest.raises(ComputationControlPlaneError):
                 EvidenceProcessSupervisorV1._capture_manifest_v1(supervisor, native, **narrowed)
     assert encoded_calls == []
+    if require_manifest_boundaries or (grant.lane.value == "REPLAY" and grant.component_closure == ("MATH-03",)
+            and grant.causal_timeline_v1() is None):
+        _assert_lp03_math03_manifest_bounds(native, grant, segments, manifest_raw, require_manifest_boundaries)
     rebuilt = {"STDOUT": bytearray(), "STDERR": bytearray()}
     ordinals = {"STDOUT": 0, "STDERR": 0}
     for raw in segments:
@@ -14394,7 +14529,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             adapter._connection.set_trace_callback(None)
         assert len({item.database_file_identity for item in bindings}) == 8
         actual_envelope = replace(envelope, store_bindings=bindings)
-        if review_cut in ("causal_timeline", "causal_public_timeline", "causal_callback_rejection"):
+        if review_cut in ("causal_timeline", "causal_public_timeline", "causal_callback_rejection", "capture_partial_fills"):
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
 
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
