@@ -858,6 +858,39 @@ def _lp03_completion_cpu_case(math_id, case):
     return case in cases.get(math_id, ())
 
 
+def _lp03_observed_sharpe_seal(issuer, operation, grant_ref, outcome, issuer_context):
+    """Keep the eight charges at refusal, before the sealing transaction unwinds."""
+    import sys
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceControlBootstrapV1
+
+    observation = None
+
+    def observe(code, offset, error):
+        nonlocal observation
+        if code is _native_require.__code__ and type(error) is ContractValidationError:
+            guard = sys._getframe(2)
+            if (guard.f_code is _EvidenceControlBootstrapV1._charge_v1.__code__
+                    and guard.f_locals["self"] is operation
+                    and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED"):
+                observation = (error, tuple(operation.consumed.items()))
+
+    # Leave an existing monitor alone. The reporter marks unavailable values explicitly.
+    monitor = sys.monitoring
+    tool = next((i for i in (4, 3) if monitor.get_tool(i) is None), None)
+    if tool is None:
+        return issuer.close_evidence_assembly_v1(grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
+    monitor.use_tool_id(tool, "LP03 Sharpe sealing refusal")
+    try:
+        monitor.register_callback(tool, monitor.events.RAISE, observe)
+        monitor.set_events(tool, monitor.events.RAISE)
+        return issuer.close_evidence_assembly_v1(grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
+    finally:
+        monitor.set_events(tool, 0)
+        monitor.register_callback(tool, monitor.events.RAISE, None)
+        monitor.free_tool_id(tool)
+
+
 def _lp03_resource_refusal_detail(error):
     from itertools import islice
     from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService, _EvidenceIssuerStateV1
@@ -928,6 +961,25 @@ def _lp03_resource_refusal_detail(error):
                     failed = order.index(name)
                     detail["preparation_evaluated"] = order[:failed + 1]
                     detail["preparation_skipped"] = order[failed + 1:]
+                seal_path = (SQLiteReferenceAdapterV1._evidence_seal_assembly_v1.__code__,
+                             SQLiteReferenceAdapterV1._evidence_append_preparation_state_v1.__code__,
+                             *source_path[1:])
+                seal_frames = frames[-7:-3]
+                if (tuple(frame.f_code for frame, _ in seal_frames) == seal_path
+                        and all(frame.f_locals.get("operation") is operation for frame, _ in seal_frames)
+                        and seal_frames[1][0].f_locals.get("sealing") is True
+                        and seal_frames[-1][0].f_locals.get("stage") == "BOOTSTRAP"):
+                    detail["operation_stage"] = "BOOTSTRAP_SEAL_READBACK"
+                    for frame, _ in frames:
+                        if frame.f_code is _lp03_observed_sharpe_seal.__code__ and frame.f_locals["operation"] is operation:
+                            observation = frame.f_locals["observation"]
+                            if observation is not None and observation[0] is error:
+                                original = dict(observation[1])
+                                counters.update((key, original[key]) for key in nonclock)
+                                order = tuple(original)
+                                failed = order.index(name)
+                                detail["preparation_evaluated"] = order[:failed + 1]
+                                detail["preparation_skipped"] = order[failed + 1:]
                 counters[name] = local["value"]
     elif guard.f_code is _EvidenceRegistrationOperationV1._room_v1.__code__:
         registration = local["self"]
@@ -1035,7 +1087,8 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
     now = time.time_ns()
     # Set the parent envelope and verification-key horizon before signing.
     positive_review = review_cut in _LP03_POSITIVE_REVIEW_CASES and not (edge_native_failure or cold_native_writer)
-    validity_seconds = 600 if positive_review else 300
+    complete_cold_review = (selected_math, review_cut, edge_native_failure, cold_native_writer) == ("MATH-35", None, False, "complete")
+    validity_seconds = 600 if positive_review or complete_cold_review else 300
     expiry = now + validity_seconds * 1_000_000_000
     origin = m.EvidenceOriginV1.SOFTWARE_CONFORMANCE
     env = m.EvidenceEnvironmentIdentityV1(
@@ -1404,11 +1457,21 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
             cpu_boundary_witness=cpu_boundary_witness)
     except Exception as error:
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+        from traceback import walk_tb
+
+        plain_positive = (selected_math in ("MATH-03", "MATH-18") and review_cut is None
+            and any(frame.f_code is _assert_lp03_original_snapshot_and_seal.__code__
+                    and frame.f_locals.get("original_positive") is True
+                    and frame.f_locals.get("selected_math") == selected_math
+                    and frame.f_locals.get("cold_native_writer") is False
+                    for frame, _ in walk_tb(error.__traceback__)))
 
         if type(error) is ContractValidationError and (
             (selected_math == "MATH-03" and review_cut in ("capture_partial_fills", "causal_timeline")
              and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED")
-            or (selected_math == "MATH-21" and review_cut is None
+            or (selected_math == "MATH-18" and plain_positive
+                and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED")
+            or ((selected_math == "MATH-03" and plain_positive or selected_math == "MATH-21" and review_cut is None)
                 and str(error) == "ST12A_INVALID_CONTRACT: LP03_REGISTRATION_RESOURCE_EXHAUSTED")
         ):
             # An incomplete traceback or an unavailable output must preserve the original refusal.
@@ -4607,6 +4670,10 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     causal_rejection = review_cut == "causal_callback_rejection"
     capture_partial_fills = review_cut == "capture_partial_fills"
     causal = causal_public or causal_rejection or capture_partial_fills or review_cut == "causal_timeline"
+    original_positive = (register and not cpu_boundary_witness and review_cut is None
+        and requested_case == (selected_math, None, False, cold_native_writer)
+        and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
+    original_sharpe = original_positive and selected_math == "MATH-18" and cold_native_writer is False
     assert selected_math in ("MATH-06","MATH-07","MATH-02", "MATH-01", "MATH-03", "MATH-04", "MATH-05", "MATH-08", "MATH-09", "MATH-10", "MATH-11", "MATH-14", "MATH-15", "MATH-16", "MATH-17", "MATH-18", "MATH-19", "MATH-20", "MATH-21", "MATH-22", "MATH-23", "MATH-24", "MATH-25", "MATH-12", "MATH-13", "MATH-26", "MATH-27", "MATH-28", "MATH-29", "MATH-30", "MATH-31", "MATH-37", "MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45", "MATH-50", "MATH-51", "MATH-52")
     cashflow=selected_math in ("MATH-06","MATH-07")
     edge = selected_math == "MATH-02"
@@ -4732,6 +4799,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             execution = replace(execution, **capacity_limits[attempt_cut])
         positive_review = (review_cut in _LP03_POSITIVE_REVIEW_CASES and not cold_native_writer
             and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
+        if original_positive and selected_math == "MATH-35" and cold_native_writer == "complete":
+            positive_review = True
         # The two 30s lanes plus one review and four ACK reservations at 60s
         # reserve 360s. Measured work also counts against the 480s aggregate.
         aggregate_wall_ns = 480_000_000_000 if positive_review else 240_000_000_000
@@ -4754,6 +4823,9 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             execution = replace(execution, max_cpu_ns=18_000_000_000)
             # Two extra 8s reservations plus up to 8s of extra charges per lane.
             aggregate_cpu_ns += 32_000_000_000
+            if original_positive and selected_math == "MATH-03" and cold_native_writer is False:
+                # Two 18s reservations, 32.953125s before close, and a measured hosted close tail up to 4.859375s.
+                aggregate_cpu_ns = 84_000_000_000
             if selected_math == "MATH-21" and review_cut is None:
                 # 36s retained + 51.546875s at PRETRADE1 + 2.5 times the 7.59375s local tail.
                 aggregate_cpu_ns = 112_000_000_000
@@ -6208,7 +6280,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         max_read_bytes=8_000_000,max_owner_queries=1280 if cashflow_capacity else 1000,
         max_query_result_records=2048 if cashflow_capacity else 1000, max_control_writes=128, max_control_bytes=2_000_000,
         # The strict timer witnesses and their positive siblings perform the same source readbacks.
-        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup else 5_000_000_000,
+        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe else 5_000_000_000,
         max_wall_ns=5_000_000_000 if seal_cut == "tail_expiry" else 30_000_000_000,
         aggregate_budget_ref="LP03-BUDGET::original-assembly")
     scope = replace(selected_scope, source_selections=selections,
@@ -6586,7 +6658,10 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         with pytest.raises(ComputationControlPlaneError, match="LP03_ORIGINAL_ASSEMBLY_OUTCOME_REQUIRED"):
             issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
         return
-    sealed_ref = issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
+    if original_sharpe:
+        sealed_ref = _lp03_observed_sharpe_seal(issuer, operation, grant.grant_ref, outcome, issuer_context)
+    else:
+        sealed_ref = issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
     assert operation.current_state.state is m.EvidenceAssemblyStateV1.SEALED
     assert sealed_ref.record_id == outcome.assembly_record.record_id and len(operation.readback_refs) == 13
     assert operation.commit_state == "SEALED_AUDIT_COMMITTED_PENDING_READBACK"
