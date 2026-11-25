@@ -2480,6 +2480,24 @@ def test_registered_exact_repair_scope_reaches_atomicrows_owners(monkeypatch) ->
 
 def test_s1_launch_graph_scope_is_exactly_owned_and_fail_closed() -> None:
     _assert_lp02_scope_and_controller()
+    from tools.validate_validation_scope_registry import lp03_restart_scope_failures
+    from src.qtt.stage1_prediction_markets.grand_global_debug_logical_consistency_audit import report as pr152
+
+    lp03 = "s1-lp03-evidence-platform-restart"
+    assert lp03_restart_scope_failures() == ()
+    report_path = pr152.c.REPORT_PATH.as_posix()
+    allowed = registry.explain_pr_scope_decision(lp03, report_path)
+    denied = registry.explain_pr_scope_decision(lp03, report_path + ".copy")
+    assert allowed["allowed"] and not denied["allowed"]
+    assert allowed["pr_id"] == denied["pr_id"] == "S1_LP03_EVIDENCE_PLATFORM"
+    assert pr152._is_allowed_pr152_changed_path_for_branch(report_path, lp03, tracked_report_write_allowed=True)
+    other_pr152_paths = set(pr152.c.EXACT_CHANGED_PATH_CANDIDATES) - registry.S1_LP03_EVIDENCE_PLATFORM_RESTART_ALLOWED_EXACT_PATHS
+    assert other_pr152_paths
+    assert all(not pr152._is_allowed_pr152_changed_path_for_branch(path, lp03, tracked_report_write_allowed=True)
+               for path in other_pr152_paths)
+    for nearby in (lp03.upper(), lp03 + "-copy", "s1-lp03-evidence-platform"):
+        assert not registry.is_pr_scoped_changed_path_allowed(nearby, report_path)
+
     scheduled = "s1-kalshi-scheduled-fee-scenario"
     scheduled_paths = frozenset({
         "src/qtt/stage1_prediction_markets/qku_computation_control_plane/source_policy.py",

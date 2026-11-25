@@ -662,6 +662,15 @@ def _read_jsonl(path: Path) -> tuple[dict, ...]:
 class PreTradeRegistryView:
     rows: tuple[dict, ...]
 
+    def bind_evidence_receiver_v1(self, *, parent_resolver, host_binding, persistence_adapter):
+        from ..stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceReceiverContextV1
+        return _EvidenceReceiverContextV1._bind_v1(owner_service=self, receiving_owner="PRETRADE1",
+            parent_resolver=parent_resolver, host_binding=host_binding, persistence_adapter=persistence_adapter)
+
+    def receive_evidence_delivery_v1(self, delivery_ref, *, receiver_context):
+        from ..stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceReceiverContextV1
+        return _EvidenceReceiverContextV1._receive_v1(receiver_context, delivery_ref, owner_service=self)
+
     def candidate_ids(self) -> tuple[str, ...]:
         return tuple(str(row["candidate_id"]) for row in self.rows)
 

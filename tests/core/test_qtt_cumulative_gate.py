@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from tempfile import TemporaryDirectory, gettempdir
 
 from tools import qtt_test_gate
 
@@ -344,7 +345,10 @@ def test_qtt_cumulative_gate_blocks_hidden_zip_authority(tmp_path):
             "nested/.codex_inputs/hidden_authority.zip"
         ),
     ]
-    _assert_direct_cli_layout_boundaries(tmp_path)
+    fixture_parent = Path(gettempdir()).resolve(strict=True)
+    assert not fixture_parent.is_relative_to(Path(__file__).resolve().parents[2])
+    with TemporaryDirectory(prefix="qtt-cli-", dir=fixture_parent) as fixture_root:
+        _assert_direct_cli_layout_boundaries(Path(fixture_root))
 
 
 def test_qtt_cumulative_gate_blocks_direct_main_bypass_claim():

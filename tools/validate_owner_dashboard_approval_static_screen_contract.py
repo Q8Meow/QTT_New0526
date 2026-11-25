@@ -4,10 +4,12 @@ from __future__ import annotations
 import argparse
 import copy
 from dataclasses import dataclass
+from hashlib import sha256
 import json
 import os
 import pathlib
 import re
+import stat
 import subprocess
 import sys
 from typing import Any, Iterable, Sequence
@@ -460,9 +462,11 @@ PR97_ALWAYS_FORBIDDEN_PATHS = (
     pathlib.Path("schemas/governance/atomicrows_full_bundle_row_expansion_plan.schema.json"),
     pathlib.Path("docs/master_plan/atomic_rows/AtomicRowsFullBundleRowExpansionPlan.yaml"),
 )
-PR99_STATIC_BUILDER_ARTIFACT_PATHS = (
-    pathlib.Path("tools/build_atomicrows_bundle.py"),
-)
+_ATOMICROWS_BUILDER = pathlib.Path("tools/build_atomicrows_bundle.py")
+PR99_STATIC_BUILDER_ARTIFACT_PATHS = (_ATOMICROWS_BUILDER,)
+_LP03_ATOMICROWS_BUILDER_BLOB = "1dd11d23cd3ec75e2fbe1ed6d7b213297f6c79bb"
+_LP03_ATOMICROWS_BUILDER_SHA256 = "a5fceece20620f8d6d2c947f930f4ce6ce8af2c926750b789376a04e7854161b"
+_LP03_ATOMICROWS_BUILDER_SIZE = 26_872
 FORBIDDEN_RUNTIME_PATHS = (
     pathlib.Path("src/qtt/dashboard_runtime"),
     pathlib.Path("src/qtt/telegram_runtime"),
@@ -1116,6 +1120,59 @@ def validate_upstream_reports(repo_root: pathlib.Path) -> tuple[list[str], dict[
     return failures, upstream
 
 
+def _is_unchanged_lp03_atomicrows_builder(repo_root: pathlib.Path) -> bool:
+    """Recognize the specific inherited builder without granting PR99 authority."""
+    def identity(info: os.stat_result, *, across_apis: bool = False) -> tuple[int, ...]:
+        # On Windows lstat reports creation time as ctime, while fstat can
+        # report change time. Compare birth times across the two APIs and
+        # retain each API's own ctime for its before/after checks.
+        timestamp = info.st_birthtime_ns if across_apis and os.name == "nt" else info.st_ctime_ns
+        return (
+            info.st_dev, info.st_ino, info.st_mode, info.st_nlink, info.st_size,
+            info.st_mtime_ns, timestamp, getattr(info, "st_file_attributes", 0),
+        )
+
+    source = repo_root / _ATOMICROWS_BUILDER
+    try:
+        parent = source.parent.lstat()
+        original = source.lstat()
+        if (
+            not stat.S_ISDIR(parent.st_mode)
+            or not stat.S_ISREG(original.st_mode)
+            or original.st_nlink != 1
+            or original.st_size != _LP03_ATOMICROWS_BUILDER_SIZE
+            or any(getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+                   for info in (parent, original))
+            or source.resolve(strict=True) != source.absolute()
+        ):
+            return False
+        name = _ATOMICROWS_BUILDER.as_posix()
+        blob = _LP03_ATOMICROWS_BUILDER_BLOB
+        tree_rc, tree_entry, _ = _git_stdout(repo_root, ["ls-tree", "-z", "HEAD", "--", name])
+        index_rc, index_entry, _ = _git_stdout(repo_root, ["ls-files", "--stage", "-z", "--", name])
+        if (tree_rc, tree_entry) != (0, f"100644 blob {blob}\t{name}\0"):
+            return False
+        if (index_rc, index_entry) != (0, f"100644 {blob} 0\t{name}\0"):
+            return False
+        with source.open("rb") as stream:
+            opened = os.fstat(stream.fileno())
+            if identity(opened, across_apis=True) != identity(original, across_apis=True):
+                return False
+            contents = stream.read(_LP03_ATOMICROWS_BUILDER_SIZE + 1)
+            if identity(os.fstat(stream.fileno())) != identity(opened):
+                return False
+        current = source.lstat()
+        current_parent = source.parent.lstat()
+    except (OSError, UnicodeError):
+        return False
+    return (
+        identity(original) == identity(current)
+        and identity(parent) == identity(current_parent)
+        and len(contents) == original.st_size
+        and sha256(contents).hexdigest() == _LP03_ATOMICROWS_BUILDER_SHA256
+    )
+
+
 def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     branch_context = _current_branch_context(repo_root)
@@ -1127,7 +1184,15 @@ def validate_filesystem_boundaries(repo_root: pathlib.Path) -> list[str]:
         if _resolve(repo_root, path).exists():
             failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
     for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
-        if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:
+        lp03_baseline_path = (
+            branch_context.branch == ci_branch_context.S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH
+            and path == _ATOMICROWS_BUILDER
+        )
+        artifact = _resolve(repo_root, path)
+        present = os.path.lexists(artifact) if lp03_baseline_path else artifact.exists()
+        if present and not pr99_static_builder_allowed:
+            if lp03_baseline_path and _is_unchanged_lp03_atomicrows_builder(repo_root):
+                continue
             failures.append(f"PR96 must not create PR97 or AtomicRows bundle artifact: {path.as_posix()}")
     if not downstream_pr97_or_later:
         for path in PR97_STATIC_PLAN_PATHS:

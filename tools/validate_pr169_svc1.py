@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import ast
+from io import StringIO
 import json
 from pathlib import Path
 import sys
+import tokenize
 from typing import Any, Iterable, Sequence
+from unicodedata import normalize
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -667,10 +671,88 @@ def _validate_st12g_descriptor(
     )
 
 
+def _uses_only_private_broker_subprocess(text: str) -> bool:
+    try:
+        module = ast.parse(text)
+    except SyntaxError:
+        return False
+
+    def imports_subprocess(node: ast.AST) -> bool:
+        if isinstance(node, ast.Import):
+            return any(name.name == "subprocess" for name in node.names)
+        return isinstance(node, ast.ImportFrom) and node.level == 0 and node.module == "subprocess"
+
+    imports = [node for node in ast.walk(module) if imports_subprocess(node)]
+    mentions = text.count("subprocess.")
+    # Include binding names such as import aliases, function names, and exception targets.
+    name_count = sum(
+        token.type == tokenize.NAME and normalize("NFKC", token.string) == "subprocess"
+        for token in tokenize.generate_tokens(StringIO(text).readline)
+    )
+    if not imports:
+        return name_count == mentions == 0
+    if len(imports) != 1 or ast.get_source_segment(text, imports[0]) != "import subprocess":
+        return False
+
+    owners = [
+        node for node in module.body
+        if isinstance(node, ast.ClassDef) and node.name == "_WindowsEvidenceProcessV1"
+    ]
+    if len(owners) != 1:
+        return False
+    methods = [
+        node for node in owners[0].body
+        if isinstance(node, ast.FunctionDef) and node.name == "prepare_suspended_v1"
+    ]
+    if len(methods) != 1 or imports[0] not in methods[0].body:
+        return False
+    method = methods[0]
+
+    # The broker uses subprocess only for argument quoting and Win32 constants.
+    permitted_assignments = {
+        ast.dump(ast.parse(statement).body[0])
+        for statement in (
+            "command_line = self.ctypes.create_unicode_buffer(subprocess.list2cmdline(argv))",
+            "startup.StartupInfo.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW",
+            "startup.StartupInfo.wShowWindow = subprocess.SW_HIDE",
+            "created = kernel.CreateProcessW(str(engine), command_line, None, None, True, "
+            "subprocess.DETACHED_PROCESS | 0x00000004 | 0x00080000 | 0x00000400, "
+            "environment_block, cwd, ctypes.byref(startup), ctypes.byref(information))",
+        )
+    }
+
+    def assignments(body: Sequence[ast.stmt]) -> Iterable[ast.Assign]:
+        for node in body:
+            if isinstance(node, ast.Assign):
+                yield node
+            elif isinstance(node, ast.Try):
+                yield from assignments(node.body)
+
+    permitted_uses = set()
+    for node in assignments(method.body):
+        shape = ast.dump(node)
+        if shape not in permitted_assignments:
+            continue
+        permitted_assignments.remove(shape)
+        for attribute in ast.walk(node):
+            if not isinstance(attribute, ast.Attribute):
+                continue
+            owner = attribute.value
+            if isinstance(owner, ast.Name) and owner.id == "subprocess":
+                if ast.get_source_segment(text, attribute) == f"subprocess.{attribute.attr}":
+                    permitted_uses.add(owner)
+
+    return len(permitted_uses) == mentions and name_count == mentions + 1
+
+
 def _validate_no_raw_runtime_scan(repo_root: Path) -> None:
     resolver = repo_root / "src/qtt/service/pr169_svc1_resolvers.py"
     _assert(resolver.exists(), "SVC1 resolver missing")
     text = resolver.read_text(encoding="utf-8")
+    _assert(
+        _uses_only_private_broker_subprocess(text),
+        "resolver contains forbidden runtime scan/network marker: subprocess.",
+    )
     forbidden = (
         "pr169_pretrade1",
         "pr169_readiness1",
@@ -684,7 +766,6 @@ def _validate_no_raw_runtime_scan(repo_root: Path) -> None:
         "requests.put(",
         "requests.delete(",
         "socket.",
-        "subprocess.",
     )
     for marker in forbidden:
         _assert(marker not in text, f"resolver contains forbidden runtime scan/network marker: {marker}")

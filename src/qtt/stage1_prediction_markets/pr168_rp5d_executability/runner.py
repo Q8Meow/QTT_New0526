@@ -52,7 +52,7 @@ from .models import (
     stable_unique,
     with_common,
     write_json,
-    write_jsonl,
+    _write_jsonl_at,
 )
 from .path_safety import path_safety_failures, path_safety_record
 
@@ -1915,16 +1915,20 @@ def build_run_report(all_rows: dict[str, list[dict[str, Any]]], materialized: di
     return _report_common(report, producer_agent="GovernanceAgent", upstream=[generated_ref("rp5d_no_orphan_artifacts.jsonl")])
 
 
-def _clean_generated_dir() -> None:
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+def _clean_generated_dir(output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
     allowed = set(all_artifact_filenames()) | set(OLD_LONG_ARTIFACT_NAMES)
-    for path in GENERATED_DIR.iterdir():
+    for path in output_dir.iterdir():
         if path.is_file() and path.name in allowed:
             path.unlink()
 
 
 def run_layer(offline: bool = True) -> dict[str, Any]:
-    _clean_generated_dir()
+    return _run_layer_at(GENERATED_DIR, logical_output_dir=GENERATED_DIR)
+
+
+def _run_layer_at(output_dir: Path, *, logical_output_dir: Path) -> dict[str, Any]:
+    _clean_generated_dir(output_dir)
     reading_rows, discovery_rows, inventory_rows, consumption_rows = build_reading_and_input_ledgers()
     materialized = build_materialization()
     readiness_quantum = build_readiness_and_quantum(materialized)
@@ -1973,19 +1977,24 @@ def run_layer(offline: bool = True) -> dict[str, Any]:
         upstream_artifact_refs=[generated_ref("rp5d_policy_params.jsonl")],
         downstream_artifact_refs=[generated_ref("rp5d_run_receipt.report.json")],
     )
-    write_json(GENERATED_DIR / "rp5d_artifact_name_registry.json", artifact_registry)
-    write_json(GENERATED_DIR / "rp5d_execution_authority.report.json", build_execution_authority())
+    write_json(output_dir / "rp5d_artifact_name_registry.json", artifact_registry)
+    write_json(output_dir / "rp5d_execution_authority.report.json", build_execution_authority())
 
     for name in JSONL_OUTPUTS:
         rows = all_rows.get(name, [])
-        write_jsonl(GENERATED_DIR / name, rows, schema_version_name=_jsonl_schema_name(name))
+        _write_jsonl_at(
+            output_dir / name,
+            rows,
+            logical_path=logical_output_dir / name,
+            schema_version_name=_jsonl_schema_name(name),
+        )
 
     run_report = build_run_report(all_rows, materialized)
     rp5e, future, live = build_handoff_reports(run_report)
-    write_json(GENERATED_DIR / "rp5d_to_rp5e_handoff.report.json", rp5e)
-    write_json(GENERATED_DIR / "rp5d_future_pr_handoff.report.json", future)
-    write_json(GENERATED_DIR / "rp5d_live_dryrun_handoff.report.json", live)
-    write_json(GENERATED_DIR / "rp5d_run_receipt.report.json", run_report)
+    write_json(output_dir / "rp5d_to_rp5e_handoff.report.json", rp5e)
+    write_json(output_dir / "rp5d_future_pr_handoff.report.json", future)
+    write_json(output_dir / "rp5d_live_dryrun_handoff.report.json", live)
+    write_json(output_dir / "rp5d_run_receipt.report.json", run_report)
     return run_report
 
 

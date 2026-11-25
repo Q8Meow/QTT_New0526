@@ -8,12 +8,18 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 import json
 from pathlib import Path
+import re
 import sys
 from types import MappingProxyType
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from tools.independent_validate_qku_computation_control_plane_execution import (
+    _lp03_sqlite_topology_nodes_v1,
+    _qualified_callable_name,
+)
 
 from src.qtt.stage1_prediction_markets.qku_computation_control_plane.cohort_compiler import (
     ReplayPaperCohortCompilerV1,
@@ -87,6 +93,7 @@ FORBIDDEN_IMPORT_ROOTS = {
     "requests",
     "socket",
     "sqlite3",
+    "_sqlite3",
     "subprocess",
     "threading",
 }
@@ -1371,17 +1378,6 @@ def _parse_operation_rows(tree: ast.Module) -> tuple[tuple[object, ...], ...]:
     return tuple(rows)
 
 
-def _qualified_callable_name(node: ast.expr) -> str:
-    """Return the complete statically qualified name for a call target."""
-
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        prefix = _qualified_callable_name(node.value)
-        return f"{prefix}.{node.attr}" if prefix else node.attr
-    return ""
-
-
 def _has_exact_false_marker(
     tree: ast.Module,
     *,
@@ -1420,6 +1416,7 @@ def _runtime_topology_failures(
     tree: ast.Module,
 ) -> tuple[str, ...]:
     policy = RUNTIME_TOPOLOGY_EXCEPTIONS.get(file_name)
+    native_sqlite_imports, native_sqlite_calls = _lp03_sqlite_topology_nodes_v1(file_name, tree)
     failures: list[str] = []
     permitted_import_count = 0
     permitted_call_count = 0
@@ -1513,7 +1510,7 @@ def _runtime_topology_failures(
                 root = alias.name.split(".", 1)[0]
                 if root not in FORBIDDEN_IMPORT_ROOTS:
                     continue
-                if node in public_thread_imports:
+                if node in public_thread_imports or node in native_sqlite_imports:
                     continue
                 is_exact_exception = (
                     policy is not None
@@ -1544,12 +1541,12 @@ def _runtime_topology_failures(
                     failures.append(f"runtime import {node.module}")
         elif isinstance(node, ast.Call):
             qualified_name = _qualified_callable_name(node.func)
-            is_exact_exception = (
-                policy is not None
-                and qualified_name == policy.allowed_qualified_call
-            )
+            is_exact_exception = policy is not None and (
+                qualified_name == policy.allowed_qualified_call or node in native_sqlite_calls)
             if is_exact_exception:
                 permitted_call_count += 1
+                continue
+            if node in native_sqlite_calls:
                 continue
             terminal_name = qualified_name.rsplit(".", 1)[-1]
             if terminal_name in FORBIDDEN_CALL_NAMES:
@@ -1638,7 +1635,10 @@ def main() -> int:
         model_text = (PACKAGE / "models.py").read_text(encoding="utf-8")
         validation_text = (PACKAGE / "validation.py").read_text(encoding="utf-8")
         for forbidden in ("payload_json", "result_json", "typing.Any"):
-            if forbidden in model_text or forbidden in validation_text:
+            # Match the untyped member itself. Private, bounded review decoders
+            # retain the original signed source under its longer schema key.
+            exact_name = r"\b" + re.escape(forbidden) + r"\b"
+            if re.search(exact_name, model_text) or re.search(exact_name, validation_text):
                 failures.append(f"untyped operation surface remains: {forbidden}")
         for required in (
             "schema_version=\"1.4.0\"",
@@ -1931,16 +1931,22 @@ def main() -> int:
             != (("Barrier", None), ("Thread", None))
         ):
             failures.append("grouped concurrency test threading import differs")
-        if any(
-            isinstance(node, ast.Call)
-            and (
-                (isinstance(node.func, ast.Name) and node.func.id == "sleep")
-                or (
-                    isinstance(node.func, ast.Attribute)
-                    and node.func.attr == "sleep"
-                )
-            )
-            for node in ast.walk(grouped_tree)
+        native_wait_name = "_lp03_wait_until_native_clock_v1"
+        native_wait = next((node for node in grouped_tree.body if isinstance(node, ast.FunctionDef)
+                            and node.name == native_wait_name), None)
+        clock_sleep_calls = {
+            node for loop in (native_wait.body if native_wait else ()) if isinstance(loop, ast.While)
+            for node in ast.walk(loop) if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name) and node.func.id == "sleep"
+        }
+        if len(clock_sleep_calls) != 1 or any(
+            _qualified_callable_name(node.func).rsplit(".", 1)[-1] == "sleep" and node not in clock_sleep_calls
+            for node in ast.walk(grouped_tree) if isinstance(node, ast.Call)
+        ) or any(
+            isinstance(node, ast.Call) and _qualified_callable_name(node.func) == native_wait_name
+            for function in grouped_tree.body if isinstance(function, ast.FunctionDef)
+            and function.name in {"_threaded", "_barrier_after_once", *(test.name for test in physical_pytest_functions)}
+            for node in ast.walk(function)
         ):
             failures.append("grouped concurrency tests use sleep as proof")
     builder_text = (

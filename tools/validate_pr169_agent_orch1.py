@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 from pathlib import Path
 import sys
@@ -499,14 +500,52 @@ def _validate_st12g_descriptor(
     )
 
 
+def _private_svc1_import_count(text: str) -> int:
+    try:
+        module = ast.parse(text)
+    except SyntaxError:
+        return 0
+
+    supervisor = "EvidenceProcessSupervisorV1"
+    allowed_imports = {
+        "AgentOrchService": {
+            "resolve_evidence_attempt_v1": supervisor,
+            "_append_evidence_process_observation_v1": supervisor,
+            "_audit_evidence_attempt_failure_v1": f"{supervisor}, _WindowsEvidenceProcessV1",
+        },
+        "_EvidenceIssuerStateV1": {"_registration_current_v1": supervisor},
+    }
+    admitted = 0
+    for owner, method_imports in allowed_imports.items():
+        classes = [node for node in module.body if isinstance(node, ast.ClassDef) and node.name == owner]
+        if len(classes) != 1:
+            continue
+        for method, names in method_imports.items():
+            methods = [node for node in classes[0].body if isinstance(node, ast.FunctionDef) and node.name == method]
+            if len(methods) != 1:
+                continue
+            expected = f"from ..service.pr169_svc1_resolvers import {names}"
+            imports = [
+                node for node in methods[0].body
+                if isinstance(node, ast.ImportFrom) and ast.get_source_segment(text, node) == expected
+            ]
+            admitted += len(imports) == 1
+    return admitted
+
+
 def _validate_resolver_static(repo_root: Path, failures: list[str]) -> None:
     resolver_path = repo_root / "src/qtt/agents/pr169_agent_orch1_resolvers.py"
     _assert(resolver_path.exists(), "Resolver/API contract module missing", failures)
     if not resolver_path.exists():
         return
     text = resolver_path.read_text(encoding="utf-8")
+    svc1_mentions = text.count("pr169_svc1")
+    _assert(
+        svc1_mentions == 0 or svc1_mentions == _private_svc1_import_count(text),
+        "Resolver contains forbidden runtime/upstream fragment: pr169_svc1",
+        failures,
+    )
     forbidden_fragments = (
-        "pr169_svc1",
         "pr169_pretrade1",
         "pr169_readiness1",
         "pr168_mem1",

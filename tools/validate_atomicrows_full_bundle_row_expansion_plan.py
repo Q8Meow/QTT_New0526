@@ -25,6 +25,7 @@ from src.qtt.core.testing.atomicrows_bundle_state import (  # noqa: E402
     validate_current_atomicrows_bundle_state,
 )
 from tools import ci_branch_context  # noqa: E402
+from tools import validate_owner_dashboard_approval_static_screen_contract as pr96_gate  # noqa: E402
 from tools.validate_master_plan_section_coverage import (  # noqa: E402
     validate_json_schema_subset,
 )
@@ -828,8 +829,17 @@ def validate_no_forbidden_artifacts(repo_root: pathlib.Path, plan: dict[str, Any
     )
     pr99_static_builder_allowed = _pr99_static_builder_branch_allowed(branch_context.branch)
     for path in PR99_STATIC_BUILDER_ARTIFACT_PATHS:
-        if _resolve(repo_root, path).exists() and not pr99_static_builder_allowed:
-            failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
+        lp03_baseline_path = (
+            branch_context.branch == ci_branch_context.S1_LP03_EVIDENCE_PLATFORM_RESTART_BRANCH
+            and path == pr96_gate._ATOMICROWS_BUILDER
+        )
+        artifact = _resolve(repo_root, path)
+        present = os.path.lexists(artifact) if lp03_baseline_path else artifact.exists()
+        if not present or pr99_static_builder_allowed:
+            continue
+        if lp03_baseline_path and pr96_gate._is_unchanged_lp03_atomicrows_builder(repo_root):
+            continue
+        failures.append(f"forbidden downstream artifact exists: {path.as_posix()}")
     for path in FORBIDDEN_RUNTIME_PATHS:
         if _resolve(repo_root, path).exists():
             failures.append(f"forbidden runtime artifact exists: {path.as_posix()}")

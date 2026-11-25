@@ -389,6 +389,37 @@ class TrancheCUnitOfWorkV1:
     ) -> TransactionCommitReceiptV1:
         return TransactionCommitReceiptV1(unit_of_work_id, state, attempt, refs, claim_ref, started_at, completed_at, failure_code, retryable)
 
+    def execute_evidence_v1(self, *, operation):
+        """Same atomic semantic boundary, restricted to the original lane batch."""
+        from .persistence import _EvidenceLaneOperationV1, _EvidenceRegistrationOperationV1
+        from .sqlite_reference import SQLiteReferenceAdapterV1
+        _native_require(type(self) is TrancheCUnitOfWorkV1 and type(operation) is _EvidenceLaneOperationV1
+                        and type(self._adapter) is SQLiteReferenceAdapterV1
+                        and self._adapter is operation.platform._store and self._retry_policy.max_transaction_attempts == 1
+                        and operation.phase == "RESERVED" and operation.unit is None, "LP03_LANE_UNIT_OF_WORK_REQUIRED")
+        operation.unit = self
+        operation.unit_original = (self, self._adapter, self._retry_policy)
+        try:
+            _EvidenceLaneOperationV1._check_current_v1(operation)
+            SQLiteReferenceAdapterV1._evidence_commit_lane_v1(self._adapter, operation)
+            _native_require(operation.phase == "COMMITTED_AND_READBACK", "LP03_LANE_COMMIT_READBACK_REQUIRED")
+            return operation
+        except BaseException:
+            _EvidenceRegistrationOperationV1._observe_accounting_v1(operation.attempt.registration)
+            raise
+
+    def _validate_evidence_records_v1(self, operation):
+        from decimal import localcontext
+        from .context import decimal_context_v1
+        from .persistence import _EvidenceLaneOperationV1
+        _native_require(type(self) is TrancheCUnitOfWorkV1 and type(operation) is _EvidenceLaneOperationV1
+                        and operation.unit is self and operation.phase == "PREPARED", "LP03_LANE_UNIT_RECORDS_SCOPE")
+        records = operation.records
+        TrancheCAtomicRecordSetV1.__post_init__(records)
+        with localcontext(decimal_context_v1()):
+            AccountingAndTCAServiceV1.validate_journal(records.journal_transaction, records.journal_postings, operation.accounts)
+        _EvidenceLaneOperationV1._check_current_v1(operation)
+
     def execute(
         self,
         *,

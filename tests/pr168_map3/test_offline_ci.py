@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
+
+from tests.pr168_map3._helpers import new_map3_workspace, run_map3_tool
 
 
 def test_offline_builder_and_validator_do_not_require_network() -> None:
-    repo_root = Path(__file__).resolve().parents[2]
-    subprocess.run(
-        [sys.executable, "tools/build_pr168_map3.py", "--offline"],
-        cwd=repo_root,
-        check=True,
-    )
-    subprocess.run(
-        [sys.executable, "tools/validate_pr168_map3.py"],
-        cwd=repo_root,
-        check=True,
-    )
+    with new_map3_workspace() as workspace_name:
+        workspace = Path(workspace_name)
+        run_map3_tool(workspace, "build_pr168_map3.py", "--offline")
+        run_map3_tool(workspace, "validate_pr168_map3.py")

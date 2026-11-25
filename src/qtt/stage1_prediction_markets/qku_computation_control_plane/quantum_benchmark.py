@@ -584,15 +584,46 @@ class QuantumClassicalNoTradeComparisonV1:
         return deterministic_json(self)
 
 
+def _bind_original_quantum_lookup_v1():
+    """Retain the existing three pure targets, without accepting caller hooks."""
+    from .context import _native_require
+    lookup = get_st12f_evidence_math_callable_v1
+    lookup_code = lookup.__code__
+    registry = lookup.__globals__["ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1"]
+    originals = tuple((name, registry[name], registry[name].__code__)
+                      for name in ("MATH-50", "MATH-51", "MATH-52"))
+
+    def resolve(math_id):
+        _native_require(get_st12f_evidence_math_callable_v1 is lookup and lookup.__code__ is lookup_code
+                        and lookup.__globals__["ST12F_EVIDENCE_MATH_CALLABLE_REGISTRY_V1"] is registry,
+                        "LP03_QUANTUM_ORIGINAL_LOOKUP_CHANGED")
+        for name, function, code in originals:
+            if math_id == name:
+                _native_require(registry[name] is function and function.__code__ is code
+                                and lookup(name) is function, "LP03_QUANTUM_ORIGINAL_CALLABLE_CHANGED")
+                return function
+        _native_require(False, "LP03_QUANTUM_ORIGINAL_CALLABLE_UNAVAILABLE")
+    return resolve
+
+
+_original_quantum_callable_v1 = _bind_original_quantum_lookup_v1()
+
+
 class QuantumBenchmarkServiceV1:
     """Consumes pre-existing traces and deterministic comparators only."""
 
     def validate_qaoa_trace(
         self, trace: QAOAPreexistingTraceV1
     ) -> QuantumTraceValidationReceiptV1:
+        return QuantumBenchmarkServiceV1._validate_qaoa_trace_with_raw_v1(self, trace)[1]
+
+    def _validate_qaoa_trace_with_raw_v1(
+        self, trace: QAOAPreexistingTraceV1
+    ) -> tuple[Mapping[str, object], QuantumTraceValidationReceiptV1]:
+        """Retain the one original raw invocation alongside its typed result."""
         if type(trace) is not QAOAPreexistingTraceV1 or not trace.trace_complete or not trace.original_model_interpret_back_valid:
             raise ContractValidationError(ReasonCode.ST12F_QUANTUM_TRACE_INVALID, "QAOA trace is not complete")
-        result = get_st12f_evidence_math_callable_v1("MATH-50")(
+        result = _original_quantum_callable_v1("MATH-50")(
             input_lock_id=trace.input_lock_id,
             formulation_id=trace.formulation_id,
             objective_id=trace.objective_id,
@@ -617,7 +648,7 @@ class QuantumBenchmarkServiceV1:
         selected = next((point for point in trace.points if point.candidate_id == result["selected_candidate_id"]), None)
         if selected is None or trace.selected_candidate_id != selected.candidate_id:
             raise ContractValidationError(ReasonCode.ST12F_QUANTUM_TRACE_INVALID, "QAOA selected candidate differs")
-        return QuantumTraceValidationReceiptV1(
+        receipt = QuantumTraceValidationReceiptV1(
             receipt_id=f"ST12F-QUANTUM-TRACE::{trace.trace_id}",
             schema_version="QTT_ST12F_QUANTUM_TRACE_VALIDATION_V1_4",
             contract_version="1.4",
@@ -641,13 +672,20 @@ class QuantumBenchmarkServiceV1:
             effect_counts=_ZERO_EFFECT_COUNTS,
             terminal_state="VALIDATED_TRACE_ONLY",
         )
+        return result, receipt
 
     def validate_vqe_trace(
         self, trace: VQEPreexistingTraceV1
     ) -> QuantumTraceValidationReceiptV1:
+        return QuantumBenchmarkServiceV1._validate_vqe_trace_with_raw_v1(self, trace)[1]
+
+    def _validate_vqe_trace_with_raw_v1(
+        self, trace: VQEPreexistingTraceV1
+    ) -> tuple[Mapping[str, object], QuantumTraceValidationReceiptV1]:
+        """Retain the one original raw invocation alongside its typed result."""
         if type(trace) is not VQEPreexistingTraceV1 or not trace.trace_complete or not trace.original_model_interpret_back_valid:
             raise ContractValidationError(ReasonCode.ST12F_QUANTUM_TRACE_INVALID, "VQE trace is not complete")
-        result = get_st12f_evidence_math_callable_v1("MATH-51")(
+        result = _original_quantum_callable_v1("MATH-51")(
             input_lock_id=trace.input_lock_id,
             formulation_id=trace.formulation_id,
             hamiltonian_id=trace.hamiltonian_id,
@@ -676,7 +714,7 @@ class QuantumBenchmarkServiceV1:
         selected = next((point for point in trace.points if point.parameter_point_id == result["selected_candidate_id"]), None)
         if selected is None:
             raise ContractValidationError(ReasonCode.ST12F_QUANTUM_TRACE_INVALID, "VQE selected point differs")
-        return QuantumTraceValidationReceiptV1(
+        receipt = QuantumTraceValidationReceiptV1(
             receipt_id=f"ST12F-QUANTUM-TRACE::{trace.trace_id}",
             schema_version="QTT_ST12F_QUANTUM_TRACE_VALIDATION_V1_4",
             contract_version="1.4",
@@ -700,6 +738,7 @@ class QuantumBenchmarkServiceV1:
             effect_counts=_ZERO_EFFECT_COUNTS,
             terminal_state="VALIDATED_TRACE_ONLY",
         )
+        return result, receipt
 
     def compare_same_lock(
         self,
@@ -709,6 +748,19 @@ class QuantumBenchmarkServiceV1:
         strongest_classical_receipt: EconomicComparatorReceiptV1,
         no_trade_receipt: EconomicComparatorReceiptV1,
     ) -> QuantumClassicalNoTradeComparisonV1:
+        return QuantumBenchmarkServiceV1._compare_same_lock_with_raw_v1(self, comparison_id=comparison_id,
+            quantum_receipt=quantum_receipt, strongest_classical_receipt=strongest_classical_receipt,
+            no_trade_receipt=no_trade_receipt)[1]
+
+    def _compare_same_lock_with_raw_v1(
+        self,
+        *,
+        comparison_id: str,
+        quantum_receipt: QuantumTraceValidationReceiptV1,
+        strongest_classical_receipt: EconomicComparatorReceiptV1,
+        no_trade_receipt: EconomicComparatorReceiptV1,
+    ) -> tuple[Mapping[str, object], QuantumClassicalNoTradeComparisonV1]:
+        """Expose the same raw comparison; never invoke or fit a backend."""
         if (
             type(quantum_receipt) is not QuantumTraceValidationReceiptV1
             or type(strongest_classical_receipt) is not EconomicComparatorReceiptV1
@@ -721,7 +773,7 @@ class QuantumBenchmarkServiceV1:
                 "quantum, classical, and NO_TRADE comparators must be exact typed receipts",
             )
         quantum_comparator = quantum_receipt.as_comparator()
-        result = get_st12f_evidence_math_callable_v1("MATH-52")(
+        result = _original_quantum_callable_v1("MATH-52")(
             quantum_basis=quantum_comparator.comparison_basis.as_mapping(),
             strongest_classical_basis=strongest_classical_receipt.comparison_basis.as_mapping(),
             no_trade_basis=no_trade_receipt.comparison_basis.as_mapping(),
@@ -729,7 +781,7 @@ class QuantumBenchmarkServiceV1:
             strongest_classical=strongest_classical_receipt.as_math_mapping(),
             no_trade=no_trade_receipt.as_math_mapping(),
         )
-        return QuantumClassicalNoTradeComparisonV1(
+        receipt = QuantumClassicalNoTradeComparisonV1(
             comparison_id=comparison_id,
             input_lock_id=quantum_receipt.input_lock_id,
             formulation_id=quantum_receipt.formulation_id,
@@ -747,3 +799,42 @@ class QuantumBenchmarkServiceV1:
             delta_quantum_vs_no_trade=result["delta_quantum_vs_no_trade"],
             winner=result["winner"],
         )
+        return result, receipt
+
+
+def _bind_original_quantum_invocation_v1():
+    """Bind the original pair constructors for the private bounded wire path."""
+    from .context import _native_require
+    owner = QuantumBenchmarkServiceV1
+    lookup = _original_quantum_callable_v1
+    lookup_code = lookup.__code__
+    originals = tuple((math_id, name, getattr(owner, name), getattr(owner, name).__code__)
+                     for math_id, name in (
+                         ("MATH-50", "_validate_qaoa_trace_with_raw_v1"),
+                         ("MATH-51", "_validate_vqe_trace_with_raw_v1"),
+                         ("MATH-52", "_compare_same_lock_with_raw_v1")))
+
+    def invoke(math_id, inputs):
+        _native_require(QuantumBenchmarkServiceV1 is owner and _original_quantum_callable_v1 is lookup
+                        and lookup.__code__ is lookup_code, "LP03_QUANTUM_ORIGINAL_CONSTRUCTOR_CHANGED")
+        function = lookup(math_id)
+        for name, member, constructor, code in originals:
+            if name == math_id:
+                _native_require(getattr(owner, member) is constructor and constructor.__code__ is code,
+                                "LP03_QUANTUM_ORIGINAL_CONSTRUCTOR_CHANGED")
+                raw, receipt = constructor(owner(), **inputs)
+                _native_require(QuantumBenchmarkServiceV1 is owner and _original_quantum_callable_v1 is lookup
+                                and lookup.__code__ is lookup_code and lookup(math_id) is function
+                                and getattr(owner, member) is constructor and constructor.__code__ is code,
+                                "LP03_QUANTUM_ORIGINAL_CONSTRUCTOR_CHANGED")
+                return raw, receipt, constructor
+        _native_require(False, "LP03_QUANTUM_ORIGINAL_CALLABLE_UNAVAILABLE")
+    return invoke
+
+
+_invoke_evidence_original_quantum_v1 = _bind_original_quantum_invocation_v1()
+
+# Complete the existing dispatcher/constructor composition while both original
+# owners are loaded. The receiver is one-shot and rejects later registration.
+from .implementation_registry import _compose_evidence_quantum_bridge_v1
+_compose_evidence_quantum_bridge_v1(_invoke_evidence_original_quantum_v1)

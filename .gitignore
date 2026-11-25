@@ -2,3 +2,16 @@ __pycache__/
 *.pyc
 .pytest_cache/
 /.qtt/
+
+# Reports written by the registered validation workflow.
+/.tmp/qtt-validation-router/fast-preflight.json
+/.tmp/qtt-validation-router/deterministic-validators-[abc].json
+/.tmp/qtt-validation-router/pytest-shard-[1-8].json
+/.tmp/qtt-validation-router/post-validation.json
+/.tmp/qtt-validation-router/validation-gates.json
+!/.tmp/qtt-validation-router/*/
+/.tmp/qtt-validation-timing/fast-preflight.json
+/.tmp/qtt-validation-timing/deterministic-validators-[abc].json
+/.tmp/qtt-validation-timing/pytest-shard-[1-8].json
+/.tmp/qtt-validation-timing/post-validation.json
+!/.tmp/qtt-validation-timing/*/

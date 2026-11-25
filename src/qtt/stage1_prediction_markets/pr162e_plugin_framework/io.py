@@ -22,7 +22,7 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True)
-    path.write_text(text + "\n", encoding="utf-8")
+    path.write_text(text + "\n", encoding="utf-8", newline="\n")
 
 
 def records_from_payload(repo_root: Path, payload: dict[str, Any]) -> list[dict[str, Any]]:

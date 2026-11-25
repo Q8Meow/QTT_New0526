@@ -18,6 +18,14 @@ from .context import _native_bounded_decimal, _native_require, _native_text
 from .errors import ContractValidationError, ReasonCode, SerializationSafetyError
 
 
+# ASCII is unchanged by NFKC. This fixed immutable table implements the same
+# case folding and alphanumeric filter without retaining any input strings.
+_ASCII_KEY_NORMALIZATION_TRANSLATION_V1 = tuple(
+    value + 32 if 65 <= value <= 90 else value if 48 <= value <= 57 or 97 <= value <= 122 else None
+    for value in range(128)
+)
+
+
 @dataclass(frozen=True, slots=True)
 class SecretKeyPolicyV1:
     """Immutable field-name policy shared by every secret-rejection surface."""
@@ -29,6 +37,8 @@ class SecretKeyPolicyV1:
     def normalize(field_name: str) -> str:
         if not isinstance(field_name, str) or not field_name:
             return ""
+        if type(field_name) is str and field_name.isascii():
+            return field_name.translate(_ASCII_KEY_NORMALIZATION_TRANSLATION_V1)
         normalized = unicodedata.normalize("NFKC", field_name).casefold()
         return "".join(character for character in normalized if character.isalnum())
 
@@ -38,6 +48,8 @@ class SecretKeyPolicyV1:
             return False
         if normalized == "token" or normalized.endswith("token"):
             return True
+        if type(normalized) is str:
+            return any(map(normalized.__contains__, self.forbidden_normalized_terms))
         return any(
             term in normalized for term in self.forbidden_normalized_terms
         )
@@ -289,6 +301,788 @@ def deterministic_json(value: Any) -> str:
     )
 
 
+def _evidence_canonical_object_v1(raw: bytes, *, max_bytes: int = 65536) -> dict:
+    """Decode LP03 data without admitting an effect or bypassing existing guards.
+
+    Decimal amounts are text in this protocol. JSON fractional/exponent numbers
+    are rejected even when numerically integral; bool remains distinct from int.
+    Kind-specific constructors must subsequently validate the exact field roster.
+    """
+    value = _native_strict_json(raw, max_bytes=max_bytes)
+    _native_require(type(value) is dict, "LP03_JSON_OBJECT")
+
+    def check(item):
+        if type(item) in (str, bool) or item is None:
+            return
+        if type(item) is int:
+            _native_require(-(2**256) < item < 2**256, "LP03_INTEGER_BOUND")
+            return
+        if type(item) is list:
+            for child in item:
+                check(child)
+            return
+        if type(item) is dict:
+            for child in item.values():
+                check(child)
+            return
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "LP03_EXACT_JSON_SCALAR")
+
+    check(value)
+    # deterministic_json still performs the ordinary secret and path checks.
+    _native_require(deterministic_json(value).encode("utf-8") == raw,
+                    "LP03_NONCANONICAL_JSON")
+    return value
+
+
+def _evidence_switch_projection_float_leaf_v1(path, root):
+    """Admit binary64 at the closed M25 coordinates only."""
+    if path[:3] != root:
+        return False
+    at = path[3:]
+    if at == ("switch_ope_estimate",):
+        return True
+    if len(at) == 2 and at[0] == "held_out_row_values":
+        return type(at[1]) is int and 0 <= at[1] < 64
+    if len(at) < 3 or at[0] != "outer_fold_results" or type(at[1]) is not int or not 0 <= at[1] < 8:
+        return False
+    if at[2:] == ("selected_tau",):
+        return True
+    if len(at) == 4 and at[2] == "held_out_row_values":
+        return type(at[3]) is int and 0 <= at[3] < 64
+    return (len(at)==5 and at[2]=="criteria" and type(at[3]) is int and 0 <= at[3] < 16
+        and at[4] in ("tau", "variance_of_mean", "bias_upper_bound", "estimated_mse_upper_bound"))
+
+
+def _evidence_projection_spine_object_v1(raw: bytes) -> dict:
+    """Closed stored-spine decoder; only closed typed projections admit floats.
+
+    The typed projection validates the original schema, implementation, field,
+    unit and basis before this leaf is admitted. No other record or position
+    receives a binary64 exception, and this grants no publication authority.
+    """
+    value = _native_strict_json(raw, max_bytes=1048576, binary64_numbers=True)
+    _native_require(type(value) is dict, "LP03_JSON_OBJECT")
+    payload = value.get("typed_payload")
+    record = payload.get("record") if type(payload) is dict else None
+    projection_path = None
+    multiple_projection = False
+    interval_projection = False
+    fold_projection = False
+    cscv_projection = False
+    spa_projection = False
+    reality_projection = False
+    bootstrap_projection = False
+    recorded_dr_projection = False
+    switch_projection = False
+    execution_matrix_projection = False
+    if (value.get("record_type") == "LP03_EVIDENCE_CONTROL_V1" and type(record) is dict
+            and record.get("kind") == "VALUE_PROJECTION"
+            and record.get("original_raw_schema_ref") in ("MATH-02::OUTPUT", "MATH-08::OUTPUT", "MATH-09::OUTPUT", "MATH-10::OUTPUT", "MATH-11::OUTPUT", "MATH-14::OUTPUT", "MATH-15::OUTPUT", "MATH-16::OUTPUT", "MATH-17::OUTPUT", "MATH-18::OUTPUT", "MATH-19::OUTPUT", "MATH-20::OUTPUT", "MATH-21::OUTPUT", "MATH-22::OUTPUT", "MATH-23::OUTPUT", "MATH-24::OUTPUT", "MATH-25::OUTPUT", "MATH-12::OUTPUT", "MATH-13::OUTPUT", "LP03::MATH-29::RAW_V1", "LP03::MATH-30::RAW_V1", "LP03::MATH-31::RAW_V1", "LP03::MATH-37::RAW_V1", "LP03::MATH-41::RAW_V1", "LP03::MATH-42::RAW_V1", "LP03::MATH-43::RAW_V1", "LP03::MATH-44::RAW_V1")):
+        from .models import EvidenceValueProjectionRecordV1
+        EvidenceValueProjectionRecordV1.from_canonical_mapping(record)
+        projection_path = ("typed_payload", "record", "projected_value")
+        multiple_projection = record["original_raw_schema_ref"] in ("MATH-12::OUTPUT", "MATH-13::OUTPUT")
+        interval_projection = record["original_raw_schema_ref"] == "MATH-11::OUTPUT"
+        fold_projection = record["original_raw_schema_ref"] == "MATH-20::OUTPUT"
+        cscv_projection = record["original_raw_schema_ref"] == "MATH-19::OUTPUT"
+        spa_projection = record["original_raw_schema_ref"] == "MATH-16::OUTPUT"
+        reality_projection = record["original_raw_schema_ref"] == "MATH-15::OUTPUT"
+        bootstrap_projection = record["original_raw_schema_ref"] == "MATH-14::OUTPUT"
+        recorded_dr_projection = record["original_raw_schema_ref"] == "MATH-22::OUTPUT"
+        switch_projection = record["original_raw_schema_ref"] == "MATH-25::OUTPUT"
+        execution_matrix_projection = record["original_raw_schema_ref"] == "LP03::MATH-44::RAW_V1"
+
+    def check(item, path=()):
+        if type(item) in (str, bool) or item is None:
+            return
+        if type(item) is int:
+            _native_require(-(2**256) < item < 2**256, "LP03_INTEGER_BOUND")
+            return
+        typed_multiple_leaf = (multiple_projection and (path == (*projection_path, "correction") or
+            len(path) == 6 and path[:4] == (*projection_path, "rows") and type(path[4]) is int and path[5] == "adjusted_p"))
+        typed_interval_leaf = (interval_projection and len(path) == 4 and path[:3] == projection_path
+                               and type(path[3]) is int and path[3] in (0, 1))
+        typed_fold_leaf = (fold_projection and len(path)==8 and path[:3]==projection_path
+            and path[3]=="topology" and type(path[4]) is int and 0<=path[4]<4
+            and path[5]=="merged_test_intervals" and type(path[6]) is int and 0<=path[6]<8
+            and type(path[7]) is int and path[7] in (0,1))
+        typed_cscv_leaf = (cscv_projection and path[:3] == projection_path and (
+            len(path) == 4 and path[3] == "probability_of_backtest_overfitting"
+            or len(path) == 5 and path[3] == "logits" and type(path[4]) is int and 0 <= path[4] < 6
+            or len(path) == 6 and path[3] == "splits" and type(path[4]) is int and 0 <= path[4] < 6
+                and path[5] in ("oos_midrank_worst_1_best_n", "relative_rank", "logit")))
+        typed_spa_leaf = (spa_projection and path[:3] == projection_path and (
+            len(path) == 4 and path[3] in ("statistic", "p_value")
+            or len(path) == 5 and type(path[4]) is int and (
+                path[3] in ("candidate_means", "long_run_variances") and 0 <= path[4] < 2
+                or path[3] == "simulated_statistics" and 0 <= path[4] < 4)))
+        typed_reality_leaf = (reality_projection and path[:3] == projection_path and (
+            len(path) == 4 and path[3] in ("statistic", "p_value")
+            or len(path) == 5 and type(path[4]) is int and (
+                path[3] == "candidate_means" and 0 <= path[4] < 2
+                or path[3] == "simulated_statistics" and 0 <= path[4] < 4)))
+        typed_bootstrap_leaf = (bootstrap_projection and path[:3] == projection_path and (
+            len(path) == 4 and path[3] in ("sample_mean", "lower", "upper", "expected_block_length")
+            or len(path) == 5 and path[3] == "bootstrap_distribution" and type(path[4]) is int and 0 <= path[4] < 4))
+        typed_recorded_dr_leaf = recorded_dr_projection and path == (*projection_path, "estimate")
+        typed_execution_matrix_leaf = (execution_matrix_projection and len(path) == 5
+            and path[:3] == projection_path and all(type(index) is int and 0 <= index < 16 for index in path[3:]))
+        if type(item) is float and ((not execution_matrix_projection and not multiple_projection and not interval_projection and not bootstrap_projection and not reality_projection and not spa_projection and not cscv_projection and not fold_projection and not recorded_dr_projection and not switch_projection and path == projection_path)
+                                   or switch_projection and _evidence_switch_projection_float_leaf_v1(path, projection_path)
+                                   or typed_execution_matrix_leaf or typed_recorded_dr_leaf or typed_multiple_leaf or typed_interval_leaf or typed_bootstrap_leaf or typed_reality_leaf or typed_spa_leaf or typed_cscv_leaf or typed_fold_leaf):
+            return  # The exact native type, finite state and domain were checked above.
+        if type(item) is list:
+            for index, child in enumerate(item):
+                check(child, (*path, index))
+            return
+        if type(item) is dict:
+            for name, child in item.items():
+                check(child, (*path, name))
+            return
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "LP03_EXACT_JSON_SCALAR")
+
+    check(value)
+    _native_require(deterministic_json(value).encode("utf-8") == raw, "LP03_NONCANONICAL_JSON")
+    return value
+
+
+def _evidence_native_decimal_json_upper_v1(value, *, maximum_bytes):
+    """Preflight this qualified native Decimal without copying its coefficient.
+
+    CPython3.14.6 _decimal.c dec_sizeof includes embedded/dynamic coefficient
+    storage. libmpdec uses at most19 digits per8 bytes (9 per4 on32-bit).
+    io.c's TOSCI buffer adds at most33 bytes beyond coefficient digits.
+    Three times the entire native size plus64 therefore bounds its C buffer
+    and quoted JSON text conservatively. This is not physical-work accounting.
+    No tuple, context rounding, hashing, integer-ratio or formatting is used.
+    """
+    import sys
+    import _decimal
+    from types import MethodDescriptorType
+    _native_require(type(maximum_bytes) is int and 0 < maximum_bytes <= 1048576,
+                    "LP03_NATIVE_DECIMAL_BYTE_BUDGET")
+    _native_require(sys.implementation.name == "cpython" and sys.version_info[:3] == (3, 14, 6)
+                    and Decimal is _decimal.Decimal and type(value) is Decimal
+                    and _decimal.__libmpdec_version__ == "4.0.0"
+                    and _decimal.MAX_PREC in (999999999999999999, 425000000)
+                    and type(Decimal.__sizeof__) is MethodDescriptorType,
+                    "LP03_NATIVE_DECIMAL_PROFILE_UNAVAILABLE")
+    size = Decimal.__sizeof__(value)
+    _native_require(0 < size <= maximum_bytes and 3 * size + 64 <= maximum_bytes,
+                    "LP03_NATIVE_DECIMAL_ALLOCATION_BOUND")
+    _native_require(Decimal.is_finite(value), "LP03_ORIGINAL_SOURCE_NONFINITE")
+    return 3 * size + 64
+
+
+def _encode_evidence_projection_json_v1(value, *, maximum_bytes, maximum_nodes):
+    """Bound canonical projection JSON before growing tokens or output buffers.
+
+    Only exact built-in JSON data is accepted. In particular mapping proxies
+    may hide a custom backing mapping and are not a callback-free input proof.
+    The projection owner builds this graph from its own decoded originals.
+    This codec grants no source, projection-schema or publication authority.
+    """
+    import math
+    _native_require(type(maximum_bytes) is int and 0 < maximum_bytes <= 1048576
+                    and type(maximum_nodes) is int and 0 < maximum_nodes <= 4096, "LP03_PROJECTION_JSON_BUDGET")
+    chunks, active = [], set()
+    size = nodes = 0
+
+    def emit(raw):
+        nonlocal size
+        _native_require(size + len(raw) <= maximum_bytes, "LP03_PROJECTION_JSON_BYTES")
+        chunks.append(raw)
+        size += len(raw)
+
+    def string(item):
+        # Every character needs at least one UTF-8 byte, plus both quotes.
+        _native_require(len(item) + 2 <= maximum_bytes - size, "LP03_PROJECTION_JSON_BYTES")
+        needed = 2
+        for char in item:
+            point = ord(char)
+            _native_require(not 0xD800 <= point <= 0xDFFF, "LP03_PROJECTION_JSON_SURROGATE")
+            if char in ('"', '\\', '\b', '\f', '\n', '\r', '\t'):
+                needed += 2
+            elif point < 0x20:
+                needed += 6
+            else:
+                needed += 1 if point < 0x80 else 2 if point < 0x800 else 3 if point < 0x10000 else 4
+            _native_require(needed <= maximum_bytes - size, "LP03_PROJECTION_JSON_BYTES")
+        raw = json.dumps(item, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        _native_require(len(raw) == needed, "LP03_PROJECTION_JSON_STRING_SIZE")
+        emit(raw)
+
+    def visit(item, depth=0, location=()):
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= maximum_nodes and depth <= 16, "LP03_PROJECTION_JSON_NODES_OR_DEPTH")
+        if item is None:
+            emit(b"null")
+        elif type(item) is bool:
+            emit(b"true" if item else b"false")
+        elif type(item) is str:
+            string(item)
+        elif type(item) is int:
+            # 128 decimal token characters need no more than 426 binary bits.
+            # The constant-size formatting follows this allocation preflight.
+            _native_require(item.bit_length() <= 426, "LP03_PROJECTION_JSON_INTEGER")
+            token = str(item)
+            _native_require(len(token) <= 128, "LP03_PROJECTION_JSON_INTEGER")
+            emit(token.encode("ascii"))
+        elif type(item) is float:
+            _native_require(math.isfinite(item), "LP03_PROJECTION_JSON_NONFINITE")
+            emit(json.dumps(item, allow_nan=False, separators=(",", ":")).encode("ascii"))
+        elif type(item) in (dict, list, tuple):
+            _native_require(depth < 16 and id(item) not in active, "LP03_PROJECTION_JSON_CYCLE_OR_DEPTH")
+            _native_require(len(item) * (2 if type(item) is dict else 1) <= maximum_nodes - nodes,
+                            "LP03_PROJECTION_JSON_NODES_OR_DEPTH")
+            active.add(id(item))
+            if type(item) is dict:
+                minimum_key_bytes = 0
+                for key in item:
+                    _native_require(type(key) is str, "LP03_PROJECTION_JSON_KEY")
+                    _native_require(len(key) + 2 <= maximum_bytes - size, "LP03_PROJECTION_JSON_BYTES")
+                    minimum_key_bytes += len(key) + 2
+                # Bound aggregate key comparison/normalization work before
+                # sorting; each value needs at least one byte as well.
+                _native_require(2 + minimum_key_bytes + 2 * len(item) + max(0, len(item) - 1)
+                                <= maximum_bytes - size, "LP03_PROJECTION_JSON_BYTES")
+                emit(b"{")
+                for index, name in enumerate(sorted(item)):
+                    _check_key(name)
+                    child_location = (*location, name)
+                    if index:
+                        emit(b",")
+                    visit(name, depth + 1, child_location)
+                    emit(b":")
+                    visit(item[name], depth + 1, child_location)
+                    # Path normalization must only inspect the child's already
+                    # admitted finite data. Nothing is returned before it passes.
+                    _check_path_value(name, item[name], location=child_location)
+                emit(b"}")
+            else:
+                emit(b"[")
+                for index, child in enumerate(item):
+                    if index:
+                        emit(b",")
+                    visit(child, depth + 1, (*location, index))
+                emit(b"]")
+            active.remove(id(item))
+        else:
+            _native_require(False, "LP03_PROJECTION_JSON_NATIVE_DATA_REQUIRED")
+
+    visit(value)
+    # Every chunk and its aggregate size have already passed byte admission.
+    return b"".join(chunks)
+
+
+def _evidence_frozen_data_v1(value: object) -> object:
+    """Bound and detach a data tree; this is never an authority/record decoder."""
+    from types import MappingProxyType
+
+    nodes = 0
+
+    def freeze(item, depth=0):
+        nonlocal nodes
+        nodes += 1
+        _native_require(nodes <= 4096 and depth <= 16, "LP03_DATA_COMPLEXITY")
+        if item is None or type(item) is bool:
+            return item
+        if type(item) is int:
+            _native_require(-(2**256) < item < 2**256, "LP03_INTEGER_BOUND")
+            return item
+        if type(item) is str:
+            _native_require(len(item) <= 65536
+                            and not any(0xD800 <= ord(c) <= 0xDFFF for c in item),
+                            "LP03_DATA_TEXT")
+            return item
+        if type(item) in (tuple, list):
+            return tuple(freeze(child, depth + 1) for child in item)
+        if type(item) in (dict, MappingProxyType):
+            result = {}
+            for name, child in item.items():
+                _native_require(type(name) is str, "LP03_DATA_MEMBER")
+                freeze(name, depth + 1)
+                _check_key(name)
+                _check_path_value(name, child, location=(name,))
+                result[name] = freeze(child, depth + 1)
+            return MappingProxyType(result)
+        raise SerializationSafetyError(ReasonCode.SERIALIZATION_UNSAFE, "LP03_DATA_TYPE")
+
+    result = freeze(value)
+    _native_require(len(deterministic_json(result).encode("utf-8")) <= 1048576,
+                    "LP03_DATA_BYTE_BOUND")
+    return result
+
+
+def _evidence_process_capture_segment_preflight_v1(raw: bytes, *, maximum_segment_bytes: int):
+    """Closed bounded metadata, with no base64 decode or byte authority."""
+    from .context import _native_ident, _public_counter_v1
+    _native_require(type(maximum_segment_bytes) is int and 0 < maximum_segment_bytes <= 65536,
+                    "LP03_CAPTURE_SEGMENT_BUDGET")
+    value = _evidence_canonical_object_v1(raw, max_bytes=maximum_segment_bytes)
+    _native_require(set(value) == {"schema_version", "operation", "capture_segment_ref", "observation_ref",
+        "grant_ref", "fence_ref", "supervisor_instance_ref", "stream", "segment_ordinal", "stream_segment_count",
+        "first_byte_offset", "captured_byte_count", "stream_captured_byte_count", "stream_observed_byte_count",
+        "stream_discarded_byte_count", "stream_eof", "capture_complete", "encoding", "data_base64"},
+        "LP03_CAPTURE_SEGMENT_FIELDS")
+    _native_require(value["schema_version"] == "1.0" and value["operation"] == "SVC_PROCESS_CAPTURE_SEGMENT_V1"
+                    and value["stream"] in ("STDOUT", "STDERR") and value["encoding"] == "BASE64_RFC4648_STANDARD_PADDED",
+                    "LP03_CAPTURE_SEGMENT_KIND")
+    for name in ("capture_segment_ref", "observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref"):
+        _native_ident(value[name])
+    for name in ("segment_ordinal", "first_byte_offset", "stream_observed_byte_count", "stream_discarded_byte_count"):
+        _public_counter_v1(value[name], allow_zero=True)
+    for name in ("stream_segment_count", "captured_byte_count", "stream_captured_byte_count"):
+        _public_counter_v1(value[name])
+    _native_require(type(value["stream_eof"]) is bool and type(value["capture_complete"]) is bool,
+                    "LP03_CAPTURE_SEGMENT_BOOLEAN")
+    ordinal, count, first, size = (value[name] for name in (
+        "segment_ordinal", "stream_segment_count", "first_byte_offset", "captured_byte_count"))
+    retained, observed, discarded = (value[name] for name in (
+        "stream_captured_byte_count", "stream_observed_byte_count", "stream_discarded_byte_count"))
+    _native_require(ordinal < count <= retained and size <= maximum_segment_bytes
+                    and first + size <= retained <= 1048576 and observed == retained + discarded
+                    and ((ordinal == 0) == (first == 0))
+                    and ((ordinal == count - 1) == (first + size == retained))
+                    and (not value["capture_complete"] or (value["stream_eof"] and discarded == 0)),
+                    "LP03_CAPTURE_SEGMENT_POSITION_OR_COUNTS")
+    _native_require(value["observation_ref"] == value["grant_ref"] + "::PROCESS:FAILURE"
+                    and value["capture_segment_ref"] == value["observation_ref"] + "::CAPTURE:" + value["stream"] + ":" + str(ordinal),
+                    "LP03_CAPTURE_SEGMENT_IDENTITY_JOIN")
+    text = value["data_base64"]
+    _native_require(type(text) is str and len(text) == 4 * ((size + 2) // 3)
+                    and len(text) <= maximum_segment_bytes, "LP03_CAPTURE_ENCODED_LENGTH")
+    return value
+
+
+def _evidence_process_capture_segment_body_v1(raw: bytes, *, maximum_segment_bytes: int):
+    """Opaque original-capture data only, never worker/source authority.
+
+    These closed bodies use the existing private idempotency carrier; they add
+    no spine kind. The producer and effect owner establish original custody.
+    """
+    import base64
+    import binascii
+    value = _evidence_process_capture_segment_preflight_v1(raw, maximum_segment_bytes=maximum_segment_bytes)
+    text, size = value["data_base64"], value["captured_byte_count"]
+    # Encoded and decoded lengths are bounded before either allocation. Strict
+    # re-encoding also rejects alternate pad bits accepted by some decoders.
+    try:
+        binary = base64.b64decode(text.encode("ascii"), validate=True)
+    except (ValueError, UnicodeError, binascii.Error) as exc:
+        raise ContractValidationError(ReasonCode.INVALID_CONTRACT, "LP03_CAPTURE_BASE64") from exc
+    _native_require(len(binary) == size and base64.b64encode(binary).decode("ascii") == text,
+                    "LP03_CAPTURE_BASE64_NONCANONICAL")
+    return _evidence_frozen_data_v1(value), binary
+
+
+def _evidence_process_capture_manifest_v1(raw: bytes, *, segment_bodies: tuple[bytes, ...],
+        maximum_capture_bytes: int, maximum_segment_bytes: int, maximum_segments: int, maximum_total_bytes: int):
+    """Validate a whole opaque capture roster, without creating custody.
+
+    Empty streams keep their own observed/discard/EOF facts. Every nonempty
+    retained stream must have exactly its contiguous original byte prefix.
+    The surrounding failure operation still owns authority and work charges.
+    """
+    from .context import _native_ident, _public_counter_v1
+    for bound in (maximum_capture_bytes, maximum_segments, maximum_total_bytes):
+        _public_counter_v1(bound, allow_zero=True)
+    _native_require(maximum_capture_bytes <= 1048576 and type(maximum_segment_bytes) is int
+                    and 0 < maximum_segment_bytes <= 65536, "LP03_CAPTURE_MANIFEST_BUDGET")
+    _native_require(type(raw) is bytes and len(raw) <= 16384 and type(segment_bodies) is tuple
+                    and len(segment_bodies) <= min(maximum_segments, 4096)
+                    and all(type(body) is bytes and len(body) <= maximum_segment_bytes for body in segment_bodies),
+                    "LP03_CAPTURE_MANIFEST_INPUT_BOUND")
+    _native_require(len(raw) + sum(len(body) for body in segment_bodies) <= maximum_total_bytes,
+                    "LP03_CAPTURE_MANIFEST_TOTAL_BYTES")
+    value = _evidence_canonical_object_v1(raw, max_bytes=16384)
+    _native_require(set(value) == {"schema_version", "operation", "observation_ref", "grant_ref", "fence_ref",
+        "supervisor_instance_ref", "capture_complete", "streams"}, "LP03_CAPTURE_MANIFEST_FIELDS")
+    _native_require(value["schema_version"] == "1.0" and value["operation"] == "SVC_PROCESS_CAPTURE_MANIFEST_V1",
+                    "LP03_CAPTURE_MANIFEST_KIND")
+    for name in ("observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref"):
+        _native_ident(value[name])
+    _native_require(value["observation_ref"] == value["grant_ref"] + "::PROCESS:FAILURE"
+                    and type(value["capture_complete"]) is bool and type(value["streams"]) is list
+                    and len(value["streams"]) == 2, "LP03_CAPTURE_MANIFEST_JOIN")
+    references, captured, observed, complete = [], 0, 0, True
+    for stream, facts in zip(("STDOUT", "STDERR"), value["streams"], strict=True):
+        _native_require(type(facts) is dict and set(facts) == {"stream", "observed_byte_count", "captured_byte_count",
+            "discarded_byte_count", "eof", "segment_refs"} and facts["stream"] == stream,
+            "LP03_CAPTURE_STREAM_FACTS")
+        for name in ("observed_byte_count", "captured_byte_count", "discarded_byte_count"):
+            _public_counter_v1(facts[name], allow_zero=True)
+        refs = facts["segment_refs"]
+        _native_require(type(facts["eof"]) is bool and type(refs) is list and len(refs) <= len(segment_bodies)
+                        and bool(refs) == bool(facts["captured_byte_count"])
+                        and facts["observed_byte_count"] == facts["captured_byte_count"] + facts["discarded_byte_count"],
+                        "LP03_CAPTURE_STREAM_COUNTS")
+        for ordinal, ref in enumerate(refs):
+            _native_ident(ref)
+            _native_require(ref == value["observation_ref"] + "::CAPTURE:" + stream + ":" + str(ordinal),
+                            "LP03_CAPTURE_MANIFEST_REFERENCE_ORDER")
+        references.extend(refs)
+        captured += facts["captured_byte_count"]
+        observed += facts["observed_byte_count"]
+        complete = complete and facts["eof"] and facts["discarded_byte_count"] == 0
+    _native_require(captured <= maximum_capture_bytes and observed < 2**63
+                    and len(references) == len(segment_bodies) == len(set(references))
+                    and value["capture_complete"] is complete, "LP03_CAPTURE_MANIFEST_TOTALS")
+    # The complete roster and cumulative encoded/decoded bounds precede any
+    # base64 decode or allocation of the reconstructed streams.
+    bodies = iter(segment_bodies)
+    for facts in value["streams"]:
+        offset = 0
+        for ordinal, ref in enumerate(facts["segment_refs"]):
+            segment = _evidence_process_capture_segment_preflight_v1(next(bodies), maximum_segment_bytes=maximum_segment_bytes)
+            _native_require(all(segment[name] == value[name] for name in
+                ("observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref", "capture_complete"))
+                and segment["capture_segment_ref"] == ref and segment["stream"] == facts["stream"]
+                and segment["segment_ordinal"] == ordinal and segment["stream_segment_count"] == len(facts["segment_refs"])
+                and segment["first_byte_offset"] == offset
+                and segment["stream_captured_byte_count"] == facts["captured_byte_count"]
+                and segment["stream_observed_byte_count"] == facts["observed_byte_count"]
+                and segment["stream_discarded_byte_count"] == facts["discarded_byte_count"]
+                and segment["stream_eof"] is facts["eof"], "LP03_CAPTURE_SEGMENT_MANIFEST_MISMATCH")
+            offset += segment["captured_byte_count"]
+        _native_require(offset == facts["captured_byte_count"], "LP03_CAPTURE_STREAM_INCOMPLETE")
+    bodies = iter(segment_bodies)
+    reconstructed = []
+    for facts in value["streams"]:
+        binary = bytearray()
+        for _ref in facts["segment_refs"]:
+            _segment, chunk = _evidence_process_capture_segment_body_v1(next(bodies), maximum_segment_bytes=maximum_segment_bytes)
+            binary.extend(chunk)
+        _native_require(len(binary) == facts["captured_byte_count"], "LP03_CAPTURE_STREAM_INCOMPLETE")
+        reconstructed.append(bytes(binary))
+    return _evidence_frozen_data_v1(value), tuple(reconstructed)
+
+
+def _evidence_process_native_observation_v1(native):
+    """Validate native observation data; original handles establish its truth."""
+    from .context import _public_counter_v1
+    _native_require(type(native) is dict and set(native) == {
+        "process_identity", "exit_code", "active_processes", "total_processes", "terminated_processes",
+        "assigned_process_ids", "effective_limit_flags", "effective_active_process_limit", "cpu_ns",
+        "process_memory_high_water_bytes", "job_memory_high_water_bytes"}, "LP03_PROCESS_NATIVE_FIELDS")
+    identity = native["process_identity"]
+    _native_require(type(identity) is list and len(identity) == 3 and type(identity[2]) is str
+                    and 0 < len(identity[2]) <= 32768, "LP03_PROCESS_NATIVE_IDENTITY")
+    for number in identity[:2]:
+        _public_counter_v1(number)
+    for name, number in native.items():
+        if name not in ("process_identity", "assigned_process_ids", "exit_code"):
+            _public_counter_v1(number, allow_zero=True)
+    _native_require(native["exit_code"] is None or (type(native["exit_code"]) is int
+                    and 0 <= native["exit_code"] <= 0xffffffff), "LP03_PROCESS_NATIVE_EXIT")
+    pids = native["assigned_process_ids"]
+    _native_require(type(pids) is list and len(pids) <= 4, "LP03_PROCESS_NATIVE_ROSTER")
+    for pid in pids:
+        _public_counter_v1(pid)
+    _native_require(len(set(pids)) == len(pids), "LP03_PROCESS_NATIVE_ROSTER")
+    return native
+
+
+def _evidence_process_observation_body_v1(raw: bytes):
+    """Closed SVC observation append data; decoding never recreates custody."""
+    from .context import _native_ident, _public_counter_v1
+    value = _evidence_canonical_object_v1(raw, max_bytes=16384)
+    _native_require(set(value) == {
+        "schema_version", "operation", "observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref",
+        "predecessor_state_ref", "stage", "clock_domain_id", "boot_identity_ref", "observed_at",
+        "native_observation", "resumed", "stdout_eof", "stderr_eof", "controller_joined", "drains_joined",
+        "output_bytes", "diagnostic_bytes", "controller_error_count", "drain_error_count", "cleanup_error_count",
+        "reason_codes", "exchange_complete", "events", "computations", "invocation_measurement_or_absence"}, "LP03_PROCESS_OBSERVATION_FIELDS")
+    _native_require(value["schema_version"] == "1.1" and value["operation"] == "SVC_PROCESS_OBSERVATION_APPEND_V1"
+                    and value["stage"] in ("SUSPENDED", "RUNNING", "TERMINAL"), "LP03_PROCESS_OBSERVATION_KIND")
+    for name in ("observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref", "predecessor_state_ref",
+                 "clock_domain_id", "boot_identity_ref"):
+        _native_ident(value[name])
+    _native_require(type(value["observed_at"]) is list and len(value["observed_at"]) == 3,
+                    "LP03_PROCESS_OBSERVATION_CLOCK")
+    for number in value["observed_at"]:
+        _public_counter_v1(number, allow_zero=True)
+    for name in ("resumed", "stdout_eof", "stderr_eof", "controller_joined", "drains_joined", "exchange_complete"):
+        _native_require(type(value[name]) is bool, "LP03_PROCESS_OBSERVATION_BOOLEAN")
+    for name in ("output_bytes", "diagnostic_bytes", "controller_error_count", "drain_error_count", "cleanup_error_count", "events", "computations"):
+        _public_counter_v1(value[name], allow_zero=True)
+    measurement = value["invocation_measurement_or_absence"]
+    if isinstance(measurement, Mapping) and measurement.get("state") == "ABSENT_WITH_REASON":
+        _native_require(set(measurement) == {"state", "reason"} and measurement["reason"] in (
+            "INVOCATION_NOT_STARTED", "INVOCATION_CLOCK_UNAVAILABLE", "INVOCATION_MEASUREMENT_UNAVAILABLE",
+            "INVOCATION_MEASUREMENT_UNQUALIFIED"),
+            "LP03_PROCESS_INVOCATION_ABSENCE")
+        _native_require(not value["exchange_complete"], "LP03_PROCESS_COMPLETED_MEASUREMENT_REQUIRED")
+    else:
+        from .latency_policy import _evidence_invocation_measurement_v1
+        _evidence_invocation_measurement_v1(measurement)
+        _native_require(value["stage"] == "TERMINAL" and measurement["clock_domain_id"] == value["clock_domain_id"]
+                        and measurement["boot_identity_ref"] == value["boot_identity_ref"]
+                        and measurement["completed"][1] <= value["observed_at"][1], "LP03_PROCESS_INVOCATION_CLOCK")
+    native = _evidence_process_native_observation_v1(value["native_observation"])
+    identity = native["process_identity"]
+    pids = native["assigned_process_ids"]
+    from .lifecycle import _EVIDENCE_REASON_STATE_V1
+    reasons = value["reason_codes"]
+    _native_require(type(reasons) is list and all(type(reason) is str and reason in _EVIDENCE_REASON_STATE_V1 for reason in reasons)
+                    and len(set(reasons)) == len(reasons), "LP03_PROCESS_OBSERVATION_REASONS")
+    if value["stage"] == "SUSPENDED":
+        _native_require(not value["resumed"] and native["exit_code"] is None and pids == identity[:1]
+                        and native["active_processes"] == native["total_processes"] == 1,
+                        "LP03_PROCESS_SUSPENDED_OBSERVATION")
+    elif value["stage"] == "RUNNING":
+        _native_require(value["resumed"], "LP03_PROCESS_RESUME_OBSERVATION")
+    else:
+        _native_require(native["exit_code"] is not None and native["active_processes"] == 0 and not pids
+                        and value["stdout_eof"] and value["stderr_eof"] and value["controller_joined"]
+                        and value["drains_joined"], "LP03_PROCESS_TERMINAL_OBSERVATION")
+    return _evidence_frozen_data_v1(value)
+
+
+def _evidence_process_capture_metadata_v1(*, grant_ref, fence_ref, supervisor_instance_ref, stream,
+        ordinal, count, first, size, captured, observed, discarded, eof, complete):
+    """One data-only segment field roster for planning and original capture."""
+    observation_ref = grant_ref + "::PROCESS:FAILURE"
+    return dict(schema_version="1.0", operation="SVC_PROCESS_CAPTURE_SEGMENT_V1",
+        capture_segment_ref=observation_ref + "::CAPTURE:" + stream + ":" + str(ordinal),
+        observation_ref=observation_ref, grant_ref=grant_ref, fence_ref=fence_ref,
+        supervisor_instance_ref=supervisor_instance_ref, stream=stream, segment_ordinal=ordinal,
+        stream_segment_count=count, first_byte_offset=first, captured_byte_count=size,
+        stream_captured_byte_count=captured, stream_observed_byte_count=observed,
+        stream_discarded_byte_count=discarded, stream_eof=eof, capture_complete=complete,
+        encoding="BASE64_RFC4648_STANDARD_PADDED", data_base64="")
+
+
+def _evidence_failure_trigger_header_v1(argument_count, *, cause_present, context_present,
+        suppress_context, observed_between, secondary_error_count):
+    """Fixed incomplete envelope; variable original diagnostics fill its room."""
+    def absent(reason):
+        return dict(state="ABSENT_WITH_REASON", reason=reason)
+    return dict(exception_type_or_absence=absent("TYPE_UNREPRESENTABLE"),
+        exception_shape="UNSUPPORTED",
+        reason_code_or_absence=absent("REASON_CODE_UNREPRESENTABLE"),
+        native_error_or_absence=absent("NATIVE_ERROR_UNREPRESENTABLE"),
+        argument_count=argument_count, argument_prefix=[], arguments_complete=False,
+        traceback_prefix=[], traceback_complete=False,
+        traceback_remainder="UNOBSERVED", cause_retention="PRESENT_NOT_RETAINED" if cause_present else "ABSENT",
+        context_retention="PRESENT_NOT_RETAINED" if context_present else "ABSENT", suppress_context=suppress_context,
+        secondary_error_count=secondary_error_count, observed_between=observed_between, complete=False)
+
+
+def _evidence_process_failure_body_v1(raw: bytes, *, capture_segment_bodies: tuple[bytes, ...],
+        maximum_capture_bytes: int, maximum_segment_bytes: int, maximum_segments: int, maximum_total_bytes: int):
+    """Closed nonpositive integrity data, never process or writer authority."""
+    from .context import _native_ident, _public_counter_v1
+    from .lifecycle import _EVIDENCE_REASON_STATE_V1, evidence_attempt_primary_reason_v1
+    from .models import EvidenceExecutionConsumptionV1
+    for bound in (maximum_capture_bytes, maximum_segments, maximum_total_bytes):
+        _public_counter_v1(bound, allow_zero=True)
+    _native_require(maximum_capture_bytes <= 1048576 and type(maximum_segment_bytes) is int
+                    and 0 < maximum_segment_bytes <= 65536 and type(raw) is bytes and len(raw) <= 16384
+                    and type(capture_segment_bodies) is tuple and len(capture_segment_bodies) <= min(maximum_segments, 4096)
+                    and all(type(body) is bytes and len(body) <= maximum_segment_bytes for body in capture_segment_bodies),
+                    "LP03_FAILURE_BODY_INPUT_BOUND")
+    _native_require(len(raw) + sum(len(body) for body in capture_segment_bodies) <= maximum_total_bytes,
+                    "LP03_FAILURE_BODY_TOTAL_BYTES")
+    value = _evidence_canonical_object_v1(raw, max_bytes=16384)
+    _native_require(set(value) == {"schema_version", "operation", "observation_ref", "grant_ref", "fence_ref",
+        "supervisor_instance_ref", "predecessor_state_ref", "clock_domain_id", "boot_identity_ref", "accounting_observed_at",
+        "consumed_prefix", "final_accounting_tail", "lifecycle_disposition", "reservation_ref", "failure_bounds", "reason_codes", "primary_reason",
+        "custody", "capture_manifest_or_absence", "capture_observed_between_or_absence", "controller_error_count",
+        "drain_error_count", "cleanup_error_count", "diagnostic_errors", "diagnostic_observed_between",
+        "invocation_measurement_or_absence", "trigger_error"}, "LP03_FAILURE_BODY_FIELDS")
+    _native_require(value["schema_version"] == "1.0" and value["operation"] == "SVC_PROCESS_FAILURE_AUDIT_V1"
+                    and value["final_accounting_tail"] == "UNRECONCILED_FULL_RESERVATION_RETAINED",
+                    "LP03_FAILURE_BODY_KIND_OR_TAIL")
+    _native_require(value["lifecycle_disposition"] in ("ORIGINAL_PREDECESSOR_RETAINED", "NONPOSITIVE_SUCCESSOR_REQUESTED"),
+                    "LP03_FAILURE_LIFECYCLE_DISPOSITION")
+    for name in ("observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref", "predecessor_state_ref",
+                 "clock_domain_id", "boot_identity_ref", "reservation_ref"):
+        _native_ident(value[name])
+    _native_require(value["observation_ref"] == value["grant_ref"] + "::PROCESS:FAILURE"
+                    and value["reservation_ref"] == value["grant_ref"] + "::RESERVATION", "LP03_FAILURE_REFERENCE_JOIN")
+
+    def clock(point):
+        _native_require(type(point) is list and len(point) == 3, "LP03_FAILURE_CLOCK_SHAPE")
+        for number in point:
+            _public_counter_v1(number, allow_zero=True)
+
+    def interval(points):
+        _native_require(type(points) is list and len(points) == 2, "LP03_FAILURE_INTERVAL_SHAPE")
+        for point in points:
+            clock(point)
+        _native_require(points[0][1] <= points[1][1] <= value["accounting_observed_at"][1]
+                        and points[0][2] <= points[1][2], "LP03_FAILURE_INTERVAL_ORDER")
+
+    def absence(item, reasons):
+        _native_require(type(item) is dict and set(item) == {"state", "reason"}
+                        and item["state"] == "ABSENT_WITH_REASON" and item["reason"] in reasons,
+                        "LP03_FAILURE_TYPED_ABSENCE")
+
+    clock(value["accounting_observed_at"])
+    bounds = value["failure_bounds"]
+    _native_require(type(bounds) is list and len(bounds) == 3, "LP03_FAILURE_FIXED_WINDOWS")
+    for number in bounds:
+        _public_counter_v1(number)
+    _native_require(bounds[0] <= bounds[1] < bounds[2] and value["accounting_observed_at"][1] < bounds[2],
+                    "LP03_FAILURE_FIXED_WINDOWS")
+    EvidenceExecutionConsumptionV1.from_canonical_mapping(value["consumed_prefix"])
+    trigger = value["trigger_error"]
+    _native_require(type(trigger) is dict and set(trigger) == set(_evidence_failure_trigger_header_v1(0,
+        cause_present=False, context_present=False, suppress_context=False, observed_between=[], secondary_error_count=0)),
+        "LP03_FAILURE_TRIGGER_FIELDS")
+    interval(trigger["observed_between"])
+    _public_counter_v1(trigger["argument_count"], allow_zero=True)
+    _public_counter_v1(trigger["secondary_error_count"], allow_zero=True)
+    for key in ("arguments_complete", "traceback_complete", "suppress_context", "complete"):
+        _native_require(type(trigger[key]) is bool, "LP03_FAILURE_TRIGGER_BOOLEAN")
+    _native_require(trigger["exception_shape"] in ("SELECTED_NATIVE_FIELDS", "UNSUPPORTED"), "LP03_FAILURE_TRIGGER_SHAPE")
+    for key in ("cause_retention", "context_retention"):
+        _native_require(trigger[key] in ("ABSENT", "PRESENT_NOT_RETAINED"), "LP03_FAILURE_TRIGGER_CHAIN")
+    kind = trigger["exception_type_or_absence"]
+    if type(kind) is dict:
+        absence(kind, ("TYPE_UNREPRESENTABLE",))
+    else:
+        _native_require(type(kind) is list and len(kind) == 2
+                        and all(type(item) is str and 0 < len(item) <= 512 for item in kind), "LP03_FAILURE_TRIGGER_TYPE")
+    code = trigger["reason_code_or_absence"]
+    if type(code) is dict:
+        absence(code, ("REASON_CODE_UNREPRESENTABLE", "NOT_CONTROL_PLANE_ERROR"))
+    else:
+        _native_require(type(code) is str and code in {item.value for item in ReasonCode}, "LP03_FAILURE_TRIGGER_CODE")
+    native_error = trigger["native_error_or_absence"]
+    if type(native_error) is dict:
+        absence(native_error, ("NATIVE_ERROR_UNREPRESENTABLE", "NOT_OS_ERROR"))
+    else:
+        _native_require(type(native_error) is list and len(native_error) == 5
+            and all(item is None or (type(item) is int and -2**63 < item < 2**63) for item in native_error[:2])
+            and all(item is None or (type(item) is str and len(item) <= 16384) for item in native_error[2:]),
+            "LP03_FAILURE_TRIGGER_NATIVE_ERROR")
+    arguments = trigger["argument_prefix"]
+    _native_require(type(arguments) is list and len(arguments) <= min(128, trigger["argument_count"])
+        and all(item is None or type(item) is bool or (type(item) is str and len(item) <= 16384)
+                or (type(item) is int and -2**63 < item < 2**63) for item in arguments)
+        and trigger["arguments_complete"] is (len(arguments) == trigger["argument_count"]), "LP03_FAILURE_TRIGGER_ARGUMENTS")
+    frames = trigger["traceback_prefix"]
+    _native_require(type(frames) is list and len(frames) <= 64, "LP03_FAILURE_TRIGGER_TRACEBACK")
+    for frame in frames:
+        _native_require(type(frame) is list and len(frame) == 3 and type(frame[0]) is str and len(frame[0]) <= 4096
+            and type(frame[1]) is str and len(frame[1]) <= 512 and type(frame[2]) is int and 0 <= frame[2] < 2**63,
+            "LP03_FAILURE_TRIGGER_LOCATION")
+    _native_require(trigger["traceback_remainder"] in ("NONE", "PRESENT_NOT_RETAINED", "LOCATION_UNAVAILABLE", "UNOBSERVED")
+        and trigger["traceback_complete"] is (trigger["traceback_remainder"] == "NONE"), "LP03_FAILURE_TRIGGER_TRACEBACK_TAIL")
+    complete = (trigger["exception_shape"] == "SELECTED_NATIVE_FIELDS" and type(kind) is list
+        and (type(code) is str or code["reason"] == "NOT_CONTROL_PLANE_ERROR")
+        and (type(native_error) is list or native_error["reason"] == "NOT_OS_ERROR")
+        and trigger["arguments_complete"] and trigger["traceback_complete"]
+        and trigger["cause_retention"] == trigger["context_retention"] == "ABSENT" and trigger["secondary_error_count"] == 0)
+    _native_require(trigger["complete"] is complete, "LP03_FAILURE_TRIGGER_COMPLETENESS")
+    reasons = value["reason_codes"]
+    _native_require(type(reasons) is list and bool(reasons) and len(reasons) <= len(_EVIDENCE_REASON_STATE_V1)
+                    and all(type(reason) is str and reason in _EVIDENCE_REASON_STATE_V1 for reason in reasons)
+                    and len(reasons) == len(set(reasons)) and not {"COLLECTION_COMPLETE", "FUTILITY"} & set(reasons)
+                    and value["primary_reason"] == evidence_attempt_primary_reason_v1(tuple(reasons)),
+                    "LP03_FAILURE_REASONS")
+    for name in ("controller_error_count", "drain_error_count", "cleanup_error_count"):
+        _public_counter_v1(value[name], allow_zero=True)
+    errors = value["diagnostic_errors"]
+    _native_require(type(errors) is dict and set(errors) == {"controller", "drain", "cleanup"},
+                    "LP03_FAILURE_DIAGNOSTIC_FIELDS")
+    interval(value["diagnostic_observed_between"])
+    for domain, summary in errors.items():
+        _native_require(type(summary) is dict and set(summary) == {"retained_entries", "omitted_entry_count", "complete"},
+                        "LP03_FAILURE_DIAGNOSTIC_SUMMARY")
+        entries = summary["retained_entries"]
+        _public_counter_v1(summary["omitted_entry_count"], allow_zero=True)
+        _native_require(type(entries) is list and len(entries) <= 128
+                        and len(entries) + summary["omitted_entry_count"] == value[domain + "_error_count"]
+                        and summary["complete"] is (summary["omitted_entry_count"] == 0), "LP03_FAILURE_DIAGNOSTIC_COUNT")
+        for entry in entries:
+            _native_require(type(entry) is list and 1 <= len(entry) <= 3
+                            and all(item is None or (type(item) is str and len(item) <= 16384)
+                                    or (type(item) is int and 0 <= item < 2**63) for item in entry),
+                            "LP03_FAILURE_DIAGNOSTIC_ENTRY")
+    _native_require(not any(value[name] for name in ("controller_error_count", "drain_error_count", "cleanup_error_count"))
+                    or "SUPERVISION_FAILURE" in reasons, "LP03_FAILURE_SUPERVISION_REASON_REQUIRED")
+    custody = value["custody"]
+    _native_require(type(custody) is dict and custody.get("kind") in ("TERMINAL", "NO_CHILD", "TERMINATION_UNKNOWN"),
+                    "LP03_FAILURE_CUSTODY_KIND")
+    if custody["kind"] == "NO_CHILD":
+        _native_require(set(custody) == {"kind", "creation_stage", "controller_joined", "controller_status", "cleanup_complete",
+            "job_total_processes", "output_storage_present"}
+            and custody["creation_stage"] in ("NOT_ENTERED", "OUTPUT_ALLOCATED", "RETURNED_FAILURE")
+            and custody["controller_status"] in ("NOT_CREATED", "JOINED")
+            and custody["controller_joined"] is (custody["controller_status"] == "JOINED")
+            and (custody["controller_status"] != "NOT_CREATED" or custody["creation_stage"] == "NOT_ENTERED")
+            and type(custody["cleanup_complete"]) is bool
+            and type(custody["job_total_processes"]) is int and custody["job_total_processes"] == 0
+            and type(custody["output_storage_present"]) is bool
+            and custody["output_storage_present"] is (custody["creation_stage"] != "NOT_ENTERED"),
+            "LP03_FAILURE_NO_CHILD_FACTS")
+        _native_require("TERMINATION_UNKNOWN" not in reasons, "LP03_FAILURE_NO_CHILD_REASON")
+        if custody["creation_stage"] == "RETURNED_FAILURE":
+            _native_require("FAILED_TO_START" in reasons, "LP03_FAILURE_NATIVE_CREATE_FAILURE_REASON")
+        _native_require(all(value["consumed_prefix"][name] == 0 for name in
+            ("events", "computations", "output_bytes", "active_workers", "process_memory_high_water_bytes", "job_memory_high_water_bytes")),
+            "LP03_FAILURE_NO_CHILD_CONSUMPTION")
+    else:
+        _native_require(set(custody) == {"kind", "native_observation_or_absence", "native_observed_between_or_absence",
+            "stdout_eof", "stderr_eof", "controller_joined", "drains_joined", "cleanup_complete"},
+            "LP03_FAILURE_NATIVE_CUSTODY_FIELDS")
+        for name in ("stdout_eof", "stderr_eof", "controller_joined", "drains_joined", "cleanup_complete"):
+            _native_require(type(custody[name]) is bool, "LP03_FAILURE_CUSTODY_BOOLEAN")
+        native = custody["native_observation_or_absence"]
+        if type(native) is dict and native.get("state") == "ABSENT_WITH_REASON":
+            absence(native, ("NATIVE_OBSERVATION_UNAVAILABLE",))
+            absence(custody["native_observed_between_or_absence"], ("NATIVE_OBSERVATION_UNAVAILABLE",))
+            _native_require(custody["kind"] == "TERMINATION_UNKNOWN", "LP03_FAILURE_TERMINAL_NATIVE_REQUIRED")
+        else:
+            _evidence_process_native_observation_v1(native)
+            interval(custody["native_observed_between_or_absence"])
+        if custody["kind"] == "TERMINAL":
+            _native_require(native["exit_code"] is not None and native["active_processes"] == 0
+                            and not native["assigned_process_ids"] and all(custody[name] for name in
+                            ("stdout_eof", "stderr_eof", "controller_joined", "drains_joined")), "LP03_FAILURE_TERMINAL_FACTS")
+        else:
+            _native_require("TERMINATION_UNKNOWN" in reasons and value["primary_reason"] == "TERMINATION_UNKNOWN"
+                            and custody["cleanup_complete"] is False, "LP03_FAILURE_UNKNOWN_STAYS_UNRESOLVED")
+    if not custody["cleanup_complete"]:
+        _native_require(bool({"TERMINATION_UNKNOWN", "INTEGRITY_FAILURE", "SUPERVISION_FAILURE"} & set(reasons)),
+                        "LP03_FAILURE_CLEANUP_BLOCKING_REASON")
+    else:
+        _native_require(value["cleanup_error_count"] == 0, "LP03_FAILURE_CLEANUP_COMPLETENESS")
+    capture = value["capture_manifest_or_absence"]
+    if type(capture) is dict and capture.get("state") == "ABSENT_WITH_REASON":
+        absence(capture, ("NO_CHILD_NO_STREAMS", "DRAIN_SNAPSHOT_UNAVAILABLE"))
+        absence(value["capture_observed_between_or_absence"], (capture["reason"],))
+        _native_require(type(capture_segment_bodies) is tuple and not capture_segment_bodies
+                        and ((custody["kind"] == "NO_CHILD") == (capture["reason"] == "NO_CHILD_NO_STREAMS")),
+                        "LP03_FAILURE_CAPTURE_ABSENCE_JOIN")
+    else:
+        _native_require(custody["kind"] != "NO_CHILD", "LP03_FAILURE_NO_CHILD_HAS_CAPTURE")
+        interval(value["capture_observed_between_or_absence"])
+        manifest_raw = _encode_evidence_projection_json_v1(capture, maximum_bytes=16384, maximum_nodes=4096)
+        manifest, _binary = _evidence_process_capture_manifest_v1(manifest_raw, segment_bodies=capture_segment_bodies,
+            maximum_capture_bytes=maximum_capture_bytes, maximum_segment_bytes=maximum_segment_bytes,
+            maximum_segments=maximum_segments, maximum_total_bytes=maximum_total_bytes)
+        _native_require(all(manifest[name] == value[name] for name in
+            ("observation_ref", "grant_ref", "fence_ref", "supervisor_instance_ref"))
+            and manifest["streams"][0]["eof"] is custody["stdout_eof"]
+            and manifest["streams"][1]["eof"] is custody["stderr_eof"], "LP03_FAILURE_CAPTURE_CUSTODY_JOIN")
+    measurement = value["invocation_measurement_or_absence"]
+    if type(measurement) is dict and measurement.get("state") == "ABSENT_WITH_REASON":
+        absence(measurement, ("INVOCATION_NOT_STARTED", "INVOCATION_MEASUREMENT_UNAVAILABLE",
+            "INVOCATION_MEASUREMENT_UNQUALIFIED", "INVOCATION_MEASUREMENT_NOT_FROZEN"))
+    else:
+        from .latency_policy import _evidence_invocation_measurement_v1
+        _evidence_invocation_measurement_v1(measurement)
+        _native_require(custody["kind"] == "TERMINAL" and measurement["clock_domain_id"] == value["clock_domain_id"]
+                        and measurement["boot_identity_ref"] == value["boot_identity_ref"]
+                        and measurement["completed"][1] <= value["accounting_observed_at"][1], "LP03_FAILURE_INVOCATION_CLOCK")
+    return _evidence_frozen_data_v1(value)
+
+
 def safe_json_loads(text: str) -> object:
     if not isinstance(text, str):
         raise SerializationSafetyError(
@@ -320,9 +1114,17 @@ def safe_json_loads(text: str) -> object:
     return value
 
 
-def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
-    """Bounded raw JSON: lexical integers stay int; other numbers use Decimal."""
+def _native_strict_json(raw: bytes, max_bytes: int = 65536, *,
+                        max_nodes: int = 4096, binary64_numbers: bool = False) -> Any:
+    """Bounded raw JSON; ordinary callers retain exact Decimal numeric tokens.
+
+    The private raw-output schema decoder explicitly selects binary64 numbers.
+    Its declared scalar positions and canonical re-encoding remain mandatory;
+    this switch grants no source or evidence authority.
+    """
     _native_require(type(max_bytes) is int and 0 < max_bytes <= 1048576, "JSON_BUDGET")
+    _native_require(type(max_nodes) is int and 0 < max_nodes <= 4096
+                    and type(binary64_numbers) is bool, "JSON_BUDGET")
     _native_require(type(raw) is bytes and len(raw) <= max_bytes, "JSON_BOUND")
     try:
         decoded = raw.decode("utf-8", errors="strict")
@@ -359,6 +1161,11 @@ def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
 
     def number(token):
         _native_require(len(token) <= 128, "NUMBER_BOUND")
+        if binary64_numbers:
+            import math
+            result = float(token)
+            _native_require(math.isfinite(result), "NONFINITE")
+            return result
         exponent = re.search(r"[eE]([+-]?[0-9]+)$", token)
         _native_require(exponent is None or abs(int(exponent.group(1))) <= 128, "NUMBER_BOUND")
         return _native_bounded_decimal(Decimal(token))
@@ -383,7 +1190,7 @@ def _native_strict_json(raw: bytes, max_bytes: int = 65536) -> Any:
     def visit(value, depth=0):
         nonlocal nodes
         nodes += 1
-        _native_require(nodes <= 4096, "JSON_NODES")
+        _native_require(nodes <= max_nodes, "JSON_NODES")
         _native_require(depth <= 16, "JSON_DEPTH")
         if type(value) is str:
             _native_require(not any(0xD800 <= ord(char) <= 0xDFFF for char in value), "SURROGATE")

@@ -51,6 +51,21 @@ def _source_epoch_refs(values: Mapping[str, object]) -> tuple[str, ...]:
 
 
 @dataclass(frozen=True, slots=True)
+class EvidenceRegisteredCompilationRequestV1:
+    """Inert exact-reference assertion around the unchanged compilation request."""
+
+    registration_ref: object
+    compilation_request: CompileReplayPaperCohortRequestV1
+
+    def __post_init__(self):
+        from .context import _native_require
+        from .models import EvidenceRecordRefV1
+        _native_require(type(self.registration_ref) is EvidenceRecordRefV1
+                        and type(self.compilation_request) is CompileReplayPaperCohortRequestV1,
+                        "LP03_REGISTERED_COMPILATION_REQUEST")
+
+
+@dataclass(frozen=True, slots=True)
 class ReplayPaperCohortCompilationRecordV1:
     compilation_id: str
     schema_version: str
@@ -144,6 +159,29 @@ class ReplayPaperExpectedSlotV1:
             )
 
 
+def _read_original_compilation_member_v1(raw, *, operation, record_ref):
+    """Decode only either original legacy contract in this admitted binding."""
+    from .context import _native_require
+    from .serialization import _evidence_canonical_object_v1
+    original = operation.binding_original
+    _native_require(original is not None and operation.compiler is original[0]
+                    and operation.compilation_request is original[1] and operation.compilation is original[2]
+                    and operation.binding_spines is original[3], "LP03_ORIGINAL_COMPILATION_CHANGED")
+    matches = tuple(index for index, spine in enumerate(original[3]) if spine.record_id == record_ref)
+    _native_require(len(matches) == 1, "LP03_COMPILATION_READBACK_MEMBER")
+    index = matches[0]
+    _native_require(raw == original[6][index].encode("utf-8"), "LP03_COMPILATION_READBACK_BYTES")
+    parsed = _evidence_canonical_object_v1(raw, max_bytes=1048576)
+    body = _evidence_canonical_object_v1(parsed["typed_payload"]["canonical_contract_json"].encode("utf-8"), max_bytes=1048576)
+    if index == 0:
+        result = ReplayPaperCohortCompilationRecordV1.from_canonical_mapping(body)
+        expected = operation.compilation
+    else:
+        result = ImmutableReplayPaperInputLockV1.from_canonical_mapping(body)
+        expected = operation.compilation.input_lock
+    _native_require(result == expected, "LP03_COMPILATION_READBACK_CONTRACT")
+
+
 class ReplayPaperCohortCompilerV1:
     """Pure contract materialization plus existing ST12-C append-only custody."""
 
@@ -173,8 +211,16 @@ class ReplayPaperCohortCompilerV1:
         return self._canonical_snapshot
 
     def _index(self, compilation: ReplayPaperCohortCompilationRecordV1) -> None:
-        self._compilations[compilation.compilation_id] = compilation
-        self._locks[compilation.input_lock_id] = compilation.input_lock
+        compilations, locks, slots = ReplayPaperCohortCompilerV1._index_members_v1(self, compilation)
+        self._compilations.update(compilations)
+        self._locks.update(locks)
+        self._slots.update(slots)
+
+    def _index_members_v1(self, compilation):
+        """Build the same inert 104 slots without publishing compiler caches."""
+        compilations = {compilation.compilation_id: compilation}
+        locks = {compilation.input_lock_id: compilation.input_lock}
+        slots = {}
         for lane, contract_ids in (
             ("REPLAY", compilation.expected_replay_result_contract_ids),
             ("PAPER", compilation.expected_paper_result_contract_ids),
@@ -191,7 +237,8 @@ class ReplayPaperCohortCompilerV1:
                     template_id,
                     contract_id,
                 )
-                self._slots[(compilation.compilation_id, lane, contract_id)] = slot
+                slots[(compilation.compilation_id, lane, contract_id)] = slot
+        return compilations, locks, slots
 
     def _load_compilation_receipt(
         self,
@@ -272,6 +319,34 @@ class ReplayPaperCohortCompilerV1:
                 "result does not address one exact expected slot",
             ) from exc
 
+    def resolve_evidence_expected_slot_v1(self, *, operation, math_id):
+        """Select from the original compilation already in this publication closure."""
+        from .context import _native_require
+        from .persistence import _EvidenceLaneOperationV1, EvidenceAvailabilityHandleV1
+        _native_require(type(self) is ReplayPaperCohortCompilerV1 and type(operation) is _EvidenceLaneOperationV1,
+                        "LP03_SLOT_ORIGINAL_COMPILER_REQUIRED")
+        registration, attempt = operation.attempt.registration, operation.attempt
+        original = registration.binding_original
+        _native_require(original is not None and self is original[0] and registration.compiler is self
+                        and registration.compilation is original[2] and registration.binding_spines is original[3]
+                        and type(math_id) is str and math_id == operation.exchange[1].math_id
+                        and math_id in attempt.payload.component_closure
+                        and operation.publication_readback_original is not None, "LP03_SLOT_ORIGINAL_BINDING_REQUIRED")
+        compilation = original[2]
+        _native_require(deterministic_json(compilation) == original[5], "LP03_SLOT_ORIGINAL_COMPILATION_CHANGED")
+        # Original exact CONTROL compilation readback occurred in availability
+        # resolution. This pure selection neither scans nor reacquires it.
+        index = compilation.cohort_template_ids.index(math_id)
+        contracts = (compilation.expected_replay_result_contract_ids if attempt.request.lane.value == "REPLAY"
+                     else compilation.expected_paper_result_contract_ids)
+        result = ReplayPaperExpectedSlotV1(compilation.compilation_id, compilation.input_lock_id,
+            attempt.request.lane.value, math_id, contracts[index])
+        EvidenceAvailabilityHandleV1._require_current_v1(operation.availability, operation=operation,
+            purpose="EVIDENCE_LANE_REGISTRATION_V1", current_grant=attempt.handle, clock=operation.issuer.clock)
+        _native_require(registration.binding_original is original and registration.compilation is compilation,
+                        "LP03_SLOT_ORIGINAL_BINDING_CHANGED")
+        return result
+
     def _receipt_spine(
         self,
         *,
@@ -323,10 +398,8 @@ class ReplayPaperCohortCompilerV1:
             no_effect_flags=NO_EFFECTS_V1,
         )
 
-    def compile(
-        self, request: CompileReplayPaperCohortRequestV1
-    ) -> ReplayPaperCohortCompilationRecordV1:
-        initialize_st12f_parameter_registry_v1()
+    def _materialize_contract_v1(self, request: CompileReplayPaperCohortRequestV1) -> ReplayPaperCohortCompilationRecordV1:
+        """Sole unchanged 52-template/104-slot materialization; no persistence."""
         if type(request) is not CompileReplayPaperCohortRequestV1:
             raise ContractValidationError(
                 ReasonCode.CONTRACT_OR_TYPE_INVALID,
@@ -344,7 +417,7 @@ class ReplayPaperCohortCompilerV1:
             asserted_input_lock_id=request.input_lock_id,
             canonical_snapshot=self._canonical_snapshot,
         )
-        compilation = ReplayPaperCohortCompilationRecordV1(
+        return ReplayPaperCohortCompilationRecordV1(
             compilation_id=compilation_id,
             schema_version=COHORT_COMPILATION_SCHEMA_VERSION_V1,
             contract_version=COHORT_COMPILATION_CONTRACT_VERSION_V1,
@@ -355,6 +428,119 @@ class ReplayPaperCohortCompilerV1:
             input_lock=input_lock,
             created_at=input_lock.created_at,
         )
+
+    def compile_registered_experiment_v1(self, request, *, registration_resolver):
+        """Bind the original preregistration using the sole existing compiler."""
+        from contextlib import ExitStack
+        from ...agents.pr169_agent_orch1_resolvers import EvidenceIssuerContextV1, _EvidenceIssuerStateV1
+        from .context import _native_require, _native_utc_nanoseconds, ComputationContextKeyV1
+        from .input_lock import _require_original_input_assembly_outcome_v1
+        from .latency_policy import _EvidenceLocalClockV1
+        from .persistence import _EvidenceRegistrationOperationV1
+        from .sqlite_reference import SQLiteReferenceAdapterV1
+
+        _native_require(type(self) is ReplayPaperCohortCompilerV1
+                        and type(request) is EvidenceRegisteredCompilationRequestV1
+                        and type(registration_resolver) is EvidenceIssuerContextV1,
+                        "LP03_REGISTERED_COMPILATION_ORIGINAL_CONTEXT")
+        state = registration_resolver._EvidenceIssuerContextV1__owner
+        _native_require(type(state) is _EvidenceIssuerStateV1, "LP03_ISSUER_CONTEXT_NOT_ORIGINAL")
+        EvidenceIssuerContextV1._identity_for_owner_v1(registration_resolver, state.service)
+        ref = request.registration_ref.record_id
+        _native_require(ref.endswith("::INPUT_ASSEMBLY::EXPERIMENT:1"), "LP03_ORIGINAL_REGISTRATION_REF_REQUIRED")
+        key = ref.removesuffix("::INPUT_ASSEMBLY::EXPERIMENT:1")
+        operation = state.registrations.get(key)
+        _native_require(type(operation) is _EvidenceRegistrationOperationV1 and operation.issuer is state,
+                        "LP03_ORIGINAL_REGISTRATION_REF_REQUIRED")
+        with state.lock, ExitStack() as locks:
+            _native_require(state.operation is None and self._persistence is state.control_store
+                            and operation.commit_state == "COMMITTED_AND_READBACK" and operation.handle is not None
+                            and operation.handle == request.registration_ref
+                            and self._canonical_snapshot is operation.preparation.input_assembly_members[2],
+                            "LP03_REGISTERED_COMPILATION_ORIGINAL_JOIN")
+            state.operation = operation
+            try:
+                state._lock_original_source_custodies_v1(locks)
+                wall, _mono, _cpu = _EvidenceRegistrationOperationV1._check_current_v1(operation)
+                inner, preparation = request.compilation_request, operation.preparation
+                envelope = operation.envelope_entry[3]
+                first = preparation.input_assembly_members[1][0].reconstructed_canonical_events[0]
+                _native_require(type(inner.context) is ComputationContextKeyV1
+                                and inner.principal_id == self._canonical_snapshot.created_by
+                                and inner.capability_bundle_id == envelope.envelope_ref
+                                and inner.context.context_id == first["context_id"]
+                                and inner.context.source_epoch_id == first["source_epoch_id"]
+                                and inner.context.input_version == first["input_version"]
+                                and inner.context.as_of == self._canonical_snapshot.decision_time
+                                and inner.context.observed_at == self._canonical_snapshot.decision_time
+                                and (inner.context.maximum_age.days * 86400 + inner.context.maximum_age.seconds) * 1_000_000_000
+                                    + inner.context.maximum_age.microseconds * 1000
+                                    == self._canonical_snapshot.latency_and_staleness_assumptions["ttl_ns"]
+                                and operation.records[0].created_wall_ns // 1000 * 1000
+                                    <= _native_utc_nanoseconds(inner.requested_at.isoformat()) <= wall,
+                                "LP03_COMPILATION_REQUEST_ORIGINAL_SCOPE")
+                if operation.compilation_request is None:
+                    _native_require(not self._compilations and not self._locks and not self._slots,
+                                    "LP03_COMPILER_HAS_UNBOUND_CACHED_CONTRACTS")
+                    operation.compiler, operation.compilation_request = self, request
+                    operation.binding_state = "ADMITTED"
+                else:
+                    _native_require(operation.compiler is self and operation.compilation_request == request
+                                    and operation.binding_state == "COMMITTED_AND_READBACK",
+                                    "LP03_COMPILATION_ALREADY_RESERVED_OR_UNRESOLVED")
+                SQLiteReferenceAdapterV1._evidence_registration_readback_v1(state.control_store, operation)
+                _require_original_input_assembly_outcome_v1(preparation, preparation.input_assembly_outcome)
+                original_snapshot = preparation.input_assembly_members[2]
+                _native_require(self._canonical_snapshot is original_snapshot, "LP03_COMPILER_ORIGINAL_SNAPSHOT_CHANGED")
+                if operation.binding_state == "COMMITTED_AND_READBACK":
+                    SQLiteReferenceAdapterV1._evidence_read_control_members_v1(state.control_store, operation, stage="BOUND_EXPERIMENT")
+                else:
+                    compilation = ReplayPaperCohortCompilerV1._materialize_contract_v1(self, inner)
+                    _native_require(type(compilation) is ReplayPaperCohortCompilationRecordV1
+                                    and self._canonical_snapshot is original_snapshot
+                                    and all(getattr(compilation.input_lock, member.name) == getattr(original_snapshot, member.name)
+                                            for member in fields(CanonicalReplayPaperInputSnapshotV1)),
+                                    "LP03_COMPILER_ORIGINAL_SNAPSHOT_CHANGED")
+                    spines = tuple(ReplayPaperCohortCompilerV1._receipt_spine(self, request=inner,
+                        receipt_class=kind, contract=contract, contract_id=identity, terminal_state=terminal,
+                        input_lock=compilation.input_lock) for kind, contract, identity, terminal in (
+                            (ST12FReceiptClassV1.COHORT_COMPILATION, compilation, compilation.compilation_id, "COMPILED"),
+                            (ST12FReceiptClassV1.INPUT_LOCK, compilation.input_lock, compilation.input_lock_id, "LOCKED_IMMUTABLE")))
+                    operation.compilation, operation.binding_spines = compilation, spines
+                    operation.binding_original = (self, request, compilation, spines,
+                        deterministic_json(request), deterministic_json(compilation), tuple(deterministic_json(row) for row in spines))
+                    SQLiteReferenceAdapterV1._evidence_bind_registered_compilation_v1(state.control_store, operation)
+                _native_require(operation.binding_commit_observation is not None and operation.binding_readback_observation is not None,
+                                "LP03_COMPILATION_BINDING_UNRESOLVED")
+                candidate_compilations, candidate_locks, candidate_slots = ReplayPaperCohortCompilerV1._index_members_v1(
+                    self, operation.compilation)
+                _EvidenceRegistrationOperationV1._check_current_v1(operation)
+                # Publish already constructed exact maps. Never dispatch an
+                # update method on caller-replaceable cache attributes here.
+                self._compilations, self._locks, self._slots = candidate_compilations, candidate_locks, candidate_slots
+                return operation.compilation
+            except BaseException:
+                if operation.binding_state not in ("ROLLED_BACK", "ROLLBACK_UNPROVEN", "COMMIT_OR_OBSERVATION_UNRESOLVED"):
+                    operation.binding_state = "BINDING_FAILED_REQUIRES_AUDIT"
+                try:
+                    _wall, mono, cpu = _EvidenceLocalClockV1.observe_v1(state.clock)
+                    _native_require(_EvidenceRegistrationOperationV1._observe_accounting_v1(operation),
+                                    "LP03_EXECUTION_ACCOUNTING_UNPROVEN")
+                except BaseException:
+                    operation.binding_state = "BINDING_CLOCK_CUSTODY_UNAVAILABLE"
+                    raise
+                raise
+            finally:
+                state.operation = None
+
+    def compile(
+        self, request: CompileReplayPaperCohortRequestV1
+    ) -> ReplayPaperCohortCompilationRecordV1:
+        initialize_st12f_parameter_registry_v1()
+        compilation = ReplayPaperCohortCompilerV1._materialize_contract_v1(self, request)
+        token = validated_st12f_identity_token_v1(request.idempotency_key)
+        compilation_id = compilation.compilation_id
+        input_lock = compilation.input_lock
         request_json = canonical_request_json_v1(request)
         claim = IdempotencyClaimReceiptV1(
             claim_id=f"ST12F-IDEMPOTENCY::{token}::OP13",

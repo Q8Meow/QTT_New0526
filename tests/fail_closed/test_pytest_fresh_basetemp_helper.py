@@ -110,6 +110,58 @@ def _command_receipt(
     )
 
 
+class _ReceiptStatusOnlyOwner:
+    """Unit seam only when supervise_command itself returns a synthetic receipt."""
+
+    def __init__(self, _attestation):
+        self.channel = self
+
+    def register(self, _root):
+        pass
+
+    def complete(self):
+        pass
+
+    def close(self):
+        pass
+
+
+def _assert_standalone_unknown_custody(monkeypatch, tmp_path: Path, capsys) -> None:
+    for index, mode in enumerate(("missing", "exception", "unknown-tree", "unknown-pipes", "no-proof")):
+        repo = tmp_path / f"unknown-custody-repo-{index}"
+        repo.mkdir()
+        cleanup_calls = []
+
+        def unresolved_supervision(command, **kwargs):
+            if mode == "missing":
+                return None
+            if mode == "exception":
+                raise RuntimeError("synthetic absent supervision result")
+            return _command_receipt(
+                command, kwargs, tmp_path, native_exit_code=0,
+                failure_class=None if mode == "no-proof" else "ENGVR_ATOMIC_RECEIPT_WRITE_FAILED",
+                termination_state={"unknown-tree": "TERMINAL:UNPROVEN;PIPES:EOF",
+                                   "unknown-pipes": "TERMINAL:PROVEN;PIPES:UNPROVEN",
+                                   "no-proof": "NOT_REQUIRED"}[mode],
+            )
+
+        with monkeypatch.context() as patch:
+            patch.setattr(helper, "supervise_command", unresolved_supervision)
+            patch.setattr(helper, "cleanup_validation_run", lambda paths: cleanup_calls.append(paths) or "PASS")
+            result, evidence = _standalone_helper_call(
+                monkeypatch, repo_root=repo,
+                process_parent=tmp_path / f"unknown-custody-parent-{index}", argv=["--version"],
+            )
+        assert result == 1
+        assert cleanup_calls == []
+        cleanup = json.loads((evidence / "cleanup.json").read_text(encoding="utf-8"))
+        assert cleanup["cleanup_state"] == "SKIPPED_PROCESS_TERMINATION_UNPROVEN"
+        assert Path(cleanup["cleanup_target"]).is_dir()
+        completion = json.loads((evidence / "completion.json").read_text(encoding="utf-8"))
+        assert completion["final_state"] == "FAIL"
+        assert "ENGVR_" in capsys.readouterr().err
+
+
 def _assert_inherited_receipt_fail_closed_matrix(
     monkeypatch,
     capsys,
@@ -200,6 +252,7 @@ def _assert_inherited_receipt_fail_closed_matrix(
                 return _command_receipt(command, kwargs, tmp_path, **parameters)
 
             receipt_patch.setattr(helper, "supervise_command", fake_supervise)
+            receipt_patch.setattr(helper, "bind_inherited_command_owner", _ReceiptStatusOnlyOwner)
             result = helper.main(
                 [
                     "tests/fail_closed",
@@ -572,29 +625,24 @@ def _assert_standalone_helper_receipt_matrix(
             reliability.EVIDENCE_ROOT_ENV,
             str(inherited_evidence),
         )
+        inherited_patch.delenv(reliability.COMMAND_OWNER_CHANNEL_ENV, raising=False)
         inherited_exit = helper.main(
             ["--version", "--basetemp", str(inherited_basetemp)]
         )
-    assert inherited_exit == 0
+    assert inherited_exit == 1
     inherited_output = capsys.readouterr()
+    assert "no original command owner channel" in inherited_output.err
     assert "Traceback" not in inherited_output.err
     assert (inherited_evidence / "run.json").read_bytes() == inherited_run_before
     assert not (inherited_evidence / "completion.json").exists()
     assert not (inherited_evidence / "cleanup.json").exists()
     nested_roots = tuple(inherited_evidence.glob("nested-pytest-*"))
-    assert len(nested_roots) == 2
+    assert len(nested_roots) == 1
     assert collision_sentinel.read_bytes() == b"PRIOR_EVIDENCE"
-    selected_nested_root = next(
-        path for path in nested_roots if path != collision_root
-    )
+    # Allocation still preserves collisions, independently of denied admission.
+    selected_nested_root = helper._allocate_nested_evidence_root(inherited_evidence)
     assert selected_nested_root.name == f"nested-pytest-{os.getpid()}-1"
-    assert {
-        path.name for path in selected_nested_root.iterdir() if path.is_file()
-    } == {
-        "command-1.json",
-        "command-1.stderr.bin",
-        "command-1.stdout.bin",
-    }
+    assert not tuple(selected_nested_root.iterdir())
 
     with monkeypatch.context() as typed_failure_patch:
         typed_failure_patch.setattr(helper, "REPO_ROOT", repo_root)
@@ -823,7 +871,10 @@ def test_selected_fresh_basetemp_is_short_and_windows_safe(monkeypatch):
                 run_id="run_system_temp_fallback",
             )
         try:
-            assert fallback_paths.process_root.parent == fallback_parent / "qttv"
+            expected_parent = fallback_parent / "qttv"
+            actual_parent = fallback_paths.process_root.parent
+            assert actual_parent == expected_parent.resolve(strict=True)
+            assert actual_parent.samefile(expected_parent)
         finally:
             reliability.cleanup_validation_run(fallback_paths)
 
@@ -872,6 +923,47 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
     tmp_path,
 ):
     seen: dict[str, object] = {}
+
+    # Validate before allocation/launch and forward only the selected deadline.
+    with monkeypatch.context() as deadline_patch:
+        deadline_patch.delenv(reliability.RUN_ID_ENV, raising=False)
+        deadline_patch.delenv(reliability.EVIDENCE_ROOT_ENV, raising=False)
+        deadline_calls = []
+
+        def selected_standalone(args, *, timeout_seconds=None):
+            deadline_calls.append((list(args), timeout_seconds))
+            return 7
+
+        deadline_patch.setattr(helper, "_run_standalone_owned", selected_standalone)
+        for option in (
+            ["--standalone-timeout-seconds", "1800"],
+            ["--standalone-timeout-seconds=1800"],
+        ):
+            assert helper.main([*option, "--version"]) == 7
+            assert deadline_calls[-1] == (["--version"], 1800.0)
+        assert helper.main(["--version"]) == 7
+        assert deadline_calls[-1] == (["--version"], None)
+        before = len(deadline_calls)
+        invalid_options = (
+            ["--standalone-timeout-seconds"],
+            ["--standalone-timeout-seconds="],
+            ["--standalone-timeout-seconds=nan"],
+            ["--standalone-timeout-seconds=inf"],
+            ["--standalone-timeout-seconds=1e309"],
+            ["--standalone-timeout-seconds=0"],
+            ["--standalone-timeout-seconds=-1"],
+            ["--standalone-timeout-seconds=nope"],
+            ["--standalone-timeout-seconds=1", "--standalone-timeout-seconds", "2"],
+        )
+        for options in invalid_options:
+            assert helper.main(options) == 1
+            assert len(deadline_calls) == before
+            assert "ENGVR_PROCESS_START_FAILED" in capsys.readouterr().err
+        deadline_patch.setenv(reliability.RUN_ID_ENV, "inherited")
+        deadline_patch.setenv(reliability.EVIDENCE_ROOT_ENV, str(tmp_path))
+        assert helper.main(["--standalone-timeout-seconds=1800", "--version"]) == 1
+        assert len(deadline_calls) == before
+        assert "forbidden with inherited run identities" in capsys.readouterr().err
 
     def fake_supervise(command, **kwargs):
         seen["command"] = list(command)
@@ -927,6 +1019,7 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
             "supervise_command",
             fake_supervise,
         )
+        inherited_patch.setattr(helper, "bind_inherited_command_owner", _ReceiptStatusOnlyOwner)
         exit_code = helper.main(
             ["tests/fail_closed", "--basetemp", custom_basetemp, "-q"]
         )
@@ -962,6 +1055,7 @@ def test_main_prints_basetemp_and_returns_pytest_exit_code(
         tmp_path,
     )
     _assert_inherited_outer_run_attestation(monkeypatch, capsys, tmp_path)
+    _assert_standalone_unknown_custody(monkeypatch, tmp_path, capsys)
 
 
 def test_helper_introduces_no_blocked_behavior_terms():

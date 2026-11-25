@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import os
 import pathlib
@@ -566,6 +567,31 @@ def _dotted_name(node: ast.AST) -> str | None:
     return None
 
 
+def _validation_ipc_nodes(rel: pathlib.PurePosixPath, tree: ast.Module) -> frozenset[ast.AST]:
+    if rel.as_posix() != "tools/validation_reliability.py":
+        return frozenset()
+
+    channels = [
+        node for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "_InvocationChannel"
+    ]
+    if len(channels) != 1:
+        return frozenset()
+
+    # Bind the two Linux IPC nodes to the reviewed channel, including descriptor
+    # inheritance and peer validation. Any structural change requires review.
+    channel = channels[0]
+    reviewed = "7ccfbadba5fac1ab126dcdeee77307a42c6842aa005ffaf6d61463fca87cd0f9"
+    if hashlib.sha256(ast.dump(channel, include_attributes=False).encode("utf-8")).hexdigest() != reviewed:
+        return frozenset()
+
+    return frozenset(
+        node for node in ast.walk(channel)
+        if (isinstance(node, ast.Import) and _imported_modules(node) == ["socket"])
+        or (isinstance(node, ast.Call) and _dotted_name(node.func) == "socket.socket")
+    )
+
+
 def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     root = repo_root.resolve()
@@ -583,13 +609,14 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
         admission_failures = admission_failures + kalshi_failures + public_failures
         admission_failures += source_use_native_contract_v1(rel.as_posix(), tree)
         failures.extend(admission_failures)
+        validation_ipc = _validation_ipc_nodes(rel, tree)
         for node in ast.walk(tree):
-            admitted_network_position = (type(node).__name__, getattr(node, 'lineno', None),
+            admitted_network_node = node in validation_ipc or (type(node).__name__, getattr(node, 'lineno', None),
                 getattr(node, 'col_offset', None), getattr(node, 'end_lineno', None),
                 getattr(node, 'end_col_offset', None)) in admitted
             for module in _imported_modules(node):
                 root_name = module.split(".", 1)[0]
-                if not admitted_network_position and ((
+                if not admitted_network_node and ((
                     module in FORBIDDEN_PYTHON_MODULES
                     and not _is_allowed_local_visual_qa_browser_module(rel, module)
                 ) or root_name in FORBIDDEN_PYTHON_MODULE_ROOTS):
@@ -613,7 +640,7 @@ def _scan_forbidden_python_usage(repo_root: pathlib.Path) -> list[str]:
                     "close_order",
                 }:
                     failures.append(f"{rel} calls forbidden authority function {name}")
-                if not admitted_network_position and name in {
+                if not admitted_network_node and name in {
                     "http.client.HTTPSConnection",
                     "http.client.HTTPConnection",
                     "websockets.sync.client.connect",

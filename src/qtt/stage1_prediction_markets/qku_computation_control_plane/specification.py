@@ -2214,3 +2214,276 @@ if len(ST12F_NEW_EVIDENCE_MATH_SPECIFICATIONS_V1) != 9 or len(ST12F_EVIDENCE_MAT
         ReasonCode.INVALID_CONTRACT,
         "ST12-F math closure must remain exact 39 reused plus 9 additive",
     )
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceRawOutputContractV1:
+    """Private C/F adapter schema; original formula identities stay separate."""
+
+    math_spec_id: str
+    schema_id: str
+    native_type: str
+    members: tuple[tuple[str, str], ...]
+    parent_callable_ref: str
+    raw_contract_version: str
+
+
+_LP03_PRIVATE_RAW_ROWS_V1 = (
+    (26, "Decimal", (), "expected_value_of_information_v1"),
+    (27, "KellyFractionV1", (("raw_fraction", "Decimal"), ("sizing_candidate", "Decimal")), "binary_kelly_fraction_v1"),
+    (28, "Decimal", (), "fractional_kelly_v1"),
+    (29, "Decimal", (), "mean_variance_utility_v1"),
+    (30, "TailRiskV1", (("value_at_risk", "Decimal"), ("conditional_value_at_risk", "Decimal"), ("confidence", "Decimal")), "conditional_value_at_risk_v1"),
+    (31, "Decimal", (), "empirical_expected_shortfall_v1"),
+    (32, "Decimal", (), "implementation_shortfall_v1"),
+    (33, "Decimal", (), "spread_cost_v1"),
+    (34, "QuantizedEconomicAmountV1", (("amount_before_rounding", "Decimal"), ("amount_after_rounding", "Decimal"),
+        ("quantization_receipt", "QuantizationReceiptV1"), ("component_class", "str"), ("source_binding_ref", "str"),
+        ("embedded_in_price", "bool")), "global_prediction_market_fee_v1"),
+    (35, "QuantizedEconomicAmountV1", (("amount_before_rounding", "Decimal"), ("amount_after_rounding", "Decimal"),
+        ("quantization_receipt", "QuantizationReceiptV1"), ("component_class", "str"), ("source_binding_ref", "str"),
+        ("embedded_in_price", "bool")), "us_prediction_market_fee_or_rebate_v1"),
+    (37, "Decimal", (), "fill_probability_v1"),
+    (38, "Decimal", (), "expected_partial_fill_quantity_v1"),
+    (40, "Decimal", (), "compute_math_40_adverse_selection_cost"),
+    (41, "float64", (), "compute_math_41_latency_alpha_decay"),
+    (42, "float64", (), "compute_math_42_square_root_market_impact"),
+    (43, "float64", (), "compute_math_43_capacity_crowding_penalty"),
+    (44, "tuple[tuple[float64]]", (), "compute_math_44_covariance_shrinkage"),
+    (45, "record", (("lcb_net", "Decimal"), ("trade_gate", "bool")), "compute_math_45_lower_confidence_bound_no_trade_gate"),
+    (50, "record", (("trace_expected_locked_cost", "Decimal"), ("original_economic_objective", "Decimal"),
+        ("selected_candidate_id", "str"), ("selected_original_model_feasible", "true"), ("effect_call_count", "zero_int")),
+        "compute_math_50_qaoa_preexisting_trace_validation"),
+    (51, "record", (("trace_expectation", "Decimal"), ("variance", "Decimal"), ("original_economic_objective", "Decimal"),
+        ("selected_candidate_id", "str"), ("selected_original_model_feasible", "true"), ("effect_call_count", "zero_int")),
+        "compute_math_51_vqe_preexisting_trace_validation"),
+    (52, "record", (("delta_quantum_vs_classical", "Decimal"), ("delta_quantum_vs_no_trade", "Decimal"),
+        ("winner", "str"), ("quantum_advantage_claim_allowed", "false")), "compute_math_52_quantum_classical_benchmark_utility"),
+)
+EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1 = MappingProxyType({
+    f"MATH-{number:02d}": EvidenceRawOutputContractV1(f"MATH-{number:02d}", f"LP03::MATH-{number:02d}::RAW_V1",
+        native_type, members, ("economic_math.py::" if number <= 38 else "implementation_registry.py::") + callable_name,
+        "ST12C-CURRENTIZED-1.0" if number <= 38 else "1.4")
+    for number, native_type, members, callable_name in _LP03_PRIVATE_RAW_ROWS_V1
+})
+
+
+def decode_evidence_private_raw_output_v1(math_spec_id, raw, *, maximum_bytes, maximum_nodes):
+    """Reconstruct bounded raw data, never original invocation provenance.
+
+    The original operation supplies its remaining byte/node allowance and
+    accounts decoding memory and time. JSON allocation is bounded by wire bytes;
+    node/depth checks precede typed reconstruction. No arbitrary native Decimal
+    enters this boundary. The original callable output and this decoded data are
+    distinct objects, and matching bytes alone do not authenticate a producer.
+    """
+    from decimal import localcontext
+    from .context import (_native_require, QuantizationReceiptV1,
+                          QuantizationRoundingV1, decimal_context_v1)
+    from .economic_math import KellyFractionV1, TailRiskV1, QuantizedEconomicAmountV1
+    from .errors import ComputationControlPlaneError
+    from .serialization import _native_strict_json, deterministic_json
+
+    _native_require(type(math_spec_id) is str and math_spec_id in EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1,
+                    "LP03_PRIVATE_RAW_SCHEMA_UNAVAILABLE")
+    # Byte/type checks occur inside the existing decoder before UTF-8 or JSON.
+    # Its node walk completes before any Decimal/dataclass reconstruction here.
+    wire = _native_strict_json(raw, max_bytes=maximum_bytes, max_nodes=maximum_nodes, binary64_numbers=True)
+    contract = EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1[math_spec_id]
+    remaining = maximum_nodes
+
+    def member(item, kind):
+        nonlocal remaining
+        _native_require(remaining > 0, "LP03_RAW_SCHEMA_WORK_EXHAUSTED")
+        remaining -= 1
+        if kind == "Decimal":
+            _native_require(type(item) is str and 0 < len(item) <= maximum_bytes,
+                            "LP03_PRIVATE_RAW_DECIMAL_TEXT")
+            # Text already came from the bounded, strict JSON decoder. Decimal
+            # construction preserves sign, trailing zeros and exponent; no
+            # statistical rational conversion or financial rounding is applied.
+            value = Decimal(item)
+            _native_require(value.is_finite() and str(value) == item,
+                            "LP03_PRIVATE_RAW_DECIMAL_CANONICAL")
+            return value
+        if kind in ("float64", "int", "bool", "str", "true", "false", "zero_int"):
+            valid = (type(item) is float and math.isfinite(item) if kind == "float64" else
+                     type(item) is int if kind == "int" else type(item) is bool if kind == "bool" else
+                     type(item) is str and bool(item) if kind == "str" else
+                     item is True if kind == "true" else item is False if kind == "false" else type(item) is int and item == 0)
+            _native_require(valid, "LP03_PRIVATE_RAW_MEMBER_TYPE")
+            return item
+        if kind == "tuple[tuple[float64]]":
+            _native_require(type(item) is list and bool(item) and len(item) <= remaining,
+                            "LP03_PRIVATE_RAW_MATRIX_SHAPE")
+            size = len(item)
+            rows = []
+            for row in item:
+                _native_require(remaining > 0 and type(row) is list and len(row) == size and size <= remaining - 1,
+                                "LP03_PRIVATE_RAW_MATRIX_SHAPE")
+                remaining -= 1
+                rows.append(tuple(member(entry, "float64") for entry in row))
+            return tuple(rows)
+        _native_require(kind == "QuantizationReceiptV1", "LP03_PRIVATE_RAW_NESTED_TYPE")
+        expected = (("receipt_id", "str"), ("policy_ref", "str"), ("field_id", "str"), ("pre_value", "Decimal"),
+            ("post_value", "Decimal"), ("residual", "Decimal"), ("unit", "str"), ("currency_or_asset", "str"),
+            ("basis", "str"), ("scale", "int"), ("rounding", "rounding"))
+        _native_require(type(item) is dict and set(item) == {name for name, _ in expected},
+                        "LP03_PRIVATE_RAW_NESTED_FIELDS")
+        values = {}
+        for name, nested_kind in expected:
+            if nested_kind == "rounding":
+                text = member(item[name], "str")
+                values[name] = QuantizationRoundingV1(text)
+            else:
+                values[name] = member(item[name], nested_kind)
+        _native_require(values["scale"] == (5 if math_spec_id == "MATH-34" else 2)
+                        and values["rounding"] is QuantizationRoundingV1.HALF_EVEN,
+                        "LP03_PRIVATE_RAW_QUANTIZATION_PROFILE")
+        # Constructor arithmetic only sees locally reconstructed, bounded
+        # values and the original complete financial context.
+        return QuantizationReceiptV1(**values)
+
+    try:
+        with localcontext(decimal_context_v1()):
+            if not contract.members:
+                result = member(wire, contract.native_type)
+            else:
+                _native_require(remaining > 0, "LP03_RAW_SCHEMA_WORK_EXHAUSTED")
+                remaining -= 1
+                names = tuple(name for name, _ in contract.members)
+                _native_require(type(wire) is dict and set(wire) == set(names), "LP03_PRIVATE_RAW_RECORD_FIELDS")
+                values = {name: member(wire[name], kind) for name, kind in contract.members}
+                if contract.native_type == "record":
+                    # JSON sorts object keys; native records retain declaration
+                    # order independently of that wire ordering.
+                    result = MappingProxyType(values)
+                else:
+                    classes = {"KellyFractionV1": KellyFractionV1, "TailRiskV1": TailRiskV1,
+                               "QuantizedEconomicAmountV1": QuantizedEconomicAmountV1}
+                    if contract.native_type == "QuantizedEconomicAmountV1":
+                        _native_require(values["amount_before_rounding"] == values["quantization_receipt"].pre_value,
+                                        "LP03_PRIVATE_RAW_QUANTIZATION_PRE_VALUE_JOIN")
+                    result = classes[contract.native_type](**values)
+            # Retain existing secret/path guards, exact numeric representation,
+            # and finite binary64 distinctions. Whitespace/aliases also reject.
+            _native_require(deterministic_json(result).encode("utf-8") == raw, "LP03_PRIVATE_RAW_NONCANONICAL")
+            return result
+    except ComputationControlPlaneError:
+        raise
+    except (ArithmeticError, ValueError, TypeError, MemoryError) as exc:
+        raise ContractValidationError(ReasonCode.OUTPUT_SCHEMA_MISMATCH, "LP03_PRIVATE_RAW_RECONSTRUCTION_FAILED") from exc
+
+
+_EVIDENCE_PURGED_SPLIT_MEMBERS_V1 = (
+    ("test_sample_ids", "list[str]"), ("train_sample_ids", "list[str]"),
+    ("purged_sample_ids", "list[str]"), ("embargoed_sample_ids", "list[str]"),
+    ("merged_test_intervals", "list[interval_pair]"))
+EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1 = MappingProxyType({
+    "B10_BIN": (("bin_index", "int"), ("left", "float64"), ("right", "float64"),
+        ("right_inclusive", "bool"), ("count", "int"), ("mean_confidence", "nullable_float64"),
+        ("empirical_frequency", "nullable_float64"), ("absolute_gap", "nullable_float64")),
+    "B19_SPLIT": (("train_groups", "list[int]"), ("is_winner_strategy_id", "str"),
+        ("oos_midrank_worst_1_best_n", "float64"), ("relative_rank", "float64"), ("logit", "float64")),
+    "B20_FOLD": (*_EVIDENCE_PURGED_SPLIT_MEMBERS_V1, ("fold_id", "int")),
+    "B21_SPLIT": (*_EVIDENCE_PURGED_SPLIT_MEMBERS_V1, ("split_id", "int"), ("test_groups", "list[int]")),
+    "B21_PATH": (("path_id", "int"), ("split_ids", "list[int]"), ("test_group_partition", "list[list[int]]")),
+    "B25_FOLD": (("outer_fold", "int"), ("selected_tau", "tau"), ("criteria", "list[B25_CRITERION]"),
+        ("held_out_row_values", "list[float64]")),
+    "B25_CRITERION": (("tau", "tau"), ("variance_of_mean", "float64"),
+        ("bias_upper_bound", "float64"), ("estimated_mse_upper_bound", "float64")),
+})
+EVIDENCE_PUBLIC_RAW_NESTED_FIELDS_V1 = MappingProxyType({
+    ("MATH-10", "bins"): "list[B10_BIN]", ("MATH-19", "splits"): "list[B19_SPLIT]",
+    ("MATH-20", "folds"): "list[B20_FOLD]", ("MATH-21", "splits"): "list[B21_SPLIT]",
+    ("MATH-21", "paths"): "list[B21_PATH]", ("MATH-25", "outer_fold_results"): "list[B25_FOLD]",
+})
+EVIDENCE_MATH39_DERIVED_INPUT_SCHEMA_V1 = "LP03::MATH-39::DERIVED_INVOCATION_INPUT_V1"
+
+
+def decode_evidence_raw_output_v1(math_spec_id, raw, *, maximum_bytes, maximum_nodes):
+    """All48 private raw-data schemas, preserving original public contracts.
+
+    The immutable decoded graph is data, not the original callable object or
+    producer authority. Nested B records are closed here without widening the
+    legacy public 3.4 validator or admitting topology as measured fold scores.
+    """
+    from decimal import localcontext
+    from .context import _native_require, decimal_context_v1
+    from .errors import ComputationControlPlaneError
+    from .serialization import _native_strict_json, deterministic_json
+
+    _native_require(type(math_spec_id) is str, "LP03_RAW_SCHEMA_UNAVAILABLE")
+    if math_spec_id in EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1:
+        return decode_evidence_private_raw_output_v1(math_spec_id, raw,
+            maximum_bytes=maximum_bytes, maximum_nodes=maximum_nodes)
+    _native_require(math_spec_id in (*tuple(f"MATH-{number:02d}" for number in range(1, 26)), "MATH-36", "MATH-39"),
+                    "LP03_RAW_SCHEMA_UNAVAILABLE")
+    wire = _native_strict_json(raw, max_bytes=maximum_bytes, max_nodes=maximum_nodes, binary64_numbers=True)
+    contract = CURRENT_NAMED_OUTPUT_CONTRACTS[math_spec_id]
+    records, nested = EVIDENCE_PUBLIC_RAW_NESTED_CONTRACTS_V1, EVIDENCE_PUBLIC_RAW_NESTED_FIELDS_V1
+    remaining = maximum_nodes
+
+    def read(item, kind):
+        nonlocal remaining
+        _native_require(remaining > 0, "LP03_RAW_SCHEMA_WORK_EXHAUSTED")
+        remaining -= 1
+        if kind.startswith("list["):
+            _native_require(type(item) is list and len(item) <= remaining, "LP03_RAW_SEQUENCE_TYPE")
+            return tuple(read(child, kind[5:-1]) for child in item)
+        if kind == "interval_pair":
+            _native_require(type(item) is list and len(item) == 2, "LP03_RAW_INTERVAL_PAIR")
+            result = tuple(read(child, "float64") for child in item)
+            _native_require(result[0] < result[1], "LP03_RAW_INTERVAL_ORDER")
+            return result
+        if kind == "nullable_float64" and item is None:
+            return None
+        if kind == "tau" and type(item) is str and item == "INF":
+            return item
+        if kind in ("nullable_float64", "tau"):
+            kind = "float64"
+        if kind == "Decimal string":
+            _native_require(type(item) is str and 0 < len(item) <= maximum_bytes, "LP03_RAW_DECIMAL_TEXT")
+            result = Decimal(item)
+            _native_require(result.is_finite() and str(result) == item, "LP03_RAW_DECIMAL_CANONICAL")
+            return result
+        if kind in ("float64", "int", "bool", "str", "enum"):
+            valid = (type(item) is float and math.isfinite(item) if kind == "float64" else
+                     type(item) is int if kind == "int" else type(item) is bool if kind == "bool" else
+                     type(item) is str and bool(item))
+            _native_require(valid, "LP03_RAW_SCALAR_TYPE")
+            return item
+        _native_require(kind in records, "LP03_RAW_NESTED_SCHEMA_UNAVAILABLE")
+        members = records[kind]
+        _native_require(type(item) is dict and set(item) == {name for name, _ in members}, "LP03_RAW_NESTED_FIELDS")
+        result = MappingProxyType({name: read(item[name], child_kind) for name, child_kind in members})
+        if kind == "B10_BIN":
+            _native_require(result["count"] >= 0 and all((result[name] is None) == (result["count"] == 0)
+                            for name in ("mean_confidence", "empirical_frequency", "absolute_gap")),
+                            "LP03_RAW_EMPTY_BIN_NULLABILITY")
+        return result
+
+    try:
+        with localcontext(decimal_context_v1()):
+            if contract.output_type != "record":
+                result = read(wire, contract.output_type)
+            else:
+                _native_require(type(wire) is dict and set(wire) == {member.name for member in contract.members},
+                                "LP03_RAW_ROOT_FIELDS")
+                _native_require(remaining > 0, "LP03_RAW_SCHEMA_WORK_EXHAUSTED")
+                remaining -= 1
+                result = MappingProxyType({member.name: read(wire[member.name],
+                    nested.get((math_spec_id, member.name), member.type_name)) for member in contract.members})
+            validate_current_formula_output(math_spec_id, result)
+            _native_require(deterministic_json(result).encode("utf-8") == raw, "LP03_RAW_NONCANONICAL")
+            return result
+    except ComputationControlPlaneError:
+        raise
+    except (ArithmeticError, ValueError, TypeError, MemoryError) as exc:
+        raise ContractValidationError(ReasonCode.OUTPUT_SCHEMA_MISMATCH, "LP03_RAW_RECONSTRUCTION_FAILED") from exc
+
+
+if set(EVIDENCE_PRIVATE_RAW_OUTPUT_CONTRACTS_V1) != {
+    f"MATH-{number:02d}" for number in (*range(26, 36), 37, 38, *range(40, 46), 50, 51, 52)
+}:
+    raise ContractValidationError(ReasonCode.OUTPUT_SCHEMA_MISMATCH, "LP03_PRIVATE_RAW_SCHEMA_ROSTER")
