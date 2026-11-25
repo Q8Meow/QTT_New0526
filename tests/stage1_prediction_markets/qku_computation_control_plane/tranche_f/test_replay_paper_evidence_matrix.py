@@ -858,6 +858,119 @@ def _lp03_completion_cpu_case(math_id, case):
     return case in cases.get(math_id, ())
 
 
+def _lp03_resource_refusal_detail(error):
+    from itertools import islice
+    from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService, _EvidenceIssuerStateV1
+    from traceback import walk_tb
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        _EvidenceControlBootstrapV1, _EvidenceReceiverContextV1, _EvidenceReceiverOperationV1, _EvidenceRegistrationOperationV1,
+    )
+
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.sqlite_reference import SQLiteReferenceAdapterV1
+
+    frames = list(islice(walk_tb(error.__traceback__), 64))
+    detail = dict(callers=[], stage=None, operation_stage=None, receiver=None, guard=None, failed_counter=None,
+                  comparison_value=None, signed_cap=None, original_clock=None)
+    for frame, line in frames:
+        detail["callers"].append((frame.f_code.co_qualname, line))
+        local = frame.f_locals
+        if frame.f_code in (SQLiteReferenceAdapterV1._evidence_read_control_members_v1.__code__,
+                            SQLiteReferenceAdapterV1._evidence_commit_measured_rows_v1.__code__,
+                            SQLiteReferenceAdapterV1._evidence_read_measured_rows_v1.__code__):
+            stage = local.get("stage")
+            if isinstance(stage, str) and stage.isidentifier() and len(stage) <= 48:
+                detail["stage"] = stage
+    if len(frames) < 2 or frames[-1][0].f_code is not _native_require.__code__:
+        return detail
+    refusal = frames[-1][0].f_locals
+    if refusal["value"] is not False or str(error) != "ST12A_INVALID_CONTRACT: " + refusal["code"]:
+        return detail
+    guard = frames[-2][0]
+    local = guard.f_locals
+    detail["guard"] = guard.f_code.co_qualname
+    if guard.f_code in (_EvidenceControlBootstrapV1._charge_v1.__code__, _EvidenceControlBootstrapV1._room_v1.__code__):
+        name, limits = local["name"], local["limits"]
+        nonclock = ("record_reads", "read_bytes", "owner_queries", "query_result_records", "control_writes", "control_bytes")
+        counters = dict.fromkeys((*nonclock, "cpu_ns", "wall_ns"))
+        detail.update(failed_counter=name, signed_cap=getattr(limits, "max_" + name),
+                      preparation_caps={key: getattr(limits, "max_" + key) for key in counters}, preparation_values=counters)
+        if guard.f_code is _EvidenceControlBootstrapV1._room_v1.__code__:
+            # The original retained counter in this expression is not a frame local.
+            detail.update(proposed_increment=local["amount"], protected_reserve=local["reserve"])
+            return detail
+        counters[name] = local["value"]
+        detail.update(comparison_value=local["value"], increments=dict(local["increments"]))
+        if len(frames) >= 3 and frames[-3][0].f_code is _EvidenceControlBootstrapV1._check_current_v1.__code__:
+            clock = frames[-3][0].f_locals
+            operation = local["self"]
+            if clock["self"] is operation:
+                deadline = operation.grant_record.deadline_clock_and_process
+                # Source-read unwinding overwrites the operation's live wall and CPU counters.
+                detail["original_clock"] = dict(wall_ns=clock["wall"], monotonic_ns=clock["mono"], cpu_ns=clock["cpu"],
+                    admitted_monotonic_ns=deadline.admitted_monotonic_ns, started_cpu_ns=operation.started_cpu_ns,
+                    exclusive_deadline_monotonic_ns=deadline.exclusive_deadline_monotonic_ns,
+                    max_cpu_ns=limits.max_cpu_ns, max_wall_ns=limits.max_wall_ns)
+                counters.update(cpu_ns=clock["cpu"] - operation.started_cpu_ns,
+                                wall_ns=clock["mono"] - deadline.admitted_monotonic_ns)
+                # This exact source-read handler updates only wall/CPU during unwind.
+                source_path = (_EvidenceIssuerStateV1._read_source_slice_v1.__code__,
+                               SQLiteReferenceAdapterV1._evidence_bootstrap_readback_v1.__code__,
+                               SQLiteReferenceAdapterV1._evidence_read_control_members_v1.__code__)
+                path = frames[-6:-3]
+                if (tuple(frame.f_code for frame, _ in path) == source_path
+                        and all(frame.f_locals.get("operation") is operation for frame, _ in path)
+                        and path[-1][0].f_locals.get("stage") == "BOOTSTRAP"
+                        and operation.commit_state == "SOURCE_READ_FAILED_REQUIRES_AUDIT"):
+                    counters.update((key, operation.consumed[key]) for key in nonclock)
+                    detail["operation_stage"] = "BOOTSTRAP_SOURCE_READBACK"
+                    order = tuple(operation.consumed)
+                    failed = order.index(name)
+                    detail["preparation_evaluated"] = order[:failed + 1]
+                    detail["preparation_skipped"] = order[failed + 1:]
+                counters[name] = local["value"]
+    elif guard.f_code is _EvidenceRegistrationOperationV1._room_v1.__code__:
+        registration = local["self"]
+        for frame, _ in frames:
+            owner_locals = frame.f_locals
+            if (frame.f_code is AgentOrchService._admit_evidence_review_v1.__code__
+                    and owner_locals.get("parent") is registration.conformance_operation
+                    and owner_locals.get("state") is registration.issuer):
+                detail["operation_stage"] = "REVIEW_ADMISSION"
+            elif (frame.f_code is AgentOrchService._close_evidence_conformance_v1.__code__
+                    and owner_locals.get("registration") is registration
+                    and owner_locals.get("state") is registration.issuer):
+                detail["operation_stage"] = "BUNDLE_CLOSE"
+            elif frame.f_code is _EvidenceReceiverContextV1._receive_v1.__code__:
+                operation, context = owner_locals.get("operation"), owner_locals["self"]
+                if type(operation) is _EvidenceReceiverOperationV1 and operation.registration is registration:
+                    original = context._original
+                    name = original[5]
+                    if (operation.context is context and original[7] is context
+                            and original[0] is registration.issuer and original[1] is owner_locals["owner_service"]
+                            and operation.original[4] is original and registration.receiver_operations.get(name) is operation):
+                        detail.update(operation_stage="RECEIVER_ACK", receiver=name)
+        totals, reserved, limits = local["totals"], local["reserved"], local["limits"]
+        detail.update(totals=dict(totals), reserved=dict(reserved), increments=dict(local["increments"]), comparisons=[])
+        # Preserve the order and short circuit of the original compound guard.
+        for names, cap in (
+            (("record_reads",), "max_input_reads"), (("query_result_records",), "max_input_reads"),
+            (("read_bytes",), "max_input_bytes"), (("owner_queries", "control_writes"), "max_persistent_operations"),
+            (("control_bytes",), "max_persistent_bytes"), (("cpu_ns",), "max_cpu_ns"), (("wall_ns",), "max_wall_ns"),
+        ):
+            value = sum(totals[name] for name in names) + reserved[cap]
+            bound = getattr(limits, cap)
+            if detail["failed_counter"] is not None:
+                disposition = "SKIPPED"
+            elif value > bound:
+                disposition = "FAILED"
+                detail.update(failed_counter="+".join(names), comparison_value=value, signed_cap=bound)
+            else:
+                disposition = "PASSED"
+            detail["comparisons"].append(dict(counters=names, reservation=cap, value=value, cap=bound, status=disposition))
+    return detail
+
+
 def _note_lp03_review_expiry(error, math_id, case):
     import sys
     import traceback
@@ -1290,6 +1403,26 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
             measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer,
             cpu_boundary_witness=cpu_boundary_witness)
     except Exception as error:
+        from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
+
+        if type(error) is ContractValidationError and (
+            (selected_math == "MATH-03" and review_cut in ("capture_partial_fills", "causal_timeline")
+             and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED")
+            or (selected_math == "MATH-21" and review_cut is None
+                and str(error) == "ST12A_INVALID_CONTRACT: LP03_REGISTRATION_RESOURCE_EXHAUSTED")
+        ):
+            # An incomplete traceback or an unavailable output must preserve the original refusal.
+            try:
+                value = _lp03_resource_refusal_detail(error)
+                note = "LP03_FIXTURE_RESOURCE_REFUSAL=" + deterministic_json(dict(
+                    math_id=selected_math, case=review_cut, strict_witness=cpu_boundary_witness, operands=value))
+                error.add_note(note)
+                print(note, file=sys.stderr, flush=True)
+            except BaseException:
+                try:
+                    error.add_note("LP03_FIXTURE_RESOURCE_REFUSAL: original diagnostic unavailable or output interrupted")
+                except BaseException:
+                    pass
         _note_lp03_review_expiry(error, selected_math, review_cut)
         raise
 
@@ -4621,6 +4754,9 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             execution = replace(execution, max_cpu_ns=18_000_000_000)
             # Two extra 8s reservations plus up to 8s of extra charges per lane.
             aggregate_cpu_ns += 32_000_000_000
+            if selected_math == "MATH-21" and review_cut is None:
+                # 36s retained + 51.546875s at PRETRADE1 + 2.5 times the 7.59375s local tail.
+                aggregate_cpu_ns = 112_000_000_000
         envelope = replace(envelope, per_attempt_limits=execution,
             aggregate_execution_limits=replace(execution, max_attempts=2, max_wall_ns=aggregate_wall_ns,
                 max_cpu_ns=aggregate_cpu_ns, max_input_reads=8000, max_input_bytes=40_000_000 if measured_decay else 32_000_000,
@@ -6064,12 +6200,15 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     # reads; at most ten additional seal slots,51*n+98 queries. n=21/20. Declare the
     # finite cashflow allowance before signing; retain the original denial.
     cashflow_capacity=held_out or recorded_dr or ope_point or analytic or private_execution or (cashflow and review_cut!="assembly_record_reads")
+    timer_setup = (register and selected_math == "MATH-03" and review_cut in ("capture_partial_fills", "causal_timeline")
+        and requested_case == (selected_math, review_cut, False, False)
+        and cold_native_writer is False
+        and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
     limits = m.EvidencePreparationLimitsV1(max_record_reads=2048 if cashflow_capacity else 1000,
         max_read_bytes=8_000_000,max_owner_queries=1280 if cashflow_capacity else 1000,
         max_query_result_records=2048 if cashflow_capacity else 1000, max_control_writes=128, max_control_bytes=2_000_000,
-        # Fund the public timeline and the setup preceding the OP14 callback
-        # rejection. Both exceeded 5s in hosted preparation before completion.
-        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection else 5_000_000_000,
+        # The strict timer witnesses and their positive siblings perform the same source readbacks.
+        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup else 5_000_000_000,
         max_wall_ns=5_000_000_000 if seal_cut == "tail_expiry" else 30_000_000_000,
         aggregate_budget_ref="LP03-BUDGET::original-assembly")
     scope = replace(selected_scope, source_selections=selections,
