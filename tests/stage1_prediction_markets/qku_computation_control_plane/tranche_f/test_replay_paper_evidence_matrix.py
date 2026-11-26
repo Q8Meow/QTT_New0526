@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass, fields, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -891,7 +892,56 @@ def _lp03_observed_sharpe_seal(issuer, operation, grant_ref, outcome, issuer_con
         monitor.free_tool_id(tool)
 
 
-def _lp03_resource_refusal_detail(error):
+@contextmanager
+def _lp03_cashflow_preparation_phase(operation, phase, selectors):
+    """Tie original guard operands to this fixture invocation, before rollback."""
+    import sys
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceControlBootstrapV1
+
+    guards = (_EvidenceControlBootstrapV1._charge_v1.__code__, _EvidenceControlBootstrapV1._room_v1.__code__)
+    observation = None
+
+    def observe(code, offset, error):
+        nonlocal observation
+        if code is _native_require.__code__ and type(error) is ContractValidationError:
+            frame = sys._getframe(2)
+            if (frame.f_code in guards and frame.f_locals.get("self") is operation
+                    and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED"):
+                observation = (error, frame.f_code.co_qualname, tuple(operation.consumed.items()))
+
+    monitor = sys.monitoring
+    tool = next((i for i in (4, 3) if monitor.get_tool(i) is None), None)
+    if tool is not None:
+        monitor.use_tool_id(tool, "LP03 cashflow preparation refusal")
+    try:
+        if tool is not None:
+            monitor.register_callback(tool, monitor.events.RAISE, observe)
+            monitor.set_events(tool, monitor.events.RAISE)
+        yield
+    except BaseException as failure:
+        try:
+            detail = _lp03_resource_refusal_detail(failure, cashflow_operation=operation)
+            if (observation is not None and observation[0] is failure and observation[1] == detail["guard"]
+                    and detail["failed_counter"] is not None):
+                values = dict(observation[2])
+                detail["preparation_values"] = values
+                if "proposed_increment" in detail:
+                    detail["comparison_value"] = (values[detail["failed_counter"]]
+                        + detail["proposed_increment"] + detail["protected_reserve"])
+            print("LP03_MATH06_PREPARATION_REFUSAL=" + deterministic_json(dict(
+                selectors=selectors, phase=phase, decision=detail, unknown_fields_are_null=True)))
+        except Exception:
+            pass  # Reporting must preserve the original exception and its traceback.
+        raise
+    finally:
+        if tool is not None:
+            monitor.set_events(tool, 0)
+            monitor.register_callback(tool, monitor.events.RAISE, None)
+            monitor.free_tool_id(tool)
+
+
+def _lp03_resource_refusal_detail(error, *, cashflow_operation=None):
     from itertools import islice
     from src.qtt.agents.pr169_agent_orch1_resolvers import AgentOrchService, _EvidenceIssuerStateV1
     from traceback import walk_tb
@@ -922,7 +972,13 @@ def _lp03_resource_refusal_detail(error):
     guard = frames[-2][0]
     local = guard.f_locals
     detail["guard"] = guard.f_code.co_qualname
-    if guard.f_code in (_EvidenceControlBootstrapV1._charge_v1.__code__, _EvidenceControlBootstrapV1._room_v1.__code__):
+    preparation_guards = (_EvidenceControlBootstrapV1._charge_v1.__code__, _EvidenceControlBootstrapV1._room_v1.__code__)
+    if cashflow_operation is not None:
+        detail["refusal_code"] = refusal["code"]
+        if (guard.f_code not in preparation_guards or local.get("self") is not cashflow_operation
+                or refusal["code"] != "LP03_PREPARATION_RESOURCE_EXHAUSTED"):
+            return detail
+    if guard.f_code in preparation_guards:
         name, limits = local["name"], local["limits"]
         nonclock = ("record_reads", "read_bytes", "owner_queries", "query_result_records", "control_writes", "control_bytes")
         counters = dict.fromkeys((*nonclock, "cpu_ns", "wall_ns"))
@@ -6276,11 +6332,19 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         and requested_case == (selected_math, review_cut, False, False)
         and cold_native_writer is False
         and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
+    preparation_cpu_ns = 10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe else 5_000_000_000
+    if (selected_math == "MATH-06" and register and not cpu_boundary_witness and cold_native_writer is False
+            and requested_case == (selected_math, review_cut, False, False)
+            and all(cut is None for cut in (expect_rejection, seal_cut, compilation_cut, attempt_cut, private26_cut))
+            and (review_cut, registration_cut) in (
+                (None, None), (None, "wrong_bounds"), (None, "expectation_outside"), (None, "zero_budget"),
+                ("cumulative_serialization", None))):
+        # These five cases need the full 21-source seal before their own assertions.
+        preparation_cpu_ns = 20_000_000_000
     limits = m.EvidencePreparationLimitsV1(max_record_reads=2048 if cashflow_capacity else 1000,
         max_read_bytes=8_000_000,max_owner_queries=1280 if cashflow_capacity else 1000,
         max_query_result_records=2048 if cashflow_capacity else 1000, max_control_writes=128, max_control_bytes=2_000_000,
-        # The strict timer witnesses and their positive siblings perform the same source readbacks.
-        max_cpu_ns=10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe else 5_000_000_000,
+        max_cpu_ns=preparation_cpu_ns,
         max_wall_ns=5_000_000_000 if seal_cut == "tail_expiry" else 30_000_000_000,
         aggregate_budget_ref="LP03-BUDGET::original-assembly")
     scope = replace(selected_scope, source_selections=selections,
@@ -6400,9 +6464,15 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert store._connection.execute("SELECT COUNT(*) FROM receipt_records WHERE record_id=?",
             (grant.grant_ref + "::INPUT_ASSEMBLY",)).fetchone() == (0,)
         return
+    cashflow_selectors = dict(requested_case=requested_case, selected_math=selected_math, register=register,
+        review_cut=review_cut, registration_cut=registration_cut, expect_rejection=expect_rejection,
+        seal_cut=seal_cut, compilation_cut=compilation_cut, attempt_cut=attempt_cut, private26_cut=private26_cut,
+        cold_native_writer=cold_native_writer, cpu_boundary_witness=cpu_boundary_witness) if selected_math == "MATH-06" else None
     try:
-        outcome = assemble_evidence_input_snapshot_v1(request, assembly_grant=grant, owner_resolvers=sources,
-            parameter_resolver=parameters, source_grants=caps, clock=state.clock)
+        with (_lp03_cashflow_preparation_phase(operation, "assembly", cashflow_selectors)
+              if cashflow_selectors is not None else nullcontext()):
+            outcome = assemble_evidence_input_snapshot_v1(request, assembly_grant=grant, owner_resolvers=sources,
+                parameter_resolver=parameters, source_grants=caps, clock=state.clock)
     except BaseException as failure:
         if cashflow:
             matched_original_read_cut=False
@@ -6661,7 +6731,9 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     if original_sharpe:
         sealed_ref = _lp03_observed_sharpe_seal(issuer, operation, grant.grant_ref, outcome, issuer_context)
     else:
-        sealed_ref = issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
+        with (_lp03_cashflow_preparation_phase(operation, "seal", cashflow_selectors)
+              if cashflow_selectors is not None else nullcontext()):
+            sealed_ref = issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
     assert operation.current_state.state is m.EvidenceAssemblyStateV1.SEALED
     assert sealed_ref.record_id == outcome.assembly_record.record_id and len(operation.readback_refs) == 13
     assert operation.commit_state == "SEALED_AUDIT_COMMITTED_PENDING_READBACK"
@@ -6779,6 +6851,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert operation.grant_record.reserved_preparation_limits.max_owner_queries==1280
         print("LP03_CASHFLOW_ASSEMBLY_CENSUS_QUALIFICATION="+deterministic_json(dict(math_id=selected_math,
             scope="ORIGINAL_SIGNED_FINITE_PREPARATION_CENSUS_ONLY",source_count=source_count,
+            **({"selectors": cashflow_selectors} if cashflow_selectors is not None else {}),
             original_limits=operation.grant_record.reserved_preparation_limits,actual_consumed=dict(operation.consumed),
             independent_expected_reads=expected_reads,independent_expected_owner_queries=expected_queries,
             sealed_ref=sealed_ref,seal_readback_observation=operation.seal_readback_observation,
