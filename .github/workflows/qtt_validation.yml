@@ -1,298 +1,971 @@
-name: QTT Validation
+name: MATH-03 hosted checkpoint observations
+run-name: MATH-03 checkpoint observations (manual)
 
 on:
-  pull_request:
   workflow_dispatch:
-    inputs:
-      full_validation:
-        description: Run the full validation suite
-        required: true
-        default: true
-        type: boolean
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
 
-env:
-  QTT_FORCE_FULL_VALIDATION: ${{ github.event_name == 'workflow_dispatch' && inputs.full_validation && '1' || '0' }}
-
 jobs:
-  validation_shards:
-    name: Validation Shard (${{ matrix.group }})
+  math03_checkpoint:
+    name: MATH-03 checkpoint observation ${{ matrix.observation }}
     runs-on: windows-2025
-    defaults:
-      run:
-        shell: bash
-    timeout-minutes: ${{ matrix.phase == 'pytest-shard-8' && 300 || 90 }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - phase: fast-preflight
-            group: fast-preflight
-          - phase: deterministic-validators-a
-            group: tools-generated-artifacts-a
-          - phase: deterministic-validators-b
-            group: tools-generated-artifacts-b
-          - phase: deterministic-validators-c
-            group: tools-generated-artifacts-c
-          - phase: pytest-shard-1
-            group: tools-core
-          - phase: pytest-shard-2
-            group: tools-authority-boundary
-          - phase: pytest-shard-3
-            group: pr168-rp-core
-          - phase: pytest-shard-4
-            group: pr168-rp-evidence
-          - phase: pytest-shard-5
-            group: pr168-rp-quantum
-          - phase: pytest-shard-6
-            group: pr168-rp-dag-no-orphan
-          - phase: pytest-shard-7
-            group: repo-wide-integrity-a
-          - phase: pytest-shard-8
-            group: repo-wide-integrity-b
-          - phase: post-validation
-            group: repo-wide-integrity
-
+        observation: [1, 2, 3]
+    env:
+      SAMPLE: ${{ matrix.observation }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Check out repository
+      - name: Allocate a job-private observation directory
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REPOSITORY -ne 'Q8Meow/QTT_New0526' -or $env:GITHUB_EVENT_NAME -ne 'workflow_dispatch' -or
+              $env:GITHUB_REF -ne 'refs/heads/codex/lp03-math03-checkpoint-observation' -or $env:GITHUB_RUN_ATTEMPT -ne '1') {
+            throw 'This diagnostic requires its reviewed scratch branch and a first manual run attempt.'
+          }
+          $observation = Join-Path $env:RUNNER_TEMP ("m03-{0}-{1}" -f $env:GITHUB_RUN_ID,$env:SAMPLE)
+          if (Test-Path -LiteralPath $observation) { throw 'The job observation directory already exists.' }
+          New-Item -ItemType Directory -Path $observation | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $observation 'evidence') | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $observation 'public') | Out-Null
+          [ordered]@{ sample=[int]$env:SAMPLE; outcome='UNVERIFIED'; failure_stage='initialization';
+            failure_class='FINAL_OBSERVATION_UNAVAILABLE'; unverified_observation_groups=@('all') } |
+            ConvertTo-Json | Set-Content -LiteralPath (Join-Path $observation 'public/observation.json') -Encoding utf8
+          "MATH03_ROOT=$observation" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          [ordered]@{ sample=$env:SAMPLE; run=$env:GITHUB_RUN_ID; workflowRevision=$env:GITHUB_SHA;
+            imageOS=$env:ImageOS; imageVersion=$env:ImageVersion; runnerOS=$env:RUNNER_OS; runnerArch=$env:RUNNER_ARCH;
+            job=$env:GITHUB_JOB; repository=$env:GITHUB_REPOSITORY; startedUtc=[DateTime]::UtcNow.ToString('o') } |
+            ConvertTo-Json | Set-Content -LiteralPath (Join-Path $observation 'evidence/job.json') -Encoding utf8
+
+      - name: Write the read-only native clock observer
+        run: |
+          set -euo pipefail
+          destination="$(cygpath -u "$MATH03_ROOT")"
+          cat > "$destination/meter.py" <<'PY'
+          """Read-only CPython observations for one synthetic registration."""
+          import collections
+          import json
+          import os
+          from pathlib import Path
+          import sqlite3
+          import sys
+          import time
+          import types
+
+          from src.qtt.agents.pr169_agent_orch1_resolvers import _EvidenceIssuerStateV1
+          from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+              _EvidenceBoundStoreV1, _EvidenceRegistrationOperationV1,
+          )
+          from src.qtt.stage1_prediction_markets.qku_computation_control_plane.sqlite_reference import SQLiteReferenceAdapterV1
+          from src.qtt.stage1_prediction_markets.qku_computation_control_plane.serialization import deterministic_json
+
+          ROOT = Path(__file__).resolve().parent
+          REPO = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          P = {}
+
+
+          def native_sample():
+              return time.time_ns(), time.monotonic_ns(), time.process_time_ns()
+
+
+          def sample_dict(sample):
+              return dict(zip(("wall_ns", "monotonic_ns", "process_cpu_ns"), sample, strict=True))
+
+
+          def emit(kind, data):
+              print("MATH03_CONTROL_" + kind + "=" + json.dumps(data, sort_keys=True), flush=True)
+
+
+          def check_imports():
+              paths = {n: str(Path(m.__file__).resolve()) for n, m in tuple(sys.modules.items())
+                       if n.startswith(("src.qtt", "tests.stage1_prediction_markets", "tools.validation_reliability"))
+                       and getattr(m, "__file__", None)}
+              assert paths and all(Path(p).is_relative_to(REPO) for p in paths.values()), paths
+              return dict(pid=os.getpid(), python=sys.executable, version=sys.version,
+                          cwd=os.getcwd(), loaded_project_modules=len(paths),
+                          adapter_source=paths[SQLiteReferenceAdapterV1.__module__])
+
+
+          def observe_registration(issuer, context, state, store, request, grant, declared_protocol, signed_fixture):
+              monitor = sys.monitoring
+              tool_id = 3
+              assert monitor.get_tool(tool_id) is None
+              register_code = SQLiteReferenceAdapterV1._evidence_register_experiment_v1.__code__
+              effect_code, = [c for c in register_code.co_consts if isinstance(c, types.CodeType) and c.co_name == "effect"]
+              current_code = _EvidenceIssuerStateV1._registration_current_v1.__code__
+              bound_code = _EvidenceBoundStoreV1._require_original_objects_v1.__code__
+              read_code = SQLiteReferenceAdapterV1._evidence_read_control_members_v1.__code__
+              init_code = _EvidenceRegistrationOperationV1.__init__.__code__
+              guard_code = _EvidenceRegistrationOperationV1._check_current_v1.__code__
+              rows = []
+              checkpoints, commit_entries, custody, enforced, admissions = [], [], [], [], []
+              original_connection = store._connection
+              assert type(store) is SQLiteReferenceAdapterV1 and type(original_connection) is sqlite3.Connection
+              assert not original_connection.in_transaction and not state.registrations
+
+              def is_effect(frame):
+                  return (frame is not None and frame.f_code is effect_code
+                          and frame.f_locals["sql"] == "COMMIT")
+
+              def line(code, number):
+                  frame = sys._getframe(1)
+                  assert frame.f_code is code
+                  if (code, number) == (register_code, 738):
+                      raw = native_sample()
+                      loc = frame.f_locals
+                      active = loc["operation"]
+                      retained = store._evidence_store_binding_v1
+                      checkpoints.append((raw, active, active.commit_state, type(active) is _EvidenceRegistrationOperationV1,
+                          loc["self"] is state.control_store is store,
+                          loc["connection"] is retained._EvidenceBoundStoreV1__connection is store._connection is original_connection,
+                          original_connection.in_transaction, state.registrations[grant.grant_ref] is state.operation is active))
+                  elif (code, number) == (init_code, 885):
+                      loc = frame.f_locals
+                      admissions.append((loc["_wall"], loc["mono"], loc["cpu"]))
+                  elif (code, number) == (effect_code, 659):
+                      if is_effect(frame):
+                          raw = native_sample()
+                          loc = frame.f_locals
+                          active = loc["operation"]
+                          commit_entries.append((raw, active, active.commit_state,
+                              loc["connection"] is original_connection is store._connection,
+                              original_connection.in_transaction, state.operation is active,
+                              frame.f_back.f_code is register_code and frame.f_back.f_locals["self"] is store,
+                              dict(active.consumed)))
+                  elif (code, number) == (read_code, 954):
+                      loc = frame.f_locals
+                      if loc["stage"] == "REGISTERED_EXPERIMENT":
+                          dbrow, = loc["rows"]
+                          rows.append((loc["table"], loc["ref"], dbrow[0], dbrow[1],
+                                       loc["reader"] is not original_connection, id(loc["reader"]),
+                                       id(loc["operation"]), loc["operation"].commit_state))
+                  else:
+                      return monitor.DISABLE
+
+              def returned(code, _offset, value):
+                  frame = sys._getframe(1)
+                  assert frame.f_code is code
+                  if code is bound_code:
+                      current = frame.f_back
+                      if current.f_code is not current_code:
+                          return
+                  else:
+                      current = frame
+                  guard = current.f_back
+                  if guard.f_code is not guard_code or not is_effect(guard.f_back):
+                      return
+                  loc = current.f_locals
+                  active = loc["operation"]
+                  if code is bound_code:
+                      retained = frame.f_locals["self"]
+                      custody.append((id(retained), id(store), id(original_connection),
+                          retained is store._evidence_store_binding_v1 and frame.f_locals["adapter"] is store,
+                          frame.f_locals["host_binding"] is state.host,
+                          retained._EvidenceBoundStoreV1__connection is original_connection,
+                          type(active) is _EvidenceRegistrationOperationV1 and active is state.operation,
+                          active.commit_state, original_connection.in_transaction))
+                      return
+                  assert code is current_code
+                  signed = loc["_signed"]
+                  key_rows = tuple((k.key_id, k.valid_from_wall_ns, k.exclusive_expiry_wall_ns,
+                                    k.validity_record_ref, type(k.revocation_record_ref_or_absence).__name__)
+                                   for k in loc["keys"])
+                  rights = tuple((r.rights_ref, r.valid_from_wall_ns, r.exclusive_expiry_wall_ns,
+                                  r.exclusive_retention_wall_ns, c.rights_by_id.get(r.rights_ref) is r,
+                                  r.rights_ref not in c.withdrawn, r.generation, c.generation,
+                                  c.lock._is_owned(), r.source_selection.selection.record_refs)
+                                 for c, policies in active.policies for r in policies)
+                  enforced.append(dict(operation=id(active), sample=value, protocol=active.protocol,
+                      signed=signed, message=loc["message"], envelope=loc["envelope"], deadline=loc["deadline"],
+                      keys=key_rows, rights=rights, original=active.protocol is active.resolved_policy_original[0],
+                      signed_entry=any(entry is active.envelope_entry for entry in state.owner_envelopes),
+                      original_blob=active.resolved_policy_original[2], aggregate=loc["envelope"].aggregate_execution_limits,
+                      effective_expiry=active.records[0].expiry_wall_ns,
+                      cancelled=loc["ref"] in state.cancelled_envelopes, generation=state.generation,
+                      active=state.registrations[grant.grant_ref] is state.operation is active))
+
+              monitor.use_tool_id(tool_id, "math03-positive-clock")
+              try:
+                  monitor.register_callback(tool_id, monitor.events.LINE, line)
+                  monitor.register_callback(tool_id, monitor.events.PY_RETURN, returned)
+                  for code in (init_code, register_code, effect_code, read_code):
+                      monitor.set_local_events(tool_id, code, monitor.events.LINE)
+                  for code in (bound_code, current_code):
+                      monitor.set_local_events(tool_id, code, monitor.events.PY_RETURN)
+                  try:
+                      result = issuer.register_evidence_experiment_v1(request, issuer_context=context)
+                  finally:
+                      for code in (init_code, register_code, effect_code, read_code, bound_code, current_code):
+                          monitor.set_local_events(tool_id, code, 0)
+              finally:
+                  monitor.register_callback(tool_id, monitor.events.LINE, None)
+                  monitor.register_callback(tool_id, monitor.events.PY_RETURN, None)
+                  monitor.free_tool_id(tool_id)
+                  emit("PHASE_COUNTS", dict(admission=len(admissions), custody=len(custody),
+                       checkpoint_738=len(checkpoints),guard_sample=len(enforced), commit_entry=len(commit_entries), returned_rows=len(rows)))
+                  for ck in checkpoints:
+                      emit("ATTEMPTED_ENTRY", dict(original=sample_dict(ck[0]), state=ck[2], operation=id(ck[1]),
+                          native_registration_type=ck[3], original_adapter=ck[4], same_bound_connection=ck[5],
+                          original_transaction_open=ck[6], original_active=ck[7]))
+                  for witness in enforced:
+                      protocol, deadline = witness["protocol"], witness["deadline"]
+                      emit("NATIVE_GUARD", dict(original=sample_dict(witness["sample"]), operation=witness["operation"],
+                          deadline=deadline.exclusive_deadline_monotonic_ns, admission=deadline.admitted_monotonic_ns,
+                          clock_domain=deadline.clock_domain_id, process=deadline.process_identity_ref, boot=deadline.boot_identity_ref,
+                          protocol=[protocol.valid_from_wall_ns,protocol.exclusive_expiry_wall_ns],
+                          message=[witness["message"].valid_from_wall_ns,witness["message"].exclusive_expiry_wall_ns],
+                          envelope=witness["envelope"].exclusive_expiry_wall_ns, original_keys=witness["keys"], original_rights=witness["rights"],
+                          native_custody=custody, declared_protocol_matches=protocol == declared_protocol))
+                  for observation in commit_entries:
+                      emit("BEFORE_NATIVE_COMMIT", dict(original=sample_dict(observation[0]), state=observation[2],
+                          same_connection=observation[3], transaction_open=observation[4], original_active=observation[5],
+                          original_adapter_frame=observation[6], original_operation=id(observation[1])))
+              admission, = admissions
+              cur, = enforced
+              original_binding, = custody
+              checkpoint, = checkpoints
+              checkpoint_sample = checkpoint[0]
+              commit, = commit_entries
+              entry, registered, commit_state, same_connection, open_transaction, active, original_frame, consumed = commit
+              assert all(original_binding[3:7]) and original_binding[7:] == ("COMMIT_ATTEMPTED", True)
+              assert commit_state == "COMMIT_ATTEMPTED" and all((same_connection, open_transaction, active, original_frame))
+              assert checkpoint[1] is registered and checkpoint[2] == "COMMIT_ATTEMPTED" and all(checkpoint[3:])
+              assert cur["operation"] == id(registered) and cur["original"] and cur["active"] and cur["signed_entry"]
+              assert not cur["cancelled"] and cur["signed"].canonical_message == signed_fixture.canonical_message
+              assert cur["signed"].signature_hex == signed_fixture.signature_hex
+              assert cur["signed"].canonical_message == deterministic_json(cur["message"])
+              assert deterministic_json(cur["message"].payload) == deterministic_json(cur["envelope"])
+              assert cur["protocol"] == declared_protocol and cur["original_blob"] == deterministic_json(declared_protocol)
+              assert registered is state.registrations[grant.grant_ref] and registered.handle is result
+              assert registered.commit_state == "COMMITTED_AND_READBACK" and not original_connection.in_transaction
+              assert registered.compilation is None and not registered.attempts
+              assert [(t, ref) for t, ref, *_ in rows] == list(registered.readback_refs)
+              assert collections.Counter(row[0] for row in rows) == {"receipt_records": 2, "idempotency_claims": 8}
+              assert len({row[5] for row in rows}) == 1
+              for row, body in zip(rows, registered.readback_bodies, strict=True):
+                  assert row[2] == len(row[3]) and row[3] == body.encode() and row[4]
+                  assert row[6:] == (id(registered), "COMMITTED_PENDING_READBACK")
+              assert registered.commit_observation[1] >= entry[1] >= cur["sample"][1] >= checkpoint_sample[1] >= admission[1]
+              assert registered.readback_observation[1] >= registered.commit_observation[1]
+              assert registered.deadline.admitted_monotonic_ns == admission[1]
+              assert cur["protocol"].exclusive_expiry_wall_ns == P["declaration"]["exclusive_expiry_wall_ns"]
+              limits = []
+              def limit(name, domain, end, start=None):
+                  index = {"wall":0, "monotonic":1, "process_cpu":2}[domain]
+                  t = entry[index]
+                  limits.append(dict(name=name, domain=domain, exclusive_end_ns=end, valid_from_ns=start,
+                      remaining_at_checkpoint_738_ns=end-checkpoint_sample[index],
+                      remaining_at_sql_659_ns=end-t, remaining_at_native_guard_ns=end-cur["sample"][index],
+                      elapsed_since_valid_from_at_checkpoint_ns=(None if start is None else checkpoint_sample[index]-start)))
+                  assert t < end and (start is None or start <= t)
+                  assert checkpoint_sample[index] < end and (start is None or start <= checkpoint_sample[index])
+              proto, msg, env, dl = (cur[k] for k in ("protocol","message","envelope","deadline"))
+              limit("parameter_protocol", "wall", proto.exclusive_expiry_wall_ns, proto.valid_from_wall_ns)
+              limit("owner_message", "wall", msg.exclusive_expiry_wall_ns, msg.valid_from_wall_ns)
+              limit("owner_envelope", "wall", env.exclusive_expiry_wall_ns)
+              limit("effective_experiment_expiry", "wall", cur["effective_expiry"])
+              limit("registration", "monotonic", dl.exclusive_deadline_monotonic_ns, dl.admitted_monotonic_ns)
+              for key_id, valid_from, expiry, validity_ref, revoked in cur["keys"]:
+                  limit("key/" + key_id, "wall", expiry, valid_from)
+              for ref, start, expiry, retention, orig, current, generation, held_generation, locked, refs in cur["rights"]:
+                  assert orig and current and generation == held_generation and locked
+                  limit("rights_validity/" + ref, "wall", expiry, start)
+                  limit("rights_retention/" + ref, "wall", retention)
+              assert {r[0] for r in cur["rights"]} == set(env.source_rights_refs)
+              assert proto.source_receipt_ref and any(proto.parameter_protocol_ref in r[-1] for r in cur["rights"])
+              cap = cur["aggregate"]
+              assert cap.max_wall_ns == 240_000_000_000 and cap.max_cpu_ns == 40_000_000_000
+              assert env.per_attempt_limits.max_cpu_ns == 10_000_000_000
+              assert registered.started_cpu_ns == admission[2] and state.supervisor is None
+              # Aggregate resources are inclusive budgets, distinct from exclusive deadlines.
+              budgets = dict(cpu_cap_ns=cap.max_cpu_ns, wall_cap_ns=cap.max_wall_ns,
+                             cpu_remaining_at_checkpoint_738_ns=cap.max_cpu_ns-(checkpoint_sample[2]-admission[2]),
+                             wall_remaining_at_checkpoint_738_ns=cap.max_wall_ns-(checkpoint_sample[1]-admission[1]),
+                             cpu_used_at_enforced_sample_ns=cur["sample"][2]-admission[2],
+                             cpu_remaining_at_commit_entry_ns=cap.max_cpu_ns-(entry[2]-admission[2]),
+                             wall_remaining_at_commit_entry_ns=cap.max_wall_ns-(entry[1]-admission[1]),
+                             original_accounted_consumed_before_sql=consumed)
+              assert budgets["cpu_remaining_at_commit_entry_ns"] >= 0
+              clocks = dict(process=state.clock.process_identity_ref, boot=state.clock.boot_identity_ref,
+                            monotonic_domain=state.clock.clock_domain_id,
+                            declarations=json.loads(deterministic_json(state.clock.declaration_v1())))
+              emit("RESULT", dict(math="MATH-03", origin=env.permitted_origins[0].value, declarations=P,
+                  cap_profile=dict(aggregate_wall_ns=cap.max_wall_ns, aggregate_cpu_ns=cap.max_cpu_ns,
+                                   per_attempt_cpu_ns=env.per_attempt_limits.max_cpu_ns),
+                  clocks=clocks, admission=sample_dict(admission), enforced_sample=sample_dict(cur["sample"]),
+                  attempted_checkpoint_738=sample_dict(checkpoint_sample),
+                  commit_sql_entry_659=sample_dict(entry), deadlines=limits, budgets=budgets,
+                  declaration_to_checkpoint_738_monotonic_ns=checkpoint_sample[1]-P["declaration"]["after"]["monotonic_ns"],
+                  declaration_to_checkpoint_738_wall_ns=checkpoint_sample[0]-P["declaration"]["after"]["wall_ns"],
+                  declaration_to_checkpoint_738_monotonic_bracket_ns=[checkpoint_sample[1]-P["declaration"][p]["monotonic_ns"] for p in ("after","before")],
+                  declaration_to_commit_entry_monotonic_ns=entry[1]-P["declaration"]["after"]["monotonic_ns"],
+                  declaration_to_commit_entry_wall_ns=entry[0]-P["declaration"]["after"]["wall_ns"],
+                  declaration_interval_before_after_ns=[entry[1]-P["declaration"][p]["monotonic_ns"] for p in ("after","before")],
+                  retained_store_id=original_binding[0], adapter_id=id(store), original_connection_id=id(original_connection),
+                  active_operation_id=id(registered), commit_entry_state=commit_state, original_transaction_open=open_transaction,
+                  original_file=store.database_path, actual_registered_state=registered.commit_state,
+                  signed_message_exact=True, original_signature_exact=True, signed_message_bytes=len(cur["signed"].canonical_message.encode()),
+                  verified_generation=cur["generation"], message_key=msg.key_id, original_keys=cur["keys"],
+                  original_rights=cur["rights"], protocol_ref=proto.parameter_protocol_ref,
+                  protocol_source_receipt=proto.source_receipt_ref, canonical_protocol_bytes_match=True,
+                  canonical_protocol_bytes=len(cur["original_blob"].encode()), owner_envelope=env.envelope_ref,
+                  registration_handle=result.record_id, handle_store=result.store_id,
+                  registration_commit=sample_dict(registered.commit_observation), native_readback=sample_dict(registered.readback_observation[:3]),
+                  parent_assembly_readback=sample_dict(registered.parent_readback_observation[:3]),
+                  rows=[dict(table=t, ref=ref, byte_count=size, direct_native_bytes_equal=True, native_reader_id=reader)
+                        for t,ref,size,body,_,reader,*rest in rows], no_compilation=True, attempt_count=0,
+                  verified_identity=check_imports()))
+              return result
+          PY
+
+      - name: Write the source-anchored fixture builder
+        run: |
+          set -euo pipefail
+          destination="$(cygpath -u "$MATH03_ROOT")"
+          cat > "$destination/prepare.py" <<'PY'
+          """Assemble the disposable test driver without importing or executing QTT."""
+          import ast
+          import builtins
+          import os
+          from pathlib import Path
+          import subprocess
+          import symtable
+          import sys
+          import textwrap
+
+          root = Path(__file__).resolve().parent
+          repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          rel = Path("tests/stage1_prediction_markets/qku_computation_control_plane/tranche_f/test_replay_paper_evidence_matrix.py")
+          source = (repo / rel).read_bytes()
+          subprocess.run(["git","--no-optional-locks","diff","--quiet","HEAD","--",rel.as_posix()],cwd=repo,check=True)
+          git_fixture = subprocess.check_output(["git","cat-file","--filters","HEAD:"+rel.as_posix()], cwd=repo)
+          assert source == git_fixture
+          lines = source.decode().splitlines(keepends=True)
+          def native(first, last):
+              return "".join(lines[first-1:last])
+
+          def here(s):
+              return textwrap.dedent(s).lstrip("\n")
+
+          def indent(s, n):
+              return textwrap.indent(here(s), " " * n)
+
+          auth = native(1131,1151)
+          auth += indent("anchor_before = time.monotonic_ns()",4) + "\n"
+          auth += native(1152,1152)
+          auth += indent("anchor_after = time.monotonic_ns()",4) + "\n"
+          auth += native(1153,1267)
+          auth += native(1279,1285)
+          auth += indent("""
+              meter.P["anchor"] = dict(wall_ns=now, monotonic_before_ns=anchor_before,
+                  monotonic_after_ns=anchor_after, validity_seconds=validity_seconds,
+                  expiry_wall_ns=expiry)
+              _assert_lp03_role_store_binding_contract(tmp_path, config, fixture_keys, envelope, message)
+          """,4)
+
+          roles = native(14904,14943)
+          roles += indent("assert os.name == 'nt'",4) + "\n"
+          roles += native(14954,14962)
+          roles += textwrap.indent(textwrap.dedent(native(14978,14980)), " " * 12)
+          roles += native(14981,14983)
+          roles += native(15006,15011)
+          roles += indent("""
+              from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
+              actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
+              seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
+                  hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True, registration_cut="protocol_expiry")
+          """,8)
+          roles += native(15965,15967)
+
+          seal = native(4711,4741)
+          seal += indent("""
+              assert not original_positive and registration_cut == "protocol_expiry"
+              assert register and selected_math == "MATH-03" and cold_native_writer is False
+              assert requested_case == ("MATH-03", None, False, False) and not cpu_boundary_witness
+          """,4)
+          seal += native(4742,5665)
+          seal += indent("before_declaration = meter.native_sample()",8) + "\n"
+          # Select the existing positive owner-envelope horizon before the protocol exists.
+          # Preserve the target route's resource/custody inputs, with no short-lived protocol or wait.
+          anchor = native(5666,5667)
+          assert anchor.strip().endswith('else envelope.exclusive_expiry_wall_ns')
+          seal += indent("protocol_expiry = envelope.exclusive_expiry_wall_ns",8) + "\n"
+          seal += indent("""
+              after_declaration = meter.native_sample()
+              meter.P["declaration"] = dict(before=meter.sample_dict(before_declaration),
+                  after=meter.sample_dict(after_declaration), original_anchor_wall_ns=meter.P["anchor"]["wall_ns"],
+                  exclusive_expiry_wall_ns=protocol_expiry, envelope_expiry_wall_ns=envelope.exclusive_expiry_wall_ns,
+                  branch="envelope.exclusive_expiry_wall_ns", fixture_source_lines=[5666, 5667])
+          """,8)
+          # Keep the target prefix verbatim, including both original refusal-before-SQL checks.
+          # The no-cut-only graph driver at 6578 is false for this historical route.
+          seal += native(5668,6735)
+          seal += indent("""
+              assert outcome._record is original_record
+              assert original_part.reconstructed_canonical_events is original_events and queries == []
+              meter.P["target_custody"] = dict(first_denied_before_sql=True, second_denied_before_sql=True,
+                  original_record_restored=True, original_events_restored=True)
+          """,4)
+          seal += native(6736,6798)
+          seal += native(6809,6810)
+          seal += native(6904,6905)
+          seal += indent("""
+              experiment_ref = meter.observe_registration(issuer, issuer_context, state, store,
+                  registration_request, grant, parameter_protocol, signed)
+              assert experiment_ref is state.registrations[grant.grant_ref].handle
+          """,8)
+
+          entry = here("""
+              def test_math03_positive(tmp_path):
+                  assert not meter.P
+                  assert tmp_path.resolve().is_relative_to(meter.ROOT / "native")
+                  meter.emit("IDENTITY", meter.check_imports())
+                  try:
+                      _assert_lp03_authorization_data_contract(tmp_path)
+                  finally:
+                      for name in ("anchor", "declaration", "target_custody"):
+                          if name in meter.P:
+                              meter.emit(name.upper(), meter.P[name])
+          """)
+          body = "\n\n".join([auth, roles, seal, entry])
+          st = symtable.symtable(body,"test_math03.py","exec")
+          names = set()
+          def collect(t):
+              names.update(s.get_name() for s in t.get_symbols() if s.is_global() and s.is_referenced())
+              for child in t.get_children():
+                  collect(child)
+          collect(st)
+          defined = {node.name for node in ast.parse(body).body if isinstance(node, ast.FunctionDef)}
+          original = symtable.symtable(source.decode(),"original","exec")
+          imports = names - set(dir(builtins)) - defined - {"meter"}
+          assert imports <= set(original.get_identifiers()), imports - set(original.get_identifiers())
+          mod = ".".join(rel.with_suffix("").parts)
+          header = '"""Single synthetic registration. Generated only from the pinned fixture and its observation driver."""\n'
+          header += '''from __future__ import annotations
+          from importlib import util as _module_util
+          from pathlib import Path as _Path
+          _spec = _module_util.spec_from_file_location("math03_observation", _Path(__file__).with_name("meter.py"))
+          meter = _module_util.module_from_spec(_spec)
+          _spec.loader.exec_module(meter)
+          '''
+          header += f"from {mod} import (\n" + "".join(f"    {name},\n" for name in sorted(imports)) + ")\n\n"
+          final = (header + body).replace("\r\n","\n")
+          out = root/"test_math03.py"
+          compile(final, str(out), "exec")
+          with out.open("xb") as stream:
+              stream.write(final.encode("utf-8"))
+          assert out.read_bytes() == final.encode("utf-8")
+          for path in (root/"meter.py", root/"prepare.py", out):
+              compile(path.read_bytes(), str(path), "exec")
+          print("Generated and compiled one positive MATH-03 fixture, with direct byte equality.")
+          PY
+
+      - name: Write the single-invocation supervisor launcher
+        run: |
+          set -euo pipefail
+          destination="$(cygpath -u "$MATH03_ROOT")"
+          cat > "$destination/run_once.py" <<'PY'
+          import importlib.metadata
+          import json
+          import os
+          from pathlib import Path
+          import platform
+          import struct
+          import subprocess
+          import sys
+          import time
+
+          ROOT = Path(os.environ["MATH03_ROOT"]).resolve()
+          REPO = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          EVIDENCE = ROOT / "evidence"
+          assert Path.cwd().resolve() == REPO and os.environ["GITHUB_RUN_ATTEMPT"] == "1"
+          assert sys.implementation.name == "cpython" and sys.version_info[:3] == (3, 14, 6)
+          assert os.name == "nt" and struct.calcsize("P") == 8 and platform.machine().upper() == "AMD64"
+          assert not os.environ.get("PYTHONOPTIMIZE") and not sys.flags.optimize
+          assert not os.getenv("PYTEST_ADDOPTS") and not os.getenv("QTT_VALIDATION_EVIDENCE_ROOT")
+          assert not os.getenv("QTT_VALIDATION_RUN_ID")
+          def git(*args):
+              return subprocess.check_output(["git", "--no-optional-locks", *args], cwd=REPO, text=True).strip()
+          assert git("rev-parse","HEAD") == "4fbf5759b142c4d813aa4deb241c6fb1a5054a93"
+          assert git("rev-parse","HEAD^{tree}") == "ca9d5f8ce6eff120a0a6b71c048ac87c7f5fd891"
+          assert git("status","--porcelain=v1","--untracked-files=all") == ""
+          assert git("ls-files","--others","--ignored","--exclude-standard") == ""
+          packages = {name:importlib.metadata.version(name) for name in
+              ("pytest","websockets","cryptography","cffi","pycparser","fido2","iniconfig","packaging","pluggy","pygments","colorama")}
+          assert all(packages[k] == v for k,v in {"pytest":"9.1.1","websockets":"17.0.1",
+              "cryptography":"50.0.1","cffi":"2.1.1","pycparser":"3.0","fido2":"2.2.1"}.items())
+          assert os.getenv("ImageOS") and os.getenv("ImageVersion") and os.environ["RUNNER_ARCH"] == "X64"
+          for n in ("QTT_VALIDATION_PROCESS_ROOT", "QTT_VALIDATION_EVIDENCE_ROOT", "QTT_VALIDATION_RUN_ID"):
+              assert not os.getenv(n)
+          def record(name, data):
+              with (EVIDENCE/name).open("x", encoding="utf-8") as stream:
+                  json.dump(data, stream, indent=2)
+                  stream.write("\n")
+          record("environment.json",dict(baseline=git("rev-parse","HEAD"),tree=git("rev-parse","HEAD^{tree}"),
+              hosted_workflow_revision=os.environ["GITHUB_SHA"], workflow_ref=os.environ["GITHUB_WORKFLOW_REF"],
+              sample=os.environ["SAMPLE"], run_id=os.environ["GITHUB_RUN_ID"], run_attempt=os.environ["GITHUB_RUN_ATTEMPT"],
+              runner_image=os.environ["ImageOS"], image_version=os.environ["ImageVersion"], runner_arch=os.environ["RUNNER_ARCH"],
+              platform=platform.platform(), windows_build=sys.getwindowsversion().build, machine=platform.machine(),
+              cpu_model=os.getenv("PROCESSOR_IDENTIFIER"), logical_cpus=os.cpu_count(), python=sys.executable, version=sys.version,
+              packages=packages, cache_hit=os.getenv("PIP_CACHE_HIT",""), cache_matched=bool(os.getenv("PIP_CACHE_MATCH")),
+              cache_protocol="Restore-only existing shard-8 pip cache prefix; record pip-cache-before and after installation.",
+              observed_work_before_test=["pinned checkout","Python setup","cache restore","pinned dependency installation",
+                  "version/identity checks","source-only generation and compile of disposable probe"],
+              omitted_work="No prior shard tests, earlier matrix instances or role-store denial campaign.",
+              request_profile="MATH-03 protocol_expiry target setup; positive owner-envelope expiry chosen before signing.",
+              target_prefix="Protected 5668–6798 preparation/custody/seal and native reread; 6809–6810 sealed-grant refusal. "
+                  "6578–6580 excludes the no-cut-only driver. Existing 6709–6735 checks restore originals and assert zero SQL. "
+                  "No adverse registration hook or no-cut lock-holder. No originating hosted VM load or prior test timings inferred."))
+          subprocess.run([sys.executable,"-I","-B",str(ROOT/"prepare.py")],cwd=REPO,check=True)
+          record("fixture-ready.json",dict(compiled_and_byte_checked=True))
+          node = str(ROOT/"test_math03.py")+"::test_math03_positive"
+          args = ["-q","-s","-p","no:cacheprovider","-c","pytest.ini","-o","addopts=","--import-mode=importlib",node]
+          cmd = [sys.executable,"-B","tools/run_pytest_fresh_basetemp.py","--standalone-timeout-seconds","180",*args]
+          record("requested.json",dict(command=cmd,pytest_args=args,cwd=str(REPO),native_parent=str(ROOT/"native"),
+              wall_ns=time.time_ns(),caller_pid=os.getpid()))
+          child = subprocess.Popen(cmd,cwd=REPO,env=dict(os.environ,QTT_VALIDATION_PROCESS_ROOT=str(ROOT/"native"),
+              PYTHONDONTWRITEBYTECODE="1"),stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+          record("started.json",dict(pid=child.pid,wall_ns=time.time_ns()))
+          stdout,stderr = child.communicate()
+          streams = {}
+          for name,raw in (("supervisor.stdout.bin",stdout),("supervisor.stderr.bin",stderr)):
+              with (EVIDENCE/name).open("xb") as sink:
+                  sink.write(raw)
+              assert (EVIDENCE/name).read_bytes() == raw
+              streams[name]=dict(bytes=len(raw),direct_readback_equal=True,pipe_eof=True)
+          record("terminal.json",dict(pid=child.pid,exit=child.returncode,wall_ns=time.time_ns(),streams=streams))
+          print("Native standalone helper exit", child.returncode)
+          raise SystemExit(child.returncode)
+          PY
+
+      - name: Write the native evidence verifier
+        run: |
+          set -euo pipefail
+          destination="$(cygpath -u "$MATH03_ROOT")"
+          cat > "$destination/verify.py" <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import sys
+
+          root = Path(os.environ["MATH03_ROOT"]).resolve()
+          repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          evidence = root/"evidence"
+          def read(path):
+              return json.loads(path.read_bytes())
+          def write(name,value):
+              with (evidence/name).open("x",encoding="utf-8") as sink:
+                  json.dump(value,sink,indent=2)
+                  sink.write("\n")
+          def git(*args):
+              return subprocess.check_output(["git","--no-optional-locks",*args],cwd=repo,text=True).strip()
+          summary = dict(sample=os.environ["SAMPLE"],job_state_before_verification=os.environ["PRIOR_STATUS"],outcome="FAIL")
+          try:
+              summary["post_checkout"] = dict(head=git("rev-parse","HEAD"),tree=git("rev-parse","HEAD^{tree}"),
+                  status=git("status","--porcelain=v1","--untracked-files=all"))
+              assert summary["post_checkout"] == dict(head="4fbf5759b142c4d813aa4deb241c6fb1a5054a93",
+                  tree="ca9d5f8ce6eff120a0a6b71c048ac87c7f5fd891",status="")
+              assert git("ls-files","--others","--ignored","--exclude-standard") == ""
+              summary["ignored_paths_absent"]=True
+              request, outer = read(evidence/"requested.json"),read(evidence/"terminal.json")
+              assert outer["exit"] == 0 and all(v["pipe_eof"] and v["direct_readback_equal"] for v in outer["streams"].values())
+              native_parent=root/"native"
+              folders = list(native_parent.glob("run_*.evidence"))
+              assert len(folders)==1, ("expected one native evidence directory", [f.name for f in folders])
+              folder,=folders
+              provenance=read(folder/"run.json")
+              run_id=provenance["run_id"]
+              paths=provenance["paths"]
+              assert folder.name==run_id+".evidence" and Path(paths["evidence_root"])==folder
+              assert Path(paths["repo_root"])==repo and provenance["phase"]=="standalone-pytest-helper"
+              target=Path(paths["process_root"])
+              assert target.parent==native_parent and Path(paths["cleanup_target"])==target
+              assert re.fullmatch(r"r\d{12}_\d+_\d+(?:_\d+)?",target.name)
+              completion,clean,command=(read(folder/n) for n in ("completion.json","cleanup.json","command-1.json"))
+              assert len(list(folder.glob("command-*.json")))==1
+              assert all(r["run_id"]==run_id for r in (completion,clean,command))
+              assert completion["final_state"]=="PASS" and completion["terminal_native_exit_code"]==0
+              assert all(completion["command_count_"+key]==1 for key in ("planned","started","completed"))
+              assert clean["cleanup_state"]==completion["process_root_cleanup_state"]=="PASS_REMOVED_EXACT_RUN_ROOT"
+              assert Path(clean["cleanup_target"])==target and clean["parent_preserved"] and not os.path.lexists(target)
+              assert command["termination_state"]=="TERMINAL:PROVEN;PIPES:EOF"
+              assert command["native_exit_code"]==0 and command["failure_class"] is None
+              assert command["timeout_state"]=="NOT_TRIGGERED" and command["timeout_seconds_or_null"]==180
+              assert Path(command["cwd"])==repo and command["command_index"]==1
+              assert command["argv"] == [request["command"][0],"-m","pytest",*request["pytest_args"],"--basetemp",str(target/"p")]
+              for stream in ("stdout","stderr"):
+                  path=folder/("command-1."+stream+".bin")
+                  assert Path(command[stream+"_path"])==path and len(path.read_bytes())==command[stream+"_byte_count"]
+              lines=(folder/"command-1.stdout.bin").read_bytes().splitlines()
+              def marker(name):
+                  prefix=("MATH03_CONTROL_"+name+"=").encode()
+                  hits=[line[len(prefix):] for line in lines if line.startswith(prefix)]
+                  assert len(hits)==1, (name,len(hits))
+                  return json.loads(hits[0])
+              assert marker("PHASE_COUNTS") == dict(admission=1,checkpoint_738=1,custody=1,guard_sample=1,commit_entry=1,returned_rows=10)
+              result=marker("RESULT")
+              assert marker("TARGET_CUSTODY")==dict(first_denied_before_sql=True,second_denied_before_sql=True,
+                  original_record_restored=True,original_events_restored=True)
+              assert marker("ANCHOR")==result["declarations"]["anchor"] and marker("DECLARATION")==result["declarations"]["declaration"]
+              assert result["actual_registered_state"]=="COMMITTED_AND_READBACK" and result["original_transaction_open"]
+              assert result["math"]=="MATH-03" and result["origin"]=="SOFTWARE_CONFORMANCE"
+              assert result["attempt_count"]==0 and result["no_compilation"] and result["registration_handle"]
+              assert len(result["rows"])==10 and sum(r["table"]=="receipt_records" for r in result["rows"])==2
+              assert sum(r["table"]=="idempotency_claims" for r in result["rows"])==8 and all(r["direct_native_bytes_equal"] for r in result["rows"])
+              assert all(d["remaining_at_checkpoint_738_ns"]>0 for d in result["deadlines"])
+              assert result["original_keys"] and result["original_rights"] and result["canonical_protocol_bytes_match"]
+              assert any(re.search(rb"\b1 passed in [0-9.]+s\b",line) for line in lines)
+              assert os.environ["PRIOR_STATUS"]=="success"
+              summary.update(outcome="PASS",native_run_id=run_id,result=result,native_receipt="command-1.json",
+                  stdout_bytes=command["stdout_byte_count"],stderr_bytes=command["stderr_byte_count"],
+                  terminal_state=command["termination_state"],cleanup=clean["cleanup_state"])
+          except Exception:
+              summary["error_class"]="NATIVE_VERIFICATION_FAILED"
+              raise
+          finally:
+              write("summary.json",summary)
+          PY
+
+      - name: Write the bounded public observation exporter
+        run: |
+          set -euo pipefail
+          destination="$(cygpath -u "$MATH03_ROOT")"
+          cat > "$destination/public_report.py" <<'PY'
+          """Build the single bounded public observation from job-private native evidence."""
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import sys
+
+          root=Path(os.environ["MATH03_ROOT"]).resolve()
+          private=root/"evidence"
+          output=root/"public"/"observation.json"
+          MAX_PUBLIC_BYTES=32_768
+          def integer(value, low=0, high=2**63-1):
+              if type(value) is not int or not low<=value<=high: raise ValueError("integer")
+              return value
+          def exact(value, choices):
+              if value not in choices: raise ValueError("enum")
+              return value
+          def flag(value):
+              if type(value) is not bool: raise ValueError("boolean")
+              return value
+          def string(value, pattern, maximum):
+              if type(value) is not str or len(value)>maximum or not re.fullmatch(pattern,value): raise ValueError("identity")
+              return value
+          def file_json(path, cap=262_144):
+              if path.stat().st_size>cap: raise ValueError("oversize")
+              return json.loads(path.read_bytes())
+          def sample(value):
+              return {k:integer(value[k]) for k in ("wall_ns","monotonic_ns","process_cpu_ns")}
+          def stages():
+              return {n.lower():exact(os.environ.get(n,""),("success","failure","cancelled","skipped",""))
+                      for n in ("CHECKOUT_STATE","SETUP_STATE","CACHE_STATE","INSTALL_STATE","CONTROL_STATE","VERIFY_STATE")}
+          def stop_stage(states):
+              if "cancelled" in states.values():
+                  return next(k for k,v in states.items() if v=="cancelled")
+              if states["control_state"]=="failure":return "control_state"
+              return next((k for k,v in states.items() if v!="success"),"public_evidence")
+          def recorded_failure(states):
+              # GitHub step outcomes survive an absent or unreadable private summary.
+              # An actual process exit is separately reported only from its native receipt.
+              if "cancelled" in states.values():return "INTERRUPTED"
+              if states["control_state"]=="failure":return "NATIVE_CONTROL_FAILED"
+              return "MISSING_OR_UNVERIFIED"
+          def read_markers(path):
+              names={"ANCHOR","DECLARATION","TARGET_CUSTODY","ATTEMPTED_ENTRY","NATIVE_GUARD","BEFORE_NATIVE_COMMIT","RESULT","PHASE_COUNTS"}
+              known={("MATH03_CONTROL_"+name+"=").encode():name for name in names}
+              found={}
+              with path.open("rb") as raw:
+                  while line:=raw.readline(65_537):
+                      if len(line)>65_536:
+                          while line and not line.endswith(b"\n"): line=raw.readline(65_537)
+                          continue
+                      for prefix,name in known.items():
+                          if line.startswith(prefix):
+                              if name in found: raise ValueError("duplicate")
+                              found[name]=json.loads(line[len(prefix):])
+              return found
+          def clock_identity(value, pattern):
+              return string(value,pattern,100)
+          def measure(m, report):
+              observed=report["observed"]
+              if "ANCHOR" in m:
+                  src=m["ANCHOR"]
+                  observed["owner_anchor"]={k:integer(src[k]) for k in ("wall_ns","monotonic_before_ns","monotonic_after_ns","validity_seconds","expiry_wall_ns")}
+              if "DECLARATION" in m:
+                  src=m["DECLARATION"]
+                  observed["declaration"]={"before":sample(src["before"]),"after":sample(src["after"]),
+                      "source_lines":[5666,5667],"expiry_wall_ns":integer(src["exclusive_expiry_wall_ns"]),
+                      "envelope_expiry_wall_ns":integer(src["envelope_expiry_wall_ns"]),
+                      "owner_anchor_wall_ns":integer(src["original_anchor_wall_ns"])}
+              if "TARGET_CUSTODY" in m:
+                  observed["target_prefix"]={k:flag(m["TARGET_CUSTODY"][k]) for k in
+                      ("first_denied_before_sql","second_denied_before_sql","original_record_restored","original_events_restored")}
+              if "ATTEMPTED_ENTRY" in m:
+                  src=m["ATTEMPTED_ENTRY"]
+                  observed["checkpoint"]={"source_line":738,"sample":sample(src["original"]),
+                      "phase":exact(src["state"],("COMMIT_ATTEMPTED",)),**{k:flag(src[k]) for k in
+                      ("native_registration_type","original_adapter","same_bound_connection","original_transaction_open","original_active")}}
+              if "NATIVE_GUARD" in m:
+                  src=m["NATIVE_GUARD"]
+                  guarded=sample(src["original"])
+                  observed["currentness"]={"sample":guarded,
+                      "domain":clock_identity(src["clock_domain"],r"LP03-QPC::[0-9]{1,14}:[a-f0-9]{32}"),
+                      "process":clock_identity(src["process"],r"LP03-PROCESS::[0-9]{1,12}:[0-9]{1,22}:[a-f0-9]{32}"),
+                      "boot":clock_identity(src["boot"],r"LP03-BOOT::[a-f0-9]{32}"),
+                      "declared_protocol_matches":flag(src["declared_protocol_matches"])}
+                  limits={}
+                  def add(name,domain,start,end):
+                      start=None if start is None else integer(start)
+                      end=integer(end)
+                      idx=domain+"_ns"
+                      value={"valid_from_ns":start,"exclusive_end_ns":end,"clock":domain,
+                          "remaining_at_native_guard_ns":end-guarded[idx]}
+                      if "checkpoint" in observed: value["remaining_at_738_ns"]=end-observed["checkpoint"]["sample"][idx]
+                      limits[name]=value
+                  add("parameter_protocol","wall",*src["protocol"])
+                  add("owner_message","wall",*src["message"])
+                  add("owner_envelope","wall",None,src["envelope"])
+                  add("registration","monotonic",src["admission"],src["deadline"])
+                  keys=src["original_keys"]
+                  if len(keys)!=2: raise ValueError("keys")
+                  for key,valid,expiry,*_ in keys:
+                      ident=exact(key,("LP03-KEY::owner","LP03-KEY::issuer"))
+                      add(ident,"wall",valid,expiry)
+                  if len({k[0] for k in keys})!=2: raise ValueError("duplicate key")
+                  rights=src["original_rights"]
+                  ids=[string(r[0],r"LP03-ORIGINAL-RIGHTS::[0-8]",32) for r in rights]
+                  if len(ids)!=9 or len(set(ids))!=9: raise ValueError("rights")
+                  for r,ident in zip(rights,ids,strict=True):
+                      if not all((flag(r[4]),flag(r[5]),flag(r[8]))) or integer(r[6])!=integer(r[7]): raise ValueError("rights custody")
+                      add(ident+"/validity","wall",r[1],r[2])
+                      add(ident+"/retention","wall",None,r[3])
+                  observed["limits"]=limits
+              if "BEFORE_NATIVE_COMMIT" in m:
+                  src=m["BEFORE_NATIVE_COMMIT"]
+                  observed["native_sql_entry"]={"source_line":659,"sample":sample(src["original"]),
+                      **{k:flag(src[k]) for k in ("same_connection","transaction_open","original_active","original_adapter_frame")}}
+              if "declaration" in observed and "checkpoint" in observed:
+                  cp=observed["checkpoint"]["sample"]
+                  d=observed["declaration"]
+                  observed["declaration_to_checkpoint_monotonic_ns"]=[cp["monotonic_ns"]-d[k]["monotonic_ns"] for k in ("after","before")]
+                  observed["declaration_to_checkpoint_wall_ns"]=[cp["wall_ns"]-d[k]["wall_ns"] for k in ("after","before")]
+              if "PHASE_COUNTS" in m:
+                  observed["counts"]={k:integer(m["PHASE_COUNTS"][k],0,100) for k in
+                      ("admission","checkpoint_738","custody","guard_sample","commit_entry","returned_rows")}
+              if "RESULT" in m:
+                  src=m["RESULT"]
+                  exact(src["math"],("MATH-03",)); exact(src["origin"],("SOFTWARE_CONFORMANCE",))
+                  observed["registration_admission"]=sample(src["admission"])
+                  cp=observed["checkpoint"]["sample"]; guard=observed["currentness"]["sample"]
+                  assert cp==sample(src["attempted_checkpoint_738"]) and guard==sample(src["enforced_sample"])
+                  effective,=[d for d in src["deadlines"] if d["name"]=="effective_experiment_expiry"]
+                  end=integer(effective["exclusive_end_ns"])
+                  observed["limits"]["effective_experiment_expiry"]={"valid_from_ns":None,"exclusive_end_ns":end,"clock":"wall",
+                      "remaining_at_738_ns":end-cp["wall_ns"],"remaining_at_native_guard_ns":end-guard["wall_ns"]}
+                  observed["caps"]={k:integer(src["budgets"][k]) for k in
+                      ("cpu_cap_ns","wall_cap_ns","cpu_remaining_at_checkpoint_738_ns","wall_remaining_at_checkpoint_738_ns")}
+                  observed["per_attempt_cpu_cap_ns"]=integer(src["cap_profile"]["per_attempt_cpu_ns"])
+                  rows=src["rows"]
+                  if len(rows)!=10: raise ValueError("rows")
+                  tables=[exact(r["table"],("receipt_records","idempotency_claims")) for r in rows]
+                  observed["committed"]={"sample":sample(src["registration_commit"]),"readback":sample(src["native_readback"]),
+                      "phase":exact(src["actual_registered_state"],("COMMITTED_AND_READBACK",)),
+                      "registered_handle":string(src["registration_handle"],r"LP03-ASSEMBLY::[0-9a-f]{32}::INPUT_ASSEMBLY::EXPERIMENT:1",110),
+                      "handle_store":exact(src["handle_store"],("LP03-STORE::CONTROL",)),
+                      "receipt_rows":tables.count("receipt_records"),"reservation_rows":tables.count("idempotency_claims"),
+                      "all_native_rows_equal":all(flag(r["direct_native_bytes_equal"]) for r in rows),
+                      "protocol_bytes_match":flag(src["canonical_protocol_bytes_match"]),"signed_message_matches":flag(src["signed_message_exact"]),
+                      "original_signature_matches":flag(src["original_signature_exact"]),"attempts":integer(src["attempt_count"],0,1),
+                      "no_compilation":flag(src["no_compilation"])}
+          def environment(report):
+              job=file_json(private/"job.json")
+              target=report["environment"]
+              target.update(image_os=string(job["imageOS"],r"(?i)win(?:dows)?[-_]?(?:2025|25)",24),
+                  image_version=string(job["imageVersion"],r"[0-9]+(?:\.[0-9]+){1,5}",48),
+                  runner_os=exact(job["runnerOS"],("Windows",)),runner_arch=exact(job["runnerArch"],("X64",)),
+                  workflow_revision=string(job["workflowRevision"],r"[a-f0-9]{40}",40))
+              if not (private/"environment.json").is_file():return
+              info=file_json(private/"environment.json")
+              target.update(windows_build=integer(info["windows_build"],1,10**7),logical_cpus=integer(info["logical_cpus"],1,65536),
+                  python="CPython 3.14.6 x64",pytest_import_mode="importlib",
+                  package_versions={k:string(info["packages"][k],r"[0-9]+(?:\.[0-9]+){1,4}",28) for k in
+                  ("pytest","websockets","cryptography","cffi","pycparser","fido2","iniconfig","packaging","pluggy","pygments","colorama")},
+                  pip_cache_policy="shard_8_prefix_restore_only",pip_cache_matched=flag(info["cache_matched"]),
+                  pip_cache_exact_hit=exact(info["cache_hit"],("true","false","")),
+                  prework=["checkout","interpreter_setup","cache_restore","pinned_dependencies"],
+                  fixture_compiled_before_launch=(private/"fixture-ready.json").is_file(),
+                  historical_matrix_warmup="omitted",prior_hosted_machine_load="unavailable")
+          def native(report):
+              native_parent=root/"native"
+              folders=list(native_parent.glob("run_*.evidence"))
+              if len(folders)!=1:return
+              folder,=folders
+              run=file_json(folder/"run.json")
+              if folder.name!=run["run_id"]+".evidence" or Path(run["paths"]["repo_root"]).resolve()!=Path(os.environ["GITHUB_WORKSPACE"]).resolve():
+                  raise ValueError("unbound evidence")
+              target=Path(run["paths"]["process_root"])
+              if target.parent!=native_parent or target!=Path(run["paths"]["cleanup_target"]):raise ValueError("unbound cleanup")
+              details=report["native"]
+              details["run_id"]=string(run["run_id"],r"run_[0-9]{8}T[0-9]{12}Z_[0-9]{1,12}_[0-9]{1,6}",64)
+              cmd_path=folder/"command-1.json"
+              if cmd_path.is_file():
+                  cmd=file_json(cmd_path)
+                  assert cmd["run_id"]==run["run_id"] and cmd["phase"]=="standalone-pytest-helper" and cmd["command_index"]==1
+                  details["exit_code"]=None if cmd["native_exit_code"] is None else integer(cmd["native_exit_code"],-2**31,2**32-1)
+                  details["timeout_seconds"]=integer(int(cmd["timeout_seconds_or_null"]),1,180)
+                  details["timeout_not_triggered"]=cmd["timeout_state"]=="NOT_TRIGGERED"
+                  details["terminal_and_both_pipes_eof"]=cmd["termination_state"]=="TERMINAL:PROVEN;PIPES:EOF"
+                  for ch in ("stdout","stderr"):
+                      p=folder/f"command-1.{ch}.bin"
+                      assert Path(cmd[ch+"_path"])==p
+                      size=integer(cmd[ch+"_byte_count"])
+                      details[ch+"_bytes"]=size
+                      # The native helper already validated its original streams; independently read them to EOF.
+                      read=0
+                      with p.open("rb") as raw:
+                          while chunk:=raw.read(65536):read+=len(chunk)
+                      details[ch+"_complete_length_verified"]=read==size
+              completion_path=folder/"completion.json"
+              if completion_path.is_file():
+                  cc=file_json(completion_path)
+                  assert cc["run_id"]==run["run_id"] and cc["phase"]=="standalone-pytest-helper"
+                  details["command_counts"]={k:integer(cc["command_count_"+k],0,1) for k in ("planned","started","completed")}
+              clean_path=folder/"cleanup.json"
+              if clean_path.is_file():
+                  c=file_json(clean_path)
+                  assert c["run_id"]==run["run_id"] and Path(c["cleanup_target"])==target
+                  details["exact_root_removed"]=c["cleanup_state"]=="PASS_REMOVED_EXACT_RUN_ROOT" and not os.path.lexists(target)
+                  details["parent_preserved"]=flag(c["parent_preserved"])
+              stream=folder/"command-1.stdout.bin"
+              if stream.is_file():measure(read_markers(stream),report)
+          states=stages()
+          report={"sample":integer(int(os.environ["SAMPLE"]),1,3),"run_id":integer(int(os.environ["GITHUB_RUN_ID"])),
+              "run_attempt":integer(int(os.environ["GITHUB_RUN_ATTEMPT"]),1,1),"outcome":"UNVERIFIED",
+              "baseline":"4fbf5759b142c4d813aa4deb241c6fb1a5054a93","tree":"ca9d5f8ce6eff120a0a6b71c048ac87c7f5fd891",
+              "steps":states,"environment":{},"native":{},"observed":{},"failure_stage":stop_stage(states),"failure_class":recorded_failure(states)}
+          try:
+              # Preserve independent sample groups even when another group is unavailable.
+              failed=False
+              for gather in (environment,native):
+                  try:gather(report)
+                  except Exception:failed=True
+              summary=file_json(private/"summary.json")
+              report["checkout_clean"]=(summary.get("post_checkout")==dict(head=report["baseline"],tree=report["tree"],status="")
+                  and summary.get("ignored_paths_absent") is True)
+              n=report["native"]; obs=report["observed"]
+              if (not failed and all(v=="success" for v in states.values()) and summary.get("outcome")=="PASS"
+                  and report["checkout_clean"] and n["terminal_and_both_pipes_eof"] and n["exact_root_removed"]
+                  and n["parent_preserved"] and n["stdout_complete_length_verified"] and n["stderr_complete_length_verified"]
+                  and n["exit_code"]==0 and n["timeout_not_triggered"] and n["timeout_seconds"]==180
+                  and {"owner_anchor","declaration","target_prefix","checkpoint","currentness","native_sql_entry","limits","committed","counts","caps"}<=obs.keys()
+                  and obs["committed"]["all_native_rows_equal"] and obs["committed"]["receipt_rows"]==2 and obs["committed"]["reservation_rows"]==8):
+                  report.update(outcome="PASS",failure_stage=None,failure_class=None)
+          except Exception:
+              pass
+          report["unverified_observation_groups"]=[k for k in ("owner_anchor","declaration","target_prefix","checkpoint","currentness",
+              "native_sql_entry","limits","committed","counts","caps") if k not in report["observed"]]
+          data=(json.dumps(report,sort_keys=True,indent=2,allow_nan=False)+"\n").encode("ascii")
+          if len(data)>MAX_PUBLIC_BYTES:
+              data=(json.dumps({"outcome":"UNVERIFIED","sample":report["sample"],"failure_stage":"public_evidence",
+                  "failure_class":"PUBLIC_SIZE_LIMIT","unverified_observation_groups":["all"]})+"\n").encode("ascii")
+              report["outcome"]="UNVERIFIED"
+          tmp=output.with_suffix(".tmp")
+          with tmp.open("xb") as f:f.write(data)
+          assert tmp.read_bytes()==data and len(data)<=MAX_PUBLIC_BYTES
+          os.replace(tmp,output)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as sink:
+              sink.write(f'MATH-03 observation {report["sample"]}: {report["outcome"]}. See the bounded observation artifact.\n')
+          if report["outcome"]!="PASS":raise SystemExit(1)
+          PY
+
+      - name: Check out the reviewed protected source
+        id: checkout
+        timeout-minutes: 5
         uses: actions/checkout@v4
         env:
           GIT_CONFIG_COUNT: '1'
           GIT_CONFIG_KEY_0: core.autocrlf
           GIT_CONFIG_VALUE_0: 'false'
-        with: &checkout_full
+        with:
+          ref: 4fbf5759b142c4d813aa4deb241c6fb1a5054a93
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Set up Python
+      - name: Set up the shard 8 interpreter
+        id: setup
+        timeout-minutes: 2
         uses: actions/setup-python@v5
         with:
           python-version: '3.14.6'
+          architecture: x64
 
-      - name: Restore pip download cache
-        uses: actions/cache@v4
-        with: &pip_cache
+      - name: Restore the existing shard 8 pip download cache
+        timeout-minutes: 1
+        id: pip-cache
+        uses: actions/cache/restore@v4
+        with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-${{ hashFiles('.github/workflows/qtt_validation.yml') }}
+          key: ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-observation-4fbf5759
           restore-keys: |
             ${{ runner.os }}-python-3.14.6-pip-pytest-9.1.1-
 
-      - name: Install test dependency
+      - name: Install the pinned shard 8 dependencies
         id: install
+        timeout-minutes: 2
         env:
           PIP_CACHE_DIR: ~/.cache/pip
-        run: &install_pytest |
-          python -m pip install pytest==9.1.1
-          python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1
-
-      - name: Run validation shard
-        if: ${{ matrix.phase != 'pytest-shard-8' }}
-        run: &validation_shard_command >
-          python -B tools/run_validation_gates.py
-          --phase ${{ matrix.phase }}
-          --timing-report .tmp/qtt-validation-timing/${{ matrix.phase }}.json
-          --router-report .tmp/qtt-validation-router/${{ matrix.phase }}.json
-
-      - name: Run validation shard 8
-        if: ${{ matrix.phase == 'pytest-shard-8' }}
-        timeout-minutes: 270
-        run: *validation_shard_command
-
-      - name: Record native phase outcome
-        if: ${{ always() && steps.install.outcome == 'success' }}
-        env:
-          VALIDATION_PHASE: ${{ matrix.phase }}
         run: |
-          python -B - <<'PY'
-          import os
-          import re
-          import tempfile
-          from collections import Counter
-          from pathlib import Path
+          set -euo pipefail
+          evidence="$(cygpath -u "$MATH03_ROOT")/evidence"
+          python -m pip cache info > "$evidence/pip-cache-before.txt" 2>&1
+          python -m pip install pytest==9.1.1 > "$evidence/pytest-install.txt" 2>&1
+          python -m pip install --only-binary=:all: --no-deps --index-url https://pypi.org/simple websockets==17.0.1 cryptography==50.0.1 cffi==2.1.1 pycparser==3.0 fido2==2.2.1 > "$evidence/dependency-install.txt" 2>&1
+          python -m pip cache info > "$evidence/pip-cache-after.txt" 2>&1
 
-          from tools.validation_reliability import (
-              CommandExecutionReceiptV1, ValidationCompletionReceiptV1, _nested_pytest_command, _read_evidence_json,
-              _require_direct_regular_evidence_file, command_receipt_file_indexes,
-              command_terminal_custody_proven, validate_published_completion_receipt,
-          )
+      - name: Run one current MATH-03 registration
+        id: control
+        timeout-minutes: 5
+        env:
+          PIP_CACHE_HIT: ${{ steps.pip-cache.outputs.cache-hit }}
+          PIP_CACHE_MATCH: ${{ steps.pip-cache.outputs.cache-matched-key }}
+        run: python -I -B "$(cygpath -u "$MATH03_ROOT")/run_once.py" > "$(cygpath -u "$MATH03_ROOT")/evidence/control.stdout" 2> "$(cygpath -u "$MATH03_ROOT")/evidence/control.stderr"
 
-          phase = os.environ["VALIDATION_PHASE"]
-          parents = {Path(os.environ["SystemDrive"] + "/qttv"), Path(tempfile.gettempdir()) / "qttv"}
-          matches = []
-          for parent in parents:
-              for directory in parent.glob("run_*.evidence"):
-                  if not re.fullmatch(r"run_\d{8}T\d{12}Z_\d+_\d+\.evidence", directory.name):
-                      continue
-                  record = _read_evidence_json(directory, "run.json")
-                  paths = record["paths"]
-                  if record["phase"] == phase and Path(paths["repo_root"]) == Path.cwd():
-                      if (directory.name != record["run_id"] + ".evidence" or paths["run_id"] != record["run_id"]
-                              or Path(paths["evidence_root"]) != directory):
-                          raise SystemExit("Validation run identity mismatch")
-                      target = Path(paths["cleanup_target"])
-                      if target.parent != parent or target != Path(paths["process_root"]):
-                          raise SystemExit("Unexpected native cleanup target")
-                      matches.append((directory, record["run_id"], target))
-          if len(matches) != 1:
-              raise SystemExit("Expected one original evidence directory for this phase")
-          directory, run_id, target = matches[0]
-          receipt = ValidationCompletionReceiptV1(**_read_evidence_json(directory, "completion.json"))
-          validate_published_completion_receipt(directory, receipt)
-          cleanup = _read_evidence_json(directory, "cleanup.json")
-          if (receipt.run_id != run_id or receipt.phase != phase or cleanup["run_id"] != run_id
-                  or Path(cleanup["cleanup_target"]) != target
-                  or cleanup["cleanup_state"] != receipt.process_root_cleanup_state):
-              raise SystemExit("Validation completion and cleanup receipts disagree")
-          print(f"QTT_HOSTED_COMPLETION phase={phase} run={run_id} planned={receipt.command_count_planned} "
-                f"started={receipt.command_count_started} completed={receipt.command_count_completed} "
-                f"first_failed={receipt.first_failed_command_index_or_null} exit={receipt.terminal_native_exit_code} "
-                f"state={receipt.final_state} text={receipt.text_integrity_preflight_state} "
-                f"cleanup={receipt.process_root_cleanup_state.split(':', 1)[0]}")
-          if receipt.final_state != "PASS" or receipt.command_count_planned == 0:
-              raise SystemExit("The phase has no passing native completion")
-          try:
-              target.lstat()
-          except FileNotFoundError:
-              pass
-          else:
-              raise SystemExit("The completed phase retained its process root")
-          indexes = command_receipt_file_indexes(directory)
-          if indexes != tuple(range(1, receipt.command_count_completed + 1)):
-              raise SystemExit("The published command receipt roster differs from completion")
-          nested = list(directory.glob("nested-pytest-*"))
-          expected_nested, observed_nested = Counter(), Counter()
-          sizes = {"stdout": 0, "stderr": 0}
-          for folder in (directory, *nested):
-              outer = folder == directory
-              if not outer and (folder.is_symlink() or folder.is_junction() or
-                                not re.fullmatch(r"nested-pytest-\d+-\d+", folder.name) or
-                                command_receipt_file_indexes(folder) != (1,)):
-                  raise SystemExit("Unexpected nested receipt directory")
-              for index in indexes if outer else (1,):
-                  cmd = CommandExecutionReceiptV1(**_read_evidence_json(folder, f"command-{index}.json"))
-                  terminal = (command_terminal_custody_proven(cmd) if outer else
-                              cmd.termination_state == "DELEGATED_TO_AUTHENTICATED_OUTER;PIPES:EOF")
-                  if (not terminal or cmd.run_id != run_id or cmd.command_index != index or cmd.pid is None
-                          or cmd.phase != (phase if outer else "nested-pytest") or Path(cmd.cwd) != Path.cwd()
-                          or cmd.native_exit_code != 0 or cmd.failure_class is not None):
-                      raise SystemExit("A native command receipt lacks successful terminal custody")
-                  if outer:
-                      child_argv = _nested_pytest_command(cmd.argv, Path(cmd.cwd))
-                      if child_argv is not None:
-                          expected_nested[child_argv] += 1
-                  else:
-                      observed_nested[tuple(cmd.argv)] += 1
-                  for stream in sizes:
-                      path, info = _require_direct_regular_evidence_file(folder, f"command-{index}.{stream}.bin")
-                      if Path(getattr(cmd, stream + "_path")) != path or getattr(cmd, stream + "_byte_count") != info.st_size:
-                          raise SystemExit("A native stream differs from its receipt")
-                      sizes[stream] += info.st_size
-          if expected_nested != observed_nested:
-              raise SystemExit("Published nested command receipts differ from the supervised helper commands")
-          print(f"QTT_HOSTED_NATIVE_VERIFIED phase={phase} commands={len(indexes)} nested={len(nested)} "
-                f"stdout_bytes={sizes['stdout']} stderr_bytes={sizes['stderr']} process_root_absent=true")
-          PY
+      - name: Verify the native run, exact cleanup and checkout
+        id: verify
+        if: ${{ always() }}
+        env:
+          PRIOR_STATUS: ${{ job.status }}
+        run: python -I -B "$(cygpath -u "$MATH03_ROOT")/verify.py" > "$(cygpath -u "$MATH03_ROOT")/evidence/verify.stdout" 2> "$(cygpath -u "$MATH03_ROOT")/evidence/verify.stderr"
 
-      - name: Upload validation timing artifact
+      - name: Produce the bounded public observation
+        if: ${{ always() }}
+        env:
+          CHECKOUT_STATE: ${{ steps.checkout.outcome }}
+          SETUP_STATE: ${{ steps.setup.outcome }}
+          CACHE_STATE: ${{ steps.pip-cache.outcome }}
+          INSTALL_STATE: ${{ steps.install.outcome }}
+          CONTROL_STATE: ${{ steps.control.outcome }}
+          VERIFY_STATE: ${{ steps.verify.outcome }}
+        run: python -I -B "$(cygpath -u "$MATH03_ROOT")/public_report.py" > "$(cygpath -u "$MATH03_ROOT")/evidence/export.stdout" 2> "$(cygpath -u "$MATH03_ROOT")/evidence/export.stderr"
+
+      - name: Retain the approved observation fields
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: validation-timing-${{ matrix.phase }}
-          path: .tmp/qtt-validation-timing/${{ matrix.phase }}.json
-          include-hidden-files: true
-          if-no-files-found: warn
+          name: math03-checkpoint-${{ github.run_id }}-${{ matrix.observation }}
+          path: ${{ runner.temp }}/m03-${{ github.run_id }}-${{ matrix.observation }}/public/observation.json
+          if-no-files-found: error
           retention-days: 7
-
-      - name: Upload validation router artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-router-${{ matrix.phase }}
-          path: .tmp/qtt-validation-router/${{ matrix.phase }}.json
-          include-hidden-files: true
-          if-no-files-found: warn
-          retention-days: 7
-
-  validation:
-    name: Validation Gates
-    runs-on: ubuntu-latest
-    needs:
-      - validation_shards
-    if: ${{ always() }}
-    timeout-minutes: 90
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with: *checkout_full
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14.6'
-
-      - name: Download validation shard artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: validation-*
-          path: .tmp/qtt-validation-artifacts
-
-      - name: Aggregate validation shard artifacts
-        run: >
-          python -B tools/validate_pr169_val1.py
-          --repo-root .
-          --artifact-root .tmp/qtt-validation-artifacts
-
-      - name: Verify AtomicRows bundle materialized and SHA absent
-        run: |
-          test -f docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl
-          test ! -e docs/master_plan/atomic_rows/AtomicRows.bundle.sha256
-          python - <<'PY'
-          from pathlib import Path
-
-          rows = Path("docs/master_plan/atomic_rows/AtomicRows.bundle.jsonl").read_text(
-              encoding="utf-8"
-          ).splitlines()
-          if len(rows) != 4183:
-              raise SystemExit(f"expected 4183 AtomicRows rows, got {len(rows)}")
-          PY
-
-      - name: Report changed-area validation scope
-        run: python -B tools/changed_area_validation_router.py --repo-root . --report-out .tmp/qtt-validation-router/validation-gates.json
-
-      - name: Fail closed unless every phase succeeded
-        env:
-          NEEDS_JSON: ${{ toJSON(needs) }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import sys
-
-          router_report = ".tmp/qtt-validation-router/validation-gates.json"
-          with open(router_report, encoding="utf-8") as handle:
-              router = json.load(handle)
-          print("required_jobs=" + ",".join(router["required_jobs"]))
-          print("full_validation_required=" + str(router["full_validation_required"]))
-          print("full_validation_reason=" + router["full_validation_reason"])
-          print("skipped_validator_count=" + str(len(router["skipped_validators"])))
-
-          needs = json.loads(os.environ["NEEDS_JSON"])
-          failures = []
-          for job_id, data in sorted(needs.items()):
-              result = data.get("result")
-              print(f"{job_id}: {result}")
-              if result != "success":
-                  failures.append(f"{job_id}={result}")
-          if failures:
-              print(
-                  "Validation phase failure(s): " + ", ".join(failures),
-                  file=sys.stderr,
-              )
-              raise SystemExit(1)
-          print("All validation phase jobs succeeded.")
-          PY
