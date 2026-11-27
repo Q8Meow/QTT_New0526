@@ -726,6 +726,10 @@ def test_input_lock_and_lane_contract_matrix(tmp_path: Path) -> None:
     # Exercise the corrected source census before repeating native lanes.
     _assert_lp03_cpu_boundary_witness(tmp_path / "wplain", None)
     _assert_lp03_authorization_data_contract(tmp_path)
+    # The real expiry wait must not consume a sibling's signed owner lifetime.
+    expiry_root = tmp_path / "protocol_expiry"
+    expiry_root.mkdir()
+    _assert_lp03_authorization_data_contract(expiry_root, registration_expiry_only=True)
     for queue_cut in (None, "queue_ack_1ns"):
         queue_root = tmp_path / ("queue_original" if queue_cut is None else queue_cut)
         queue_root.mkdir()
@@ -929,8 +933,10 @@ def _lp03_cashflow_preparation_phase(operation, phase, selectors):
                 if "proposed_increment" in detail:
                     detail["comparison_value"] = (values[detail["failed_counter"]]
                         + detail["proposed_increment"] + detail["protected_reserve"])
-            print("LP03_MATH06_PREPARATION_REFUSAL=" + deterministic_json(dict(
-                selectors=selectors, phase=phase, decision=detail, unknown_fields_are_null=True)))
+            prefix = ("LP03_MATH07_PREPARATION_REFUSAL=" if selectors["selected_math"] == "MATH-07"
+                      else "LP03_MATH06_PREPARATION_REFUSAL=")
+            print(prefix + deterministic_json(dict(selectors=selectors, phase=phase,
+                preparation_record_id=operation.grant_record.record_id, decision=detail, unknown_fields_are_null=True)))
         except Exception:
             pass  # Reporting must preserve the original exception and its traceback.
         raise
@@ -1129,7 +1135,8 @@ def _note_lp03_review_expiry(error, math_id, case):
 
 
 def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="MATH-03", review_cut=None, published_kelly_source=None, edge_native_failure=False,
-        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False) -> None:
+        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False,
+        registration_expiry_only=False) -> None:
     """Data/authentication only; these placeholder file IDs authorize no store.
 
     Real admission/publication/receiver tests must bind actual original stores.
@@ -1519,7 +1526,7 @@ def _assert_lp03_authorization_data_contract(tmp_path: Path, *, selected_math="M
         _assert_lp03_role_store_binding_contract(tmp_path, config, fixture_keys, envelope, message,
             selected_math=selected_math, review_cut=review_cut, published_kelly_source=published_kelly_source, edge_native_failure=edge_native_failure,
             measured_edge_source=measured_edge_source, measured_decay_fit=measured_decay_fit, cold_native_writer=cold_native_writer,
-            cpu_boundary_witness=cpu_boundary_witness)
+            cpu_boundary_witness=cpu_boundary_witness, registration_expiry_only=registration_expiry_only)
     except Exception as error:
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.errors import ContractValidationError
         from traceback import walk_tb
@@ -5663,8 +5670,12 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import EvidenceProtocolParametersV1
         group_ref, coverage_ref = "LP03-GROUP::synthetic-event", "LP03-COVERAGE::synthetic-event"
         from time import time_ns
-        protocol_expiry = time_ns() + 5_000_000_000 if registration_cut in (
-            "protocol_expiry", "protocol_final_return_expiry") or compilation_cut == "binding_return_expiry" else envelope.exclusive_expiry_wall_ns
+        protocol_expiry = envelope.exclusive_expiry_wall_ns
+        if registration_cut == "protocol_expiry":
+            assert selected_math == "MATH-03"
+            protocol_expiry = time_ns() + 60_000_000_000
+        elif registration_cut == "protocol_final_return_expiry" or compilation_cut == "binding_return_expiry":
+            protocol_expiry = time_ns() + 5_000_000_000
         statistic_absence = m.EvidenceAbsenceV1("NOT_APPLICABLE_TO_DETERMINISTIC_CONFORMANCE")
         coverage_refs = ((published_packet.packet_id,) if kelly28 else ()) + tuple(packet.packet_id for packet in packets)
         numerical_limits = dict(max_input_bits=4096, max_work_bits=65536, max_serialized_bytes=65536)
@@ -6364,13 +6375,13 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         and cold_native_writer is False
         and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
     preparation_cpu_ns = 10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe else 5_000_000_000
-    if (selected_math == "MATH-06" and register and not cpu_boundary_witness and cold_native_writer is False
+    if (cashflow and register and not cpu_boundary_witness and cold_native_writer is False
             and requested_case == (selected_math, review_cut, False, False)
             and all(cut is None for cut in (expect_rejection, seal_cut, compilation_cut, attempt_cut, private26_cut))
             and (review_cut, registration_cut) in (
                 (None, None), (None, "wrong_bounds"), (None, "expectation_outside"), (None, "zero_budget"),
                 ("cumulative_serialization", None))):
-        # These five cases need the full 21-source seal before their own assertions.
+        # Each route needs the full MATH-06 (21 sources) or MATH-07 (20 sources) seal.
         preparation_cpu_ns = 20_000_000_000
     strict_cashflow = (register and selected_math == "MATH-06" and review_cut == "assembly_record_reads"
         and requested_case == (selected_math, review_cut, False, False) and cold_native_writer is False
@@ -6504,7 +6515,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     cashflow_selectors = dict(requested_case=requested_case, selected_math=selected_math, register=register,
         review_cut=review_cut, registration_cut=registration_cut, expect_rejection=expect_rejection,
         seal_cut=seal_cut, compilation_cut=compilation_cut, attempt_cut=attempt_cut, private26_cut=private26_cut,
-        cold_native_writer=cold_native_writer, cpu_boundary_witness=cpu_boundary_witness) if selected_math == "MATH-06" else None
+        cold_native_writer=cold_native_writer, cpu_boundary_witness=cpu_boundary_witness) if cashflow else None
     try:
         with (_lp03_cashflow_preparation_phase(operation, "assembly", cashflow_selectors)
               if cashflow_selectors is not None else nullcontext()):
@@ -7066,14 +7077,72 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             from time import time_ns
             observed_cut = []
             with pytest.MonkeyPatch.context() as patch:
-                if registration_cut in ("protocol_expiry", "protocol_final_return_expiry"):
+                if registration_cut == "protocol_expiry":
+                    from traceback import walk_tb
+                    from src.qtt.agents.pr169_agent_orch1_resolvers import _EvidenceIssuerStateV1
+
+                    connection = store._connection
+                    current = _EvidenceIssuerStateV1._registration_current_v1
+                    checkpoint = {}
+
+                    def registration_rows(active):
+                        receipts = tuple(ref for table, ref in active.readback_refs if table == "receipt_records")
+                        claims = tuple(ref for table, ref in active.readback_refs if table == "idempotency_claims")
+                        assert len(set(receipts)) == 2 and len(set(claims)) == 8
+                        return (connection.execute("SELECT COUNT(*) FROM receipt_records WHERE record_id IN (?,?)",
+                                                   receipts).fetchone()[0],
+                                connection.execute("SELECT COUNT(*) FROM idempotency_claims WHERE claim_record_id "
+                                                   "IN (?,?,?,?,?,?,?,?)", claims).fetchone()[0])
+
+                    def cross_signed_expiry(issuer_state, active):
+                        sample = current(issuer_state, active)
+                        if issuer_state is not state or active.commit_state != "COMMIT_ATTEMPTED":
+                            return sample
+                        assert not observed_cut and active is state.operation is state.registrations[grant.grant_ref]
+                        assert store._connection is connection and connection.in_transaction
+                        assert active.protocol is active.resolved_policy_original[0] and active.protocol == parameter_protocol
+                        assert registration_rows(active) == (2, 8)
+                        wall, mono, _ = sample
+                        _, _, owner_message, signed_envelope = active.envelope_entry
+                        config = state.host.public_configuration
+                        keys = [key for key in config.verification_keys if key.key_id in (owner_message.key_id, config.signing_key_id)]
+                        rights = [policy for _, policies in active.policies for policy in policies]
+                        assert len(keys) == 2 and {policy.rights_ref for policy in rights} == set(signed_envelope.source_rights_refs)
+                        parent_wall = min(owner_message.exclusive_expiry_wall_ns, signed_envelope.exclusive_expiry_wall_ns,
+                                          *(key.exclusive_expiry_wall_ns for key in keys),
+                                          *(min(policy.exclusive_expiry_wall_ns, policy.exclusive_retention_wall_ns) for policy in rights))
+                        parent_mono = active.deadline.exclusive_deadline_monotonic_ns
+                        assert active.protocol.valid_from_wall_ns <= wall < protocol_expiry < parent_wall
+                        assert protocol_expiry - wall < parent_mono - mono
+                        checkpoint.update(entry_wall_ns=wall, entry_monotonic_ns=mono, signed_expiry_wall_ns=protocol_expiry,
+                                          parent_wall_ns=parent_wall, parent_monotonic_ns=parent_mono)
+                        observed_cut.append(True)
+                        def registration_wall_ns():
+                            wall_now, mono_now, _ = state.clock.observe_v1()
+                            assert max(0, protocol_expiry - wall_now) < parent_mono - mono_now
+                            return wall_now
+
+                        _lp03_wait_until_native_clock_v1(registration_wall_ns, protocol_expiry)
+                        assert store._connection is connection and connection.in_transaction and active is state.operation
+                        return current(issuer_state, active)
+
+                    patch.setattr(_EvidenceIssuerStateV1, "_registration_current_v1", cross_signed_expiry)
+                    with pytest.raises(ComputationControlPlaneError, match="LP03_PARAMETER_PROTOCOL_EXPIRED") as refusal:
+                        issuer.register_evidence_experiment_v1(registration_request, issuer_context=issuer_context)
+                    guard, = (frame.f_locals for frame, _ in walk_tb(refusal.value.__traceback__)
+                              if frame.f_code is current.__code__)
+                    failed = state.registrations[grant.grant_ref]
+                    assert guard["operation"] is failed and guard["original"][0] is failed.protocol
+                    assert protocol_expiry == failed.protocol.exclusive_expiry_wall_ns <= guard["wall"] < checkpoint["parent_wall_ns"]
+                    assert checkpoint["entry_monotonic_ns"] <= guard["mono"] < checkpoint["parent_monotonic_ns"]
+                    assert not connection.in_transaction and registration_rows(failed) == (0, 0)
+                    checkpoint.update(refusal_wall_ns=guard["wall"], refusal_monotonic_ns=guard["mono"])
+                elif registration_cut == "protocol_final_return_expiry":
                     original_objects = _EvidenceBoundStoreV1._require_original_objects_v1
                     def expire_registration(retained, host, adapter):
                         original_objects(retained, host, adapter)
                         active = state.operation
-                        at_cut = type(active) is _EvidenceRegistrationOperationV1 and (
-                            active.commit_state == "COMMIT_ATTEMPTED" and adapter._connection.in_transaction
-                            if registration_cut == "protocol_expiry" else active.commit_state == "COMMITTED_AND_READBACK")
+                        at_cut = type(active) is _EvidenceRegistrationOperationV1 and active.commit_state == "COMMITTED_AND_READBACK"
                         if adapter is store and at_cut and not observed_cut:
                             observed_cut.append(True)
                             _lp03_wait_until_native_clock_v1(time_ns, active.protocol.exclusive_expiry_wall_ns + 1_000_000)
@@ -7102,10 +7171,18 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             assert store._connection.execute("SELECT COUNT(*) FROM receipt_records WHERE record_id IN (?,?)",
                 tuple(record.record_id for record in failed.records)).fetchone() == (2 if committed else 0,)
             before = dict(failed.consumed)
+            if registration_cut == "protocol_expiry":
+                with pytest.raises(ComputationControlPlaneError, match="LP03_REGISTRATION_ALREADY_RESERVED_OR_UNRESOLVED"):
+                    issuer.register_evidence_experiment_v1(registration_request, issuer_context=issuer_context)
+                assert state.registrations[grant.grant_ref] is failed and failed.handle is None and failed.consumed == before
             with pytest.raises(ComputationControlPlaneError, match="LP03_REGISTRATION_ALREADY_RESERVED_OR_UNRESOLVED"):
                 issuer.register_evidence_experiment_v1(replace(registration_request, idempotency_key="LP03-REGISTRATION::cannot-reset"),
                                                       issuer_context=issuer_context)
             assert failed.consumed == before
+            if registration_cut == "protocol_expiry":
+                print("LP03_MATH03_REGISTRATION_EXPIRY=" + deterministic_json(dict(
+                    **checkpoint, registration_state=failed.commit_state, receipt_rows=0, reservation_rows=0,
+                    handle_issued=False, reissue_changed_accounting=False)))
             return
         from sys import _getframe
         from threading import Event
@@ -14902,7 +14979,8 @@ def _assert_lp03_worker_data_protocol(attempt, envelope, inputs):
 
 
 def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_keys, envelope, owner_message, *, selected_math="MATH-03", review_cut=None, published_kelly_source=None, edge_native_failure=False,
-        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False) -> None:
+        measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False, cpu_boundary_witness=False,
+        registration_expiry_only=False) -> None:
     """Actual role-file/schema setup and denial, not grant/readback acceptance."""
     from functools import partial
     import os
@@ -15009,6 +15087,14 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
         seal_snapshot = partial(_assert_lp03_original_snapshot_and_seal,
             requested_case=(selected_math, review_cut, edge_native_failure, cold_native_writer),
             cpu_boundary_witness=cpu_boundary_witness)
+        if registration_expiry_only:
+            from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
+            assert selected_math == "MATH-03" and review_cut is None
+            assert not (cpu_boundary_witness or edge_native_failure or cold_native_writer)
+            actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
+            seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message, hosts, bindings,
+                          initialize_st12f_parameter_registry_v1(), adapters, register=True, registration_cut="protocol_expiry")
+            return
         if cpu_boundary_witness:
             assert selected_math == "MATH-03" and review_cut in _LP03_MATH03_COMPLETION_CASES
             assert not edge_native_failure and not cold_native_writer
@@ -15591,7 +15677,7 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
                     "capacity_persistent_bytes", "capacity_header", "capacity_roster", "capacity_manifest", "capacity_body"):
             seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut)
-        for cut in ("protocol_expiry", "postcommit_reader_failure", "protocol_final_return_expiry", "source_metadata_after_seal",
+        for cut in ("postcommit_reader_failure", "protocol_final_return_expiry", "source_metadata_after_seal",
                     "policy_source_member_after_native"):
             seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, original_parameters, adapters, register=True, registration_cut=cut)
