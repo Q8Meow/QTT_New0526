@@ -814,6 +814,10 @@ _LP03_POSITIVE_REVIEW_CASES = frozenset((
 
 
 _LP03_MATH03_COMPLETION_CASES = (None, "capture_partial_fills", "causal_public_timeline", "causal_timeline")
+_LP03_MATH03_LANE_FAILURE_CUTS = (
+    "failure_lane_before_commit", "failure_lane_commit_observation", "failure_lane_readback",
+    "failure_lane_final_return", "failure_lane_association_omitted_before", "failure_lane_association_omitted_after",
+)
 
 
 def _assert_lp03_cpu_boundary_witness(root, case):
@@ -896,8 +900,23 @@ def _lp03_observed_sharpe_seal(issuer, operation, grant_ref, outcome, issuer_con
         monitor.free_tool_id(tool)
 
 
+def _lp03_release_raise_monitor(monitor, tool, *, pending_failure):
+    """Attempt each release, retaining the original operation's exception if it is unwinding."""
+    first_error = None
+    for release in (lambda: monitor.set_events(tool, 0),
+                    lambda: monitor.register_callback(tool, monitor.events.RAISE, None),
+                    lambda: monitor.free_tool_id(tool)):
+        try:
+            release()
+        except BaseException as error:
+            if first_error is None:
+                first_error = error
+    if first_error is not None and not pending_failure:
+        raise first_error
+
+
 @contextmanager
-def _lp03_cashflow_preparation_phase(operation, phase, selectors):
+def _lp03_preparation_phase(operation, phase, selectors):
     """Tie original guard operands to this fixture invocation, before rollback."""
     import sys
     from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_require
@@ -908,43 +927,205 @@ def _lp03_cashflow_preparation_phase(operation, phase, selectors):
 
     def observe(code, offset, error):
         nonlocal observation
-        if code is _native_require.__code__ and type(error) is ContractValidationError:
+        if code is not _native_require.__code__ or type(error) is not ContractValidationError:
+            return
+        try:
             frame = sys._getframe(2)
-            if (frame.f_code in guards and frame.f_locals.get("self") is operation
-                    and str(error) == "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED"):
-                observation = (error, frame.f_code.co_qualname, tuple(operation.consumed.items()))
+            if (frame.f_code not in guards or frame.f_locals.get("self") is not operation
+                    or str(error) != "ST12A_INVALID_CONTRACT: LP03_PREPARATION_RESOURCE_EXHAUSTED"):
+                return
+            values = tuple(operation.consumed.items())
+            decision = None
+            if selectors["selected_math"] == "MATH-18":
+                local = frame.f_locals
+                name = local["name"]
+                room = frame.f_code is guards[1]
+                order = tuple(local["upper_bounds"] if room else operation.consumed)
+                failed = order.index(name)
+                decision = dict(commit_state=operation.commit_state, in_seal_audit=operation.in_seal_audit,
+                    passed=order[:failed], failed=name, short_circuited=order[failed + 1:],
+                    consumed=dict(values)[name], signed_cap=getattr(local["limits"], "max_" + name))
+                if room:
+                    decision.update(increment=local["amount"], reserved=local["reserve"])
+                else:
+                    decision.update(charged=local["value"])
+            observation = (error, frame.f_code.co_qualname, values, decision)
+        except BaseException:
+            pass  # A failed capture cannot replace the original exception.
 
     monitor = sys.monitoring
     tool = next((i for i in (4, 3) if monitor.get_tool(i) is None), None)
     if tool is not None:
-        monitor.use_tool_id(tool, "LP03 cashflow preparation refusal")
+        monitor.use_tool_id(tool, "LP03 preparation refusal")
+    pending_failure = False
     try:
         if tool is not None:
             monitor.register_callback(tool, monitor.events.RAISE, observe)
             monitor.set_events(tool, monitor.events.RAISE)
         yield
     except BaseException as failure:
+        pending_failure = True
         try:
             detail = _lp03_resource_refusal_detail(failure, cashflow_operation=operation)
             if (observation is not None and observation[0] is failure and observation[1] == detail["guard"]
                     and detail["failed_counter"] is not None):
                 values = dict(observation[2])
                 detail["preparation_values"] = values
+                if observation[3] is not None:
+                    detail["decision_at_raise"] = observation[3]
                 if "proposed_increment" in detail:
                     detail["comparison_value"] = (values[detail["failed_counter"]]
                         + detail["proposed_increment"] + detail["protected_reserve"])
-            prefix = ("LP03_MATH07_PREPARATION_REFUSAL=" if selectors["selected_math"] == "MATH-07"
-                      else "LP03_MATH06_PREPARATION_REFUSAL=")
+            prefix = "LP03_" + selectors["selected_math"].replace("-", "") + "_PREPARATION_REFUSAL="
             print(prefix + deterministic_json(dict(selectors=selectors, phase=phase,
                 preparation_record_id=operation.grant_record.record_id, decision=detail, unknown_fields_are_null=True)))
-        except Exception:
+        except BaseException:
             pass  # Reporting must preserve the original exception and its traceback.
         raise
     finally:
         if tool is not None:
-            monitor.set_events(tool, 0)
-            monitor.register_callback(tool, monitor.events.RAISE, None)
-            monitor.free_tool_id(tool)
+            _lp03_release_raise_monitor(monitor, tool, pending_failure=pending_failure)
+
+
+@contextmanager
+def _lp03_lane_refusal(attempt, requested_case, requested_cut, executed_cut):
+    """Read the bound operation at the original refusal, before lane or audit cleanup."""
+    import sys
+    from traceback import walk_stack
+    from itertools import islice
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.context import _native_require
+    from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import (
+        _EvidenceAttemptOperationV1, _EvidenceRegistrationOperationV1,
+    )
+
+    attempt_guard = _EvidenceAttemptOperationV1._check_room_v1.__code__
+    aggregate_guard = _EvidenceRegistrationOperationV1._room_v1.__code__
+    registration = attempt.registration
+    observations = {}
+
+    def record(raised, guard, error):
+        if guard.f_code not in (attempt_guard, aggregate_guard):
+            return
+        local = guard.f_locals
+        if not ((guard.f_code is attempt_guard and local["self"] is attempt)
+                or (guard.f_code is aggregate_guard and local["self"] is registration)):
+            return
+        refusal = raised.f_locals.get("code") if raised is not guard else "LP03_ATTEMPT_EXECUTION_RESOURCE_EXHAUSTED"
+        if refusal not in ("LP03_ATTEMPT_RESOURCE_EXHAUSTED", "LP03_ATTEMPT_EXPIRED",
+                           "LP03_ATTEMPT_EXECUTION_RESOURCE_EXHAUSTED", "LP03_REGISTRATION_RESOURCE_EXHAUSTED",
+                           "LP03_REGISTRATION_EXECUTION_RESOURCE_EXHAUSTED"):
+            return
+        if raised is not guard and raised.f_locals["value"] is not False:
+            return
+        limits, totals = local["limits"], local["totals"]
+        checks, execution_operands = [], {}
+        if raised is guard or refusal == "LP03_REGISTRATION_EXECUTION_RESOURCE_EXHAUSTED":
+            aggregate = guard.f_code is aggregate_guard
+            if raised is guard and (aggregate or "limit" not in local or error.reason_code is not ReasonCode.BUDGET_EXCEEDED):
+                return
+            if raised is not guard and not aggregate:
+                return
+            usage = dict(local["usage"])
+            execution_operands["usage"] = usage
+            if aggregate:
+                execution_operands["reserved"] = dict(local["reserved"])
+            failed = False
+            for name, limit in (
+                ("process_memory_high_water_bytes", "max_process_memory_bytes"), ("job_memory_high_water_bytes", "max_job_memory_bytes"),
+                ("events", "max_events"), ("callbacks", "max_callbacks"), ("coordinates", "max_coordinates"),
+                ("computations", "max_computations"), ("output_bytes", "max_output_bytes"), ("active_workers", "max_concurrency"),
+            ):
+                if failed:
+                    checks.append(dict(counter=name, limit=limit, status="SKIPPED"))
+                    continue
+                value, cap = usage[name], getattr(limits, limit)
+                check = dict(counter=name, limit=limit, usage=value, cap=cap, relation="<=")
+                if aggregate:
+                    check["reserved"] = execution_operands["reserved"].get(limit, 0)
+                    value += check["reserved"]
+                failed = value > cap
+                if failed and not aggregate and (name, limit) != (local["name"], local["limit"]):
+                    return
+                check.update(value=value, status="FAILED" if failed else "PASSED")
+                checks.append(check)
+            if not failed:
+                return
+        else:
+            dimensions = [(("record_reads",), "input_reads"), (("read_bytes",), "input_bytes"),
+                (("owner_queries", "control_writes"), "persistent_operations"), (("control_bytes",), "persistent_bytes"),
+                (("cpu_ns",), "cpu_ns")]
+            aggregate = guard.f_code is aggregate_guard
+            failed = False
+            if aggregate:
+                dimensions.insert(1, (("query_result_records",), "input_reads"))
+                dimensions.append((("wall_ns",), "wall_ns"))
+            else:
+                wall_offset = attempt.started[1] - registration.deadline.admitted_monotonic_ns
+                value, bound = totals["wall_ns"] - wall_offset, attempt.failure_bounds[0] - attempt.started[1]
+                failed = refusal == "LP03_ATTEMPT_EXPIRED"
+                checks.append(dict(counters=("wall_ns",), total=totals["wall_ns"], prefix=wall_offset, value=value,
+                    relation="<", bound=bound, status="FAILED" if failed else "PASSED"))
+            for names, dimension in dimensions:
+                if failed:
+                    checks.append(dict(counters=names, status="SKIPPED"))
+                    continue
+                counters = {name: totals[name] for name in names}
+                cap = getattr(limits, "max_" + dimension)
+                if aggregate:
+                    reserve = local["reserved"]["max_" + dimension]
+                    value, bound = sum(counters.values()) + reserve, cap
+                    operands = dict(retained_reservation=reserve)
+                else:
+                    reserve = getattr(limits, "reserved_failure_" + dimension)
+                    prefix = (attempt.started[2] - registration.started_cpu_ns + attempt.child_cpu_prefix
+                        if dimension == "cpu_ns" else sum(local["prefix"][name] for name in names))
+                    value, bound = sum(counters.values()) - prefix, cap - reserve
+                    operands = dict(prefix=prefix, failure_reserve=reserve)
+                failed = value > bound
+                checks.append(dict(counters=counters, signed_cap=cap, value=value, relation="<=", bound=bound,
+                    status="FAILED" if failed else "PASSED", **operands))
+        return dict(requested_case=requested_case,
+            requested_cut=requested_cut, executed_cut=executed_cut, grant_ref=attempt.grant_record.record_id,
+            lane=attempt.request.lane.value, attempt_phase=attempt.phase, registration_stage=registration.commit_state,
+            finalization_phase=getattr(attempt.lane_operation, "finalization_phase", None), guard=guard.f_code.co_qualname,
+            refusal=refusal, comparisons=checks, **execution_operands, callers=[(f.f_code.co_qualname, line)
+                for f, line in islice(walk_stack(guard), 16)])
+
+    def observe(code, offset, error):
+        if type(error) is not ContractValidationError or code not in (_native_require.__code__, attempt_guard):
+            return
+        try:
+            raised = sys._getframe(1)
+            guard = raised.f_back if code is _native_require.__code__ else raised
+            detail = record(raised, guard, error)
+            if detail is not None:
+                observations.setdefault(id(error), (error, detail))
+        except BaseException:
+            pass  # Capture must preserve native exception custody.
+
+    monitor = sys.monitoring
+    tool = next((i for i in (4, 3) if monitor.get_tool(i) is None), None)
+    if tool is None:
+        yield
+        return
+    monitor.use_tool_id(tool, "LP03 lane resource refusal")
+    pending_failure = False
+    try:
+        monitor.register_callback(tool, monitor.events.RAISE, observe)
+        monitor.set_events(tool, monitor.events.RAISE)
+        yield
+    except BaseException as failure:
+        pending_failure = True
+        try:
+            observation = observations.get(id(failure))
+            if observation is not None and observation[0] is failure:
+                print("LP03_MATH03_LANE_RESOURCE_REFUSAL=" + deterministic_json(observation[1]))
+        except BaseException:
+            pass  # Even failed output must preserve the original exception and traceback.
+        raise
+    finally:
+        observations.clear()
+        _lp03_release_raise_monitor(monitor, tool, pending_failure=pending_failure)
 
 
 def _lp03_resource_refusal_detail(error, *, cashflow_operation=None, close_registration=None):
@@ -4716,7 +4897,7 @@ def _lp03_causal_callbacks_v1(package, origin):
 
 
 def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, message, hosts, bindings, parameters, adapters,
-                                          *, requested_case, cpu_boundary_witness, baseline_currency="USD", expect_rejection=None, seal_cut=None, register=False,
+                                          *, requested_case, cpu_boundary_witness, requested_fixture_cut=None, baseline_currency="USD", expect_rejection=None, seal_cut=None, register=False,
                                           registration_cut=None, compilation_cut=None, attempt_cut=None, selected_math="MATH-03", review_cut=None,
                                           private26_cut=None, published_kelly_source=None,
                                           measured_edge_source=None, measured_decay_fit=None, cold_native_writer=False):
@@ -4746,6 +4927,17 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         and requested_case == (selected_math, None, False, cold_native_writer)
         and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
     original_sharpe = original_positive and selected_math == "MATH-18" and cold_native_writer is False
+    exact_cut_request = (register and not cpu_boundary_witness and cold_native_writer is False
+        and requested_case == (selected_math, review_cut, False, False)
+        and all(cut is None for cut in (expect_rejection, seal_cut, compilation_cut, private26_cut)))
+    funded_lane = (exact_cut_request and selected_math == "MATH-03" and review_cut is registration_cut is None
+        and attempt_cut in _LP03_MATH03_LANE_FAILURE_CUTS and requested_fixture_cut == ("attempt", attempt_cut))
+    sharpe_sibling = (exact_cut_request and selected_math == "MATH-18" and attempt_cut is None
+        and (requested_fixture_cut, registration_cut, review_cut) in (
+            (("registration", "zero_budget"), "zero_budget", None),
+            (("review", "cumulative_serialization"), None, "cumulative_serialization")))
+    if requested_fixture_cut is not None:
+        assert funded_lane or sharpe_sibling, (requested_case, requested_fixture_cut, review_cut, registration_cut, attempt_cut)
     assert selected_math in ("MATH-06","MATH-07","MATH-02", "MATH-01", "MATH-03", "MATH-04", "MATH-05", "MATH-08", "MATH-09", "MATH-10", "MATH-11", "MATH-14", "MATH-15", "MATH-16", "MATH-17", "MATH-18", "MATH-19", "MATH-20", "MATH-21", "MATH-22", "MATH-23", "MATH-24", "MATH-25", "MATH-12", "MATH-13", "MATH-26", "MATH-27", "MATH-28", "MATH-29", "MATH-30", "MATH-31", "MATH-37", "MATH-32", "MATH-33", "MATH-35", "MATH-36", "MATH-38", "MATH-39", "MATH-40", "MATH-41", "MATH-42", "MATH-43", "MATH-44", "MATH-45", "MATH-50", "MATH-51", "MATH-52")
     cashflow=selected_math in ("MATH-06","MATH-07")
     edge = selected_math == "MATH-02"
@@ -4890,6 +5082,10 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                  (selected_math == "MATH-35" and review_cut is None and cold_native_writer in cold_cases))
             and _lp03_completion_cpu_case(selected_math, review_cut)
         )
+        if funded_lane:
+            # One original lane reservation. Both the failure reserve and aggregate remain signed at their original sizes.
+            assert not completion_cpu and aggregate_cpu_ns == 40_000_000_000
+            execution = replace(execution, max_cpu_ns=18_000_000_000)
         if completion_cpu:
             # Completed hosted lanes used 7.625s; other 8s grants exhausted during
             # publication. Reserve 16s of ordinary CPU and 2s of failure CPU per lane.
@@ -6374,7 +6570,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         and requested_case == (selected_math, review_cut, False, False)
         and cold_native_writer is False
         and all(cut is None for cut in (expect_rejection, seal_cut, registration_cut, compilation_cut, attempt_cut, private26_cut)))
-    preparation_cpu_ns = 10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe else 5_000_000_000
+    preparation_cpu_ns = 10_000_000_000 if cashflow_capacity or causal_public or causal_rejection or timer_setup or original_sharpe or sharpe_sibling else 5_000_000_000
     if (cashflow and register and not cpu_boundary_witness and cold_native_writer is False
             and requested_case == (selected_math, review_cut, False, False)
             and all(cut is None for cut in (expect_rejection, seal_cut, compilation_cut, attempt_cut, private26_cut))
@@ -6512,13 +6708,17 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert store._connection.execute("SELECT COUNT(*) FROM receipt_records WHERE record_id=?",
             (grant.grant_ref + "::INPUT_ASSEMBLY",)).fetchone() == (0,)
         return
-    cashflow_selectors = dict(requested_case=requested_case, selected_math=selected_math, register=register,
+    preparation_selectors = dict(requested_case=requested_case, selected_math=selected_math, register=register,
         review_cut=review_cut, registration_cut=registration_cut, expect_rejection=expect_rejection,
         seal_cut=seal_cut, compilation_cut=compilation_cut, attempt_cut=attempt_cut, private26_cut=private26_cut,
-        cold_native_writer=cold_native_writer, cpu_boundary_witness=cpu_boundary_witness) if cashflow else None
+        cold_native_writer=cold_native_writer, cpu_boundary_witness=cpu_boundary_witness) if cashflow or sharpe_sibling else None
+    if sharpe_sibling:
+        preparation_selectors["requested_fixture_cut"] = requested_fixture_cut
+        signed_preparation = operation.grant_record.reserved_preparation_limits
+        assert (signed_preparation.max_cpu_ns, signed_preparation.max_wall_ns) == (10_000_000_000, 30_000_000_000)
     try:
-        with (_lp03_cashflow_preparation_phase(operation, "assembly", cashflow_selectors)
-              if cashflow_selectors is not None else nullcontext()):
+        with (_lp03_preparation_phase(operation, "assembly", preparation_selectors)
+              if preparation_selectors is not None else nullcontext()):
             outcome = assemble_evidence_input_snapshot_v1(request, assembly_grant=grant, owner_resolvers=sources,
                 parameter_resolver=parameters, source_grants=caps, clock=state.clock)
     except BaseException as failure:
@@ -6787,8 +6987,8 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
     if original_sharpe:
         sealed_ref = _lp03_observed_sharpe_seal(issuer, operation, grant.grant_ref, outcome, issuer_context)
     else:
-        with (_lp03_cashflow_preparation_phase(operation, "seal", cashflow_selectors)
-              if cashflow_selectors is not None else nullcontext()):
+        with (_lp03_preparation_phase(operation, "seal", preparation_selectors)
+              if preparation_selectors is not None else nullcontext()):
             sealed_ref = issuer.close_evidence_assembly_v1(grant.grant_ref, assembly_outcome=outcome, issuer_context=issuer_context)
     assert operation.current_state.state is m.EvidenceAssemblyStateV1.SEALED
     assert sealed_ref.record_id == outcome.assembly_record.record_id and len(operation.readback_refs) == 13
@@ -6907,7 +7107,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         assert operation.grant_record.reserved_preparation_limits.max_owner_queries==1280
         print("LP03_CASHFLOW_ASSEMBLY_CENSUS_QUALIFICATION="+deterministic_json(dict(math_id=selected_math,
             scope="ORIGINAL_SIGNED_FINITE_PREPARATION_CENSUS_ONLY",source_count=source_count,
-            **({"selectors": cashflow_selectors} if cashflow_selectors is not None else {}),
+            **({"selectors": preparation_selectors} if preparation_selectors is not None else {}),
             original_limits=operation.grant_record.reserved_preparation_limits,actual_consumed=dict(operation.consumed),
             independent_expected_reads=expected_reads,independent_expected_owner_queries=expected_queries,
             sealed_ref=sealed_ref,seal_readback_observation=operation.seal_readback_observation,
@@ -7476,7 +7676,7 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             replace(attempt.grant_record, component_and_callback_pins=dict(components=(("MATH-03", "changed", "1.1R1"),), callbacks=()))
         from src.qtt.stage1_prediction_markets.qku_computation_control_plane.persistence import _EvidenceAttemptOperationV1
         accounting_before = dict(registered.consumed)
-        signed_cpu_ns = 18_000_000_000 if completion_cpu else 10_000_000_000
+        signed_cpu_ns = 18_000_000_000 if completion_cpu or funded_lane else 10_000_000_000
         assert attempt.limits.max_cpu_ns == signed_cpu_ns
         assert attempt.limits.reserved_failure_cpu_ns == 2_000_000_000
         ordinary_cpu_ns = signed_cpu_ns - 2_000_000_000
@@ -7488,6 +7688,13 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                 ("wall_ns", attempt.started[1] - registered.deadline.admitted_monotonic_ns, 24_000_000_000)):
             proposed = dict(accounting_before, **{counter: prefix + positive_allowance + 1})
             expected = "LP03_ATTEMPT_EXPIRED" if counter == "wall_ns" else "LP03_ATTEMPT_RESOURCE_EXHAUSTED"
+            if funded_lane and counter == "cpu_ns":
+                assert ordinary_cpu_ns == 16_000_000_000
+                assert attempt_grant._attempt is attempt and attempt.handle is attempt_grant
+                assert registered.envelope_entry[3].aggregate_execution_limits.max_cpu_ns == 40_000_000_000
+                assert supervisor._active is None and not supervisor._retained
+                # Same genuine grant and preceding operands. Only the last CPU nanosecond differs.
+                _EvidenceAttemptOperationV1._check_room_v1(attempt, dict(proposed, cpu_ns=proposed["cpu_ns"] - 1))
             with pytest.raises(ComputationControlPlaneError, match=expected):
                 _EvidenceAttemptOperationV1._check_room_v1(attempt, proposed)
             if counter == "wall_ns":
@@ -7502,6 +7709,12 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
         with pytest.raises(ComputationControlPlaneError, match="LP03_ATTEMPT_RESOURCE_EXHAUSTED"):
             _EvidenceAttemptOperationV1._check_room_v1(attempt, proposed)
         assert registered.consumed == accounting_before
+        if funded_lane:
+            assert supervisor._active is None and not supervisor._retained
+            print("LP03_MATH03_LANE_FAILURE_CPU_BOUNDARY=" + deterministic_json(dict(
+                requested_case=requested_case, requested_cut=requested_fixture_cut, executed_cut=attempt_cut,
+                grant_ref=attempt.grant_record.record_id, signed_ns=signed_cpu_ns, reserve_ns=attempt.limits.reserved_failure_cpu_ns,
+                refused_ordinary_ns=ordinary_cpu_ns + 1, native_count=len(supervisor._retained), accounting_unchanged=True)))
         original_state, original_rows = attempt.current_state, attempt.readback_rows
         attempt.current_state = replace(original_state, event_ordinal=1)
         with pytest.raises(ComputationControlPlaneError, match="LP03_ATTEMPT_ORIGINAL_RECORD_CHANGED"):
@@ -7531,8 +7744,10 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
                 stream_capture={name: value.hex() if type(value) is bytes else value for name, value in terminal[9].items()})))
             return
         if attempt_cut is not None and attempt_cut.startswith("failure_"):
-            _assert_lp03_native_failure_audit_cut(attempt_cut, attempt_grant, supervisor, svc, store, registered,
-                lane_platform=lane_platforms.get("REPLAY"))
+            with (_lp03_lane_refusal(attempt, requested_case, requested_fixture_cut, attempt_cut)
+                  if funded_lane else nullcontext()):
+                _assert_lp03_native_failure_audit_cut(attempt_cut, attempt_grant, supervisor, svc, store, registered,
+                    lane_platform=lane_platforms.get("REPLAY"))
             if attempt_cut in ("failure_before_controller", "failure_audit_commit_observation", "failure_unknown_final_query"):
                 _assert_lp03_fresh_control_owner_denied(attempt_cut, state, fixture_keys, old_attempt=attempt)
             return
@@ -15276,13 +15491,15 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
             actual_message = replace(owner_message, payload=json.loads(deterministic_json(actual_envelope)))
             seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                 hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True, selected_math=selected_math,
-                review_cut=review_cut)
+                review_cut=review_cut, requested_fixture_cut=(("review", review_cut)
+                    if selected_math == "MATH-18" and review_cut == "cumulative_serialization" else None))
             if review_cut is None:
                 cuts = ("wrong_bounds", "retarget_candidate") if selected_math == "MATH-17" else ("zero_budget",)
                 for cut in cuts:
                     seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
                         hosts, bindings, initialize_st12f_parameter_registry_v1(), adapters, register=True,
-                        selected_math=selected_math, registration_cut=cut)
+                        selected_math=selected_math, registration_cut=cut,
+                        requested_fixture_cut=("registration", cut) if selected_math == "MATH-18" else None)
             return
         if selected_math == "MATH-16":
             from src.qtt.stage1_prediction_markets.qku_computation_control_plane.parameter_policy import initialize_st12f_parameter_registry_v1
@@ -15672,7 +15889,8 @@ def _assert_lp03_role_store_binding_contract(tmp_path: Path, config, fixture_key
                     "failure_process_prefix_omitted_before", "failure_process_prefix_omitted_after",
                     "failure_lane_association_omitted_before", "failure_lane_association_omitted_after"):
             seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
-                hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut)
+                hosts, bindings, original_parameters, adapters, register=True, attempt_cut=cut,
+                requested_fixture_cut=("attempt", cut) if cut in _LP03_MATH03_LANE_FAILURE_CUTS else None)
         for cut in ("capacity_zero_reserve", "capacity_input_reads", "capacity_input_bytes", "capacity_persistent_operations",
                     "capacity_persistent_bytes", "capacity_header", "capacity_roster", "capacity_manifest", "capacity_body"):
             seal_snapshot(tmp_path, fixture_keys, actual_envelope, actual_message,
