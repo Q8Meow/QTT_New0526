@@ -1143,7 +1143,7 @@ def _lp03_resource_refusal_detail(error, *, cashflow_operation=None, close_regis
     detail = dict(callers=[], stage=None, operation_stage=None, receiver=None, guard=None, failed_counter=None,
                   comparison_value=None, signed_cap=None, original_clock=None)
     if close_registration is not None:
-        detail.update(totals=None, reserved=None, increments=None, comparisons=None)
+        detail.update(original_registration=None, totals=None, reserved=None, increments=None, comparisons=None)
     for frame, line in frames:
         detail["callers"].append((frame.f_code.co_qualname, line))
         local = frame.f_locals
@@ -1252,8 +1252,13 @@ def _lp03_resource_refusal_detail(error, *, cashflow_operation=None, close_regis
                             and original[0] is registration.issuer and original[1] is owner_locals["owner_service"]
                             and operation.original[4] is original and registration.receiver_operations.get(name) is operation):
                         detail.update(operation_stage="RECEIVER_ACK", receiver=name)
-        if close_registration is not None and (detail["operation_stage"] != "BUNDLE_CLOSE" or detail["receiver"] is not None):
-            return detail
+        if close_registration is not None:
+            if detail["operation_stage"] != "BUNDLE_CLOSE" or detail["receiver"] is not None:
+                return detail
+            detail["original_registration"] = dict(
+                records=tuple(record.record_id for record in registration.records),
+                compilation_binding=registration.binding_record.record_id,
+            )
         totals, reserved, limits = local["totals"], local["reserved"], local["limits"]
         detail.update(totals=dict(totals), reserved=dict(reserved), increments=dict(local["increments"]), comparisons=[])
         # Preserve the order and short circuit of the original compound guard.
@@ -5095,6 +5100,9 @@ def _assert_lp03_original_snapshot_and_seal(tmp_path, fixture_keys, envelope, me
             if original_positive and selected_math == "MATH-03" and cold_native_writer is False:
                 # Two 18s reservations, 32.953125s before close, and a measured hosted close tail up to 4.859375s.
                 aggregate_cpu_ns = 84_000_000_000
+            if bootstrap and original_positive and cold_native_writer is False:
+                # The ordinary MATH-14 closeout includes both retained 18s lane reservations.
+                aggregate_cpu_ns = 88_000_000_000
             if selected_math == "MATH-21" and review_cut is None:
                 # 36s retained + 51.546875s at PRETRADE1 + 2.5 times the 7.59375s local tail.
                 aggregate_cpu_ns = 112_000_000_000
@@ -10451,16 +10459,18 @@ def _assert_lp03_brier_measured_flow(tmp_path, fixture_keys, hosts, bindings, ad
         try:
             closed = service.close_measured_bundle_v1(candidate_ref, receiver_ack_refs=tuple(ack_refs))
         except ContractValidationError as error:
-            if kelly_publication is not None and str(error) == "ST12A_INVALID_CONTRACT: LP03_REGISTRATION_RESOURCE_EXHAUSTED":
+            if (bootstrap or kelly_publication is not None) and str(error) == "ST12A_INVALID_CONTRACT: LP03_REGISTRATION_RESOURCE_EXHAUSTED":
                 try:
                     operands = _lp03_resource_refusal_detail(error, close_registration=registered)
-                    note = "LP03_FIXTURE_RESOURCE_REFUSAL=" + deterministic_json(dict(
-                        source=kelly_publication, operands=operands, unavailable_fields="unknown"))
+                    report = dict(source=kelly_publication, operands=operands, unavailable_fields="unknown")
+                    if bootstrap:
+                        report["math_id"] = math_id
+                    note = "LP03_FIXTURE_RESOURCE_REFUSAL=" + deterministic_json(report)
                     error.add_note(note)
                     print(note, flush=True)
                 except BaseException:
                     try:
-                        error.add_note("LP03_FIXTURE_RESOURCE_REFUSAL: MATH-28 original closeout operands unavailable")
+                        error.add_note(f"LP03_FIXTURE_RESOURCE_REFUSAL: {math_id} original closeout operands unavailable")
                     except BaseException:
                         pass
             raise
